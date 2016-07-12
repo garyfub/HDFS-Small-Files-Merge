@@ -48,7 +48,10 @@ class PageinfoTransformer extends ITransformer {
     val location = (row \ "location").asOpt[String].getOrElse("")
     val c_label = (row \ "c_label").asOpt[String].getOrElse("")
     val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
+    val js_server_jsonstr = Json.parse(server_jsonstr)
+
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
+    val js_c_server = Json.parse(c_server)
 
     // mb_pageinfo -> mb_pageinfo_log
     val (extend_params_1, pre_extend_params_1) = pagename.toLowerCase() match {
@@ -149,6 +152,27 @@ class PageinfoTransformer extends ITransformer {
       case _ => ticks
     }
 
+    // for_pageid 判断
+    val for_pageid = forPageId(pagename, extend_params, js_server_jsonstr)
+    val for_pre_pageid = forPageId(pre_page, pre_extend_params, js_server_jsonstr)
+    val p_source = getSource(source)
+
+
+
+    val pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
+    val gsort_key = (js_server_jsonstr \ "_gsort_key").toString()
+    val (sdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty)
+      {
+        val sdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
+        val sorthour = gsort_key.split("_")(4)
+        val lplid = gsort_key.split("_")(6)
+        val ptplid = gsort_key.split("_")(6)
+        (sdate, sorthour, lplid, ptplid)
+      }
+
+    val gid = (js_c_server \ "gid").asOpt[Int].getOrElse(0)
+    val ugroup = (js_c_server \ "ugroup").asOpt[Int].getOrElse(0)
+
     // 最终返回值
     return ""
   }
@@ -170,6 +194,33 @@ class PageinfoTransformer extends ITransformer {
       (DateHour("1970-01-01", "1").toString, line)
     }
   }
+
+  def forPageId(pagename: String, extend_params: String, js_server_jsonstr: JsValue): String =
+  {
+    val for_pageid = pagename.toLowerCase() match
+    {
+      case a if pagename.toLowerCase() == "page_tab" && extend_params.toInt > 0 && extend_params.toInt < 9999999 => "page_tab"
+      case c if pagename.toLowerCase() == "page_tab" && (js_server_jsonstr \ "cid").asOpt[Int].getOrElse(0) < 0 => (pagename+(js_server_jsonstr \ "cid").asOpt[String]).toLowerCase()
+      case b if pagename.toLowerCase() != "page_tab" => pagename.toLowerCase()
+      case _ => (pagename+extend_params).toLowerCase()
+    }
+    for_pageid
+  }
+
+  def getSource(source: String): String =
+  {
+    val s = source match {
+      case a if a.isEmpty() | a == "null" | !a.contains("push") => "未知"
+      case b if b.contains("订单") => "用户个人订单信息推送"
+      case c if c.contains("售后", "退货", "退款") => "用户售后信息推送"
+      case d if d.contains("你好") => "用户个人消息通知推送"
+      case e if e.contains("有货就赶紧抢") => "有货提醒"
+      case f if f.contains("收藏的商品") => "用户收藏商品最新消息推送"
+      case g if g.contains("订单") => "用户个人订单信息推送"
+      case _ => source.substring(6)
+    }
+    s
+  }
 }
 
 // for test
@@ -180,6 +231,25 @@ object PageinfoTransformer{
     println(b.get("session_id"))
 
     val row = Json.parse(liuliang)
-    println(row)
+    println((row \ "uid").asOpt[Int].getOrElse(0))
+    var source = "要正怎样,sdfsadfsadfsadfasfdsa"
+    println(source.substring(6))
+
+    val gsort_key = "POSTION_SORT_65_20160525_12_63_68"
+//    println(gsort_key.split("_")(3).substring(0, 4))
+//    println(gsort_key)
+//    println(gsort_key.split("_")(3))
+//    println(gsort_key.split("_")(3).substring(4, 6))
+//    println(gsort_key.split("_")(3).substring(6, 8))
+
+    val (sdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty)
+    {
+      val sdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
+      val sorthour = gsort_key.split("_")(4)
+      val lplid = gsort_key.split("_")(6)
+      val ptplid = gsort_key.split("_")(6)
+      (sdate, sorthour, lplid, ptplid)
+    }
+  println(sdate, sorthour, lplid, ptplid)
   }
 }
