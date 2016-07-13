@@ -5,6 +5,7 @@ import java.io.FileInputStream
 
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory}
+import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.storage.StorageLevel
@@ -58,13 +59,19 @@ class InitConfig {
   }
 
   def iniHive() = {
+    // 查询 hive 中的 dim_page 和 dim_event
+    val sc: SparkContext = new SparkContext(conf)
     val sqlContext = new org.apache.spark.sql.hive.HiveContext(sc)
   }
 
   def initDimPage(sqlContext: HiveContext): RDD[(String, Int, String)] =
   {
     val dimPageSql = s"""select page_id,page_exp1, page_exp2, concat_ws(",", url1, url2, url3,regexp1, regexp2, regexp3) as url_pattern
-                         | from dim_page where page_id>0 order by page_id'""".stripMargin
+                         | from dw.dim_page
+                         | where page_id > 0
+                         | and terminal_lvl1_id = 2
+                         | and del_flag = 0
+                         | order by page_id'""".stripMargin
 
     val dimPageData = sqlContext.sql(dimPageSql).persist(StorageLevel.MEMORY_AND_DISK)
 
@@ -72,6 +79,7 @@ class InitConfig {
       val page_id = line.getAs[Int]("page_id")
       val page_exp1 = line.getAs[String]("page_exp1")
       val page_exp2 = line.getAs[String]("page_exp2")
+      // 移动端的 page_exp1+page_exp2 不会为空，但是 url_pattern 为空
       val url_pattern = line.getAs[String]("url_pattern")
       (page_exp1+page_exp2, page_id, url_pattern)
     })
@@ -79,6 +87,31 @@ class InitConfig {
     dimPageData.unpersist(true)
 
     dimPages
+  }
+
+  def initDimEvent(sqlContext: HiveContext): RDD[(String, Int, String)] =
+  {
+    val dimPageSql = s"""select event_id, event_exp1, event_exp2
+                         | from dw.dim_event
+                         | where event_id > 0
+                         | and terminal_lvl1_id = 2
+                         | and del_flag = 0
+                         | order by event_id'""".stripMargin
+
+    val dimData = sqlContext.sql(dimPageSql).persist(StorageLevel.MEMORY_AND_DISK)
+
+    dimEvents = dimData.map(line => {
+      val page_id = line.getAs[Int]("page_id")
+      val page_exp1 = line.getAs[String]("page_exp1")
+      val page_exp2 = line.getAs[String]("page_exp2")
+      // 移动端的 page_exp1+page_exp2 不会为空，但是 url_pattern 为空
+      val url_pattern = line.getAs[String]("url_pattern")
+      (page_exp1+page_exp2, page_id, url_pattern)
+    })
+
+    dimData.unpersist(true)
+
+    dimEvents
   }
 }
 

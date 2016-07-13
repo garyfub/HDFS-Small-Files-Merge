@@ -15,7 +15,7 @@ import org.apache.spark.{Logging, SparkConf, SparkContext}
 import com.juanpi.bi.streaming.MultiOutputRDD._
 
 @SerialVersionUID(42L)
-class KafkaConsumer(topic: String, dimPage: RDD[(Int, (String, String))], dimEvent: RDD[(Int, (String, String))])
+class KafkaConsumer(topic: String)
   extends Logging with Serializable
 {
 
@@ -38,7 +38,7 @@ class KafkaConsumer(topic: String, dimPage: RDD[(Int, (String, String))], dimEve
   }
 
   def parseMessage(message:String):(String,String) = {
-    getTransformer().transform(message, dimPage, dimEvent)
+    getTransformer().transform(message)
   }
 
   def getTransformer():ITransformer = {
@@ -65,29 +65,27 @@ object KafkaConsumer{
 
 
   def main(args: Array[String]) {
-    if (args.length != 2) {
+    if (args.length < 3) {
       System.err.println(s"""
-                            |Usage: KafkaConsumer <zkQuorum> <brokers> <topic> <groupId> <consumerType> <consumerTime>
-                            |OR
-                            |Usage: KafkaConsumer <topic> <groupId>
-                            |  #<zkQuorum> zookeeper address to save kafka consumer offsets
-                            |  #<brokers> is a list of one or more Kafka brokers
+                            |Usage: KafkaConsumerOffset <zkQuorum> <brokers> <topic> <groupId> <consumerType> <consumerTime>
+                            |  <zkQuorum> zookeeper address to save kafka consumer offsets
+                            |  <brokers> is a list of one or more Kafka brokers
                             |  <topic> topic name
+                            |  <table> table name
                             |  <groupId> consumer groupId name
-                            |  #<consumerType> consumer type 1-every batch offset save 2-recove from 5 minutes save datetime
-                            |  #<consumerTime> recoved time
+                            |  <consumerType> consumer type 1-every batch offset save 2-recove from 5 minutes save datetime
+                            |  <consumerTime> recoved time
         """.stripMargin)
       System.exit(1)
     }
-    val ic = new InitConfig()
-    println(ic.brokerList, ic.consumerTime, ic.hbaseZk, ic.zkQuorum)
 
-    // read from system env
-    val Array(topic, groupId) = args
-    println(topic)
+    val Array(zkQuorum, brokerList, topic, table, groupId, consumerType, consumerTime) = args
 
-    // read from conf.properties
-    val Array(brokerList, zkQuorum, consumerType, consumerTime, hbaseZk) = Array(ic.brokerList, ic.zkQuorum, ic.consumerType, ic.consumerTime, ic.hbaseZk)
+//    val ic = new InitConfig()
+//    // read from conf.properties
+//    val Array(brokerList, zkQuorum, consumerType, consumerTime, hbaseZk) = Array(ic.brokerList, ic.zkQuorum, ic.consumerType, ic.consumerTime, ic.hbaseZk)
+
+
     val groupIds = Set("pageinfo_direct_dw", "mbevent_direct_dw")
     if(!groupIds.contains(groupId)) {
       println("groupId有误！！约定的groupId是：mbevent_direct_dw 或者 pageinfo_direct_dw")
@@ -116,12 +114,6 @@ object KafkaConsumer{
       .set("spark.eventLog.overwrite", "true")
 
     val ssc = new StreamingContext(conf, Seconds(Config.interval))
-    val sc: SparkContext = new SparkContext(conf)
-
-    // 查询 hive 中的 dim_page 和 dim_event
-
-//    val dimPage = initDimPage(sqlContext)
-//    val dimEvent = initDimEvent(sqlContext)
 
     // Connect to a Kafka topic for reading
     val kafkaParams : Map[String, String] = Map("metadata.broker.list" -> brokerList,
@@ -136,7 +128,7 @@ object KafkaConsumer{
     }
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
-    val consumer = new KafkaConsumer(topic, dimPage, dimEvent)
+    val consumer = new KafkaConsumer(topic)
     consumer.process(message, ssc, km)
 
     ssc.start()
