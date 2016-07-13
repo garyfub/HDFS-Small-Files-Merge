@@ -32,9 +32,7 @@ class KafkaConsumer(topic: String)
   }
 
   def transMessage(rdd:RDD[String]):RDD[(String,String)] ={
-    rdd.map{msg =>
-      parseMessage(msg)
-    }
+    rdd.map{ msg =>parseMessage(msg) }
   }
 
   def parseMessage(message:String):(String,String) = {
@@ -112,7 +110,7 @@ object KafkaConsumer{
 //    println(ic.conf.get("spark.app.name"))
 
 
-    System.exit(1)
+//    System.exit(1)
 
     val ssc = new StreamingContext(ic.conf, Seconds(Config.interval))
 

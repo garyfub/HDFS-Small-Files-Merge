@@ -10,7 +10,6 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.storage.StorageLevel
 import play.api.libs.json.{JsValue, Json}
-
 /**
   * Created by gongzi on 2016/7/8.
   */
@@ -30,6 +29,9 @@ class InitConfig {
   var consumerTime = ""
   var hbaseZk = ""
 
+  var dimPages:RDD[(String, Int, String)] = null
+  var dimEvents:RDD[(String, Int, String)] = null
+
   var conf = new SparkConf()
 
   def init() = {
@@ -48,15 +50,21 @@ class InitConfig {
       .set("spark.streaming.blockInterval", "10000")
       .set("spark.shuffle.manager", "SORT")
       .set("spark.eventLog.overwrite", "true")
+
+    // 查询 hive 中的 dim_page 和 dim_event
+    val sc: SparkContext = new SparkContext(conf)
+    val sqlContext: HiveContext = new HiveContext(sc)
+
+    initDimPage(sqlContext)
+    initDimPage(sqlContext)
   }
 
   def loadProperties():Unit = {
     val properties = new Properties()
     val path = Thread.currentThread().getContextClassLoader.getResource("conf.properties").getPath //文件要放到resource文件夹下
     properties.load(new FileInputStream(path))
-    // 读取键为ddd的数据的值
-    brokerList_=(properties.getProperty("brokerList"))
-    zkQuorum = properties.getProperty("zkQuorum")
+//    brokerList_=(properties.getProperty("brokerList"))
+//    zkQuorum = properties.getProperty("zkQuorum")
     hbaseZk = properties.getProperty("hbaseZk")
   }
 
@@ -67,12 +75,6 @@ class InitConfig {
     hbaseConf.setInt("timeout", 120000)
     //Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
     ConnectionFactory.createConnection(hbaseConf)
-  }
-
-  def iniHive() = {
-    // 查询 hive 中的 dim_page 和 dim_event
-    val sc: SparkContext = new SparkContext(conf)
-    val sqlContext = new org.apache.spark.sql.hive.HiveContext(sc)
   }
 
   def initDimPage(sqlContext: HiveContext) =
@@ -86,7 +88,7 @@ class InitConfig {
 
     val dimPageData = sqlContext.sql(dimPageSql).persist(StorageLevel.MEMORY_AND_DISK)
 
-    val dimPages = dimPageData.map(line => {
+    dimPages = dimPageData.map(line => {
       val page_id = line.getAs[Int]("page_id")
       val page_exp1 = line.getAs[String]("page_exp1")
       val page_exp2 = line.getAs[String]("page_exp2")
@@ -111,7 +113,7 @@ class InitConfig {
 
     val dimData = sqlContext.sql(dimEventSql).persist(StorageLevel.MEMORY_AND_DISK)
 
-    val dimEvents = dimData.map(line => {
+    dimEvents = dimData.map(line => {
       val page_id = line.getAs[Int]("page_id")
       val page_exp1 = line.getAs[String]("page_exp1")
       val page_exp2 = line.getAs[String]("page_exp2")
