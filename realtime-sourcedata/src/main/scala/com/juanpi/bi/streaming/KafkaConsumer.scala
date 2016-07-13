@@ -85,6 +85,9 @@ object KafkaConsumer{
 //    // read from conf.properties
 //    val Array(brokerList, zkQuorum, consumerType, consumerTime, hbaseZk) = Array(ic.brokerList, ic.zkQuorum, ic.consumerType, ic.consumerTime, ic.hbaseZk)
 
+    val ic = new InitConfig()
+
+    ic.init()
 
     val groupIds = Set("pageinfo_direct_dw", "mbevent_direct_dw")
     if(!groupIds.contains(groupId)) {
@@ -97,23 +100,9 @@ object KafkaConsumer{
       System.exit(1)
     }
 
-    val conf = new SparkConf()
-      .setAppName("com.juanpi.bi.realtime." + topic + ".Consumer")
-      .set("spark.akka.frameSize", "256")
-      .set("spark.kryoserializer.buffer.max", "512m")
-      .set("spark.kryoserializer.buffer", "256m")
-      .set("spark.scheduler.mode", "FAIR")
-      .set("spark.storage.blockManagerSlaveTimeoutMs", "8000000")
-      .set("spark.storage.blockManagerHeartBeatMs", "8000000")
-      .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-      .set("spark.rdd.compress", "true")
-      .set("spark.io.compression.codec", "org.apache.spark.io.SnappyCompressionCodec")
-      // control default partition number
-      .set("spark.streaming.blockInterval", "10000")
-      .set("spark.shuffle.manager", "SORT")
-      .set("spark.eventLog.overwrite", "true")
+    ic.conf.setAppName("com.juanpi.bi.realtime." + topic + ".Consumer")
 
-    val ssc = new StreamingContext(conf, Seconds(Config.interval))
+    val ssc = new StreamingContext(ic.conf, Seconds(Config.interval))
 
     // Connect to a Kafka topic for reading
     val kafkaParams : Map[String, String] = Map("metadata.broker.list" -> brokerList,

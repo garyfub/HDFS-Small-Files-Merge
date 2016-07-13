@@ -5,7 +5,7 @@ import java.io.FileInputStream
 
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory}
-import org.apache.spark.SparkContext
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.storage.StorageLevel
@@ -29,10 +29,28 @@ class InitConfig {
   var consumerType = ""
   var consumerTime = ""
   var hbaseZk = ""
-  var dimPages: RDD[(String, Int, String)]
-  var dimEvents: RDD[(String, Int, String)]
 
-  this.loadProperties()
+  val conf = new SparkConf()
+
+  def init() = {
+    this.loadProperties()
+
+    conf.set("spark.akka.frameSize", "256")
+      .set("spark.kryoserializer.buffer.max", "512m")
+      .set("spark.kryoserializer.buffer", "256m")
+      .set("spark.scheduler.mode", "FAIR")
+      .set("spark.storage.blockManagerSlaveTimeoutMs", "8000000")
+      .set("spark.storage.blockManagerHeartBeatMs", "8000000")
+      .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+      .set("spark.rdd.compress", "true")
+      .set("spark.io.compression.codec", "org.apache.spark.io.SnappyCompressionCodec")
+      // control default partition number
+      .set("spark.streaming.blockInterval", "10000")
+      .set("spark.shuffle.manager", "SORT")
+      .set("spark.eventLog.overwrite", "true")
+  }
+
+
 
   def loadProperties():Unit = {
     val properties = new Properties()
@@ -40,13 +58,8 @@ class InitConfig {
     properties.load(new FileInputStream(path))
     // 读取键为ddd的数据的值
     brokerList_=(properties.getProperty("brokerList"))
-    groupId = properties.getProperty("groupId")
     zkQuorum = properties.getProperty("zkQuorum")
-    consumerType = properties.getProperty("consumerType")
-    consumerTime = properties.getProperty("consumerTime")
-//    topic = properties.getProperty("topic")
     hbaseZk = properties.getProperty("hbaseZk")
-//    println(properties.getProperty("ddd","没有值"))//如果ddd不存在,则返回第二个参数
   }
 
   def getHbaseConf(): Connection = {
@@ -64,7 +77,7 @@ class InitConfig {
     val sqlContext = new org.apache.spark.sql.hive.HiveContext(sc)
   }
 
-  def initDimPage(sqlContext: HiveContext): RDD[(String, Int, String)] =
+  def initDimPage(sqlContext: HiveContext) =
   {
     val dimPageSql = s"""select page_id,page_exp1, page_exp2, concat_ws(",", url1, url2, url3,regexp1, regexp2, regexp3) as url_pattern
                          | from dw.dim_page
@@ -75,7 +88,7 @@ class InitConfig {
 
     val dimPageData = sqlContext.sql(dimPageSql).persist(StorageLevel.MEMORY_AND_DISK)
 
-    dimPages = dimPageData.map(line => {
+    val dimPages = dimPageData.map(line => {
       val page_id = line.getAs[Int]("page_id")
       val page_exp1 = line.getAs[String]("page_exp1")
       val page_exp2 = line.getAs[String]("page_exp2")
@@ -86,21 +99,21 @@ class InitConfig {
 
     dimPageData.unpersist(true)
 
-    dimPages
+//    dimPages
   }
 
-  def initDimEvent(sqlContext: HiveContext): RDD[(String, Int, String)] =
+  def initDimEvent(sqlContext: HiveContext) =
   {
-    val dimPageSql = s"""select event_id, event_exp1, event_exp2
+    val dimEventSql = s"""select event_id, event_exp1, event_exp2
                          | from dw.dim_event
                          | where event_id > 0
                          | and terminal_lvl1_id = 2
                          | and del_flag = 0
                          | order by event_id'""".stripMargin
 
-    val dimData = sqlContext.sql(dimPageSql).persist(StorageLevel.MEMORY_AND_DISK)
+    val dimData = sqlContext.sql(dimEventSql).persist(StorageLevel.MEMORY_AND_DISK)
 
-    dimEvents = dimData.map(line => {
+    val dimEvents = dimData.map(line => {
       val page_id = line.getAs[Int]("page_id")
       val page_exp1 = line.getAs[String]("page_exp1")
       val page_exp2 = line.getAs[String]("page_exp2")
@@ -111,7 +124,7 @@ class InitConfig {
 
     dimData.unpersist(true)
 
-    dimEvents
+//    dimEvents
   }
 }
 
