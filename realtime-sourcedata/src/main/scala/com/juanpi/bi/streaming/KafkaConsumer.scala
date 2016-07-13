@@ -1,15 +1,14 @@
 package com.juanpi.bi.streaming
 
-import com.juanpi.bi.init.InitConfig
+import com.juanpi.bi.init.InitConfig.MySparkConf
 import com.juanpi.bi.transformer.ITransformer
 import kafka.serializer.StringDecoder
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.hive.HiveContext
-import org.apache.spark.storage.StorageLevel
+
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
 import org.apache.spark.streaming.{Seconds, StreamingContext}
-import org.apache.spark.{Logging, SparkConf, SparkContext}
+import org.apache.spark.{Logging}
 
 // todo
 import com.juanpi.bi.streaming.MultiOutputRDD._
@@ -86,13 +85,6 @@ object KafkaConsumer{
 //    // read from conf.properties
 //    val Array(brokerList, zkQuorum, consumerType, consumerTime, hbaseZk) = Array(ic.brokerList, ic.zkQuorum, ic.consumerType, ic.consumerTime, ic.hbaseZk)
 
-    val ic = new InitConfig()
-
-    ic.init()
-
-    println(groupId)
-
-
     val groupIds = Set("pageinfo_direct_dw", "mbevent_direct_dw")
     if(!groupIds.contains(groupId)) {
       println("groupId有误！！约定的groupId是：mbevent_direct_dw 或者 pageinfo_direct_dw")
@@ -104,15 +96,15 @@ object KafkaConsumer{
       System.exit(1)
     }
 
-    ic.conf.setAppName("com.juanpi.bi.realtime." + topic + ".Consumer")
+    MySparkConf.setAppName("com.juanpi.bi.realtime." + topic + ".Consumer")
 
     // com.juanpi.bi.realtime.pageinfo.Consumer
-//    println(ic.conf.get("spark.app.name"))
+    println(MySparkConf.get("spark.app.name"))
 
 
-//    System.exit(1)
+    System.exit(1)
 
-    val ssc = new StreamingContext(ic.conf, Seconds(Config.interval))
+    val ssc = new StreamingContext(MySparkConf, Seconds(Config.interval))
 
     // Connect to a Kafka topic for reading
     val kafkaParams : Map[String, String] = Map(

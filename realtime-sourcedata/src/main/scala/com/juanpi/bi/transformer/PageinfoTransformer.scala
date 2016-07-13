@@ -1,23 +1,18 @@
 package com.juanpi.bi.transformer
 
 import com.alibaba.fastjson.JSON
-import com.juanpi.bi.init.InitConfig
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.bi.streaming.DateHour
-import com.juanpi.bi.utils.{GetGoodsId, GetMbPageId}
-import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
-import org.apache.hadoop.hbase.client.{Get, HTable, Put, Result}
-import org.apache.spark.rdd.RDD
+import com.juanpi.bi.utils._
+import org.apache.hadoop.hbase.client.{Get, Put, Result}
 import play.api.libs.json.{JsValue, Json}
 import org.apache.hadoop.hbase.util.Bytes
+import com.juanpi.bi.init.InitConfig.initTicksHistory
+import com.juanpi.bi.init.InitConfig.{HbaseFamily, dimPages}
 /**
   * 解析逻辑的具体实现
   */
 class PageinfoTransformer extends ITransformer {
-
-  val hbase_family = "dw"
-  val ic = new InitConfig
-  val table = TableName.valueOf("ticks_history")
 
   def parse(row: JsValue): String = {
     // mb_pageinfo
@@ -55,7 +50,7 @@ class PageinfoTransformer extends ITransformer {
     // mb_pageinfo -> mb_pageinfo_log
     val (extend_params_1, pre_extend_params_1) = pagename.toLowerCase() match {
       case "page_goods" | "page_temai_goods" | "page_temai_imagetxtgoods" | "page_temai_parametergoods" => {
-        (GetGoodsId.evaluate(extend_params), GetGoodsId.evaluate(pre_extend_params))
+        (new GetGoodsId().evaluate(extend_params), new GetGoodsId().evaluate(pre_extend_params))
       }
       case _ => {
         (extend_params.toLowerCase(), pre_extend_params.toLowerCase())
@@ -85,25 +80,23 @@ class PageinfoTransformer extends ITransformer {
       case _ => -999
     }
 
-    // todo 查hbase 从 ticks_history 中查找 ticks 存在的记录
-
-    val ticks_history = ic.getHbaseConf().getTable(table)
-
-    //查询某条数据
+    // 查hbase 从 ticks_history 中查找 ticks 存在的记录
+    // 查询某条数据
+    val ticks_history = initTicksHistory()
     val key = new Get(Bytes.toBytes(ticks + app_name))
     val ticks_res = ticks_history.get(key)
 
     if (!ticks_res.isEmpty) {
-      utm = Bytes.toString(ticks_res.getValue(hbase_family.getBytes, "utm".getBytes))
-      gu_create_time = Bytes.toString(ticks_res.getValue(hbase_family.getBytes, "gu_create_time".getBytes))
+      utm = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "utm".getBytes))
+      gu_create_time = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "gu_create_time".getBytes))
     }
     else {
       // 如果不存在就写入 hbase
       // 准备插入一条 key 为 id001 的数据
       val p = new Put((ticks + app_name).getBytes)
       // 为put操作指定 column 和 value （以前的 put.add 方法被弃用了）
-      p.addColumn(hbase_family.getBytes, "utm".getBytes, utm.getBytes)
-      p.addColumn(hbase_family.getBytes, "gu_create_time".getBytes, gu_create_time.getBytes)
+      p.addColumn(HbaseFamily.getBytes, "utm".getBytes, utm.getBytes)
+      p.addColumn(HbaseFamily.getBytes, "gu_create_time".getBytes, gu_create_time.getBytes)
       //提交
       ticks_history.put(p)
     }
@@ -156,6 +149,20 @@ class PageinfoTransformer extends ITransformer {
     val for_pre_pageid = forPageId(pre_page, pre_extend_params, js_server_jsonstr)
     val p_source = getSource(source)
 
+    var (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPages.get(for_pageid).getOrElse(0, 0, "", 0)
+    val page_id = getPageId(d_page_id, extend_params)
+    var page_value = getPageValue(d_page_id, extend_params, page_type_id, d_page_value)
+
+
+    // ref_page_id
+    var (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimPages.get(for_pre_pageid).getOrElse(0, 0, "", 0)
+    var pre_page_id = getPageId(d_pre_page_id, pre_extend_params)
+    var pre_page_value = getPageValue(d_pre_page_id, pre_extend_params, d_pre_page_type_id, d_pre_page_value)
+
+    val shop_id = getShopId(d_page_id, extend_params)
+    val ref_shop_id = getShopId(d_pre_page_id, pre_extend_params)
+
+    val page_level_id = getPageLevelId(d_page_id, extend_params)
 
 
     val pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
@@ -174,6 +181,77 @@ class PageinfoTransformer extends ITransformer {
 
     // 最终返回值
     return ""
+  }
+
+  def getPageLevelId(page_id: Int, extend_params: String, d_page_level_id: Int): Int =
+  {
+    if (page_id == 289 || page_id == 154)
+    {
+
+    }
+    0
+//    CASE WHEN P1.page_id not in (154,289) THEN p1.page_level_id
+//    WHEN getpageid(a.extend_params) in (34,65) then 2
+//    when getpageid(a.extend_params) = 10069 then 3
+//    else 0 end page_level_id,
+  }
+
+  def getShopId(x_page_id: Int, extend_params: String): String =
+  {
+    val shop_id = if(x_page_id == 250)
+      new GetGoodsId().evaluate(extend_params.split("_")(1))
+    shop_id.toString()
+  }
+
+  def getPageValue(x_page_id:Int, x_extend_params: String, page_type_id: Int, x_page_value: String): String =
+  {
+    // 解析 page_value
+    val page_value: String =
+      if (x_page_id == 289 || x_page_id == 154)
+      {
+        new GetDwPcPageValue().evaluate(x_extend_params)
+      }
+      else
+      {
+        if(x_page_id == 254)
+        {
+          new GetDwMbPageValue().evaluate(x_extend_params.toString, page_type_id.toString)
+        }
+        else if(page_type_id == 1 || page_type_id == 4 || page_type_id == 10)
+        {
+          new GetDwMbPageValue().evaluate(x_page_value, page_type_id.toString)
+        }
+        else if(x_page_id == 250)
+        {
+          // by gognzi on 2016-04-24 17:10
+          // app端品牌页面id = 250,extend_params格式：加密brandid_shopid_引流款id,或者 加密brandid_shopid
+          // getgoodsid(split(a.extend_params,'_')[0])
+          new GetDwMbPageValue().evaluate(new GetGoodsId().evaluate(x_extend_params.split("_")(0)), page_type_id.toString)
+        }
+        else
+        {
+          new GetDwMbPageValue().evaluate(x_extend_params, page_type_id.toString)
+        }
+      }
+    page_value
+  }
+
+  // page_id
+  def getPageId(x_page_id: Int, x_extend_params: String): Int =
+  {
+    if(x_page_id == 0)
+    {
+      -1
+    }else if (x_page_id == 289 || x_page_id == 154)
+    {
+      if(GetPageID.evaluate(x_extend_params) > 0)
+      {
+        GetPageID.evaluate(x_extend_params)
+      }
+      else x_page_id
+    }
+    else
+      x_page_id
   }
 
   // 返回解析的结果
@@ -235,12 +313,6 @@ object PageinfoTransformer{
     println(source.substring(6))
 
     val gsort_key = "POSTION_SORT_65_20160525_12_63_68"
-//    println(gsort_key.split("_")(3).substring(0, 4))
-//    println(gsort_key)
-//    println(gsort_key.split("_")(3))
-//    println(gsort_key.split("_")(3).substring(4, 6))
-//    println(gsort_key.split("_")(3).substring(6, 8))
-
     val (sdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty)
     {
       val sdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
