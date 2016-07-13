@@ -40,20 +40,30 @@
       <file leaf-file-name="PageinfoTransformer.scala" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/transformer/PageinfoTransformer.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="362">
-              <caret line="159" column="0" selection-start-line="159" selection-start-column="0" selection-end-line="159" selection-end-column="0" />
+            <state relative-caret-position="230">
+              <caret line="10" column="34" selection-start-line="10" selection-start-column="27" selection-end-line="10" selection-end-column="34" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="InitConfig.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/init/InitConfig.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="431">
+              <caret line="59" column="14" selection-start-line="59" selection-start-column="14" selection-end-line="59" selection-end-column="14" />
               <folding>
-                <element signature="e#35#67#0" expanded="true" />
+                <element signature="e#28#55#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="InitConfig.scala" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/init/InitConfig.scala">
+      <file leaf-file-name="KafkaConsumer.scala" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/streaming/KafkaConsumer.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="362">
-              <caret line="55" column="7" selection-start-line="55" selection-start-column="7" selection-end-line="55" selection-end-column="7" />
+            <state relative-caret-position="534">
+              <caret line="132" column="0" selection-start-line="132" selection-start-column="0" selection-end-line="132" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -148,8 +158,6 @@
         <option value="$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/streaming/ParseEventLog.scala" />
         <option value="$PROJECT_DIR$/realtime-sourcedata/pom.xml" />
         <option value="$MAVEN_REPOSITORY$/org/apache/hbase/hbase-client/1.2.0-cdh5.7.1/hbase-client-1.2.0-cdh5.7.1.jar!/org/apache/hadoop/hbase/client/Put.class" />
-        <option value="$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/streaming/KafkaConsumer.scala" />
-        <option value="$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/init/InitConfig.scala" />
         <option value="$PROJECT_DIR$/realtime-sourcedata/src/main/java/com/juanpi/bi/utils/IDChecker.java" />
         <option value="$PROJECT_DIR$/realtime-sourcedata/src/main/java/com/juanpi/bi/utils/IDSChecker.java" />
         <option value="$PROJECT_DIR$/realtime-sourcedata/src/main/java/com/juanpi/bi/utils/GetMbActionId.java" />
@@ -157,6 +165,8 @@
         <option value="$PROJECT_DIR$/realtime-sourcedata/src/main/resource/conf.properties" />
         <option value="$PROJECT_DIR$/realtime-sourcedata/src/main/java/com/juanpi/bi/bean/page_ref_reg.sql" />
         <option value="$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/transformer/PageinfoTransformer.scala" />
+        <option value="$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/init/InitConfig.scala" />
+        <option value="$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/streaming/KafkaConsumer.scala" />
       </list>
     </option>
   </component>
@@ -703,6 +713,44 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="streaming" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="dw-realtime" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="dw-realtime" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="realtime-sourcedata" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="bi" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="streaming" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="KafkaConsumer.scala" />
+              <option name="myItemType" value="org.jetbrains.plugins.scala.components.ScalaDefsProjectViewProvider$ScalaFileTreeNode" />
             </PATH_ELEMENT>
           </PATH>
           <PATH>
@@ -1528,15 +1576,15 @@
       <workItem from="1467959857696" duration="16030000" />
       <workItem from="1467985102833" duration="478000" />
       <workItem from="1467985638631" duration="32916000" />
-      <workItem from="1468217147858" duration="29757000" />
+      <workItem from="1468217147858" duration="37287000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="230813000" />
+    <option name="totallyTimeSpent" value="238343000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="0" width="1932" height="1047" extended-state="1" />
+    <frame x="-7" y="0" width="1932" height="1047" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1548,7 +1596,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2145144" sideWeight="0.5208768" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2145144" sideWeight="0.47912318" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2145144" sideWeight="0.47912318" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -1724,16 +1772,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/hbase/InitConfig.scala" />
-    <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/streaming/KafkaConsumer.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="349">
-          <caret line="146" column="41" selection-start-line="146" selection-start-column="41" selection-end-line="146" selection-end-column="41" />
-          <folding>
-            <element signature="e#33#69#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/java/com/juanpi/bi/bean/MbEvent.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="255">
@@ -1856,16 +1894,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/transformer/MbEventTransformer.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="460">
-          <caret line="65" column="0" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
-          <folding>
-            <element signature="e#35#67#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/resource/conf.properties">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="46">
@@ -1917,16 +1945,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/transformer/PageinfoTransformer.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="362">
-          <caret line="159" column="0" selection-start-line="159" selection-start-column="0" selection-end-line="159" selection-end-column="0" />
-          <folding>
-            <element signature="e#35#67#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/hbase/HbaseCRUD.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1975,10 +1993,38 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/transformer/MbEventTransformer.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="460">
+          <caret line="65" column="0" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
+          <folding>
+            <element signature="e#35#67#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/transformer/PageinfoTransformer.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="230">
+          <caret line="10" column="34" selection-start-line="10" selection-start-column="27" selection-end-line="10" selection-end-column="34" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/init/InitConfig.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="362">
-          <caret line="55" column="7" selection-start-line="55" selection-start-column="7" selection-end-line="55" selection-end-column="7" />
+        <state relative-caret-position="431">
+          <caret line="59" column="14" selection-start-line="59" selection-start-column="14" selection-end-line="59" selection-end-column="14" />
+          <folding>
+            <element signature="e#28#55#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/realtime-sourcedata/src/main/scala/com/juanpi/bi/streaming/KafkaConsumer.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="534">
+          <caret line="132" column="0" selection-start-line="132" selection-start-column="0" selection-end-line="132" selection-end-column="0" />
           <folding />
         </state>
       </provider>

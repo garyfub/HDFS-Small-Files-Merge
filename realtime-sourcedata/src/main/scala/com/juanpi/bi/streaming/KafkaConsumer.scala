@@ -61,42 +61,8 @@ class KafkaConsumer(topic: String, dimPage: RDD[(Int, (String, String))], dimEve
 
 object KafkaConsumer{
 
-  def initDimPage(sqlContext: HiveContext): RDD[(Int, (String, String))] =
-  {
-    val dimPageSql = s"""select * from dw.dim_page'""".stripMargin
 
-    val dimPageData = sqlContext.sql(dimPageSql).persist(StorageLevel.MEMORY_AND_DISK)
 
-    val dimPage = dimPageData.map(line => {
-      val page_id = line.getAs[Int]("page_id")
-      val page_exp1 = line.getAs[String]("page_exp1")
-      val page_exp2 = line.getAs[String]("page_exp2")
-      (page_id, (page_exp1, page_exp2))
-    })
-
-    dimPageData.unpersist(true)
-
-    dimPage
-  }
-
-  def initDimEvent(sqlContext: HiveContext): RDD[(Int, (String, String))] =
-  {
-    val dimEventSql = s"""select * from dw.dim_event'""".stripMargin
-
-    val dimEventData = sqlContext.sql(dimEventSql).persist(StorageLevel.MEMORY_AND_DISK)
-
-    val dimEvent = dimEventData.map(line => {
-      val event_id = line.getAs[Int]("page_id")
-      val event_exp1 = line.getAs[String]("event_exp1")
-      val event_exp2 = line.getAs[String]("event_exp2")
-
-      (event_id, (event_exp1, event_exp2))
-    })
-
-    dimEventData.unpersist(true)
-
-    dimEvent
-  }
 
   def main(args: Array[String]) {
     if (args.length != 2) {
@@ -153,9 +119,9 @@ object KafkaConsumer{
     val sc: SparkContext = new SparkContext(conf)
 
     // 查询 hive 中的 dim_page 和 dim_event
-    val sqlContext = new org.apache.spark.sql.hive.HiveContext(sc)
-    val dimPage = initDimPage(sqlContext)
-    val dimEvent = initDimEvent(sqlContext)
+
+//    val dimPage = initDimPage(sqlContext)
+//    val dimEvent = initDimEvent(sqlContext)
 
     // Connect to a Kafka topic for reading
     val kafkaParams : Map[String, String] = Map("metadata.broker.list" -> brokerList,

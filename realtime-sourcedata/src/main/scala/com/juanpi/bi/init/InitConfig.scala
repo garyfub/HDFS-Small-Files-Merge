@@ -5,6 +5,10 @@ import java.io.FileInputStream
 
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory}
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.hive.HiveContext
+import org.apache.spark.storage.StorageLevel
+import play.api.libs.json.{JsValue, Json}
 
 /**
   * Created by gongzi on 2016/7/8.
@@ -24,6 +28,8 @@ class InitConfig {
   var consumerType = ""
   var consumerTime = ""
   var hbaseZk = ""
+  var dimPages: RDD[(String, Int, String)]
+  var dimEvents: RDD[(String, Int, String)]
 
   this.loadProperties()
 
@@ -45,11 +51,34 @@ class InitConfig {
   def getHbaseConf(): Connection = {
     val hbaseConf = HBaseConfiguration.create()
     hbaseConf.set("hbase.zookeeper.property.clientPort", "2181")
-    // val zkQuorum="GZ-JSQ-JP-BI-HBASE-003.jp,GZ-JSQ-JP-BI-HBASE-001.jp,GZ-JSQ-JP-BI-HBASE-002.jp"
     hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
     hbaseConf.setInt("timeout", 120000)
     //Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
     ConnectionFactory.createConnection(hbaseConf)
+  }
+
+  def iniHive() = {
+    val sqlContext = new org.apache.spark.sql.hive.HiveContext(sc)
+  }
+
+  def initDimPage(sqlContext: HiveContext): RDD[(String, Int, String)] =
+  {
+    val dimPageSql = s"""select page_id,page_exp1, page_exp2, concat_ws(",", url1, url2, url3,regexp1, regexp2, regexp3) as url_pattern
+                         | from dim_page where page_id>0 order by page_id'""".stripMargin
+
+    val dimPageData = sqlContext.sql(dimPageSql).persist(StorageLevel.MEMORY_AND_DISK)
+
+    dimPages = dimPageData.map(line => {
+      val page_id = line.getAs[Int]("page_id")
+      val page_exp1 = line.getAs[String]("page_exp1")
+      val page_exp2 = line.getAs[String]("page_exp2")
+      val url_pattern = line.getAs[String]("url_pattern")
+      (page_exp1+page_exp2, page_id, url_pattern)
+    })
+
+    dimPageData.unpersist(true)
+
+    dimPages
   }
 }
 

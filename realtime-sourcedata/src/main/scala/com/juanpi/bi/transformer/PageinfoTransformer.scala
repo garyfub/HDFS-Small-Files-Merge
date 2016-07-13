@@ -5,7 +5,6 @@ import com.juanpi.bi.init.InitConfig
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.bi.streaming.DateHour
 import com.juanpi.bi.utils.{GetGoodsId, GetMbPageId}
-import org.apache.derby.vti.Restriction.OR
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
 import org.apache.hadoop.hbase.client.{Get, HTable, Put, Result}
 import org.apache.spark.rdd.RDD
