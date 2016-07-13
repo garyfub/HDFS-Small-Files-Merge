@@ -30,7 +30,7 @@ class InitConfig {
   var consumerTime = ""
   var hbaseZk = ""
 
-  val conf = new SparkConf()
+  var conf = new SparkConf()
 
   def init() = {
     this.loadProperties()
@@ -49,8 +49,6 @@ class InitConfig {
       .set("spark.shuffle.manager", "SORT")
       .set("spark.eventLog.overwrite", "true")
   }
-
-
 
   def loadProperties():Unit = {
     val properties = new Properties()
@@ -130,10 +128,10 @@ class InitConfig {
 
 object InitConfig {
   def main(args: Array[String]) {
-    val ic = new InitConfig()
-    ic.loadProperties
-    println(ic.brokerList)
-
-    println(ic.brokerList, ic.consumerTime, ic.groupId, ic.hbaseZk, ic.zkQuorum)
+//    val ic = new InitConfig()
+//    ic.loadProperties
+//    println(ic.brokerList)
+//
+//    println(ic.brokerList, ic.consumerTime, ic.groupId, ic.hbaseZk, ic.zkQuorum)
   }
 }

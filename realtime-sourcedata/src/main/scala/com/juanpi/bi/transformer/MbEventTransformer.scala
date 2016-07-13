@@ -111,7 +111,8 @@ class MbEventTransformer extends ITransformer{
   }
 
   // 返回解析的结果
-  def transform(line: String, page: RDD[(Int, (String, String))], event: RDD[(Int, (String, String))]): (String, String) = {
+//  def transform(line: String, page: RDD[(Int, (String, String))], event: RDD[(Int, (String, String))]): (String, String) = {
+  def transform(line: String): (String, String) = {
 
     // fastjson 也可以用。
     // val row = JSON.parseObject(line)

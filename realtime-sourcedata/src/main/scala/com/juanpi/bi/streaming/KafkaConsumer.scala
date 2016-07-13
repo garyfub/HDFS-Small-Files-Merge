@@ -61,13 +61,14 @@ class KafkaConsumer(topic: String)
 
 object KafkaConsumer{
 
-
-
-
   def main(args: Array[String]) {
+
+    println(args.length)
+
     if (args.length < 3) {
       System.err.println(s"""
                             |Usage: KafkaConsumerOffset <zkQuorum> <brokers> <topic> <groupId> <consumerType> <consumerTime>
+                            | 192.168.16.50:8081 192.168.16.50:8081 pageinfo pageinfo_direct_dw 1 60
                             |  <zkQuorum> zookeeper address to save kafka consumer offsets
                             |  <brokers> is a list of one or more Kafka brokers
                             |  <topic> topic name
@@ -79,7 +80,9 @@ object KafkaConsumer{
       System.exit(1)
     }
 
-    val Array(zkQuorum, brokerList, topic, table, groupId, consumerType, consumerTime) = args
+    val Array(zkQuorum, brokerList, topic, groupId, consumerType, consumerTime) = args
+
+//    println(args)
 
 //    val ic = new InitConfig()
 //    // read from conf.properties
@@ -88,6 +91,9 @@ object KafkaConsumer{
     val ic = new InitConfig()
 
     ic.init()
+
+    println(groupId)
+
 
     val groupIds = Set("pageinfo_direct_dw", "mbevent_direct_dw")
     if(!groupIds.contains(groupId)) {
@@ -102,14 +108,21 @@ object KafkaConsumer{
 
     ic.conf.setAppName("com.juanpi.bi.realtime." + topic + ".Consumer")
 
+    // com.juanpi.bi.realtime.pageinfo.Consumer
+//    println(ic.conf.get("spark.app.name"))
+
+
+    System.exit(1)
+
     val ssc = new StreamingContext(ic.conf, Seconds(Config.interval))
 
     // Connect to a Kafka topic for reading
-    val kafkaParams : Map[String, String] = Map("metadata.broker.list" -> brokerList,
+    val kafkaParams : Map[String, String] = Map(
+      "metadata.broker.list" -> brokerList,
       "auto.offset.reset" -> "largest",
       "group.id" -> groupId)
 
-    /*init beginning offset number, it could consumer which data with config file*/
+    // init beginning offset number, it could consumer which data with config file
     val km = new KafkaManager(kafkaParams, zkQuorum)
 
     if (consumerType.equals("2")) {
