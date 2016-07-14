@@ -2,7 +2,7 @@ package com.juanpi.bi.handler.mb;
 
 
 import com.alibaba.fastjson.JSON;
-import com.juanpi.bi.bean.MbEvent;
+import com.alibaba.fastjson.JSONObject;
 import com.juanpi.bi.handler.IHandler;
 
 /**
@@ -18,7 +18,7 @@ public class EventAssembleHandler implements IHandler {
     @SuppressWarnings("unchecked")
     @Override
     public Object handle() {
-        return JSON.parseObject(line,MbEvent.class);
+        return JSONObject.parseObject(line);
     }
 
     public String getLine() {

@@ -19,15 +19,14 @@ import scala.collection.mutable
   * Created by gongzi on 2016/7/8.
   */
 class InitConfig {
-  var hbaseZk = ""
   var hbasePort = ""
   var zkQuorum = ""
   var hbase_family = ""
 
   val dimPages = new mutable.HashMap[String, (Int, Int, String, Int)]
   var dimEvents = new mutable.HashMap[String, Int]
-  var ticks_history: Table = null
-  val table_ticks_history = TableName.valueOf("ticks_history")
+  var ticks_history: None.type = None
+  val table_ticks_history = TableName.valueOf("utm_history")
 
   var conf = new SparkConf().set("spark.akka.frameSize", "256")
     .set("spark.kryoserializer.buffer.max", "512m")
@@ -62,13 +61,13 @@ class InitConfig {
     properties.load(new FileInputStream(path))
     hbasePort = properties.getProperty("hbase.zookeeper.property.clientPort")
     zkQuorum = properties.getProperty("zkQuorum")
-    hbaseZk = properties.getProperty("hbaseZk")
+//    hbaseZk = properties.getProperty("hbaseZk")
     hbase_family = properties.getProperty("hbase_family")
   }
 
   def getHbaseConf(): Connection = {
     val hbaseConf = HBaseConfiguration.create()
-    hbaseConf.set("hbase.zookeeper.property.clientPort", hbasePort)
+//    hbaseConf.set("hbase.zookeeper.property.clientPort", hbasePort)
     hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
     hbaseConf.setInt("timeout", 120000)
     //Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
@@ -96,9 +95,6 @@ class InitConfig {
       // 移动端的 page_exp1+page_exp2 不会为空，但是 url_pattern 为空
 //      val url_pattern = line.getAs[String]("url_pattern")
       dimPages += (page_exp1+page_exp2 -> (page_id, page_type_id, page_value, page_level_id))
-//      dimPages += ((page_exp1+page_exp2) -> (page_id, page_type_id, page_value, page_level_id))
-//      val scores3 = new scala.collection.mutable.HashMap[String,Int]
-//      scores3 += (page_exp1 -> page_id)
 
     })
     dimPageData.unpersist(true)

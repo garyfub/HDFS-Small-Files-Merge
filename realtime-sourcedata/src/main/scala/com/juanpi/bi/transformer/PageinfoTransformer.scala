@@ -83,23 +83,25 @@ class PageinfoTransformer extends ITransformer {
     // 查hbase 从 ticks_history 中查找 ticks 存在的记录
     // 查询某条数据
     val ticks_history = initTicksHistory()
-    val key = new Get(Bytes.toBytes(ticks + app_name))
+//    val key = new Get(Bytes.toBytes(ticks + app_name))
+    val key = new Get(Bytes.toBytes(gu_id + ":" + utm))
     val ticks_res = ticks_history.get(key)
 
     if (!ticks_res.isEmpty) {
-      utm = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "utm".getBytes))
-      gu_create_time = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "gu_create_time".getBytes))
+//      utm = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "utm".getBytes))
+//      gu_create_time
+      gu_create_time = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "starttime".getBytes))
     }
-    else {
-      // 如果不存在就写入 hbase
-      // 准备插入一条 key 为 id001 的数据
-      val p = new Put((ticks + app_name).getBytes)
-      // 为put操作指定 column 和 value （以前的 put.add 方法被弃用了）
-      p.addColumn(HbaseFamily.getBytes, "utm".getBytes, utm.getBytes)
-      p.addColumn(HbaseFamily.getBytes, "gu_create_time".getBytes, gu_create_time.getBytes)
-      //提交
-      ticks_history.put(p)
-    }
+//    else {
+//      // 如果不存在就写入 hbase
+//      // 准备插入一条 key 为 id001 的数据
+//      val p = new Put((ticks + app_name).getBytes)
+//      // 为put操作指定 column 和 value （以前的 put.add 方法被弃用了）
+//      p.addColumn(HbaseFamily.getBytes, "utm".getBytes, utm.getBytes)
+//      p.addColumn(HbaseFamily.getBytes, "gu_create_time".getBytes, gu_create_time.getBytes)
+//      //提交
+//      ticks_history.put(p)
+//    }
 
     val logTime = if (starttime.size == 0) {
       0L
@@ -188,12 +190,12 @@ class PageinfoTransformer extends ITransformer {
     val jpk = 0
     val tab_source = "page"
     // 最终返回值
-    val (event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadtime) = ""
+    val event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadTime = ""
 
     Array(terminal_id,app_version,gu_id,utm,site_id,ref_site_id,uid,session_id,deviceid,page_id,
       page_value,ref_page_id,ref_page_value,page_level_id,page_lvl2_value,ref_page_lvl2_value,jpk,pit_type,sortdate,
       sorthour,lplid,ptplid,gid,ugroup,shop_id,ref_shop_id,starttime,endtime,hot_goods_id,ctag,location,ip,url,urlref,
-      to_switch,source,event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadtime,gu_create_time,tab_source
+      to_switch,source,event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadTime,gu_create_time,tab_source
 //      ,date,hour
     ).mkString("\u0001")
   }
@@ -298,24 +300,6 @@ class PageinfoTransformer extends ITransformer {
       x_page_id
   }
 
-  // 返回解析的结果
-  def transform(line: String): (String, String) = {
-
-    // fastjson 也可以用。
-    // val row = JSON.parseObject(line)
-
-    //play
-    val row = Json.parse(line)
-    // 解析逻辑
-    val res = parse(row)
-
-    if (row != null) {
-      (DateUtils.dateHour((row \ "endtime").as[Long]).toString, res.toString())
-    } else {
-      (DateHour("1970-01-01", "1").toString, line)
-    }
-  }
-
   def forPageId(pagename: String, extend_params: String, js_server_jsonstr: JsValue): String =
   {
     val for_pageid = pagename.toLowerCase() match
@@ -342,6 +326,25 @@ class PageinfoTransformer extends ITransformer {
     }
     s
   }
+
+  // 返回解析的结果
+  def transform(line: String): (String, String) = {
+
+    // fastjson 也可以用。
+    // val row = JSON.parseObject(line)
+
+    //play
+    val row = Json.parse(line)
+    // 解析逻辑
+    val res = parse(row)
+
+    if (row != null) {
+      (DateUtils.dateHour((row \ "endtime").as[Long]).toString, res.toString())
+    } else {
+      (DateHour("1970-01-01", "1").toString, line)
+    }
+  }
+
 }
 
 // for test

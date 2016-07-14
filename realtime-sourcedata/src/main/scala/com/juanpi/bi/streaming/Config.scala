@@ -7,10 +7,12 @@ object Config {
 
   val interval = System.getProperty("spark.mystreaming.batch.interval", "60").toInt
 
-  val checkpoindDir="/user/hadoop/sparkstreaming/checkpoint"
+  val dirPrefix = "/user/hadoop/gongzi/"
+
+  val checkpoindDir= dirPrefix + "sparkstreaming/checkpoint"
 
   // todo 配置 baseDir
-  val baseDir = System.getProperty("spark.juanpi.bi.realtime.basedir", "/user/hadoop/kafka_realoutput")
+  val baseDir = System.getProperty("spark.juanpi.bi.realtime.basedir", dirPrefix + "kafka_realoutput")
 
   private val transformerPackage="com.juanpi.bi.transformer"
   val kafkaTopicMap:Map[String, Seq[String]] = Map(

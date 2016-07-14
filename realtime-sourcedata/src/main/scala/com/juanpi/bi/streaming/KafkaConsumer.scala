@@ -79,12 +79,6 @@ object KafkaConsumer{
 
     val Array(zkQuorum, brokerList, topic, groupId, consumerType, consumerTime) = args
 
-//    println(args)
-
-//    val ic = new InitConfig()
-//    // read from conf.properties
-//    val Array(brokerList, zkQuorum, consumerType, consumerTime, hbaseZk) = Array(ic.brokerList, ic.zkQuorum, ic.consumerType, ic.consumerTime, ic.hbaseZk)
-
     val groupIds = Set("pageinfo_direct_dw", "mbevent_direct_dw")
     if(!groupIds.contains(groupId)) {
       println("groupId有误！！约定的groupId是：mbevent_direct_dw 或者 pageinfo_direct_dw")
@@ -100,9 +94,6 @@ object KafkaConsumer{
 
     // com.juanpi.bi.realtime.pageinfo.Consumer
     println(MySparkConf.get("spark.app.name"))
-
-
-    System.exit(1)
 
     val ssc = new StreamingContext(MySparkConf, Seconds(Config.interval))
 
