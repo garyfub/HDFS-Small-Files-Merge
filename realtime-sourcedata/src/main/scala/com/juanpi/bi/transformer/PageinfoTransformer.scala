@@ -149,26 +149,28 @@ class PageinfoTransformer extends ITransformer {
     val for_pre_pageid = forPageId(pre_page, pre_extend_params, js_server_jsonstr)
     val p_source = getSource(source)
 
-    var (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPages.get(for_pageid).getOrElse(0, 0, "", 0)
+    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPages.get(for_pageid).getOrElse(0, 0, "", 0)
     val page_id = getPageId(d_page_id, extend_params)
     var page_value = getPageValue(d_page_id, extend_params, page_type_id, d_page_value)
 
 
     // ref_page_id
-    var (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimPages.get(for_pre_pageid).getOrElse(0, 0, "", 0)
+    val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimPages.get(for_pre_pageid).getOrElse(0, 0, "", 0)
     var pre_page_id = getPageId(d_pre_page_id, pre_extend_params)
     var pre_page_value = getPageValue(d_pre_page_id, pre_extend_params, d_pre_page_type_id, d_pre_page_value)
 
     val shop_id = getShopId(d_page_id, extend_params)
     val ref_shop_id = getShopId(d_pre_page_id, pre_extend_params)
 
-    val page_level_id = getPageLevelId(d_page_id, extend_params)
+    val page_level_id = getPageLevelId(d_page_id, extend_params, d_page_level_id)
 
+    val page_lvl2_value = getPageLvl2Value(d_page_id, extend_params, server_jsonstr)
+
+    val ref_page_lvl2_value = getPageLvl2Value(d_pre_page_id, pre_extend_params, server_jsonstr)
 
     val pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
     val gsort_key = (js_server_jsonstr \ "_gsort_key").toString()
-    val (sdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty)
-      {
+    val (sdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty) {
         val sdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
         val sorthour = gsort_key.split("_")(4)
         val lplid = gsort_key.split("_")(6)
@@ -183,17 +185,46 @@ class PageinfoTransformer extends ITransformer {
     return ""
   }
 
+  // page level2 value 二级页面值(品牌页：引流款ID等)
+  def getPageLvl2Value(x_page_id: Int, x_extend_params: String, server_jsonstr: String): String =
+  {
+    val page_lel2_value = if(x_page_id == 250) {
+      //  WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extend_params,'_')[2],''))
+        new GetGoodsId().evaluate(x_extend_params.split("_")(2))
+      }
+    else if(x_page_id == 154 || x_page_id == 289) {
+    //    when P1.page_id in (154,289) and getpageid(a.extend_params) = 10104 then getskcid(a.extend_params)
+      val pid = GetPageID.evaluate(x_extend_params)
+      if(pid == 10104) {
+        new GetSkcId().evaluate(x_extend_params)
+      }
+      else if(pid == 10102) {
+        new GetShopId().evaluate(x_extend_params)
+      } else ""
+    }
+    else if(x_page_id == 169) {
+      // -- 'page_temai_orderdetails'
+      // WHEN P1.page_id = 169 then get_json_object(a.server_jsonstr,'$.order_status')
+      (Json.parse(server_jsonstr) \ "order_status").asOpt[String].getOrElse("")
+    }
+    else ""
+    page_lel2_value
+  }
+
+  // page level id
   def getPageLevelId(page_id: Int, extend_params: String, d_page_level_id: Int): Int =
   {
-    if (page_id == 289 || page_id == 154)
+    val page_level_id: Int = if (page_id == 289 || page_id == 154)
     {
-
+      d_page_level_id
+    }else if(GetPageID.evaluate(extend_params)== 34 || GetPageID.evaluate(extend_params) == 65) {
+      2
     }
-    0
-//    CASE WHEN P1.page_id not in (154,289) THEN p1.page_level_id
-//    WHEN getpageid(a.extend_params) in (34,65) then 2
-//    when getpageid(a.extend_params) = 10069 then 3
-//    else 0 end page_level_id,
+    else if( GetPageID.evaluate(extend_params) == 10069){
+      3
+    }
+    else 0
+    page_level_id
   }
 
   def getShopId(x_page_id: Int, extend_params: String): String =
