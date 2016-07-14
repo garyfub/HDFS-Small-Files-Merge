@@ -105,7 +105,6 @@ class MbEventTransformer extends ITransformer{
     }
     ""
 
-    val res =
   }
 
   // 返回解析的结果
