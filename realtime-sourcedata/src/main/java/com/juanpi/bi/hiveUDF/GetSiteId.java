@@ -1,4 +1,6 @@
-package com.juanpi.bi.utils;
+package com.juanpi.bi.hiveUDF;
+
+import com.juanpi.bi.utils.URLUtils;
 
 /**
  * 返回URL的域名，1表示juanpi，2表示9快邮，-999 表示站外

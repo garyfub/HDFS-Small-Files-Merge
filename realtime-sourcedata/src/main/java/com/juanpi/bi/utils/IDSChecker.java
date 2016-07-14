@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 /**
- * Created by gongzi on 2016/7/11.
+ * Updated by gongzi on 2016/7/11.
  */
 public class IDSChecker {
     private static IDSChecker IDSChecker  = null;

@@ -1,4 +1,4 @@
-package com.juanpi.bi.utils;
+package com.juanpi.bi.hiveUDF;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +7,8 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.juanpi.bi.utils.CateNameChecker;
+import com.juanpi.bi.utils.DecodeURLParam;
 import org.apache.commons.lang.StringUtils;
 
 /**

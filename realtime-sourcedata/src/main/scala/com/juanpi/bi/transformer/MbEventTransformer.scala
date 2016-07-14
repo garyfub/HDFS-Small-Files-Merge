@@ -1,10 +1,11 @@
 package com.juanpi.bi.transformer
 
 import com.alibaba.fastjson.JSON
+import com.juanpi.bi.hiveUDF.{GetGoodsId, GetMbPageId}
 import com.juanpi.bi.init.InitConfig
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.bi.streaming.DateHour
-import com.juanpi.bi.utils.{GetGoodsId, GetMbPageId}
+import com.juanpi.bi.utils.GetMbPageId
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.{Get, Put}
 import org.apache.hadoop.hbase.util.Bytes

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.juanpi.bi.utils.IDSChecker.Page_Pattern;
 
 public class DwPageValue
 {
@@ -140,51 +139,47 @@ public class DwPageValue
     return patternsMap;
   }
 
-  public static void main(String[] paramArrayOfString)
+  public static class Page_Pattern
   {
-  }
+    public String page_type_id;
+    public String page_value;
+    public List<String> regex_pattern;
 
-//  public static class Page_Pattern
-//  {
-//    public String page_type_id;
-//    public String page_value;
-//    public List<String> regex_pattern;
-//
-//    public boolean match(String paramString)
-//    {
-//      Iterator localIterator = this.regex_pattern.iterator();
-//      while (localIterator.hasNext())
-//      {
-//        String str1 = (String)localIterator.next();
-//        if (str1.contains("%"))
-//        {
-//          String[] arrayOfString1 = str1.split("%");
-//          int i = 1;
-//          for (String str2 : arrayOfString1)
-//          {
-//            if ((str2.trim().length() <= 0) || (paramString.contains(str2.trim())))
-//              continue;
-//            i = 0;
-//            break;
-//          }
-//          if (i != 0)
-//          {
-//            if ((!str1.startsWith("%")) && (!paramString.startsWith(arrayOfString1[0])))
-//              i = 0;
-//            if ((!str1.endsWith("%")) && (!paramString.endsWith(arrayOfString1[(arrayOfString1.length - 1)])))
-//              i = 0;
-//          }
-//          if (i != 0)
-//            return true;
-//        }
-//        else if (paramString.matches(str1))
-//        {
-//          return true;
-//        }
-//      }
-//      return false;
-//    }
-//  }
+    public boolean match(String paramString)
+    {
+      Iterator localIterator = this.regex_pattern.iterator();
+      while (localIterator.hasNext())
+      {
+        String str1 = (String)localIterator.next();
+        if (str1.contains("%"))
+        {
+          String[] arrayOfString1 = str1.split("%");
+          int i = 1;
+          for (String str2 : arrayOfString1)
+          {
+            if ((str2.trim().length() <= 0) || (paramString.contains(str2.trim())))
+              continue;
+            i = 0;
+            break;
+          }
+          if (i != 0)
+          {
+            if ((!str1.startsWith("%")) && (!paramString.startsWith(arrayOfString1[0])))
+              i = 0;
+            if ((!str1.endsWith("%")) && (!paramString.endsWith(arrayOfString1[(arrayOfString1.length - 1)])))
+              i = 0;
+          }
+          if (i != 0)
+            return true;
+        }
+        else if (paramString.matches(str1))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
 }
 
 /* Location:           C:\Users\kaenrion\OneDrive\

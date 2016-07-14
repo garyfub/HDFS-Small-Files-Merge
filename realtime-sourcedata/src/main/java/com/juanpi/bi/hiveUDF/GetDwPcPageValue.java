@@ -1,5 +1,8 @@
-package com.juanpi.bi.utils;
+package com.juanpi.bi.hiveUDF;
 
+import com.juanpi.bi.utils.DecodeURLParam;
+import com.juanpi.bi.utils.DwPageValue;
+import com.juanpi.bi.utils.IDSChecker;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hive.ql.exec.UDF;
 
@@ -11,7 +14,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.juanpi.bi.utils.IDSChecker.Page_Pattern;
+import com.juanpi.bi.utils.DwPageValue.Page_Pattern;
 
 /**
  * 获取pc端pagevalue
@@ -37,7 +40,7 @@ public class GetDwPcPageValue extends UDF {
 		}
 
 		DwPageValue.getInstance("PcPageValue.properties");
-		Map<String, IDSChecker.Page_Pattern> patternsMap = DwPageValue.patternsMap;
+		Map<String, Page_Pattern> patternsMap = DwPageValue.patternsMap;
 		if (patternsMap == null || patternsMap.isEmpty())
 			return null;
 

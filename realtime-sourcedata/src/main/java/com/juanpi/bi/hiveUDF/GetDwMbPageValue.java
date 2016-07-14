@@ -1,4 +1,4 @@
-package com.juanpi.bi.utils;
+package com.juanpi.bi.hiveUDF;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

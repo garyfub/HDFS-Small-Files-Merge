@@ -1,4 +1,4 @@
-package com.juanpi.bi.utils;
+package com.juanpi.bi.hiveUDF;
 
 import org.apache.hadoop.hive.ql.exec.UDF;
 

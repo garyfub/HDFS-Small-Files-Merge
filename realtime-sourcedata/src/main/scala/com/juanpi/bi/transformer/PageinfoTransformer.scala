@@ -1,9 +1,9 @@
 package com.juanpi.bi.transformer
 
 import com.alibaba.fastjson.JSON
+import com.juanpi.bi.hiveUDF._
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.bi.streaming.DateHour
-import com.juanpi.bi.utils._
 import org.apache.hadoop.hbase.client.{Get, Put, Result}
 import play.api.libs.json.{JsValue, Json}
 import org.apache.hadoop.hbase.util.Bytes

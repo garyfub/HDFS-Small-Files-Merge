@@ -4,9 +4,6 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author zhuokun
- */
 public class StringUtils {
 
     public static String multipleSplit(final String s, String... vars) {

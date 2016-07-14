@@ -1,5 +1,7 @@
 package com.juanpi.bi.utils;
 
+import com.juanpi.bi.hiveUDF.GetSiteId;
+
 import java.util.List;
 
 /**

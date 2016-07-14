@@ -1,4 +1,6 @@
-package com.juanpi.bi.utils;
+package com.juanpi.bi.hiveUDF;
+
+import com.juanpi.bi.utils.PageTypeUtils;
 
 /**
  * 获取页面类型，类型与数据库dim_page_type 中定义的Page_ID 一致，特殊返回值介绍：-1表示站内未知页，-999表示站外页，非法URL或空URL时返回null。

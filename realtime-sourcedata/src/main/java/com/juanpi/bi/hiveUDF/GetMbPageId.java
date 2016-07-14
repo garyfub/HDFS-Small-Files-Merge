@@ -1,4 +1,6 @@
-package com.juanpi.bi.utils;
+package com.juanpi.bi.hiveUDF;
+
+import com.juanpi.bi.utils.IDChecker;
 
 import java.util.List;
 
