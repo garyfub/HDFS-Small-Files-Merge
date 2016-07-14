@@ -14,6 +14,13 @@ public class IDSChecker {
     private static IDSChecker IDSChecker  = null;
     public static Log log = LogFactory.getLog(IDSChecker.class);
 
+    /**
+     * 如果一个类要被声明为static的，只有一种情况，就是静态内部类。如果在外部类声明为static，程序会编译都不会过。在一番调查后个人总结出了3点关于内部类和静态内部类（俗称：内嵌类）
+     * 1.静态内部类跟静态方法一样，只能访问静态的成员变量和方法，不能访问非静态的方法和属性，但是普通内部类可以访问任意外部类的成员变量和方法
+     * 2.静态内部类可以声明普通成员变量和方法，而普通内部类不能声明static成员变量和方法。
+     * 3.静态内部类可以单独初始化
+     * 参考：http://www.cnblogs.com/Alex--Yang/p/3386863.html
+     */
     public static class Page_Pattern{
         public int id;
         public String pageName;

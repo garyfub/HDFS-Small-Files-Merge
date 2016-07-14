@@ -11,6 +11,8 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.juanpi.bi.utils.IDSChecker.Page_Pattern;
+
 /**
  * 获取pc端pagevalue
  * 2015年8月28日11:08:05
@@ -49,7 +51,7 @@ public class GetDwPcPageValue extends UDF {
 		}
 		
         //通过page_type_id定位
-		IDSChecker.Page_Pattern = patternsMap.get(page_value);
+		Page_Pattern pat = patternsMap.get(page_value);
 		//搜索页获取关键词规则
 		if ("6".equals(pat.page_type_id)) {
 			try {
