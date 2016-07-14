@@ -173,6 +173,7 @@ class PageinfoTransformer extends ITransformer {
 
     val pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
     val gsort_key = (js_server_jsonstr \ "_gsort_key").toString()
+
     val (sortdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty) {
         val sortdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
         val sorthour = gsort_key.split("_")(4)
@@ -192,8 +193,9 @@ class PageinfoTransformer extends ITransformer {
     Array(terminal_id,app_version,gu_id,utm,site_id,ref_site_id,uid,session_id,deviceid,page_id,
       page_value,ref_page_id,ref_page_value,page_level_id,page_lvl2_value,ref_page_lvl2_value,jpk,pit_type,sortdate,
       sorthour,lplid,ptplid,gid,ugroup,shop_id,ref_shop_id,starttime,endtime,hot_goods_id,ctag,location,ip,url,urlref,
-      to_switch,source,event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadtime,gu_create_time,tab_source,date
-      hour).mkString("\u0001")
+      to_switch,source,event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadtime,gu_create_time,tab_source
+//      ,date,hour
+    ).mkString("\u0001")
   }
 
   // page level2 value 二级页面值(品牌页：引流款ID等)
