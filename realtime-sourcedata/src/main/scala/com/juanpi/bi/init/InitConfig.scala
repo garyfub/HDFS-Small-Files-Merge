@@ -10,6 +10,12 @@ import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.storage.StorageLevel
 
 /**
+  * 默认情况下 Scala 使用不可变 Map。如果你需要使用可变集合，你需要显式的引入 import scala.collection.mutable.Map 类
+  * 参见 ：https://wizardforcel.gitbooks.io/w3school-scala/content/17.html
+   */
+import scala.collection.mutable
+
+/**
   * Created by gongzi on 2016/7/8.
   */
 class InitConfig {
@@ -18,8 +24,8 @@ class InitConfig {
   var zkQuorum = ""
   var hbase_family = ""
 
-  var dimPages: Map[String, (Int, Int, String, Int)] = Map()
-  var dimEvents: Map[String, Int] = Map()
+  val dimPages = new mutable.HashMap[String, (Int, Int, String, Int)]
+  var dimEvents = new mutable.HashMap[String, Int]
   var ticks_history: Table = null
   val table_ticks_history = TableName.valueOf("ticks_history")
 
@@ -84,12 +90,15 @@ class InitConfig {
       val page_id: Int = line.getAs[Int]("page_id")
       val page_exp1 = line.getAs[String]("page_exp1")
       val page_exp2 = line.getAs[String]("page_exp2")
+      val page_value = line.getAs[String]("page_value")
       val page_type_id = line.getAs[Int]("page_type_id")
-      val page_value = line.getAs[Int]("page_value")
       val page_level_id = line.getAs[Int]("page_level_id")
       // 移动端的 page_exp1+page_exp2 不会为空，但是 url_pattern 为空
 //      val url_pattern = line.getAs[String]("url_pattern")
-       dimPages += (page_exp1+page_exp2 -> (page_id, page_type_id, page_value, page_level_id))
+      dimPages += (page_exp1+page_exp2 -> (page_id, page_type_id, page_value, page_level_id))
+//      dimPages += ((page_exp1+page_exp2) -> (page_id, page_type_id, page_value, page_level_id))
+//      val scores3 = new scala.collection.mutable.HashMap[String,Int]
+//      scores3 += (page_exp1 -> page_id)
 
     })
     dimPageData.unpersist(true)
@@ -125,8 +134,8 @@ object InitConfig {
 
   ic.init()
 
-  val dimPages: Map[String, (Int, Int, String, Int)] = ic.dimPages
-  val dimEvents: Map[String, Int] = ic.dimEvents
+  val dimPages = ic.dimPages
+  val dimEvents = ic.dimEvents
 
   // hbase 创建连接
   def initTicksHistory(): Table =
@@ -135,7 +144,7 @@ object InitConfig {
   }
 
   def main(args: Array[String]) {
-//    val ic = new InitConfig()
+    val ic = new InitConfig()
 //    ic.loadProperties
 //    println(ic.brokerList)
 //

@@ -1,6 +1,6 @@
 package com.juanpi.bi.hiveUDF;
 
-import com.juanpi.bi.utils.IDChecker;
+import com.juanpi.bi.utils.IDSChecker;
 
 import java.util.List;
 
@@ -13,20 +13,14 @@ import java.util.List;
 public class GetMbPageId {
 
     public static Integer evaluate(final String name, String extendname) {
-        //List<Page_Pattern> patterns = new MbPageIDChecker("com/juanpi/hive/props/MbPageID.properties").patterns;
-        //IDChecker mc = new IDChecker("com/juanpi/hive/props/MbPageID.properties");
-//		String[] a = name.split(", ");
-//		String[] b = extendname.split(extendname);
-        //a[0]
 
         if (name == null || name.trim().length() == 0)
             return -1;
         if (extendname == null || extendname.trim().length() == 0)
             extendname = "";
-        //IDChecker.getInstance("com/juanpi/bi/props/MbPageID.properties");
-        List<IDChecker.Page_Pattern> patterns = IDChecker.patterns;
+        List<IDSChecker.Page_Pattern> patterns = IDSChecker.patterns;
         if (patterns == null || patterns.isEmpty()) return -1;
-        for (IDChecker.Page_Pattern pat : patterns) {
+        for (IDSChecker.Page_Pattern pat : patterns) {
             if (pat.match(name.toLowerCase(), extendname.toLowerCase())) {
                 return pat.id;
             }

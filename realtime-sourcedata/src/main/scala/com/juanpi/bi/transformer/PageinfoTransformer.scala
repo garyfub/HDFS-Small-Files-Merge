@@ -182,6 +182,8 @@ class PageinfoTransformer extends ITransformer {
     val ugroup = (js_c_server \ "ugroup").asOpt[Int].getOrElse(0)
 
     // 最终返回值
+
+    val res = Array().mkString("\u0001")
     return ""
   }
 

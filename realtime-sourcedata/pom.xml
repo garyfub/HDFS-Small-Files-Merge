@@ -266,9 +266,11 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
+                <!--<artifactId>maven-install-plugin</artifactId>-->
+                <!-- 参考 http://maven.apache.org/plugins-archives/maven-surefire-plugin-2.12.4/examples/skipping-test.html -->
+                <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <skip>true</skip>
+                    <skipTests>true</skipTests>
                 </configuration>
             </plugin>
             <plugin>

@@ -2,14 +2,9 @@ package com.juanpi.bi.transformer
 
 import com.alibaba.fastjson.JSON
 import com.juanpi.bi.hiveUDF.{GetGoodsId, GetMbPageId}
-import com.juanpi.bi.init.InitConfig
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.bi.streaming.DateHour
-import com.juanpi.bi.utils.GetMbPageId
-import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.{Get, Put}
-import org.apache.hadoop.hbase.util.Bytes
-import org.apache.spark.rdd.RDD
 import play.api.libs.json.{JsValue, Json}
 
 /**
@@ -58,7 +53,7 @@ class MbEventTransformer extends ITransformer{
     // mb_event -> mb_event_log
     val (extend_params_1, pre_extend_params_1) = pagename.toLowerCase() match {
       case "page_goods" | "page_temai_goods" | "page_temai_imagetxtgoods" | "page_temai_parametergoods" => {
-        (GetGoodsId.evaluate(extend_params), GetGoodsId.evaluate(pre_extend_params))
+        (new GetGoodsId().evaluate(extend_params), new GetGoodsId().evaluate(pre_extend_params))
       }
       case _ => {
         (extend_params.toLowerCase(), pre_extend_params.toLowerCase())
@@ -109,6 +104,8 @@ class MbEventTransformer extends ITransformer{
       uid
     }
     ""
+
+    val res =
   }
 
   // 返回解析的结果
