@@ -33,14 +33,14 @@ class PageinfoTransformer extends ITransformer {
     val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
     val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
     val pre_extend_params = (row \ "pre_extend_params").asOpt[String].getOrElse("")
-    val wap_url = (row \ "wap_url").asOpt[String].getOrElse("")
-    val wap_pre_url = (row \ "wap_pre_url").asOpt[String].getOrElse("")
+    val url = (row \ "wap_url").asOpt[String].getOrElse("")
+    val urlref = (row \ "wap_pre_url").asOpt[String].getOrElse("")
     val deviceid = (row \ "deviceid").asOpt[String].getOrElse("")
     val jpid = (row \ "jpid").asOpt[String].getOrElse("")
     val ip = (row \ "ip").asOpt[String].getOrElse("")
     val to_switch = (row \ "to_switch").asOpt[Int].getOrElse("0")
     val location = (row \ "location").asOpt[String].getOrElse("")
-    val c_label = (row \ "c_label").asOpt[String].getOrElse("")
+    val ctag = (row \ "c_label").asOpt[String].getOrElse("")
     val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
     val js_server_jsonstr = Json.parse(server_jsonstr)
 
@@ -156,13 +156,16 @@ class PageinfoTransformer extends ITransformer {
 
     // ref_page_id
     val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimPages.get(for_pre_pageid).getOrElse(0, 0, "", 0)
-    var pre_page_id = getPageId(d_pre_page_id, pre_extend_params)
-    var pre_page_value = getPageValue(d_pre_page_id, pre_extend_params, d_pre_page_type_id, d_pre_page_value)
+    var ref_page_id = getPageId(d_pre_page_id, pre_extend_params)
+    var ref_page_value = getPageValue(d_pre_page_id, pre_extend_params, d_pre_page_type_id, d_pre_page_value)
 
     val shop_id = getShopId(d_page_id, extend_params)
     val ref_shop_id = getShopId(d_pre_page_id, pre_extend_params)
 
     val page_level_id = getPageLevelId(d_page_id, extend_params, d_page_level_id)
+
+    // WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extend_params,'_')[2],''))
+    val hot_goods_id = if(d_page_id == 250){new GetGoodsId().evaluate(extend_params.split("_")(2))} else ""
 
     val page_lvl2_value = getPageLvl2Value(d_page_id, extend_params, server_jsonstr)
 
@@ -170,21 +173,27 @@ class PageinfoTransformer extends ITransformer {
 
     val pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
     val gsort_key = (js_server_jsonstr \ "_gsort_key").toString()
-    val (sdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty) {
-        val sdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
+    val (sortdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty) {
+        val sortdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
         val sorthour = gsort_key.split("_")(4)
         val lplid = gsort_key.split("_")(6)
         val ptplid = gsort_key.split("_")(6)
-        (sdate, sorthour, lplid, ptplid)
+        (sortdate, sorthour, lplid, ptplid)
       }
 
     val gid = (js_c_server \ "gid").asOpt[Int].getOrElse(0)
     val ugroup = (js_c_server \ "ugroup").asOpt[Int].getOrElse(0)
 
+    val jpk = 0
+    val tab_source = "page"
     // 最终返回值
+    val (event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadtime) = ""
 
-    val res = Array().mkString("\u0001")
-    return ""
+    Array(terminal_id,app_version,gu_id,utm,site_id,ref_site_id,uid,session_id,deviceid,page_id,
+      page_value,ref_page_id,ref_page_value,page_level_id,page_lvl2_value,ref_page_lvl2_value,jpk,pit_type,sortdate,
+      sorthour,lplid,ptplid,gid,ugroup,shop_id,ref_shop_id,starttime,endtime,hot_goods_id,ctag,location,ip,url,urlref,
+      to_switch,source,event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadtime,gu_create_time,tab_source,date
+      hour).mkString("\u0001")
   }
 
   // page level2 value 二级页面值(品牌页：引流款ID等)

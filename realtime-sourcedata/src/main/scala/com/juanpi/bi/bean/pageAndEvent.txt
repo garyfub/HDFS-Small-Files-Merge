@@ -33,7 +33,6 @@ page_value              string
 ref_page_id             string
 ref_page_value          string
 ref_site_id             int
-user_id                 int
 page_level_id           int
 location                string
 ctag                    string
