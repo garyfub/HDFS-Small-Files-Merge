@@ -1,9 +1,22 @@
 
 ##### jar包上传
 ```
+### on ops001.jp
+### 删除 ops001.jp 和 sparkoo1.jp 上的 realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar 后
+scp /data/home/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/
+ssh hadoop@spark001.jp
+## on sparkoo1.jp
+
 hadoop fs -mkdir /user/hadoop/spark-jobs/gongzi
 hadoop fs -ls /user/hadoop/spark-jobs/gongzi
+
+## 上传
 hadoop fs -put /home/hadoop/users/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar /user/hadoop/spark-jobs/gongzi/
+
+## 删除
+hadoop fs -rm hdfs://nameservice1/user/hadoop/spark-jobs/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar
+
+hadoop fs -rm hdfs://nameservice1/user/hadoop/spark-jobs/gongzi/bi-dw-gongzi-realtime.sh
 ```
 
 ##### 上线脚本-V-new bi-dw-gongzi-realtime.sh

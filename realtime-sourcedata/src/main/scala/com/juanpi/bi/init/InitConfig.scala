@@ -5,19 +5,25 @@ import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Table}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.storage.StorageLevel
-
 import com.typesafe.config.ConfigFactory
-
+import org.apache.spark.streaming.{Duration, StreamingContext}
 /**
   * 默认情况下 Scala 使用不可变 Map。如果你需要使用可变集合，你需要显式的引入 import scala.collection.mutable.Map 类
   * 参见 ：https://wizardforcel.gitbooks.io/w3school-scala/content/17.html
    */
 import scala.collection.mutable
+import scala.reflect.BeanProperty
 
 /**
   * Created by gongzi on 2016/7/8.
   */
 class InitConfig {
+
+  @BeanProperty var spconf: SparkConf = _
+  @BeanProperty var AppName: String = _
+  @BeanProperty var ssc: StreamingContext = _
+  @BeanProperty var duration: Duration = _
+
 //  var hbasePort = ""
   var zkQuorum = ""
   var hbase_family = ""
@@ -27,47 +33,42 @@ class InitConfig {
   var ticks_history: None.type = None
   val table_ticks_history = TableName.valueOf("utm_history")
 
-  var conf = new SparkConf().set("spark.akka.frameSize", "256")
-    .set("spark.kryoserializer.buffer.max", "512m")
-    .set("spark.kryoserializer.buffer", "256m")
-    .set("spark.scheduler.mode", "FAIR")
-    .set("spark.storage.blockManagerSlaveTimeoutMs", "8000000")
-    .set("spark.storage.blockManagerHeartBeatMs", "8000000")
-    .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-    .set("spark.rdd.compress", "true")
-    .set("spark.io.compression.codec", "org.apache.spark.io.SnappyCompressionCodec")
-    // control default partition number
-    .set("spark.streaming.blockInterval", "10000")
-    .set("spark.shuffle.manager", "SORT")
-    .set("spark.eventLog.overwrite", "true")
-
   this.loadProperties()
 
   def init() = {
 
     // 查询 hive 中的 dim_page 和 dim_event
-    val sc: SparkContext = new SparkContext(conf)
-    val sqlContext: HiveContext = new HiveContext(sc)
+    val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
 
     initDimPage(sqlContext)
     initDimPage(sqlContext)
 
   }
 
+  def getStreamingContext() = {
+    this.setSsc(new StreamingContext(this.getSpconf(), this.getDuration()))
+  }
+
+  def initSparkConfig(appName:String): Unit = {
+    val conf = new SparkConf().set("spark.akka.frameSize", "256")
+      .set("spark.kryoserializer.buffer.max", "512m")
+      .set("spark.kryoserializer.buffer", "256m")
+      .set("spark.scheduler.mode", "FAIR")
+      .set("spark.storage.blockManagerSlaveTimeoutMs", "8000000")
+      .set("spark.storage.blockManagerHeartBeatMs", "8000000")
+      .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+      .set("spark.rdd.compress", "true")
+      .set("spark.io.compression.codec", "org.apache.spark.io.SnappyCompressionCodec")
+      // control default partition number
+      .set("spark.streaming.blockInterval", "10000")
+      .set("spark.shuffle.manager", "SORT")
+      .set("spark.eventLog.overwrite", "true")
+    this.setSpconf(conf)
+  }
+
   def loadProperties():Unit = {
 
-//    val properties = new Properties()
-//    val path = Thread.currentThread().getContextClassLoader.getResource("").getPath //文件要放到resource文件夹下
-//    properties.load(new FileInputStream(path))
-//    hbasePort = properties.getProperty("hbase.zookeeper.property.clientPort")
-//    zkQuorum = properties.getProperty("zkQuorum")
-//    hbaseZk = properties.getProperty("hbaseZk")
-//    hbase_family = properties.getProperty("hbase_family")
-
     val config = ConfigFactory.load("hbase.conf")
-    println(config.getString("hbaseConf.zkQuorum"))
-    println(config.getString("hbaseConf.hbase_family"))
-
     zkQuorum = config.getString("hbaseConf.zkQuorum")
     hbase_family = config.getString("hbaseConf.hbase_family")
   }
@@ -88,22 +89,32 @@ class InitConfig {
                          | where page_id > 0
                          | and terminal_lvl1_id = 2
                          | and del_flag = 0
-                         | order by page_id'""".stripMargin
+                         | order by page_id""".stripMargin
 
     val dimPageData = sqlContext.sql(dimPageSql).persist(StorageLevel.MEMORY_AND_DISK)
 
-    dimPageData.foreach(line => {
+    dimPageData.map(line => {
       val page_id: Int = line.getAs[Int]("page_id")
       val page_exp1 = line.getAs[String]("page_exp1")
       val page_exp2 = line.getAs[String]("page_exp2")
       val page_value = line.getAs[String]("page_value")
       val page_type_id = line.getAs[Int]("page_type_id")
       val page_level_id = line.getAs[Int]("page_level_id")
+
+      val key = page_exp1 + page_exp2
+      (page_id, page_type_id, page_value, page_level_id,key)
+    }).collect().foreach( items => {
+      val page_id: Int = items._1
+      val page_type_id = items._2
+      val page_value = items._3
+      val page_level_id = items._4
+      val key = items._5
+      dimPages += ( key -> (page_id, page_type_id, page_value, page_level_id))
+    })
+
       // 移动端的 page_exp1+page_exp2 不会为空，但是 url_pattern 为空
 //      val url_pattern = line.getAs[String]("url_pattern")
-      dimPages += (page_exp1+page_exp2 -> (page_id, page_type_id, page_value, page_level_id))
 
-    })
     dimPageData.unpersist(true)
   }
 
@@ -114,11 +125,11 @@ class InitConfig {
                          | where event_id > 0
                          | and terminal_lvl1_id = 2
                          | and del_flag = 0
-                         | order by event_id'""".stripMargin
+                         | order by event_id""".stripMargin
 
     val dimData = sqlContext.sql(dimEventSql).persist(StorageLevel.MEMORY_AND_DISK)
 
-    dimData.foreach(line => {
+    dimData.map(line => {
       val event_id = line.getAs[Int]("event_id")
       val event_exp1 = line.getAs[String]("event_exp1")
       val event_exp2 = line.getAs[String]("event_exp2")
@@ -133,7 +144,6 @@ object InitConfig {
 
   val ic = new InitConfig()
   val HbaseFamily = ic.hbase_family
-  val MySparkConf = ic.conf
 
   ic.init()
 
@@ -147,9 +157,10 @@ object InitConfig {
   }
 
   def main(args: Array[String]) {
-    val ic = new InitConfig()
-    ic.loadProperties
-    println(ic.hbase_family, ic.zkQuorum)
+//    val ic = new InitConfig()
+//    ic.loadProperties
+//    println(ic.hbase_family, ic.zkQuorum)
+
 //
 //    println(ic.brokerList, ic.consumerTime, ic.groupId, ic.hbaseZk, ic.zkQuorum)
   }

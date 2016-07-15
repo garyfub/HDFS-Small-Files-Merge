@@ -1,14 +1,14 @@
 package com.juanpi.bi.streaming
 
+import com.juanpi.bi.init.InitConfig
 import com.juanpi.bi.init.InitConfig.MySparkConf
 import com.juanpi.bi.transformer.ITransformer
 import kafka.serializer.StringDecoder
 import org.apache.spark.rdd.RDD
-
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
 import org.apache.spark.streaming.{Seconds, StreamingContext}
-import org.apache.spark.{Logging}
+import org.apache.spark.Logging
 
 // todo
 import com.juanpi.bi.streaming.MultiOutputRDD._
@@ -90,12 +90,19 @@ object KafkaConsumer{
       System.exit(1)
     }
 
-    MySparkConf.setAppName("com.juanpi.bi.realtime." + topic + ".Consumer")
+    val ic = InitConfig.ic
+
+
+    //    MySparkConf.setAppName("com.juanpi.bi.realtime." + topic + ".Consumer")
 
     // com.juanpi.bi.realtime.pageinfo.Consumer
-    println(MySparkConf.get("spark.app.name"))
+//    println("Running: " + MySparkConf.get("spark.app.name"))
 
-    val ssc = new StreamingContext(MySparkConf, Seconds(Config.interval))
+    ic.setAppName(topic)
+    ic.setDuration(Seconds(Config.interval))
+    ic.initSparkConfig(topic)
+    val ssc = ic.getSsc()
+//    val ssc = new StreamingContext(MySparkConf, Seconds(Config.interval))
 
     // Connect to a Kafka topic for reading
     val kafkaParams : Map[String, String] = Map(
