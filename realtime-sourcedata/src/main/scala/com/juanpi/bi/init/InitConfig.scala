@@ -1,13 +1,12 @@
 package com.juanpi.bi.init
 
-import java.util.Properties
-import java.io.FileInputStream
-
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Table}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.storage.StorageLevel
+
+import com.typesafe.config.ConfigFactory
 
 /**
   * 默认情况下 Scala 使用不可变 Map。如果你需要使用可变集合，你需要显式的引入 import scala.collection.mutable.Map 类
@@ -19,7 +18,7 @@ import scala.collection.mutable
   * Created by gongzi on 2016/7/8.
   */
 class InitConfig {
-  var hbasePort = ""
+//  var hbasePort = ""
   var zkQuorum = ""
   var hbase_family = ""
 
@@ -56,13 +55,21 @@ class InitConfig {
   }
 
   def loadProperties():Unit = {
-    val properties = new Properties()
-    val path = Thread.currentThread().getContextClassLoader.getResource("conf.properties").getPath //文件要放到resource文件夹下
-    properties.load(new FileInputStream(path))
-    hbasePort = properties.getProperty("hbase.zookeeper.property.clientPort")
-    zkQuorum = properties.getProperty("zkQuorum")
+
+//    val properties = new Properties()
+//    val path = Thread.currentThread().getContextClassLoader.getResource("").getPath //文件要放到resource文件夹下
+//    properties.load(new FileInputStream(path))
+//    hbasePort = properties.getProperty("hbase.zookeeper.property.clientPort")
+//    zkQuorum = properties.getProperty("zkQuorum")
 //    hbaseZk = properties.getProperty("hbaseZk")
-    hbase_family = properties.getProperty("hbase_family")
+//    hbase_family = properties.getProperty("hbase_family")
+
+    val config = ConfigFactory.load("hbase.conf")
+    println(config.getString("hbaseConf.zkQuorum"))
+    println(config.getString("hbaseConf.hbase_family"))
+
+    zkQuorum = config.getString("hbaseConf.zkQuorum")
+    hbase_family = config.getString("hbaseConf.hbase_family")
   }
 
   def getHbaseConf(): Connection = {
@@ -141,8 +148,8 @@ object InitConfig {
 
   def main(args: Array[String]) {
     val ic = new InitConfig()
-//    ic.loadProperties
-//    println(ic.brokerList)
+    ic.loadProperties
+    println(ic.hbase_family, ic.zkQuorum)
 //
 //    println(ic.brokerList, ic.consumerTime, ic.groupId, ic.hbaseZk, ic.zkQuorum)
   }
