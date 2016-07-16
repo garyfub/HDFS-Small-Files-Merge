@@ -38,7 +38,7 @@ class InitConfig() {
     val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
 
     initDimPage(sqlContext)
-    initDimPage(sqlContext)
+    initDimEvent(sqlContext)
   }
 
   // 得到初始化的 StreamingContext
