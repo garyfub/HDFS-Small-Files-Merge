@@ -125,7 +125,13 @@ class InitConfig() {
       val event_id = line.getAs[Int]("event_id")
       val event_exp1 = line.getAs[String]("event_exp1")
       val event_exp2 = line.getAs[String]("event_exp2")
-      dimEvents += (event_exp1+event_exp2 -> event_id)
+
+      val key = event_exp1 + event_exp2
+      (event_id, key)
+    }).collect().foreach( items => {
+      val event_id: Int = items._1
+      val key = items._2
+      dimEvents += ( key -> event_id)
     })
 
     dimData.unpersist(true)
