@@ -6,7 +6,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.storage.StorageLevel
 import com.typesafe.config.ConfigFactory
-import org.apache.spark.streaming.{Duration, StreamingContext}
+import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
 /**
   * 默认情况下 Scala 使用不可变 Map。如果你需要使用可变集合，你需要显式的引入 import scala.collection.mutable.Map 类
   * 参见 ：https://wizardforcel.gitbooks.io/w3school-scala/content/17.html
@@ -17,7 +17,7 @@ import scala.reflect.BeanProperty
 /**
   * Created by gongzi on 2016/7/8.
   */
-class InitConfig {
+class InitConfig() {
 
   @BeanProperty var spconf: SparkConf = _
   @BeanProperty var AppName: String = _
@@ -33,20 +33,21 @@ class InitConfig {
   var ticks_history: None.type = None
   val table_ticks_history = TableName.valueOf("utm_history")
 
-  def init() = {
+  def initDimPageEvent() = {
     // 查询 hive 中的 dim_page 和 dim_event
     val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
 
     initDimPage(sqlContext)
     initDimPage(sqlContext)
-
   }
 
-  def getStreamingContext() = {
+  // 得到初始化的 StreamingContext
+   private def setStreamingContext() = {
     this.setSsc(new StreamingContext(this.getSpconf(), this.getDuration()))
   }
 
-  def initSparkConfig(appName:String): Unit = {
+  // 初始化 SparkConf 公共参数
+  private def initSparkConfig(appName:String): Unit = {
     val conf = new SparkConf().set("spark.akka.frameSize", "256")
       .set("spark.kryoserializer.buffer.max", "512m")
       .set("spark.kryoserializer.buffer", "256m")
@@ -63,14 +64,13 @@ class InitConfig {
     this.setSpconf(conf)
   }
 
-  def loadProperties():Unit = {
-
+  private def loadProperties():Unit = {
     val config = ConfigFactory.load("hbase.conf")
     zkQuorum = config.getString("hbaseConf.zkQuorum")
     hbase_family = config.getString("hbaseConf.hbase_family")
   }
 
-  def getHbaseConf(): Connection = {
+  private def getHbaseConf(): Connection = {
     val hbaseConf = HBaseConfiguration.create()
     hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
     hbaseConf.setInt("timeout", 120000)
@@ -78,7 +78,7 @@ class InitConfig {
     ConnectionFactory.createConnection(hbaseConf)
   }
 
-  def initDimPage(sqlContext: HiveContext) =
+  private def initDimPage(sqlContext: HiveContext) =
   {
     val dimPageSql = s"""select page_id,page_exp1, page_exp2, page_type_id, page_value, page_level_id, concat_ws(",", url1, url2, url3,regexp1, regexp2, regexp3) as url_pattern
                          | from dw.dim_page
@@ -110,7 +110,7 @@ class InitConfig {
     dimPageData.unpersist(true)
   }
 
-  def initDimEvent(sqlContext: HiveContext) =
+  private def initDimEvent(sqlContext: HiveContext) =
   {
     val dimEventSql = s"""select event_id, event_exp1, event_exp2
                          | from dw.dim_event
@@ -134,11 +134,33 @@ class InitConfig {
 
 object InitConfig {
 
+  // 主构造器
   val ic = new InitConfig()
+
+  def initParam(appName: String, interval: Int) = {
+    // 根据 topic 设置 appName
+    ic.setAppName(appName)
+
+    // 初始化 apark 超时时间, spark.mystreaming.batch.interval
+    ic.setDuration(Seconds(interval))
+
+    // 初始化 SparkConfig
+    ic.initSparkConfig(ic.getAppName)
+
+    ic.setStreamingContext()
+
+    // load 配置文件
+    ic.loadProperties()
+
+    // 初始化
+    ic.initDimPageEvent()
+  }
+
+  def getStreamingContext(): StreamingContext = {
+    ic.getSsc()
+  }
+
   val HbaseFamily = ic.hbase_family
-
-  ic.init()
-
   val dimPages = ic.dimPages
   val dimEvents = ic.dimEvents
 

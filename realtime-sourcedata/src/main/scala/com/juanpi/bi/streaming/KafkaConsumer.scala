@@ -93,12 +93,9 @@ object KafkaConsumer{
       * 初始化 SparkConfig StreamingContext HiveContext
       *
       */
-    val ic = InitConfig.ic
-    ic.setAppName(topic)
-    ic.initSparkConfig(topic)
-    ic.setDuration(Seconds(Config.interval))
-    ic.loadProperties()
-    val ssc = ic.getSsc()
+    val ic = InitConfig
+    ic.initParam(topic, Config.interval)
+    val ssc = ic.getStreamingContext()
 
     // Connect to a Kafka topic for reading
     val kafkaParams : Map[String, String] = Map(
