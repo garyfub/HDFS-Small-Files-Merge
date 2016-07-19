@@ -44,10 +44,17 @@ class PageinfoTransformer extends ITransformer {
     val location = (row \ "location").asOpt[String].getOrElse("")
     val ctag = (row \ "c_label").asOpt[String].getOrElse("")
     val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
-    val js_server_jsonstr = Json.parse(server_jsonstr)
+
+    var gid = 0
+    var ugroup = 0
 
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
-    val js_c_server = Json.parse(c_server)
+    if(!c_server.isEmpty())
+    {
+        val js_c_server = Json.parse(c_server)
+        gid = (js_c_server \ "gid").asOpt[Int].getOrElse(0)
+        ugroup = (js_c_server \ "ugroup").asOpt[Int].getOrElse(0)
+    }
 
     // mb_pageinfo -> mb_pageinfo_log
     val (extend_params_1, pre_extend_params_1) = pagename.toLowerCase() match {
@@ -149,8 +156,8 @@ class PageinfoTransformer extends ITransformer {
     }
 
     // for_pageid 判断
-    val for_pageid = forPageId(pagename, extend_params, js_server_jsonstr)
-    val for_pre_pageid = forPageId(pre_page, pre_extend_params, js_server_jsonstr)
+    val for_pageid = forPageId(pagename, extend_params, server_jsonstr)
+    val for_pre_pageid = forPageId(pre_page, pre_extend_params, server_jsonstr)
     val p_source = getSource(source)
 
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPages.get(for_pageid).getOrElse(0, 0, "", 0)
@@ -175,8 +182,14 @@ class PageinfoTransformer extends ITransformer {
 
     val ref_page_lvl2_value = getPageLvl2Value(d_pre_page_id, pre_extend_params, server_jsonstr)
 
-    val pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
-    val gsort_key = (js_server_jsonstr \ "_gsort_key").asOpt[String].getOrElse("")
+    var pit_type = 0
+    var gsort_key = ""
+    if(!server_jsonstr.isEmpty())
+    {
+        val js_server_jsonstr = Json.parse(server_jsonstr)
+        pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
+        gsort_key = (js_server_jsonstr \ "_gsort_key").asOpt[String].getOrElse("")
+    }
 
     val (sortdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty) {
         val sortdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
@@ -186,9 +199,6 @@ class PageinfoTransformer extends ITransformer {
         (sortdate, sorthour, lplid, ptplid)
       }
     else ("", "", "", "")
-
-    val gid = (js_c_server \ "gid").asOpt[Int].getOrElse(0)
-    val ugroup = (js_c_server \ "ugroup").asOpt[Int].getOrElse(0)
 
     val jpk = 0
     val tab_source = "page"
@@ -307,12 +317,13 @@ class PageinfoTransformer extends ITransformer {
       x_page_id
   }
 
-  def forPageId(pagename: String, extend_params: String, js_server_jsonstr: JsValue): String =
+  def forPageId(pagename: String, extend_params: String, server_jsonstr: String): String =
   {
+
     val for_pageid = pagename.toLowerCase() match
     {
       case a if pagename.toLowerCase() == "page_tab" && isInteger(extend_params) && (extend_params.toInt > 0 && extend_params.toInt < 9999999) => "page_tab"
-      case c if pagename.toLowerCase() == "page_tab" && (js_server_jsonstr \ "cid").asOpt[Int].getOrElse(0) < 0 => (pagename+(js_server_jsonstr \ "cid").asOpt[String]).toLowerCase()
+      case c if pagename.toLowerCase() == "page_tab" && !server_jsonstr.isEmpty() && (Json.parse(server_jsonstr) \ "cid").asOpt[Int].getOrElse(0) < 0 => (pagename+(Json.parse(server_jsonstr) \ "cid").asOpt[String]).toLowerCase()
       case b if pagename.toLowerCase() != "page_tab" => pagename.toLowerCase()
       case _ => (pagename+extend_params).toLowerCase()
     }
@@ -378,27 +389,12 @@ object PageinfoTransformer{
     val  pp: PageinfoTransformer = new PageinfoTransformer()
     val liuliang =
       """
-        |{"app_name":"zhe","app_version":"3.4.7","c_label":"C2","c_server":"{\"gid\":\"C2\",\"ugroup\":\"225_217_236\"}","deviceid":"866936020922108","endtime":"1468892508176","endtime_origin":"1468892506863","extend_params":"17","gj_ext_params":"17,http://m.juanpi.com/zhuanti/zyjjgxp?mobile=1&qminkview=1&qmshareview=1,17,17","gj_page_names":"page_tab,page_active,page_tab,page_tab","ip":"115.60.84.175","jpid":"00000000-75d0-04f2-ea1d-6b2a00000030","location":"河南省","os":"android","os_version":"4.4.2","pagename":"page_tab","pre_extend_params":"16314984","pre_page":"page_temai_goods","server_jsonstr":"{\"ab_info\":null,\"ab_attr\":\"8\"}","session_id":"1468653064917_zhe_1468892173028","source":"","starttime":"1468892453939","starttime_origin":"1468892452626","ticks":"1468653064917","to_switch":"0","uid":"39775699","utm":"101225","wap_pre_url":"","wap_url":""}
+        |{"app_name":"zhe","app_version":"3.4.7","c_label":"C2","deviceid":"866936020922108","endtime":"1468892508176","endtime_origin":"1468892506863","extend_params":"17","gj_ext_params":"17,http://m.juanpi.com/zhuanti/zyjjgxp?mobile=1&qminkview=1&qmshareview=1,17,17","gj_page_names":"page_tab,page_active,page_tab,page_tab","ip":"115.60.84.175","jpid":"00000000-75d0-04f2-ea1d-6b2a00000030","location":"河南省","os":"android","os_version":"4.4.2","pagename":"page_tab","pre_extend_params":"16314984","pre_page":"page_temai_goods","server_jsonstr":"","session_id":"1468653064917_zhe_1468892173028","source":"","starttime":"1468892453939","starttime_origin":"1468892452626","ticks":"1468653064917","to_switch":"0","uid":"39775699","utm":"101225","wap_pre_url":"","wap_url":""}
         |""".stripMargin
 
     val line = Json.parse(liuliang.replaceAll("null", """\\"\\""""))
     val p = pp.parse(line)
     println(p)
-    val server_jsonstr = (line \ "server_jsonstr").asOpt[String].getOrElse("")
-    val js_server_jsonstr = Json.parse(server_jsonstr)
-    val gsort_key = (js_server_jsonstr \ "_gsort_key").toString()
-
-    val c_server = (line \ "c_server").asOpt[String].getOrElse("")
-    val js_c_server = Json.parse(c_server)
-
-    val dtms = line \ "endtime"
-    println(dtms)
-
-    println(dtms.as[String].toLong)
-
-    val dt = DateUtils.dateHour(dtms.as[String].toLong).toString
-
-    println("======>> dt " + dt)
 
     val row = Json.parse(liuliang)
     println((row \ "uid").asOpt[Int].getOrElse(0))
