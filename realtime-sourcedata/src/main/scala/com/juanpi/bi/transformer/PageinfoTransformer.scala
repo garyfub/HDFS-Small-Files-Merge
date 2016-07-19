@@ -176,17 +176,16 @@ class PageinfoTransformer extends ITransformer {
     val ref_page_lvl2_value = getPageLvl2Value(d_pre_page_id, pre_extend_params, server_jsonstr)
 
     val pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
-    val gsort_key = (js_server_jsonstr \ "_gsort_key").toString()
+    val gsort_key = (js_server_jsonstr \ "_gsort_key").asOpt[String].getOrElse("")
 
     val (sortdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty) {
-      println(gsort_key)
         val sortdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
-      println(sortdate)
-      val sorthour = gsort_key.split("_")(4)
+        val sorthour = gsort_key.split("_")(4)
         val lplid = gsort_key.split("_")(6)
         val ptplid = gsort_key.split("_")(6)
         (sortdate, sorthour, lplid, ptplid)
       }
+    else ("", "", "", "")
 
     val gid = (js_c_server \ "gid").asOpt[Int].getOrElse(0)
     val ugroup = (js_c_server \ "ugroup").asOpt[Int].getOrElse(0)
@@ -382,18 +381,7 @@ object PageinfoTransformer{
         |{"app_name":"zhe","app_version":"3.4.7","c_label":"C2","c_server":"{\"gid\":\"C2\",\"ugroup\":\"225_217_236\"}","deviceid":"866936020922108","endtime":"1468892508176","endtime_origin":"1468892506863","extend_params":"17","gj_ext_params":"17,http://m.juanpi.com/zhuanti/zyjjgxp?mobile=1&qminkview=1&qmshareview=1,17,17","gj_page_names":"page_tab,page_active,page_tab,page_tab","ip":"115.60.84.175","jpid":"00000000-75d0-04f2-ea1d-6b2a00000030","location":"河南省","os":"android","os_version":"4.4.2","pagename":"page_tab","pre_extend_params":"16314984","pre_page":"page_temai_goods","server_jsonstr":"{\"ab_info\":null,\"ab_attr\":\"8\"}","session_id":"1468653064917_zhe_1468892173028","source":"","starttime":"1468892453939","starttime_origin":"1468892452626","ticks":"1468653064917","to_switch":"0","uid":"39775699","utm":"101225","wap_pre_url":"","wap_url":""}
         |""".stripMargin
 
-    val b = JSON.parseObject(liuliang)
-    println(b.get("server_jsonstr"))
-
-    val js_server_jsonstr1:String = b.get("server_jsonstr").toString
-    val ab_info = JSON.parseObject(js_server_jsonstr1).get("ab_info")
-    println(ab_info)
-    if(ab_info == "null" || ab_info == null) {
-      println("-----")
-    }
-
-
-    val line = Json.parse(liuliang)
+    val line = Json.parse(liuliang.replaceAll("null", """\\"\\""""))
     val p = pp.parse(line)
     println(p)
     val server_jsonstr = (line \ "server_jsonstr").asOpt[String].getOrElse("")
@@ -417,15 +405,5 @@ object PageinfoTransformer{
     var source = "要正怎样,sdfsadfsadfsadfasfdsa"
     println(source.substring(6))
 
-//    val gsort_key = "POSTION_SORT_65_20160525_12_63_68"
-    val (sdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty)
-    {
-      val sdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
-      val sorthour = gsort_key.split("_")(4)
-      val lplid = gsort_key.split("_")(6)
-      val ptplid = gsort_key.split("_")(6)
-      (sdate, sorthour, lplid, ptplid)
-    }
-  println(sdate, sorthour, lplid, ptplid)
   }
 }
