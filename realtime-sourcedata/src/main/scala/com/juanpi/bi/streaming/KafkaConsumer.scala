@@ -59,7 +59,7 @@ object KafkaConsumer{
 
   def main(args: Array[String]) {
 
-    println(args.length)
+    println("======>> com.juanpi.bi.streaming.KafkaConsumer 开始运行，参数个数：" + args.length)
 
     if (args.length < 3) {
       System.err.println(s"""
