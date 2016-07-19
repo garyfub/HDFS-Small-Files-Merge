@@ -125,7 +125,7 @@ class MbEventTransformer extends ITransformer{
       val res = parse(row)
 
       if (row != null) {
-        (DateUtils.dateHour((row \ "endtime").as[Long]).toString, res.toString())
+        (DateUtils.dateHour((row \ "endtime").as[String].toLong).toString, res.toString())
       } else {
         (DateHour("1970-01-01", "1").toString, line)
       }
