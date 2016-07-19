@@ -338,7 +338,8 @@ class PageinfoTransformer extends ITransformer {
   def  isInteger(str: String): Boolean =
   {
     val pattern: Pattern = Pattern.compile("^[-\\+]?[\\d]*$")
-    pattern.matcher(str).matches()
+//    pattern.matcher(str).matches()
+    if (!str.isEmpty()) pattern.matcher(str).matches() else false
   }
 
   def getSource(source: String): String =
@@ -395,6 +396,8 @@ object PageinfoTransformer{
     val line = Json.parse(liuliang.replaceAll("null", """\\"\\""""))
     val p = pp.parse(line)
     println(p)
+
+    println(pp.isInteger(""))
 
     val row = Json.parse(liuliang)
     println((row \ "uid").asOpt[Int].getOrElse(0))
