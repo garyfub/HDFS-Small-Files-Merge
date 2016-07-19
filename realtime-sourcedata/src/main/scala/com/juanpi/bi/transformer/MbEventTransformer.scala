@@ -2,6 +2,7 @@ package com.juanpi.bi.transformer
 
 import com.alibaba.fastjson.JSON
 import com.juanpi.bi.hiveUDF.{GetGoodsId, GetMbPageId}
+import com.juanpi.bi.init.InitConfig._
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.bi.streaming.DateHour
 import org.apache.hadoop.hbase.client.{Get, Put}
@@ -11,9 +12,6 @@ import play.api.libs.json.{JsValue, Json}
   * Created by gongzi on 2016/7/11.
   */
 class MbEventTransformer extends ITransformer{
-//  val hbase_family = "dw"
-//  val ic = new InitConfig
-//  val table = TableName.valueOf("ticks_history")
 
   def parse(row: JsValue): String = {
     // mb_event
@@ -33,7 +31,7 @@ class MbEventTransformer extends ITransformer{
     val app_name = (row \ "app_name").asOpt[String].getOrElse("")
     val app_version = (row \ "app_version").asOpt[String].getOrElse("")
     val os = (row \ "os").asOpt[String].getOrElse("")
-    val pagename = (row \ "pagename").asOpt[String].getOrElse("")
+    val pagename = (row \ "pagename").asOpt[String].getOrElse("").toLowerCase()
     val page_extends_param = (row \ "page_extends_param").asOpt[String].getOrElse("")
     val deviceid = (row \ "deviceid").asOpt[String].getOrElse("")
     val pre_page = (row \ "pre_page").asOpt[String].getOrElse("")
@@ -48,7 +46,39 @@ class MbEventTransformer extends ITransformer{
     val location = (row \ "location").asOpt[String].getOrElse("")
     val c_label = (row \ "c_label").asOpt[String].getOrElse("")
     val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
+
+    var gid = 0
+    var ugroup = 0
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
+    if(!c_server.isEmpty())
+    {
+      val js_c_server = Json.parse(c_server)
+      gid = (js_c_server \ "gid").asOpt[Int].getOrElse(0)
+      ugroup = (js_c_server \ "ugroup").asOpt[Int].getOrElse(0)
+    }
+
+    val terminal_id = pageAndEventParser.getTerminalId(os)
+    val site_id = pageAndEventParser.getSiteId(app_name)
+    val ref_site_id = site_id
+
+    // pageid
+    {
+      // for_pageid 判断
+      val for_pageid = forPageId(pagename, extend_params, server_jsonstr)
+      val for_pre_pageid = forPageId(pre_page, pre_extend_params, server_jsonstr)
+      val p_source = getSource(source)
+
+      val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPages.get(for_pageid).getOrElse(0, 0, "", 0)
+      val page_id = getPageId(d_page_id, extend_params)
+      var page_value = getPageValue(d_page_id, extend_params, page_type_id, d_page_value)
+    }
+
+
+    // ref_page_id
+    val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimPages.get(for_pre_pageid).getOrElse(0, 0, "", 0)
+    var ref_page_id = getPageId(d_pre_page_id, pre_extend_params)
+    var ref_page_value = getPageValue(d_pre_page_id, pre_extend_params, d_pre_page_type_id, d_pre_page_value)
+
 
     // mb_event -> mb_event_log
     val (extend_params_1, pre_extend_params_1) = pagename.toLowerCase() match {
@@ -103,7 +133,12 @@ class MbEventTransformer extends ITransformer{
     } else {
       uid
     }
-    ""
+    Array(terminal_id,app_version,gu_id,utm,site_id,ref_site_id,uid,session_id,deviceid,page_id,
+      page_value,ref_page_id,ref_page_value,page_level_id,page_lvl2_value,ref_page_lvl2_value,jpk,pit_type,sortdate,
+      sorthour,lplid,ptplid,gid,ugroup,shop_id,ref_shop_id,starttime,endtime,hot_goods_id,ctag,location,ip,url,urlref,
+      to_switch,source,event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadTime,gu_create_time,tab_source
+      //      ,date,hour
+    ).mkString("\u0001")
 
   }
 

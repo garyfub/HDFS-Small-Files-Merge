@@ -47,7 +47,6 @@ class PageinfoTransformer extends ITransformer {
 
     var gid = 0
     var ugroup = 0
-
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
     if(!c_server.isEmpty())
     {
@@ -77,17 +76,9 @@ class PageinfoTransformer extends ITransformer {
 
     var gu_create_time = ""
 
-    val gu_id = os.toLowerCase match {
-      case "android" => jpid
-      case "ios" => deviceid
-      case _ => "0"
-    }
+    val gu_id = pageAndEventParser.getGuid(jpid, deviceid, os)
 
-    val terminal_id = os.toLowerCase match {
-      case "android" => 2
-      case "ios" => 3
-      case _ => -999
-    }
+    val terminal_id = pageAndEventParser.getTerminalId(os)
 
     // 查hbase 从 ticks_history 中查找 ticks 存在的记录
     // 查询某条数据
