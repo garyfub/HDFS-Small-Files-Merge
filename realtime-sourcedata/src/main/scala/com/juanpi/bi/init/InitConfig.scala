@@ -28,17 +28,15 @@ class InitConfig() {
   var zkQuorum = ""
   @BeanProperty var hbase_family: String = _
 
-  @BeanProperty var dimPages = new mutable.HashMap[String, (Int, Int, String, Int)]
-  @BeanProperty var dimEvents = new mutable.HashMap[String, Int]
   @BeanProperty var ticks_history: None.type = None
   val table_ticks_history = TableName.valueOf("utm_history")
 
-  def initDimPageEvent() = {
+  def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)], mutable.HashMap[String, Int]) = {
     // 查询 hive 中的 dim_page 和 dim_event
     val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
-
-    initDimPage(sqlContext)
-    initDimEvent(sqlContext)
+    val dp: mutable.HashMap[String, (Int, Int, String, Int)] = initDimPage(sqlContext)
+    val de: mutable.HashMap[String, Int] = initDimEvent(sqlContext)
+    (dp, de)
   }
 
   // 得到初始化的 StreamingContext
@@ -78,7 +76,7 @@ class InitConfig() {
     ConnectionFactory.createConnection(hbaseConf)
   }
 
-  private def initDimPage(sqlContext: HiveContext) =
+  def initDimPage(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int, String, Int)] =
   {
     var dimPages = new mutable.HashMap[String, (Int, Int, String, Int)]
     val dimPageSql = s"""select page_id,page_exp1, page_exp2, page_type_id, page_value, page_level_id, concat_ws(",", url1, url2, url3,regexp1, regexp2, regexp3) as url_pattern
@@ -109,13 +107,19 @@ class InitConfig() {
       dimPages += ( key -> (page_id, page_type_id, page_value, page_level_id))
     })
 
-    this.setDimPages(dimPages)
-
     dimPageData.unpersist(true)
+
+    for((k, v) <- dimPages)
+    {
+      println("======getDimPages_=====>> k:" + k, "# v:" + v)
+    }
+
+    dimPages
   }
 
-  private def initDimEvent(sqlContext: HiveContext) =
+  def initDimEvent(sqlContext: HiveContext): mutable.HashMap[String, Int] =
   {
+    var dimEvents = new mutable.HashMap[String, Int]
     val dimEventSql = s"""select event_id, event_exp1, event_exp2
                          | from dw.dim_event
                          | where event_id > 0
@@ -135,10 +139,12 @@ class InitConfig() {
     }).collect().foreach( items => {
       val event_id: Int = items._1
       val key = items._2
-      this.dimEvents += ( key -> event_id)
+      dimEvents += ( key -> event_id)
     })
 
     dimData.unpersist(true)
+
+    dimEvents
   }
 }
 
@@ -147,6 +153,7 @@ object InitConfig {
   // 主构造器
   val ic = new InitConfig()
   var DIMPAGE = new mutable.HashMap[String, (Int, Int, String, Int)]
+  var DIMENT = new mutable.HashMap[String, Int]
 
   def initParam(appName: String, interval: Int) = {
     // 根据 topic 设置 appName
@@ -164,28 +171,20 @@ object InitConfig {
     ic.loadProperties()
 
     // 初始化 page and event
-    ic.initDimPageEvent()
-
-    DIMPAGE = ic.getDimPages()
+//    (DIMPAGE, DIMENT) = ic.initDimPageEvent()
+    DIMPAGE = ic.initDimPageEvent()._1
+    DIMENT = ic.initDimPageEvent()._2
+//
+//    println("DIMPAGE.keys=======>>" + DIMPAGE.keys)
+//
+//    for((k, v) <- DIMPAGE)
+//    {
+//      println("======getDimPages_=====>> k:" + k, "# v:" + v)
+//    }
   }
 
   def getStreamingContext(): StreamingContext = {
     ic.getSsc()
-  }
-
-  def getDimPages_(): mutable.HashMap[String, (Int, Int, String, Int)] =
-  {
-    println("=== test getDimPages_ ===")
-    for((k, v) <- ic.getDimPages)
-    {
-      println("======getDimPages_=====>> k:" + k, "# v:" + v)
-    }
-    ic.getDimPages
-  }
-
-  def getDimEvents_(): mutable.HashMap[String, Int] =
-  {
-    ic.getDimEvents
   }
 
   def getHbaseFamily =
@@ -200,8 +199,5 @@ object InitConfig {
   }
 
   def main(args: Array[String]) {
-//    val dimPages_test = new mutable.HashMap[String, (Int, Int, String, Int)]
-//    dimPages_test += ("page_taball" -> (219,10,"最新折扣",1))
-//    println(dimPages_test.get("page_taball"))
   }
 }

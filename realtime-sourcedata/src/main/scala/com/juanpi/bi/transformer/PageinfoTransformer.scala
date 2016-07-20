@@ -102,6 +102,7 @@ class PageinfoTransformer extends ITransformer {
     println("for_pageid::" + for_pageid)
     val for_pre_pageid = forPageId(pre_page, pre_extend_params, server_jsonstr)
 
+    println("InitConfig.DIMPAGE.keys====>>" + InitConfig.DIMPAGE.keys)
     for((k, v) <- InitConfig.DIMPAGE)
     {
       println("####parse#==>> k:" + k, "~~ v:" + v)
