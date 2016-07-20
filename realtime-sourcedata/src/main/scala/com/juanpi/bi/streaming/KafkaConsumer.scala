@@ -9,11 +9,13 @@ import org.apache.spark.streaming.kafka.KafkaManager
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.Logging
 
+import scala.collection.mutable
+
 // todo
 import com.juanpi.bi.streaming.MultiOutputRDD._
 
 @SerialVersionUID(42L)
-class KafkaConsumer(topic: String)
+class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)])
   extends Logging with Serializable
 {
 
@@ -35,7 +37,7 @@ class KafkaConsumer(topic: String)
   }
 
   def parseMessage(message:String):(String,String) = {
-    getTransformer().transform(message)
+    getTransformer().transform(message, dimpage)
   }
 
   def getTransformer():ITransformer = {
@@ -112,7 +114,7 @@ object KafkaConsumer{
     }
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
-    val consumer = new KafkaConsumer(topic)
+    val consumer = new KafkaConsumer(topic, ic.DIMPAGE)
     consumer.process(message, ssc, km)
 
     ssc.start()

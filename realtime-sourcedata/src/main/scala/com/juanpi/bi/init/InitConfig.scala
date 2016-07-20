@@ -108,12 +108,6 @@ class InitConfig() {
     })
 
     dimPageData.unpersist(true)
-
-    for((k, v) <- dimPages)
-    {
-      println("======getDimPages_=====>> k:" + k, "# v:" + v)
-    }
-
     dimPages
   }
 
@@ -171,16 +165,9 @@ object InitConfig {
     ic.loadProperties()
 
     // 初始化 page and event
-//    (DIMPAGE, DIMENT) = ic.initDimPageEvent()
     DIMPAGE = ic.initDimPageEvent()._1
     DIMENT = ic.initDimPageEvent()._2
-//
-//    println("DIMPAGE.keys=======>>" + DIMPAGE.keys)
-//
-//    for((k, v) <- DIMPAGE)
-//    {
-//      println("======getDimPages_=====>> k:" + k, "# v:" + v)
-//    }
+
   }
 
   def getStreamingContext(): StreamingContext = {

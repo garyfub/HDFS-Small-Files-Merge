@@ -11,13 +11,14 @@ import org.apache.hadoop.hbase.client.{Get, Put, Result}
 import play.api.libs.json.{JsValue, Json}
 import org.apache.hadoop.hbase.util.Bytes
 import com.juanpi.bi.init.InitConfig.initTicksHistory
-import com.juanpi.bi.init.InitConfig
+
+import scala.collection.mutable
 /**
   * 解析逻辑的具体实现
   */
 class PageinfoTransformer extends ITransformer {
 
-  def parse(row: JsValue): String = {
+  def parse(row: JsValue, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): String = {
     // mb_pageinfo
     val ticks = (row \ "ticks").asOpt[String].getOrElse("")
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
@@ -102,20 +103,18 @@ class PageinfoTransformer extends ITransformer {
     println("for_pageid::" + for_pageid)
     val for_pre_pageid = forPageId(pre_page, pre_extend_params, server_jsonstr)
 
-    println("InitConfig.DIMPAGE.keys====>>" + InitConfig.DIMPAGE.keys)
-    for((k, v) <- InitConfig.DIMPAGE)
-    {
-      println("####parse#==>> k:" + k, "~~ v:" + v)
-    }
+    println("dimpage.keys====>>" + dimpage.keys)
 
-    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = InitConfig.DIMPAGE.get(for_pageid).getOrElse(0, 0, "", 0)
+    println(dimpage.get(for_pageid))
+
+    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimpage.get(for_pageid).getOrElse(0, 0, "", 0)
     println("====>>" + for_pageid + "==>" + (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int))
 
     val page_id = pageAndEventParser.getPageId(d_page_id, extend_params)
     var page_value = pageAndEventParser.getPageValue(d_page_id, extend_params, page_type_id, d_page_value)
 
     // ref_page_id
-    val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = InitConfig.DIMPAGE.get(for_pre_pageid).getOrElse(0, 0, "", 0)
+    val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimpage.get(for_pre_pageid).getOrElse(0, 0, "", 0)
     var ref_page_id = pageAndEventParser.getPageId(d_pre_page_id, pre_extend_params)
     var ref_page_value = pageAndEventParser.getPageValue(d_pre_page_id, pre_extend_params, d_pre_page_type_id, d_pre_page_value)
 
@@ -126,7 +125,11 @@ class PageinfoTransformer extends ITransformer {
     val page_level_id = getPageLevelId(d_page_id, extend_params, d_page_level_id)
 
     // WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extend_params,'_')[2],''))
-    val hot_goods_id = if(d_page_id == 250){new GetGoodsId().evaluate(extend_params.split("_")(2))} else ""
+    val hot_goods_id = if(d_page_id == 250 && !extend_params.isEmpty && extend_params.contains("_") && extend_params.split("_").length > 1)
+    {
+      new GetGoodsId().evaluate(extend_params.split("_")(2))
+    }
+    else {""}
 
     val page_lvl2_value = getPageLvl2Value(d_page_id, extend_params, server_jsonstr)
 
@@ -169,10 +172,10 @@ class PageinfoTransformer extends ITransformer {
   // page level2 value 二级页面值(品牌页：引流款ID等)
   def getPageLvl2Value(x_page_id: Int, x_extend_params: String, server_jsonstr: String): String =
   {
-    val page_lel2_value = if(x_page_id == 250) {
+    val page_lel2_value = if(x_page_id == 250 && !x_extend_params.isEmpty() && x_extend_params.contains("_") && x_extend_params.split("_").length > 1) {
       //  WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extend_params,'_')[2],''))
-        new GetGoodsId().evaluate(x_extend_params.split("_")(2))
-      }
+      new GetGoodsId().evaluate(x_extend_params.split("_")(2))
+    }
     else if(x_page_id == 154 || x_page_id == 289) {
     //    when P1.page_id in (154,289) and getpageid(a.extend_params) = 10104 then getskcid(a.extend_params)
       val pid = new GetPageID().evaluate(x_extend_params)
@@ -183,7 +186,7 @@ class PageinfoTransformer extends ITransformer {
         new GetShopId().evaluate(x_extend_params)
       } else ""
     }
-    else if(x_page_id == 169) {
+    else if(x_page_id == 169 && !server_jsonstr.isEmpty()) {
       // -- 'page_temai_orderdetails'
       // WHEN P1.page_id = 169 then get_json_object(a.server_jsonstr,'$.order_status')
       (Json.parse(server_jsonstr) \ "order_status").asOpt[String].getOrElse("")
@@ -242,7 +245,7 @@ class PageinfoTransformer extends ITransformer {
   }
 
   // 返回解析的结果
-  def transform(line: String): (String, String) = {
+  def transform(line: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): (String, String) = {
 
     // fastjson 也可以用。
     // val row = JSON.parseObject(line)
@@ -254,7 +257,7 @@ class PageinfoTransformer extends ITransformer {
 
     if (row != null) {
       // 解析逻辑
-      val res = parse(row)
+      val res = parse(row, dimpage)
 
       // for test
 //      val res = Array("2", "2", "4", "5", "7", "8", "10","11","12").mkString("\u0001")
@@ -278,8 +281,12 @@ object PageinfoTransformer{
         |""".stripMargin
 
     val line = Json.parse(liuliang.replaceAll("null", """\\"\\""""))
-    val p = pp.parse(line)
-    println(p)
+//    val p = pp.parse(line)
+//    println(p)
+
+    val aa = (Json.parse("{}") \ "order_status").asOpt[String].getOrElse("")
+    println(aa)
+
 
   }
 }
