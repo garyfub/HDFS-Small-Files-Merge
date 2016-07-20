@@ -56,14 +56,8 @@ class PageinfoTransformer extends ITransformer {
     }
 
     // mb_pageinfo -> mb_pageinfo_log
-    val (extend_params_1, pre_extend_params_1) = pagename.toLowerCase() match {
-      case "page_goods" | "page_temai_goods" | "page_temai_imagetxtgoods" | "page_temai_parametergoods" => {
-        (new GetGoodsId().evaluate(extend_params), new GetGoodsId().evaluate(pre_extend_params))
-      }
-      case _ => {
-        (extend_params.toLowerCase(), pre_extend_params.toLowerCase())
-      }
-    }
+    val extend_params_1 = pageAndEventParser.getExtendParams(pagename, extend_params)
+    val pre_extend_params_1 = pageAndEventParser.getExtendParams(pagename, pre_extend_params)
 
     // TODO GetMbPageId 函数需要更新
     val pageId = GetMbPageId.evaluate(pagename.toLowerCase(), extend_params_1)
@@ -152,14 +146,14 @@ class PageinfoTransformer extends ITransformer {
     val p_source = getSource(source)
 
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPages.get(for_pageid).getOrElse(0, 0, "", 0)
-    val page_id = getPageId(d_page_id, extend_params)
-    var page_value = getPageValue(d_page_id, extend_params, page_type_id, d_page_value)
+    val page_id = pageAndEventParser.getPageId(d_page_id, extend_params)
+    var page_value = pageAndEventParser.getPageValue(d_page_id, extend_params, page_type_id, d_page_value)
 
 
     // ref_page_id
     val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimPages.get(for_pre_pageid).getOrElse(0, 0, "", 0)
-    var ref_page_id = getPageId(d_pre_page_id, pre_extend_params)
-    var ref_page_value = getPageValue(d_pre_page_id, pre_extend_params, d_pre_page_type_id, d_pre_page_value)
+    var ref_page_id = pageAndEventParser.getPageId(d_pre_page_id, pre_extend_params)
+    var ref_page_value = pageAndEventParser.getPageValue(d_pre_page_id, pre_extend_params, d_pre_page_type_id, d_pre_page_value)
 
     val shop_id = getShopId(d_page_id, extend_params)
     val ref_shop_id = getShopId(d_pre_page_id, pre_extend_params)
@@ -255,57 +249,6 @@ class PageinfoTransformer extends ITransformer {
     val shop_id = if(x_page_id == 250)
       new GetGoodsId().evaluate(extend_params.split("_")(1))
     shop_id.toString()
-  }
-
-  def getPageValue(x_page_id:Int, x_extend_params: String, page_type_id: Int, x_page_value: String): String =
-  {
-    // 解析 page_value
-    val page_value: String =
-      if (x_page_id == 289 || x_page_id == 154)
-      {
-        new GetDwPcPageValue().evaluate(x_extend_params)
-      }
-      else
-      {
-        if(x_page_id == 254)
-        {
-          new GetDwMbPageValue().evaluate(x_extend_params.toString, page_type_id.toString)
-        }
-        else if(page_type_id == 1 || page_type_id == 4 || page_type_id == 10)
-        {
-          new GetDwMbPageValue().evaluate(x_page_value, page_type_id.toString)
-        }
-        else if(x_page_id == 250)
-        {
-          // by gognzi on 2016-04-24 17:10
-          // app端品牌页面id = 250,extend_params格式：加密brandid_shopid_引流款id,或者 加密brandid_shopid
-          // getgoodsid(split(a.extend_params,'_')[0])
-          new GetDwMbPageValue().evaluate(new GetGoodsId().evaluate(x_extend_params.split("_")(0)), page_type_id.toString)
-        }
-        else
-        {
-          new GetDwMbPageValue().evaluate(x_extend_params, page_type_id.toString)
-        }
-      }
-    page_value
-  }
-
-  // page_id
-  def getPageId(x_page_id: Int, x_extend_params: String): Int =
-  {
-    if(x_page_id == 0)
-    {
-      -1
-    }else if (x_page_id == 289 || x_page_id == 154)
-    {
-      if(GetPageID.evaluate(x_extend_params) > 0)
-      {
-        GetPageID.evaluate(x_extend_params)
-      }
-      else x_page_id
-    }
-    else
-      x_page_id
   }
 
   def forPageId(pagename: String, extend_params: String, server_jsonstr: String): String =

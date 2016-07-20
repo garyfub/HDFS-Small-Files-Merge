@@ -66,6 +66,26 @@ object pageAndEventParser {
   }
 
   /**
+    * for page and event
+    * @param pagename
+    * @param extend_params
+    * @return
+    */
+  def getExtendParams(pagename: String, extend_params: String): String =
+  {
+    val extend_params_1 = pagename.toLowerCase() match {
+      case "page_goods" | "page_temai_goods" | "page_temai_imagetxtgoods" | "page_temai_goods_logistics" | "page_peerpay_apply" => {
+        new GetGoodsId().evaluate(extend_params)
+      }
+      case _ => {
+        extend_params.toLowerCase()
+      }
+    }
+    extend_params_1
+  }
+
+
+  /**
     *
     * @param x_page_id
     * @param x_extend_params

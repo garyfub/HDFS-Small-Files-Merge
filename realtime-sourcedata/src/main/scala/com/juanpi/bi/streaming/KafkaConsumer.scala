@@ -20,7 +20,8 @@ class KafkaConsumer(topic: String)
   var transformer:ITransformer = null
 
   def process(dataDStream: DStream[(String,String)], ssc: StreamingContext, km: KafkaManager) ={
-    val data = dataDStream.map(_._2.replace("\0","")).transform(transMessage _)
+    // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
+    val data = dataDStream.map(_._2.replace("\0","")).filter(line => !line.contains("collect_api_responsetime")).transform(transMessage _)
     save(data)
 
     // save offset
