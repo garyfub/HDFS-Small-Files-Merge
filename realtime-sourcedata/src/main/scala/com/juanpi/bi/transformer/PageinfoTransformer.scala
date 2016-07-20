@@ -125,7 +125,7 @@ class PageinfoTransformer extends ITransformer {
     val page_level_id = getPageLevelId(d_page_id, extend_params, d_page_level_id)
 
     // WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extend_params,'_')[2],''))
-    val hot_goods_id = if(d_page_id == 250 && !extend_params.isEmpty && extend_params.contains("_") && extend_params.split("_").length > 1)
+    val hot_goods_id = if(d_page_id == 250 && !extend_params.isEmpty && extend_params.contains("_") && extend_params.split("_").length > 2)
     {
       new GetGoodsId().evaluate(extend_params.split("_")(2))
     }
@@ -172,7 +172,7 @@ class PageinfoTransformer extends ITransformer {
   // page level2 value 二级页面值(品牌页：引流款ID等)
   def getPageLvl2Value(x_page_id: Int, x_extend_params: String, server_jsonstr: String): String =
   {
-    val page_lel2_value = if(x_page_id == 250 && !x_extend_params.isEmpty() && x_extend_params.contains("_") && x_extend_params.split("_").length > 1) {
+    val page_lel2_value = if(x_page_id == 250 && !x_extend_params.isEmpty() && x_extend_params.contains("_") && x_extend_params.split("_").length > 2) {
       //  WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extend_params,'_')[2],''))
       new GetGoodsId().evaluate(x_extend_params.split("_")(2))
     }
