@@ -183,14 +183,6 @@ class MbEventTransformer extends ITransformer {
 //      "-1"
 //    }
 //
-//    var gu_create_time = ""
-//
-//    val gu_id = os.toLowerCase match {
-//      case "android" => jpid
-//      case "ios" => deviceid
-//      case _ => "0"
-//    }
-//
 //    val logTime = if (starttime.size == 0) {
 //      0L
 //    } else {
@@ -211,12 +203,7 @@ class MbEventTransformer extends ITransformer {
 //      }
 //    }
 //
-//    // gu_id
-//    val id = if ((uid.length == 0) || uid.equals("0")) {
-//      gu_id
-//    } else {
-//      uid
-//    }
+
 //    Array(terminal_id,app_version,gu_id,utm,site_id,ref_site_id,uid,session_id,deviceid,page_id,
 //      page_value,pre_page_id,ref_page_value,page_level_id,page_lvl2_value,ref_page_lvl2_value,jpk,pit_type,sortdate,
 //      sorthour,lplid,ptplid,gid,ugroup,shop_id,ref_shop_id,starttime,endtime,hot_goods_id,ctag,location,ip,url,urlref,
@@ -224,6 +211,7 @@ class MbEventTransformer extends ITransformer {
 //      //      ,date,hour
 //    ).mkString("\u0001")
     ""
+
   }
 
   def getAbinfo(extend_params: String, arg: String): String =
@@ -247,8 +235,6 @@ class MbEventTransformer extends ITransformer {
     case "click_temai_inpage_collect" => new GetGoodsId().evaluate(extend_params)
     case "click_temai_inpage_cancelcollect" => new GetGoodsId().evaluate(extend_params)
     case "click_temai_orderdetails_complex" => new GetGoodsId().evaluate(extend_params)
-    case "click_temai_inpage_qq" => new GetGoodsId().evaluate(extend_params)
-    case "click_temai_returngoods" => new GetGoodsId().evaluate(extend_params)
     case "click_goods_tb" => new GetGoodsId().evaluate(extend_params)
     case "click_goods_cancel" => new GetGoodsId().evaluate(extend_params)
     case "click_goods_collection" => new GetGoodsId().evaluate(extend_params)

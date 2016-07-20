@@ -4,13 +4,14 @@ import java.util.regex.Pattern
 
 import com.alibaba.fastjson.JSON
 import com.juanpi.bi.hiveUDF._
+import com.juanpi.bi.init.InitConfig
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.bi.streaming.DateHour
 import org.apache.hadoop.hbase.client.{Get, Put, Result}
 import play.api.libs.json.{JsValue, Json}
 import org.apache.hadoop.hbase.util.Bytes
 import com.juanpi.bi.init.InitConfig.initTicksHistory
-import com.juanpi.bi.init.InitConfig.{HbaseFamily, dimPages}
+import com.juanpi.bi.init.InitConfig
 /**
   * 解析逻辑的具体实现
   */
@@ -45,8 +46,10 @@ class PageinfoTransformer extends ITransformer {
     val ctag = (row \ "c_label").asOpt[String].getOrElse("")
     val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
 
+    // 用户画像
     var gid = 0
     var ugroup = 0
+
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
     if(!c_server.isEmpty())
     {
@@ -59,20 +62,17 @@ class PageinfoTransformer extends ITransformer {
     val extend_params_1 = pageAndEventParser.getExtendParams(pagename, extend_params)
     val pre_extend_params_1 = pageAndEventParser.getExtendParams(pagename, pre_extend_params)
 
-    // TODO GetMbPageId 函数需要更新
-    val pageId = GetMbPageId.evaluate(pagename.toLowerCase(), extend_params_1)
-    val goodsId = if ((pageId == 158) ||
-      (pageId == 159 && (app_version == "3.2.3" || app_version == "3.2.4") && (os.toLowerCase() == "ios"))) {
-      extend_params_1
-    } else {
-      "-1"
+    val site_id = app_name.toLowerCase match {
+      case "jiu" => 2
+      case "zhe" => 1
+      case _ => -999
     }
 
-    var gu_create_time = ""
-
+    val ref_site_id = site_id
     val gu_id = pageAndEventParser.getGuid(jpid, deviceid, os)
-
     val terminal_id = pageAndEventParser.getTerminalId(os)
+
+    var gu_create_time = ""
 
     // 查hbase 从 ticks_history 中查找 ticks 存在的记录
     // 查询某条数据
@@ -97,64 +97,28 @@ class PageinfoTransformer extends ITransformer {
 //      ticks_history.put(p)
 //    }
 
-    val logTime = if (starttime.size == 0) {
-      0L
-    } else {
-      starttime.toLong
-    }
-
-    val validGoodsId = try {
-      if (goodsId.size == 0) {
-        "-1"
-      } else {
-        val goods = goodsId.toInt
-        goods.toString
-      }
-    } catch {
-      case ex: NumberFormatException => {
-        println("======>> pageinfo解析异常" + ":" + goodsId + ":" + row)
-        "-1"
-      }
-    }
-
-    // gu_id
-    val id = if ((uid.length == 0) || uid.equals("0")) {
-      gu_id
-    } else {
-      uid
-    }
-
-    val site_id = app_name.toLowerCase match {
-      case "jiu" => 2
-      case "zhe" => 1
-      case _ => -999
-    }
-
-    val ref_site_id = site_id
-
-    // session_id 判断
-    val sess_id = session_id match
-    {
-      case ("" | "null" ) => ticks
-      case session_id if session_id.length() ==0 => ticks
-      case _ => ticks
-    }
-
     // for_pageid 判断
     val for_pageid = forPageId(pagename, extend_params, server_jsonstr)
+    println("for_pageid::" + for_pageid)
     val for_pre_pageid = forPageId(pre_page, pre_extend_params, server_jsonstr)
-    val p_source = getSource(source)
 
-    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPages.get(for_pageid).getOrElse(0, 0, "", 0)
+    for((k, v) <- InitConfig.DIMPAGE)
+    {
+      println("####parse#==>> k:" + k, "~~ v:" + v)
+    }
+
+    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = InitConfig.DIMPAGE.get(for_pageid).getOrElse(0, 0, "", 0)
+    println("====>>" + for_pageid + "==>" + (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int))
+
     val page_id = pageAndEventParser.getPageId(d_page_id, extend_params)
     var page_value = pageAndEventParser.getPageValue(d_page_id, extend_params, page_type_id, d_page_value)
 
-
     // ref_page_id
-    val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimPages.get(for_pre_pageid).getOrElse(0, 0, "", 0)
+    val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = InitConfig.DIMPAGE.get(for_pre_pageid).getOrElse(0, 0, "", 0)
     var ref_page_id = pageAndEventParser.getPageId(d_pre_page_id, pre_extend_params)
     var ref_page_value = pageAndEventParser.getPageValue(d_pre_page_id, pre_extend_params, d_pre_page_type_id, d_pre_page_value)
 
+    val p_source = pageAndEventParser.getSource(source)
     val shop_id = getShopId(d_page_id, extend_params)
     val ref_shop_id = getShopId(d_pre_page_id, pre_extend_params)
 
@@ -190,15 +154,14 @@ class PageinfoTransformer extends ITransformer {
     // 最终返回值
     val event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadTime = ""
 
+    println("======>> page_id :: " + page_id)
+
     Array(terminal_id,app_version,gu_id,utm,site_id,ref_site_id,uid,session_id,deviceid,page_id,
       page_value,ref_page_id,ref_page_value,page_level_id,page_lvl2_value,ref_page_lvl2_value,jpk,pit_type,sortdate,
       sorthour,lplid,ptplid,gid,ugroup,shop_id,ref_shop_id,starttime,endtime,hot_goods_id,ctag,location,ip,url,urlref,
       to_switch,source,event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadTime,gu_create_time,tab_source
 //      ,date,hour
     ).mkString("\u0001")
-
-//    Array("2", "2", "4", "5", "7", "8", "10","11","12"
-//    ).mkString("\u0001")
 
   }
 
@@ -211,7 +174,7 @@ class PageinfoTransformer extends ITransformer {
       }
     else if(x_page_id == 154 || x_page_id == 289) {
     //    when P1.page_id in (154,289) and getpageid(a.extend_params) = 10104 then getskcid(a.extend_params)
-      val pid = GetPageID.evaluate(x_extend_params)
+      val pid = new GetPageID().evaluate(x_extend_params)
       if(pid == 10104) {
         new GetSkcId().evaluate(x_extend_params)
       }
@@ -231,13 +194,14 @@ class PageinfoTransformer extends ITransformer {
   // page level id
   def getPageLevelId(page_id: Int, extend_params: String, d_page_level_id: Int): Int =
   {
+    val pid = new GetPageID().evaluate(extend_params)
     val page_level_id: Int = if (page_id == 289 || page_id == 154)
     {
       d_page_level_id
-    }else if(GetPageID.evaluate(extend_params)== 34 || GetPageID.evaluate(extend_params) == 65) {
+    }else if(pid == 34 || pid == 65) {
       2
     }
-    else if( GetPageID.evaluate(extend_params) == 10069){
+    else if( pid == 10069){
       3
     }
     else 0
@@ -276,21 +240,6 @@ class PageinfoTransformer extends ITransformer {
     if (!str.isEmpty()) pattern.matcher(str).matches() else false
   }
 
-  def getSource(source: String): String =
-  {
-    val s = source match {
-      case a if a.isEmpty() | a == "null" | !a.contains("push") => "未知"
-      case b if b.contains("订单") => "用户个人订单信息推送"
-      case c if c.contains("售后", "退货", "退款") => "用户售后信息推送"
-      case d if d.contains("你好") => "用户个人消息通知推送"
-      case e if e.contains("有货就赶紧抢") => "有货提醒"
-      case f if f.contains("收藏的商品") => "用户收藏商品最新消息推送"
-      case g if g.contains("订单") => "用户个人订单信息推送"
-      case _ => source.substring(6)
-    }
-    s
-  }
-
   // 返回解析的结果
   def transform(line: String): (String, String) = {
 
@@ -300,7 +249,7 @@ class PageinfoTransformer extends ITransformer {
     //play
     val row = Json.parse(line)
 
-    println("======>> row:: " + row)
+    println("===#transform#===>> row:: " + row)
 
     if (row != null) {
       // 解析逻辑
@@ -324,19 +273,12 @@ object PageinfoTransformer{
     val  pp: PageinfoTransformer = new PageinfoTransformer()
     val liuliang =
       """
-        |{"app_name":"zhe","app_version":"3.4.7","c_label":"C2","deviceid":"866936020922108","endtime":"1468892508176","endtime_origin":"1468892506863","extend_params":"17","gj_ext_params":"17,http://m.juanpi.com/zhuanti/zyjjgxp?mobile=1&qminkview=1&qmshareview=1,17,17","gj_page_names":"page_tab,page_active,page_tab,page_tab","ip":"115.60.84.175","jpid":"00000000-75d0-04f2-ea1d-6b2a00000030","location":"河南省","os":"android","os_version":"4.4.2","pagename":"page_tab","pre_extend_params":"16314984","pre_page":"page_temai_goods","server_jsonstr":"","session_id":"1468653064917_zhe_1468892173028","source":"","starttime":"1468892453939","starttime_origin":"1468892452626","ticks":"1468653064917","to_switch":"0","uid":"39775699","utm":"101225","wap_pre_url":"","wap_url":""}
+        |{"app_name":"zhe","app_version":"3.4.6","c_label":"C3","c_server":"{\"gid\":\"C3\",\"ugroup\":\"143_223_112_142\"}","deviceid":"867568022962029","endtime":"1468929132822","endtime_origin":"1468929131796","extend_params":"crazy_zhe","gj_ext_params":"past_zhe,1580540_1500762_13504152,past_zhe,crazy_zhe","gj_page_names":"page_tab,page_home_brand_in,page_tab,page_tab","ip":"119.109.179.179","jpid":"ffffffff-bc21-7da8-ffff-ffffe4de7969","location":"辽宁省","os":"android","os_version":"4.4.4","pagename":"page_tab","pre_extend_params":"past_zhe","pre_page":"page_tab","server_jsonstr":"{\"ab_info\":{\"rule_id\":\"\",\"test_id\":\"\",\"select\":\"\"},\"ab_attr\":\"7\"}","session_id":"1468155168409_zhe_1468929047609","source":"","starttime":"1468929130209","starttime_origin":"1468929129183","ticks":"1468155168409","to_switch":"0","uid":"40102432","utm":"104954","wap_pre_url":"","wap_url":""}
         |""".stripMargin
 
     val line = Json.parse(liuliang.replaceAll("null", """\\"\\""""))
     val p = pp.parse(line)
     println(p)
-
-    println(pp.isInteger(""))
-
-    val row = Json.parse(liuliang)
-    println((row \ "uid").asOpt[Int].getOrElse(0))
-    var source = "要正怎样,sdfsadfsadfsadfasfdsa"
-    println(source.substring(6))
 
   }
 }

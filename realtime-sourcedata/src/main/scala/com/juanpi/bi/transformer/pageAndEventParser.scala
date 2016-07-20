@@ -5,11 +5,18 @@ import java.util.regex.Pattern
 import com.juanpi.bi.hiveUDF.{GetDwMbPageValue, GetDwPcPageValue, GetGoodsId, GetPageID}
 import play.api.libs.json.Json
 
+import scala.collection.mutable
+
 /**
   * Created by gongzi on 2016/7/19.
   */
 object pageAndEventParser {
 
+  /**
+    *
+    * @param os
+    * @return
+    */
   def getTerminalId(os: String): Int =
   {
     os.toLowerCase match {
@@ -19,6 +26,11 @@ object pageAndEventParser {
     }
   }
 
+  /**
+    *
+    * @param app_name
+    * @return
+    */
   def getSiteId(app_name: String): Int =
   {
     app_name.toLowerCase match {
@@ -98,9 +110,10 @@ object pageAndEventParser {
       -1
     }else if (x_page_id == 289 || x_page_id == 154)
     {
-      if(GetPageID.evaluate(x_extend_params) > 0)
+      val pid = new GetPageID().evaluate(x_extend_params)
+      if(pid > 0)
       {
-        GetPageID.evaluate(x_extend_params)
+        pid
       }
       else x_page_id
     }
@@ -179,6 +192,15 @@ object pageAndEventParser {
       case _ => source.substring(6)
     }
     s
+  }
+
+  def main(args: Array[String]) {
+    println(getSource("push:小卷温馨提醒！=购物车的商品等你好久啦！你爱的时尚亲肤卡通床品套件低至49.00元疯抢中，果断带宝贝回家→=3465969792363098765"))
+
+    val dimPages_test = new mutable.HashMap[String, (Int, Int, String, Int)]
+    dimPages_test += ("page_taball" -> (219,10,"最新折扣",1))
+    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPages_test.get("page_taball").getOrElse(0, 0, "", 0)
+    println(d_page_id, page_type_id, d_page_value,d_page_level_id)
   }
 
 
