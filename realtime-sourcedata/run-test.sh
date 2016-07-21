@@ -10,6 +10,6 @@ scp ~/dev_pro/dw-realtime/realtime-sourcedata/target/realtime-souredata-1.0-SNAP
 
 if test $? -ne 0
 then
-echo "spark failed!"
+echo "mvn package failed!"
 exit 2
 fi
