@@ -2,9 +2,7 @@ package com.juanpi.bi.transformer
 
 import java.util.regex.Pattern
 
-import com.alibaba.fastjson.JSON
 import com.juanpi.bi.hiveUDF._
-import com.juanpi.bi.init.InitConfig
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.bi.streaming.DateHour
 import org.apache.hadoop.hbase.client.{Get, Put, Result}
@@ -17,6 +15,8 @@ import scala.collection.mutable
   * 解析逻辑的具体实现
   */
 class PageinfoTransformer extends ITransformer {
+
+  val HbaseFamily = "dw"
 
   def parse(row: JsValue, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): String = {
     // mb_pageinfo
@@ -77,39 +77,32 @@ class PageinfoTransformer extends ITransformer {
 
     // 查hbase 从 ticks_history 中查找 ticks 存在的记录
     // 查询某条数据
-//    val ticks_history = initTicksHistory()
-////    val key = new Get(Bytes.toBytes(ticks + app_name))
-//    val key = new Get(Bytes.toBytes(gu_id + ":" + utm))
-//    val ticks_res = ticks_history.get(key)
-//
-//    if (!ticks_res.isEmpty) {
-////      utm = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "utm".getBytes))
-////      gu_create_time
-//      gu_create_time = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "starttime".getBytes))
-//    }
-//    else {
-//      // 如果不存在就写入 hbase
-//      // 准备插入一条 key 为 id001 的数据
-//      val p = new Put((ticks + app_name).getBytes)
-//      // 为put操作指定 column 和 value （以前的 put.add 方法被弃用了）
-//      p.addColumn(HbaseFamily.getBytes, "utm".getBytes, utm.getBytes)
-//      p.addColumn(HbaseFamily.getBytes, "gu_create_time".getBytes, gu_create_time.getBytes)
-//      //提交
-//      ticks_history.put(p)
-//    }
+    val ticks_history = initTicksHistory()
+    val key = new Get(Bytes.toBytes(gu_id + ":" + utm))
+    val ticks_res = ticks_history.get(key)
+
+    if (!ticks_res.isEmpty) {
+      utm = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "utm".getBytes))
+      gu_create_time = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "starttime".getBytes))
+    }
+    else {
+      // 如果不存在就写入 hbase
+      // 准备插入一条 key 为 id001 的数据
+      val p = new Put((ticks + app_name).getBytes)
+      // 为put操作指定 column 和 value （以前的 put.add 方法被弃用了）
+      p.addColumn(HbaseFamily.getBytes, "utm".getBytes, utm.getBytes)
+      p.addColumn(HbaseFamily.getBytes, "init_date".getBytes, gu_create_time.getBytes)
+      //提交
+      ticks_history.put(p)
+    }
 
     // for_pageid 判断
     val for_pageid = forPageId(pagename, extend_params, server_jsonstr)
-    println("for_pageid::" + for_pageid)
     val for_pre_pageid = forPageId(pre_page, pre_extend_params, server_jsonstr)
-
-    println("dimpage.keys====>>" + dimpage.keys)
 
     println(dimpage.get(for_pageid))
 
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimpage.get(for_pageid).getOrElse(0, 0, "", 0)
-    println("====>>" + for_pageid + "==>" + (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int))
-
     val page_id = pageAndEventParser.getPageId(d_page_id, extend_params)
     var page_value = pageAndEventParser.getPageValue(d_page_id, extend_params, page_type_id, d_page_value)
 
