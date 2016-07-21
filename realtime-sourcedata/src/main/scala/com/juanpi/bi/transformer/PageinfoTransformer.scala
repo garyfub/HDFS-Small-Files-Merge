@@ -90,8 +90,8 @@ class PageinfoTransformer extends ITransformer {
     }
 
     // mb_pageinfo -> mb_pageinfo_log
-    val extendParams1 = pageAndEventParser.getExtendParams(pagename, extendParams1)
-    val preExtendParams1 = pageAndEventParser.getExtendParams(pagename, preExtendParams1)
+    val extendParams1 = pageAndEventParser.getExtendParams(pagename, extend_params)
+    val preExtendParams1 = pageAndEventParser.getExtendParams(pagename, pre_extend_params)
 
     // for_pageid 判断
     val for_pageid = forPageId(pagename, extendParams1, server_jsonstr)
