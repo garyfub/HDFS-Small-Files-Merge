@@ -179,7 +179,7 @@ class PageinfoTransformer extends ITransformer {
           new GetShopId().evaluate(x_extend_params)
         } else ""
       }
-      else if(x_page_id == 169 && !server_jsonstr.isEmpty()) {
+      else if(x_page_id == 169 && server_jsonstr.contains("order_status")) {
         // -- 'page_temai_orderdetails'
         // WHEN P1.page_id = 169 then get_json_object(a.server_jsonstr,'$.order_status')
         (Json.parse(server_jsonstr) \ "order_status").asOpt[String].getOrElse("")

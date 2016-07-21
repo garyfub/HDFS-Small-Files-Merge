@@ -1,5 +1,7 @@
 package com.juanpi.bi.init
 
+import java.io.IOException
+
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Table}
 import org.apache.spark.{SparkConf, SparkContext}
@@ -182,9 +184,8 @@ object InitConfig {
   // hbase 创建连接
   def initTicksHistory(): Table =
   {
-    ic.getHbaseConf().getTable(ic.table_ticks_history)
-  }
-
-  def main(args: Array[String]) {
+    try {
+      ic.getHbaseConf().getTable(ic.table_ticks_history)
+    }
   }
 }
