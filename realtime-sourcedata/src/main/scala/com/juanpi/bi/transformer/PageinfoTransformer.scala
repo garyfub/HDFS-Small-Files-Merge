@@ -84,63 +84,63 @@ class PageinfoTransformer extends ITransformer {
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
     if(!c_server.isEmpty())
     {
-        val js_c_server = Json.parse(c_server)
-        gid = (js_c_server \ "gid").asOpt[Int].getOrElse(0)
-        ugroup = (js_c_server \ "ugroup").asOpt[Int].getOrElse(0)
+      val js_c_server = Json.parse(c_server)
+      gid = (js_c_server \ "gid").asOpt[Int].getOrElse(0)
+      ugroup = (js_c_server \ "ugroup").asOpt[Int].getOrElse(0)
     }
 
     // mb_pageinfo -> mb_pageinfo_log
-    val extendParams1 = pageAndEventParser.getExtendParams(pagename, extend_params)
-    val preExtendParams1 = pageAndEventParser.getExtendParams(pagename, pre_extend_params)
+    val extendParams1 = pageAndEventParser.getExtendParams(pagename, extendParams1)
+    val preExtendParams1 = pageAndEventParser.getExtendParams(pagename, preExtendParams1)
 
     // for_pageid 判断
-    val for_pageid = forPageId(pagename, extend_params, server_jsonstr)
-    val for_pre_pageid = forPageId(pre_page, pre_extend_params, server_jsonstr)
+    val for_pageid = forPageId(pagename, extendParams1, server_jsonstr)
+    val for_pre_pageid = forPageId(pre_page, preExtendParams1, server_jsonstr)
 
     println(dimpage.get(for_pageid))
 
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimpage.get(for_pageid).getOrElse(0, 0, "", 0)
-    val page_id = pageAndEventParser.getPageId(d_page_id, extend_params)
-    var page_value = pageAndEventParser.getPageValue(d_page_id, extend_params, page_type_id, d_page_value)
+    val page_id = pageAndEventParser.getPageId(d_page_id, extendParams1)
+    var page_value = pageAndEventParser.getPageValue(d_page_id, extendParams1, page_type_id, d_page_value)
 
     // ref_page_id
     val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimpage.get(for_pre_pageid).getOrElse(0, 0, "", 0)
-    var ref_page_id = pageAndEventParser.getPageId(d_pre_page_id, pre_extend_params)
-    var ref_page_value = pageAndEventParser.getPageValue(d_pre_page_id, pre_extend_params, d_pre_page_type_id, d_pre_page_value)
+    var ref_page_id = pageAndEventParser.getPageId(d_pre_page_id, preExtendParams1)
+    var ref_page_value = pageAndEventParser.getPageValue(d_pre_page_id, preExtendParams1, d_pre_page_type_id, d_pre_page_value)
 
     val p_source = pageAndEventParser.getSource(source)
-    val shop_id = getShopId(d_page_id, extend_params)
-    val ref_shop_id = getShopId(d_pre_page_id, pre_extend_params)
+    val shop_id = getShopId(d_page_id, extendParams1)
+    val ref_shop_id = getShopId(d_pre_page_id, preExtendParams1)
 
-    val page_level_id = getPageLevelId(d_page_id, extend_params, d_page_level_id)
+    val page_level_id = getPageLevelId(d_page_id, extendParams1, d_page_level_id)
 
-    // WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extend_params,'_')[2],''))
-    val hot_goods_id = if(d_page_id == 250 && !extend_params.isEmpty && extend_params.contains("_") && extend_params.split("_").length > 2)
+    // WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extendParams1,'_')[2],''))
+    val hot_goods_id = if(d_page_id == 250 && !extendParams1.isEmpty && extendParams1.contains("_") && extendParams1.split("_").length > 2)
     {
-      new GetGoodsId().evaluate(extend_params.split("_")(2))
+      new GetGoodsId().evaluate(extendParams1.split("_")(2))
     }
     else {""}
 
-    val page_lvl2_value = getPageLvl2Value(d_page_id, extend_params, server_jsonstr)
+    val page_lvl2_value = getPageLvl2Value(d_page_id, extendParams1, server_jsonstr)
 
-    val ref_page_lvl2_value = getPageLvl2Value(d_pre_page_id, pre_extend_params, server_jsonstr)
+    val ref_page_lvl2_value = getPageLvl2Value(d_pre_page_id, preExtendParams1, server_jsonstr)
 
     var pit_type = 0
     var gsort_key = ""
     if(!server_jsonstr.isEmpty())
     {
-        val js_server_jsonstr = Json.parse(server_jsonstr)
-        pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
-        gsort_key = (js_server_jsonstr \ "_gsort_key").asOpt[String].getOrElse("")
+      val js_server_jsonstr = Json.parse(server_jsonstr)
+      pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
+      gsort_key = (js_server_jsonstr \ "_gsort_key").asOpt[String].getOrElse("")
     }
 
     val (sortdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty) {
-        val sortdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
-        val sorthour = gsort_key.split("_")(4)
-        val lplid = gsort_key.split("_")(6)
-        val ptplid = gsort_key.split("_")(6)
-        (sortdate, sorthour, lplid, ptplid)
-      }
+      val sortdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
+      val sorthour = gsort_key.split("_")(4)
+      val lplid = gsort_key.split("_")(6)
+      val ptplid = gsort_key.split("_")(6)
+      (sortdate, sorthour, lplid, ptplid)
+    }
     else ("", "", "", "")
 
     val jpk = 0
@@ -154,7 +154,7 @@ class PageinfoTransformer extends ITransformer {
       page_value,ref_page_id,ref_page_value,page_level_id,page_lvl2_value,ref_page_lvl2_value,jpk,pit_type,sortdate,
       sorthour,lplid,ptplid,gid,ugroup,shop_id,ref_shop_id,starttime,endtime,hot_goods_id,ctag,location,ip,url,urlref,
       to_switch,source,event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadTime,gu_create_time,tab_source
-//      ,date,hour
+      //      ,date,hour
     ).mkString("\u0001")
 
   }
