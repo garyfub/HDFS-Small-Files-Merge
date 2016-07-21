@@ -47,28 +47,8 @@ class PageinfoTransformer extends ITransformer {
     val ctag = (row \ "c_label").asOpt[String].getOrElse("")
     val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
 
-    // 用户画像
-    var gid = 0
-    var ugroup = 0
-
-    val c_server = (row \ "c_server").asOpt[String].getOrElse("")
-    if(!c_server.isEmpty())
-    {
-        val js_c_server = Json.parse(c_server)
-        gid = (js_c_server \ "gid").asOpt[Int].getOrElse(0)
-        ugroup = (js_c_server \ "ugroup").asOpt[Int].getOrElse(0)
-    }
-
-    // mb_pageinfo -> mb_pageinfo_log
-    val extend_params_1 = pageAndEventParser.getExtendParams(pagename, extend_params)
-    val pre_extend_params_1 = pageAndEventParser.getExtendParams(pagename, pre_extend_params)
-
-    val site_id = app_name.toLowerCase match {
-      case "jiu" => 2
-      case "zhe" => 1
-      case _ => -999
-    }
-
+    // =========================================== base to base log ===========================================  //
+    val site_id = pageAndEventParser.getSiteId(app_name)
     val ref_site_id = site_id
     val gu_id = pageAndEventParser.getGuid(jpid, deviceid, os)
     val terminal_id = pageAndEventParser.getTerminalId(os)
@@ -95,6 +75,23 @@ class PageinfoTransformer extends ITransformer {
       //提交
       ticks_history.put(p)
     }
+
+    // =========================================== base to dw ===========================================  //
+    // 用户画像中定义的
+    var gid = 0
+    var ugroup = 0
+
+    val c_server = (row \ "c_server").asOpt[String].getOrElse("")
+    if(!c_server.isEmpty())
+    {
+        val js_c_server = Json.parse(c_server)
+        gid = (js_c_server \ "gid").asOpt[Int].getOrElse(0)
+        ugroup = (js_c_server \ "ugroup").asOpt[Int].getOrElse(0)
+    }
+
+    // mb_pageinfo -> mb_pageinfo_log
+    val extendParams1 = pageAndEventParser.getExtendParams(pagename, extend_params)
+    val preExtendParams1 = pageAndEventParser.getExtendParams(pagename, pre_extend_params)
 
     // for_pageid 判断
     val for_pageid = forPageId(pagename, extend_params, server_jsonstr)
