@@ -2,6 +2,8 @@
 
 git pull
 
+chmod +x run-test.sh
+
 mvn clean package
 
 scp ~/dev_pro/dw-realtime/realtime-sourcedata/target/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/
