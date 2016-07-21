@@ -172,27 +172,31 @@ class PageinfoTransformer extends ITransformer {
   // page level2 value 二级页面值(品牌页：引流款ID等)
   def getPageLvl2Value(x_page_id: Int, x_extend_params: String, server_jsonstr: String): String =
   {
-    val page_lel2_value = if(x_page_id == 250 && !x_extend_params.isEmpty() && x_extend_params.contains("_") && x_extend_params.split("_").length > 2) {
-      //  WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extend_params,'_')[2],''))
-      new GetGoodsId().evaluate(x_extend_params.split("_")(2))
-    }
-    else if(x_page_id == 154 || x_page_id == 289) {
-    //    when P1.page_id in (154,289) and getpageid(a.extend_params) = 10104 then getskcid(a.extend_params)
-      val pid = new GetPageID().evaluate(x_extend_params)
-      if(pid == 10104) {
-        new GetSkcId().evaluate(x_extend_params)
+    val page_lel2_value =
+      if(x_page_id == 250 && !x_extend_params.isEmpty()
+      && x_extend_params.contains("_")
+      && x_extend_params.split("_").length > 2)
+      {
+        //  WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extend_params,'_')[2],''))
+        new GetGoodsId().evaluate(x_extend_params.split("_")(2))
       }
-      else if(pid == 10102) {
-        new GetShopId().evaluate(x_extend_params)
-      } else ""
-    }
-    else if(x_page_id == 169 && !server_jsonstr.isEmpty()) {
-      // -- 'page_temai_orderdetails'
-      // WHEN P1.page_id = 169 then get_json_object(a.server_jsonstr,'$.order_status')
-      (Json.parse(server_jsonstr) \ "order_status").asOpt[String].getOrElse("")
-    }
-    else ""
-    page_lel2_value
+      else if(x_page_id == 154 || x_page_id == 289) {
+      //    when P1.page_id in (154,289) and getpageid(a.extend_params) = 10104 then getskcid(a.extend_params)
+        val pid = new GetPageID().evaluate(x_extend_params)
+        if(pid == 10104) {
+          new GetSkcId().evaluate(x_extend_params)
+        }
+        else if(pid == 10102) {
+          new GetShopId().evaluate(x_extend_params)
+        } else ""
+      }
+      else if(x_page_id == 169 && !server_jsonstr.isEmpty()) {
+        // -- 'page_temai_orderdetails'
+        // WHEN P1.page_id = 169 then get_json_object(a.server_jsonstr,'$.order_status')
+        (Json.parse(server_jsonstr) \ "order_status").asOpt[String].getOrElse("")
+      }
+      else ""
+      page_lel2_value
   }
 
   // page level id
@@ -287,6 +291,7 @@ object PageinfoTransformer{
     val aa = (Json.parse("{}") \ "order_status").asOpt[String].getOrElse("")
     println(aa)
 
+    println(if("a_b".split("_").length > 2) {"a_b_c".split("_")(2)})
 
   }
 }

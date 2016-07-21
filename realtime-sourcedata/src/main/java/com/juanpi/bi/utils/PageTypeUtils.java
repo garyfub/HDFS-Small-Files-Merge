@@ -15,9 +15,10 @@ public class PageTypeUtils {
 
     public static final String[] SITE_HOSTS = {"juanpi.com", "jiukuaiyou.com"};
 
+    public static final Integer NULLRES = -99999;
     public static Integer getPageID(String url) {
         if (url == null || url.trim().length() < 4) {
-            return null;
+            return NULLRES;
         }
         url = url.trim();
         if (-999 == GetSiteId.evaluate(url)) {
