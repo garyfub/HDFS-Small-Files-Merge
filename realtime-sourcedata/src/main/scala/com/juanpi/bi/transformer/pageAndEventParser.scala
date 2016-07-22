@@ -96,6 +96,19 @@ object pageAndEventParser {
     extend_params_1
   }
 
+  def getShopId(x_page_id: Int, extend_params: String): String =
+  {
+    val shop_id = if(x_page_id == 250 && extend_params.contains("_")){
+      new GetGoodsId().evaluate(extend_params.split("_")(1))
+    }
+    else {
+      println("page_id=250, but cannot get shop_id, extend_params is: " + extend_params)
+      0
+    }
+    shop_id.toString()
+  }
+
+
 
   /**
     *

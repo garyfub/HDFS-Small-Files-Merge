@@ -108,8 +108,8 @@ class PageinfoTransformer extends ITransformer {
     val ref_page_value = pageAndEventParser.getPageValue(d_pre_page_id, preExtendParams1, d_pre_page_type_id, d_pre_page_value)
 
     val parsed_source = pageAndEventParser.getSource(source)
-    val shop_id = getShopId(d_page_id, extendParams1)
-    val ref_shop_id = getShopId(d_pre_page_id, preExtendParams1)
+    val shop_id = pageAndEventParser.getShopId(d_page_id, extendParams1)
+    val ref_shop_id = pageAndEventParser.getShopId(d_pre_page_id, preExtendParams1)
 
     val page_level_id = getPageLevelId(d_page_id, extendParams1, d_page_level_id)
 
@@ -203,13 +203,6 @@ class PageinfoTransformer extends ITransformer {
     }
     else 0
     page_level_id
-  }
-
-  def getShopId(x_page_id: Int, extend_params: String): String =
-  {
-    val shop_id = if(x_page_id == 250)
-      new GetGoodsId().evaluate(extend_params.split("_")(1))
-    shop_id.toString()
   }
 
   def forPageId(pagename: String, extend_params: String, server_jsonstr: String): String =
