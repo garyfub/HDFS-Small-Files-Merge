@@ -95,8 +95,8 @@ class PageinfoTransformer extends ITransformer {
     val preExtendParams1 = pageAndEventParser.getExtendParams(pagename, pre_extend_params)
 
     // for_pageid 判断
-    val for_pageid = forPageId(pagename, extendParams1, server_jsonstr)
-    val for_pre_pageid = forPageId(pre_page, preExtendParams1, server_jsonstr)
+    val for_pageid = pageAndEventParser.forPageId(pagename, extendParams1, server_jsonstr)
+    val for_pre_pageid = pageAndEventParser.forPageId(pre_page, preExtendParams1, server_jsonstr)
 
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimpage.get(for_pageid).getOrElse(0, 0, "", 0)
     val page_id = pageAndEventParser.getPageId(d_page_id, extendParams1)
@@ -111,7 +111,7 @@ class PageinfoTransformer extends ITransformer {
     val shop_id = pageAndEventParser.getShopId(d_page_id, extendParams1)
     val ref_shop_id = pageAndEventParser.getShopId(d_pre_page_id, preExtendParams1)
 
-    val page_level_id = getPageLevelId(d_page_id, extendParams1, d_page_level_id)
+    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, extendParams1, d_page_level_id)
 
     // WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extendParams1,'_')[2],''))
     val hot_goods_id = if(d_page_id == 250 && !extendParams1.isEmpty && extendParams1.contains("_") && extendParams1.split("_").length > 2)
@@ -120,9 +120,9 @@ class PageinfoTransformer extends ITransformer {
     }
     else {""}
 
-    val page_lvl2_value = getPageLvl2Value(d_page_id, extendParams1, server_jsonstr)
+    val page_lvl2_value = pageAndEventParser.getPageLvl2Value(d_page_id, extendParams1, server_jsonstr)
 
-    val ref_page_lvl2_value = getPageLvl2Value(d_pre_page_id, preExtendParams1, server_jsonstr)
+    val ref_page_lvl2_value = pageAndEventParser.getPageLvl2Value(d_pre_page_id, preExtendParams1, server_jsonstr)
 
     var pit_type = 0
     var gsort_key = ""
@@ -156,78 +156,6 @@ class PageinfoTransformer extends ITransformer {
       //      ,date,hour
     ).mkString("\u0001")
 
-  }
-
-  // page level2 value 二级页面值(品牌页：引流款ID等)
-  def getPageLvl2Value(x_page_id: Int, x_extend_params: String, server_jsonstr: String): String =
-  {
-    val page_lel2_value =
-      if(x_page_id == 250 && !x_extend_params.isEmpty()
-      && x_extend_params.contains("_")
-      && x_extend_params.split("_").length > 2)
-      {
-        //  WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extend_params,'_')[2],''))
-        new GetGoodsId().evaluate(x_extend_params.split("_")(2))
-      }
-      else if(x_page_id == 154 || x_page_id == 289) {
-      //    when P1.page_id in (154,289) and getpageid(a.extend_params) = 10104 then getskcid(a.extend_params)
-        val pid = new GetPageID().evaluate(x_extend_params)
-        if(pid == 10104) {
-          new GetSkcId().evaluate(x_extend_params)
-        }
-        else if(pid == 10102) {
-          new GetShopId().evaluate(x_extend_params)
-        } else ""
-      }
-      else if(x_page_id == 169 && server_jsonstr.contains("order_status")) {
-        // -- 'page_temai_orderdetails'
-        // WHEN P1.page_id = 169 then get_json_object(a.server_jsonstr,'$.order_status')
-        (Json.parse(server_jsonstr) \ "order_status").asOpt[String].getOrElse("")
-      }
-      else ""
-      page_lel2_value
-  }
-
-  // page level id
-  def getPageLevelId(page_id: Int, extend_params: String, d_page_level_id: Int): Int =
-  {
-    val pid = new GetPageID().evaluate(extend_params)
-    val page_level_id: Int = if (page_id == 289 || page_id == 154)
-    {
-      d_page_level_id
-    }else if(pid == 34 || pid == 65) {
-      2
-    }
-    else if( pid == 10069){
-      3
-    }
-    else 0
-    page_level_id
-  }
-
-  def forPageId(pagename: String, extend_params: String, server_jsonstr: String): String =
-  {
-
-    val for_pageid = pagename.toLowerCase() match
-    {
-      case a if pagename.toLowerCase() == "page_tab" && isInteger(extend_params) && (extend_params.toInt > 0 && extend_params.toInt < 9999999) => "page_tab"
-      case c if pagename.toLowerCase() == "page_tab" && !server_jsonstr.isEmpty() && (Json.parse(server_jsonstr) \ "cid").asOpt[Int].getOrElse(0) < 0 => (pagename+(Json.parse(server_jsonstr) \ "cid").asOpt[String]).toLowerCase()
-      case b if pagename.toLowerCase() != "page_tab" => pagename.toLowerCase()
-      case _ => (pagename+extend_params).toLowerCase()
-    }
-    for_pageid
-  }
-
-  /*
-  * 判断是否为整数
-  * @param str 传入的字符串
-  * @return 是整数返回true,否则返回false
-  */
-  def  isInteger(str: String): Boolean =
-  {
-    val pattern: Pattern = Pattern.compile("^[-\\+]?[\\d]*$")
-//    pattern.matcher(str).matches()
-    if (!str.isEmpty()) pattern.matcher(str).matches() else false
   }
 
   // 返回解析的结果

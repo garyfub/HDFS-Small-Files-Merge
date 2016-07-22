@@ -2,7 +2,7 @@ package com.juanpi.bi.transformer
 
 import java.util.regex.Pattern
 
-import com.juanpi.bi.hiveUDF.{GetDwMbPageValue, GetDwPcPageValue, GetGoodsId, GetPageID}
+import com.juanpi.bi.hiveUDF.{GetShopId, _}
 import play.api.libs.json.Json
 
 import scala.collection.mutable
@@ -96,6 +96,63 @@ object pageAndEventParser {
     extend_params_1
   }
 
+  /**
+    * 二级页面值(品牌页：引流款ID等)
+    * @param x_page_id
+    * @param x_extend_params
+    * @param server_jsonstr
+    * @return
+    */
+  def getPageLvl2Value(x_page_id: Int, x_extend_params: String, server_jsonstr: String): String =
+  {
+    val page_lel2_value =
+      if(x_page_id == 250 && !x_extend_params.isEmpty()
+        && x_extend_params.contains("_")
+        && x_extend_params.split("_").length > 2)
+      {
+        new GetGoodsId().evaluate(x_extend_params.split("_")(2))
+      }
+      else if(x_page_id == 154 || x_page_id == 289) {
+        val pid = new GetPageID().evaluate(x_extend_params)
+        if(pid == 10104) {
+          new GetSkcId().evaluate(x_extend_params)
+        }
+        else if(pid == 10102) {
+          new GetShopId().evaluate(x_extend_params)
+        } else ""
+      }
+      else if(x_page_id == 169 && server_jsonstr.contains("order_status")) {
+        (Json.parse(server_jsonstr) \ "order_status").asOpt[String].getOrElse("")
+      }
+      else ""
+    page_lel2_value
+  }
+
+
+  /**
+    *
+    * @param page_id
+    * @param extend_params
+    * @param d_page_level_id
+    * @return
+    */
+  def getPageLevelId(page_id: Int, extend_params: String, d_page_level_id: Int): Int =
+  {
+    val pid = new GetPageID().evaluate(extend_params)
+    pid.toInt match {
+      case 289|154 => d_page_level_id
+      case 34|65 => 2
+      case 10069 => 3
+      case _ => 0
+    }
+  }
+
+  /**
+    *
+    * @param x_page_id
+    * @param extend_params, 正确的格式应该有两种：brandid_shopid_hotgoodsid, brandid_shopid。错误的格式：为空或者只有 brandid
+    * @return
+    */
   def getShopId(x_page_id: Int, extend_params: String): String =
   {
     val shop_id = if(x_page_id == 250 && extend_params.contains("_")){

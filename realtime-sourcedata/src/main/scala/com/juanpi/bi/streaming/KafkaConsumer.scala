@@ -21,8 +21,16 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
 
   var transformer:ITransformer = null
 
+  /**
+    * event 过滤 collect_api_responsetime
+    * page 和 event 都需要过滤 gu_id 为空的数据，需要过滤 site_id 不为（2, 3）的数据
+    * @param dataDStream
+    * @param ssc
+    * @param km
+    */
   def process(dataDStream: DStream[(String,String)], ssc: StreamingContext, km: KafkaManager) ={
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
+    // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
     val data = dataDStream.map(_._2.replace("\0","")).filter(line => !line.contains("collect_api_responsetime")).transform(transMessage _)
     save(data)
 
