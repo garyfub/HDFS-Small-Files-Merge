@@ -161,9 +161,6 @@ class PageinfoTransformer extends ITransformer {
   // 返回解析的结果
   def transform(line: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): (String, String) = {
 
-    // fastjson 也可以用。
-    // val row = JSON.parseObject(line)
-
     //play
     val row = Json.parse(line)
 
