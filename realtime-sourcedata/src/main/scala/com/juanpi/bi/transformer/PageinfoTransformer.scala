@@ -2,6 +2,7 @@ package com.juanpi.bi.transformer
 
 import java.util.regex.Pattern
 
+import com.juanpi.bi.bean.{User, Page, PageAndEvent, Event}
 import com.juanpi.bi.hiveUDF._
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.bi.streaming.DateHour
@@ -24,7 +25,7 @@ class PageinfoTransformer extends ITransformer {
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
     val pagename = (row \ "pagename").asOpt[String].getOrElse("").toLowerCase()
     val starttime = (row \ "starttime").asOpt[String].getOrElse("0")
-    val endtime = (row \ "endtime").asOpt[String].getOrElse(0)
+    val endtime = (row \ "endtime").asOpt[String].getOrElse("0")
     val pre_page = (row \ "pre_page").asOpt[String].getOrElse("")
     val uid = (row \ "uid").asOpt[String].getOrElse("0")
     val extend_params = (row \ "extend_params").asOpt[String].getOrElse("")
@@ -79,15 +80,15 @@ class PageinfoTransformer extends ITransformer {
 
     // =========================================== base to dw ===========================================  //
     // 用户画像中定义的
-    var gid = 0
-    var ugroup = 0
+    var gid = ""
+    var ugroup = ""
 
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
     if(!c_server.isEmpty())
     {
       val js_c_server = Json.parse(c_server)
-      gid = (js_c_server \ "gid").asOpt[Int].getOrElse(0)
-      ugroup = (js_c_server \ "ugroup").asOpt[Int].getOrElse(0)
+      gid = (js_c_server \ "gid").asOpt[String].getOrElse("0")
+      ugroup = (js_c_server \ "ugroup").asOpt[String].getOrElse("0")
     }
 
     // mb_pageinfo -> mb_pageinfo_log
@@ -148,13 +149,20 @@ class PageinfoTransformer extends ITransformer {
     val event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadTime = ""
 
     println("======>> page_id :: " + page_id)
+    val (date, hour) = DateUtils.dateHourStr(endtime.toLong)
 
     Array(terminal_id,app_version,gu_id,utm,site_id,ref_site_id,uid,session_id,deviceid,page_id,
       page_value,ref_page_id,ref_page_value,page_level_id,page_lvl2_value,ref_page_lvl2_value,jpk,pit_type,sortdate,
       sorthour,lplid,ptplid,gid,ugroup,shop_id,ref_shop_id,starttime,endtime,hot_goods_id,ctag,location,ip,url,urlref,
       to_switch,parsed_source,event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadTime,gu_create_time,tab_source
-      //      ,date,hour
+      ,date,hour
     ).mkString("\u0001")
+
+    User.apply(gu_id,utm,gu_create_time).toString +
+    PageAndEvent.apply(session_id,terminal_id,app_version,page_id,page_value,site_id,ref_site_id,ref_page_id,ref_page_value,page_level_id,
+      starttime,endtime,ctag,hot_goods_id,page_lvl2_value,ref_page_lvl2_value,jpk,pit_type,sortdate,sorthour,lplid,ptplid,gid,ugroup).toString +
+    Page.apply(source, ip, url,urlref,deviceid,to_switch).toString +
+    Event.apply(event_id,event_value,event_lvl2_value,rule_id,test_id,select_id).toString
 
   }
 
@@ -162,7 +170,7 @@ class PageinfoTransformer extends ITransformer {
   def transform(line: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): (String, String) = {
 
     //play
-    val row = Json.parse(line)
+    val row = Json.parse(line.replaceAll("null", """\\"\\"""").replaceAll("\\n", ""))
 
     println("===#transform#===>> row:: " + row)
 
@@ -178,22 +186,32 @@ class PageinfoTransformer extends ITransformer {
       (DateHour("1970-01-01", "1").toString, line)
     }
   }
-
 }
 
 // for test
 object PageinfoTransformer{
   def main(args: Array[String]) {
 
-    val  pp: PageinfoTransformer = new PageinfoTransformer()
     val liuliang =
       """
-        |{"app_name":"zhe","app_version":"3.4.6","c_label":"C3","c_server":"{\"gid\":\"C3\",\"ugroup\":\"143_223_112_142\"}","deviceid":"867568022962029","endtime":"1468929132822","endtime_origin":"1468929131796","extend_params":"crazy_zhe","gj_ext_params":"past_zhe,1580540_1500762_13504152,past_zhe,crazy_zhe","gj_page_names":"page_tab,page_home_brand_in,page_tab,page_tab","ip":"119.109.179.179","jpid":"ffffffff-bc21-7da8-ffff-ffffe4de7969","location":"辽宁省","os":"android","os_version":"4.4.4","pagename":"page_tab","pre_extend_params":"past_zhe","pre_page":"page_tab","server_jsonstr":"{\"ab_info\":{\"rule_id\":\"\",\"test_id\":\"\",\"select\":\"\"},\"ab_attr\":\"7\"}","session_id":"1468155168409_zhe_1468929047609","source":"","starttime":"1468929130209","starttime_origin":"1468929129183","ticks":"1468155168409","to_switch":"0","uid":"40102432","utm":"104954","wap_pre_url":"","wap_url":""}
+        |{"app_name":"zhe","app_version":"3.4.6","c_label":"C3","c_server":"{\"gid\":\"C3\",\"ugroup\":\"143_223_112_142\"}","deviceid":"867568022962029","endtime":"1468929132822","endtime_origin":"1468929131796","extend_params":" {\n  "uid" : "36371591",\n  "validate" : 1\n}","gj_ext_params":"past_zhe,1580540_1500762_13504152,past_zhe,crazy_zhe","gj_page_names":"page_tab,page_home_brand_in,page_tab,page_tab","ip":"119.109.179.179","jpid":"ffffffff-bc21-7da8-ffff-ffffe4de7969","location":"辽宁省","os":"android","os_version":"4.4.4","pagename":"page_tab","pre_extend_params":"past_zhe","pre_page":"page_tab","server_jsonstr":"{\"ab_info\":{\"rule_id\":\"\",\"test_id\":\"\",\"select\":\"\"},\"ab_attr\":\"7\"}","session_id":"1468155168409_zhe_1468929047609","source":"","starttime":"1468929130209","starttime_origin":"1468929129183","ticks":"1468155168409","to_switch":"0","uid":"40102432","utm":"104954","wap_pre_url":"","wap_url":""}
         |""".stripMargin
 
-    val line = Json.parse(liuliang.replaceAll("null", """\\"\\""""))
-//    val p = pp.parse(line)
-//    println(p)
+
+    val pl = liuliang.replaceAll("null", """\\"\\"""").replaceAll("\\\\n\\s+", "\\\\")
+    println(pl)
+
+    try{
+
+      val line = Json.parse(pl)
+      println(line)
+    }catch{
+      //使用模式匹配来处理异常
+      case ex:IllegalArgumentException=>println(ex.getMessage())
+      case ex:RuntimeException=>{ println("ok")}
+      case ex:StringIndexOutOfBoundsException=>println("Invalid Index")
+      case ex:Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + pl)
+    }
 
     val aa = (Json.parse("{}") \ "order_status").asOpt[String].getOrElse("")
     println(aa)

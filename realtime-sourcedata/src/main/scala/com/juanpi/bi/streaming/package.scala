@@ -1,8 +1,5 @@
 package com.juanpi.bi.streaming
 
-/**
- * Created by juanpi on 2015/8/18.
- */
 package object streaming {
 
 }

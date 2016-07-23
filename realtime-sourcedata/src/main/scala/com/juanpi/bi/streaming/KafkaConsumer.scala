@@ -8,6 +8,7 @@ import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.Logging
+import org.apache.hadoop.hbase.client.Table
 
 import scala.collection.mutable
 
@@ -15,7 +16,7 @@ import scala.collection.mutable
 import com.juanpi.bi.streaming.MultiOutputRDD._
 
 @SerialVersionUID(42L)
-class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)])
+class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)], hbaseTable: Table)
   extends Logging with Serializable
 {
 
@@ -28,13 +29,17 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
     * @param ssc
     * @param km
     */
-  def process(dataDStream: DStream[(String,String)], ssc: StreamingContext, km: KafkaManager) ={
+  def process(dataDStream: DStream[(String,String)], ssc: StreamingContext, km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
-    val data = dataDStream.map(_._2.replace("\0","")).filter(line => !line.contains("collect_api_responsetime")).transform(transMessage _)
+    val data = dataDStream.map(_._2.replace("\0","")).
+      filter(line => !line.contains("collect_api_responsetime")).
+      transform(transMessage _)
+
+    // 保存数据至hdfs
     save(data)
 
-    // save offset
+    // 更新kafka offset
     dataDStream.foreachRDD { rdd =>
       km.updateOffsets(rdd)
     }
@@ -122,7 +127,7 @@ object KafkaConsumer{
     }
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
-    val consumer = new KafkaConsumer(topic, ic.DIMPAGE)
+    val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.initTicksHistory())
     consumer.process(message, ssc, km)
 
     ssc.start()
