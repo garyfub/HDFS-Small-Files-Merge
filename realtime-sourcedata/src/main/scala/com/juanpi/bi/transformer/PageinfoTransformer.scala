@@ -1,23 +1,16 @@
 package com.juanpi.bi.transformer
 
-import java.util.regex.Pattern
-
 import com.juanpi.bi.bean.{User, Page, PageAndEvent, Event}
 import com.juanpi.bi.hiveUDF._
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.bi.streaming.DateHour
-import org.apache.hadoop.hbase.client.{Get, Put, Result}
 import play.api.libs.json.{JsValue, Json}
-import org.apache.hadoop.hbase.util.Bytes
-import com.juanpi.bi.init.InitConfig.initTicksHistory
 
 import scala.collection.mutable
 /**
   * 解析逻辑的具体实现
   */
 class PageinfoTransformer extends ITransformer {
-
-  val HbaseFamily = "dw"
 
   def parse(row: JsValue, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): String = {
     // mb_pageinfo
@@ -55,28 +48,6 @@ class PageinfoTransformer extends ITransformer {
     val terminal_id = pageAndEventParser.getTerminalId(os)
 
     var gu_create_time = ""
-
-    // 查hbase 从 ticks_history 中查找 ticks 存在的记录
-    // 查询某条数据
-//    val ticks_history = initTicksHistory()
-//    val key = new Get(Bytes.toBytes(gu_id + ":" + utm))
-//    println("=======> ticks_history.get:" + key)
-//    val ticks_res = ticks_history.get(key)
-//
-//    if (!ticks_res.isEmpty) {
-//      utm = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "utm".getBytes))
-//      gu_create_time = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "starttime".getBytes))
-//    }
-//    else {
-//      // 如果不存在就写入 hbase
-//      // 准备插入一条 key 为 id001 的数据
-//      val p = new Put((ticks + app_name).getBytes)
-//      // 为put操作指定 column 和 value （以前的 put.add 方法被弃用了）
-//      p.addColumn(HbaseFamily.getBytes, "utm".getBytes, utm.getBytes)
-//      p.addColumn(HbaseFamily.getBytes, "init_date".getBytes, gu_create_time.getBytes)
-//      //提交
-//      ticks_history.put(p)
-//    }
 
     // =========================================== base to dw ===========================================  //
     // 用户画像中定义的

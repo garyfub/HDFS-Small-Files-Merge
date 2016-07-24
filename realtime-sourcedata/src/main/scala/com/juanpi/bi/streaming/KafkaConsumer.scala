@@ -8,7 +8,8 @@ import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.Logging
-import org.apache.hadoop.hbase.client.Table
+import org.apache.hadoop.hbase.client.{Get, Put, Result, Table}
+import org.apache.hadoop.hbase.util.Bytes
 
 import scala.collection.mutable
 
@@ -17,10 +18,10 @@ import com.juanpi.bi.streaming.MultiOutputRDD._
 
 @SerialVersionUID(42L)
 class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)], hbaseTable: Table)
-  extends Logging with Serializable
-{
+  extends Logging with Serializable {
 
   var transformer:ITransformer = null
+  val HbaseFamily = "dw"
 
   /**
     * event 过滤 collect_api_responsetime
@@ -32,9 +33,18 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
   def process(dataDStream: DStream[(String,String)], ssc: StreamingContext, km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
-    val data = dataDStream.map(_._2.replace("\0","")).
-      filter(line => !line.contains("collect_api_responsetime")).
-      transform(transMessage _)
+    // 数据块中的每一条记录需要处理
+    val data = dataDStream.map(_._2.replace("\0",""))
+        .filter(line => !line.contains("collect_api_responsetime"))
+        .transform(transMessage _)
+        .foreachRDD(rdd => {
+          rdd.foreachPartition(partitionRecord => {
+            partitionRecord.foreach(record => {
+            val gu_id = ""
+              val (utm, gu_create_time) = getGuIdUtmInitDate(gu_id)
+            }
+          }
+        })
 
     // 保存数据至hdfs
     save(data)
@@ -45,7 +55,39 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
     }
   }
 
-  def transMessage(rdd:RDD[String]):RDD[(String,String)] ={
+  /**
+    * 查hbase 从 ticks_history 中查找 ticks 存在的记录
+    * @param gu_id
+    * @param utm
+    * @return
+    */
+  private def getGuIdUtmInitDate(gu_id: String) = {
+    var utm = ""
+    var gu_create_time = ""
+    val ticks_history = hbaseTable
+    val key = new Get(Bytes.toBytes(gu_id))
+    println("=======> ticks_history.get:" + key)
+    val ticks_res = ticks_history.get(key)
+
+    if (!ticks_res.isEmpty) {
+      utm = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "utm".getBytes))
+      gu_create_time = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "init_date".getBytes))
+      (utm, gu_create_time)
+    }
+    else {
+      // 如果不存在就写入 hbase
+      // 准备插入一条 key 为 id001 的数据
+      val p = new Put(gu_id.getBytes)
+      // 为put操作指定 column 和 value （以前的 put.add 方法被弃用了）
+      p.addColumn(HbaseFamily.getBytes, "utm".getBytes, utm.getBytes)
+      p.addColumn(HbaseFamily.getBytes, "init_date".getBytes, gu_create_time.getBytes)
+      //提交
+      ticks_history.put(p)
+      (utm, gu_create_time)
+    }
+  }
+
+  def transMessage(rdd:RDD[String]):RDD[(String,String)] = {
     rdd.map{ msg =>parseMessage(msg) }
   }
 
