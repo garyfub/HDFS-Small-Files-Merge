@@ -1,5 +1,6 @@
 package com.juanpi.bi.streaming
 
+import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.InitConfig
 import com.juanpi.bi.transformer.ITransformer
 import kafka.serializer.StringDecoder
@@ -26,6 +27,7 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
   /**
     * event 过滤 collect_api_responsetime
     * page 和 event 都需要过滤 gu_id 为空的数据，需要过滤 site_id 不为（2, 3）的数据
+    *
     * @param dataDStream
     * @param ssc
     * @param km
@@ -34,20 +36,31 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
     // 数据块中的每一条记录需要处理
-    val data = dataDStream.map(_._2.replace("\0",""))
+    dataDStream.map(_._2.replace("\0",""))
         .filter(line => !line.contains("collect_api_responsetime"))
         .transform(transMessage _)
-        .foreachRDD(rdd => {
-          rdd.foreachPartition(partitionRecord => {
-            partitionRecord.foreach(record => {
-            val gu_id = ""
+        .foreachRDD((rdd,time) =>
+        {
+          rdd.foreachPartition(partitionRecord =>
+          {
+            // TODO 单独初始化HBase
+            // TODO 单独初始化HBase
+            partitionRecord.foreach(record =>
+            {
+              val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
+              val gu_id = user.gu_id
               val (utm, gu_create_time) = getGuIdUtmInitDate(gu_id)
-            }
-          }
-        })
+              user.utm_id = utm
+              user.gu_create_time = gu_create_time
+              (record._1, List(user, pageAndEvent, page, event).mkString("\u0001"))
+            })
+          })
 
-    // 保存数据至hdfs
-    save(data)
+          // 保存数据至hdfs
+          rdd.map(v => (v._1+"/"+time.milliseconds,v._2))
+            .repartition(1)
+            .saveAsMultiTextFiles(Config.baseDir+"/"+topic)
+        })
 
     // 更新kafka offset
     dataDStream.foreachRDD { rdd =>
@@ -57,8 +70,8 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
 
   /**
     * 查hbase 从 ticks_history 中查找 ticks 存在的记录
+    *
     * @param gu_id
-    * @param utm
     * @return
     */
   private def getGuIdUtmInitDate(gu_id: String) = {
@@ -87,11 +100,11 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
     }
   }
 
-  def transMessage(rdd:RDD[String]):RDD[(String,String)] = {
+  def transMessage(rdd:RDD[String]):RDD[(String, Any)] = {
     rdd.map{ msg =>parseMessage(msg) }
   }
 
-  def parseMessage(message:String):(String,String) = {
+  def parseMessage(message:String):(String, Any) = {
     getTransformer().transform(message, dimpage)
   }
 
@@ -103,7 +116,7 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
   }
 
   // 保存 page 或者 event的数据
-  def save(page_event:DStream[(String,String)]) = {
+  def save(page_event: DStream[(String, String)]) = {
     page_event.foreachRDD{ (rdd,time) =>
       rdd.map(v => (v._1+"/"+time.milliseconds,v._2))
         .repartition(1)

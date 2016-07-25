@@ -118,3 +118,8 @@ exit 2
 fi
 
 ```
+
+#### 解析文件输出路径
+```
+select substring(gu_id, length(gu_id)), count(gu_id) from dw.fct_session where date = '2016-07-21' group by substring(gu_id, length(gu_id));
+```

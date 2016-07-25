@@ -81,7 +81,7 @@ public class PathListNew {
             xx ++;
 
             context.write(k2, v2);
-        };
+        }
     }
 
     //static class NewValue

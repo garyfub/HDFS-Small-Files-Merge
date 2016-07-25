@@ -12,7 +12,7 @@ import scala.collection.mutable
   */
 class PageinfoTransformer extends ITransformer {
 
-  def parse(row: JsValue, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): String = {
+  def parse(row: JsValue, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): (User.type, PageAndEvent.type, Page.type, Event.type) = {
     // mb_pageinfo
     val ticks = (row \ "ticks").asOpt[String].getOrElse("")
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
@@ -122,39 +122,39 @@ class PageinfoTransformer extends ITransformer {
     println("======>> page_id :: " + page_id)
     val (date, hour) = DateUtils.dateHourStr(endtime.toLong)
 
-    Array(terminal_id,app_version,gu_id,utm,site_id,ref_site_id,uid,session_id,deviceid,page_id,
-      page_value,ref_page_id,ref_page_value,page_level_id,page_lvl2_value,ref_page_lvl2_value,jpk,pit_type,sortdate,
-      sorthour,lplid,ptplid,gid,ugroup,shop_id,ref_shop_id,starttime,endtime,hot_goods_id,ctag,location,ip,url,urlref,
-      to_switch,parsed_source,event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadTime,gu_create_time,tab_source
-      ,date,hour
-    ).mkString("\u0001")
+//    Array(terminal_id,app_version,gu_id,utm,site_id,ref_site_id,uid,session_id,deviceid,page_id,
+//      page_value,ref_page_id,ref_page_value,page_level_id,page_lvl2_value,ref_page_lvl2_value,jpk,pit_type,sortdate,
+//      sorthour,lplid,ptplid,gid,ugroup,shop_id,ref_shop_id,starttime,endtime,hot_goods_id,ctag,location,ip,url,urlref,
+//      to_switch,parsed_source,event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadTime,gu_create_time,tab_source
+//      ,date,hour
+//    ).mkString("\u0001")
 
-    User.apply(gu_id,utm,gu_create_time).toString +
-    PageAndEvent.apply(session_id,terminal_id,app_version,page_id,page_value,site_id,ref_site_id,ref_page_id,ref_page_value,page_level_id,
-      starttime,endtime,ctag,hot_goods_id,page_lvl2_value,ref_page_lvl2_value,jpk,pit_type,sortdate,sorthour,lplid,ptplid,gid,ugroup).toString +
-    Page.apply(source, ip, url,urlref,deviceid,to_switch).toString +
-    Event.apply(event_id,event_value,event_lvl2_value,rule_id,test_id,select_id).toString
-
+    User.apply(gu_id, utm, gu_create_time, session_id, terminal_id, app_version, site_id, ref_site_id, ctag)
+    PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, page_level_id, starttime, endtime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, jpk, pit_type, sortdate, sorthour, lplid, ptplid, gid, ugroup)
+    Page.apply(source, ip, url,urlref,deviceid,to_switch)
+    Event.apply(event_id,event_value,event_lvl2_value,rule_id,test_id,select_id)
+    (User, PageAndEvent, Page, Event)
   }
 
   // 返回解析的结果
-  def transform(line: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): (String, String) = {
+  def transform(line: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): (String, Any) = {
 
     //play
-    val row = Json.parse(line.replaceAll("null", """\\"\\"""").replaceAll("\\n", ""))
+    val row = Json.parse(line.replaceAll("null", """\\"\\"""") )// .replaceAll("\\n", ""))
 
     println("===#transform#===>> row:: " + row)
 
     if (row != null) {
       // 解析逻辑
-      val res = parse(row, dimpage)
-
-      // for test
-//      val res = Array("2", "2", "4", "5", "7", "8", "10","11","12").mkString("\u0001")
-
-      (DateUtils.dateHour((row \ "endtime").as[String].toLong).toString, res)
+      val gu_id = pageAndEventParser.getGuid((row \ "jpid").as[String], (row \ "deviceid").as[String], (row \ "os").as[String])
+      if(!gu_id.isEmpty) {
+        val res = parse(row, dimpage)
+        (DateUtils.dateHour((row \ "endtime").as[String].toLong).toString, res)
+        } else {
+        ("", None)
+      }
     } else {
-      (DateHour("1970-01-01", "1").toString, line)
+      ("", None)
     }
   }
 }
