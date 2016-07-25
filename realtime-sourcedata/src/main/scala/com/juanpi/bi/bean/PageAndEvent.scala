@@ -68,7 +68,8 @@ case class PageAndEvent (
   lplid: String,
   ptplid: String,
   gid: String,
-  ugroup: String
+  ugroup: String,
+  table_source: String
                         )
 
 /**

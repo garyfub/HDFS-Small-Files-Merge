@@ -26,7 +26,7 @@ class PageinfoTransformer extends ITransformer {
     val app_version = (row \ "app_version").asOpt[String].getOrElse("")
 //    val os_version = (row \ "os_version").asOpt[String].getOrElse("")
     val os = (row \ "os").asOpt[String].getOrElse("")
-    var utm = (row \ "utm").asOpt[String].getOrElse("0")
+    val utm = (row \ "utm").asOpt[String].getOrElse("0")
     val source = (row \ "source").asOpt[String].getOrElse("")
     val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
     val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
@@ -47,7 +47,7 @@ class PageinfoTransformer extends ITransformer {
     val gu_id = pageAndEventParser.getGuid(jpid, deviceid, os)
     val terminal_id = pageAndEventParser.getTerminalId(os)
 
-    var gu_create_time = ""
+    val gu_create_time = ""
 
     // =========================================== base to dw ===========================================  //
     // 用户画像中定义的
@@ -115,7 +115,7 @@ class PageinfoTransformer extends ITransformer {
     else ("", "", "", "")
 
     val jpk = 0
-    val tab_source = "page"
+    val table_source = "page"
     // 最终返回值
     val event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadTime = ""
 
@@ -130,7 +130,7 @@ class PageinfoTransformer extends ITransformer {
 //    ).mkString("\u0001")
 
     User.apply(gu_id, utm, gu_create_time, session_id, terminal_id, app_version, site_id, ref_site_id, ctag)
-    PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, page_level_id, starttime, endtime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, jpk, pit_type, sortdate, sorthour, lplid, ptplid, gid, ugroup)
+    PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, page_level_id, starttime, endtime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, jpk, pit_type, sortdate, sorthour, lplid, ptplid, gid, ugroup, table_source)
     Page.apply(source, ip, url,urlref,deviceid,to_switch)
     Event.apply(event_id,event_value,event_lvl2_value,rule_id,test_id,select_id)
     (User, PageAndEvent, Page, Event)
