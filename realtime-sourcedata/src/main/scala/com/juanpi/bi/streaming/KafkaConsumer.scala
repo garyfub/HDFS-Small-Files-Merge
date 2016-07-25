@@ -41,32 +41,52 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
         .transform(transMessage _)
         .foreachRDD((rdd,time) =>
         {
-          rdd.foreachPartition(partitionRecord =>
-          {
-            // TODO 单独初始化HBase
-            // TODO 单独初始化HBase
-            partitionRecord.foreach(record =>
-            {
-              val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
-              val gu_id = user.gu_id
-              val (utm, gu_create_time) = getGuIdUtmInitDate(gu_id)
-              user.utm_id = utm
-              user.gu_create_time = gu_create_time
-              (record._1, List(user, pageAndEvent, page, event).mkString("\u0001"))
-            })
-          })
 
+
+          val newRdd = rdd.map(record => {
+            val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
+            val gu_id = user.gu_id
+            val (utm, gu_create_time) = getGuIdUtmInitDate(gu_id)
+            user.utm_id = utm
+            user.gu_create_time = gu_create_time
+            (record._1, List(user, pageAndEvent, page, event).mkString("\u0001"))
+          })
           // 保存数据至hdfs
-          rdd.map(v => (v._1+"/"+time.milliseconds,v._2))
+
+          newRdd.map(v => (v._1+"/"+time.milliseconds,v._2))
             .repartition(1)
             .saveAsMultiTextFiles(Config.baseDir+"/"+topic)
         })
+
 
     // 更新kafka offset
     dataDStream.foreachRDD { rdd =>
       km.updateOffsets(rdd)
     }
   }
+
+  //        .foreachRDD((rdd,time) =>
+  //        {
+  //          rdd.mapPartitions( ("", rec) =>
+  //          {
+  //            println("")
+  //          })
+
+  //          rdd.mapPartitions(partitionRecord =>
+  //          {
+  //            // TODO 单独初始化HBase
+  //            // TODO 单独初始化HBase
+  //            partitionRecord.foreach(record =>
+  //            {
+  //              val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
+  //              val gu_id = user.gu_id
+  //              val (utm, gu_create_time) = getGuIdUtmInitDate(gu_id)
+  //              user.utm_id = utm
+  //              user.gu_create_time = gu_create_time
+  //              (record._1, List(user, pageAndEvent, page, event).mkString("\u0001"))
+  //            })
+  //          })
+
 
   /**
     * 查hbase 从 ticks_history 中查找 ticks 存在的记录
