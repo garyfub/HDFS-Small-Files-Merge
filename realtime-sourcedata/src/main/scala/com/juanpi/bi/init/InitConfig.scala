@@ -64,19 +64,19 @@ class InitConfig() {
     this.setSpconf(conf)
   }
 
-  private def loadProperties():Unit = {
-    val config = ConfigFactory.load("hbase.conf")
-    zkQuorum = config.getString("hbaseConf.zkQuorum")
-    this.setHbase_family(config.getString("hbaseConf.hbase_family"))
-  }
+//  private def loadProperties():Unit = {
+//    val config = ConfigFactory.load("hbase.conf")
+//    zkQuorum = config.getString("hbaseConf.zkQuorum")
+//    this.setHbase_family(config.getString("hbaseConf.hbase_family"))
+//  }
 
-  private def getHbaseConf(): Connection = {
-    val hbaseConf = HBaseConfiguration.create()
-    hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
-    hbaseConf.setInt("timeout", 120000)
-    //Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
-    ConnectionFactory.createConnection(hbaseConf)
-  }
+//  private def getHbaseConf(): Connection = {
+//    val hbaseConf = HBaseConfiguration.create()
+//    hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
+//    hbaseConf.setInt("timeout", 120000)
+//    //Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
+//    ConnectionFactory.createConnection(hbaseConf)
+//  }
 
   def initDimPage(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int, String, Int)] =
   {
@@ -164,7 +164,7 @@ object InitConfig {
     ic.setStreamingContext()
 
     // load 配置文件
-    ic.loadProperties()
+//    ic.loadProperties()
 
     // 初始化 page and event
     DIMPAGE = ic.initDimPageEvent()._1
@@ -176,16 +176,16 @@ object InitConfig {
     ic.getSsc()
   }
 
-  def getHbaseFamily =
-  {
-    ic.getHbase_family
-  }
+//  def getHbaseFamily =
+//  {
+//    ic.getHbase_family
+//  }
 
   // hbase 创建连接
-  def initTicksHistory(): Table =
-  {
-    try {
-      ic.getHbaseConf().getTable(ic.table_ticks_history)
-    }
-  }
+//  def initTicksHistory(): Table =
+//  {
+//    try {
+//      ic.getHbaseConf().getTable(ic.table_ticks_history)
+//    }
+//  }
 }
