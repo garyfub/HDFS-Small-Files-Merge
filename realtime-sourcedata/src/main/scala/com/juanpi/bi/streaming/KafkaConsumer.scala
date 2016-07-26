@@ -146,7 +146,6 @@ object KafkaConsumer{
   def main(args: Array[String]) {
 
     println("======>> com.juanpi.bi.streaming.KafkaConsumer 开始运行，参数个数：" + args.length)
-
     val arg = args(0)
     println(arg)
 
