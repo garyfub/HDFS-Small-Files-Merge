@@ -45,8 +45,8 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
       .filter(_._1 != "")
       .foreachRDD((rdd, time) =>
       {
-        @transient val conn = initHBaseConnection(zkQuorum)
-        @transient val tab = conn.getTable(table_ticks_history)
+        val conn = initHBaseConnection(zkQuorum)
+        val tab = conn.getTable(table_ticks_history)
 
         val newRdd = rdd.map(record => {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
