@@ -23,9 +23,9 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
   extends Logging with Serializable {
 
   var transformer:ITransformer = null
-  val HbaseFamily = "dw"
-  var hBaseConnection = None
-  val table_ticks_history = TableName.valueOf("utm_history")
+
+  @transient val HbaseFamily = "dw"
+  @transient val table_ticks_history = TableName.valueOf("utm_history")
 
   /**
     * event 过滤 collect_api_responsetime
