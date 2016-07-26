@@ -75,8 +75,6 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
 
   private def initHBaseConnection(zkQuorum: String): Connection = {
     // TODO
-    if(hBaseConnection.isEmpty) {}
-
     val hbaseConf = HBaseConfiguration.create()
     hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
     hbaseConf.setInt("timeout", 120000)
