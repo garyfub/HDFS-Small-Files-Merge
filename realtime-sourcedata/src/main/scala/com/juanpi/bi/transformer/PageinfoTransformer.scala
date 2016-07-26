@@ -1,9 +1,8 @@
 package com.juanpi.bi.transformer
 
-import com.juanpi.bi.bean.{User, Page, PageAndEvent, Event}
+import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.hiveUDF._
 import com.juanpi.bi.sc_utils.DateUtils
-import com.juanpi.bi.streaming.DateHour
 import play.api.libs.json.{JsValue, Json}
 
 import scala.collection.mutable

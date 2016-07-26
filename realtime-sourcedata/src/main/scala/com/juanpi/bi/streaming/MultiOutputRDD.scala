@@ -36,8 +36,8 @@ import org.apache.hadoop.mapreduce.lib.output.{LazyOutputFormat, MultipleOutputs
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl.DummyReporter
 import org.apache.hadoop.mapreduce.task.{ReduceContextImpl, TaskAttemptContextImpl}
 import org.apache.hadoop.util.Progress
-import org.apache.spark.{Logging, _}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.{Logging, _}
 
 import scala.reflect.ClassTag
 

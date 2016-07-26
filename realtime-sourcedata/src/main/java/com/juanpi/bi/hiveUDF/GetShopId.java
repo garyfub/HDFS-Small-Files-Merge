@@ -1,11 +1,11 @@
 package com.juanpi.bi.hiveUDF;
 
+import org.apache.hadoop.hive.ql.exec.UDF;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.hadoop.hive.ql.exec.UDF;
 
 public class GetShopId extends UDF{
 	

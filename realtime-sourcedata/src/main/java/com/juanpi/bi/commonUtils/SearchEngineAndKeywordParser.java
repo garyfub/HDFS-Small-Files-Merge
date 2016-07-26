@@ -1,7 +1,7 @@
 package com.juanpi.bi.commonUtils;
 
-import org.apache.commons.lang.StringUtils;
 import com.juanpi.bi.bean.LoggerBean;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Description: TODO <br/>

@@ -1,14 +1,13 @@
 package com.juanpi.bi.commonUtils;
 
+import nl.bitwalker.useragentutils.OperatingSystem;
+import nl.bitwalker.useragentutils.UserAgent;
+import org.apache.commons.lang.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-
-import nl.bitwalker.useragentutils.OperatingSystem;
-import nl.bitwalker.useragentutils.UserAgent;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Description: 日志解析方法类 <br/>

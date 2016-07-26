@@ -1,11 +1,9 @@
 package com.juanpi.bi.hiveUDF;
 
+import com.juanpi.bi.utils.PageTypeUtils;
 import org.apache.hadoop.hive.ql.exec.Description;
 import org.apache.hadoop.hive.ql.exec.UDF;
 
-import com.juanpi.bi.utils.PageTypeUtils;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

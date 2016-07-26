@@ -2,7 +2,7 @@ package com.juanpi.bi.hiveUDF;
 
 import com.juanpi.bi.utils.DecodeURLParam;
 import com.juanpi.bi.utils.DwPageValue;
-import com.juanpi.bi.utils.IDSChecker;
+import com.juanpi.bi.utils.DwPageValue.Page_Pattern;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hive.ql.exec.UDF;
 
@@ -13,8 +13,6 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.juanpi.bi.utils.DwPageValue.Page_Pattern;
 
 /**
  * 获取pc端pagevalue
