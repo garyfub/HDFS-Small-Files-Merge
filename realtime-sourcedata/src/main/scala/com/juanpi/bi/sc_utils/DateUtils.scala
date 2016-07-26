@@ -12,11 +12,17 @@ object DateUtils {
     DateHour(dateTime.toString("yyyy-MM-dd"), dateTime.toString("H"))
   }
 
-  def dateGuid(milliseconds: Long, gu_id: String): String = {
+  /**
+    * 返回日期加上gu_id最后一位，作为log文件的保存目录
+    * @param milliseconds
+    * @param gu_id
+    * @return
+    */
+  def dateGuidPartitions(milliseconds: Long, gu_id: String): String = {
     val dateTime = new DateTime(milliseconds)
     val date = dateTime.toString("yyyy-MM-dd")
-    val gu_hash = dateTime.toString("H")
-    s"date=${date}/hour=${gu_hash}"
+    val gu_hex = (gu_id.last).toLower
+    s"date=${date}/gu_hash=${gu_hex}"
   }
 
   /**
@@ -35,8 +41,8 @@ object DateUtils {
 
   def main(args: Array[String]) {
     val gu_id = "ffffffff-bc21-7da8-ffff-ffffe4de7969"
-    println(gu_id.substring(24))
-    println(md5Hash(gu_id))
-//    dateGuid("1468929132822".toLong, ("ffffffff-bc21-7da8-ffff-ffffe4de7969").hashCode())
+    println((gu_id.last).toLower)
+
+    println(dateGuidPartitions("1468929132822".toLong, "13a69d96f245ab71b"))
   }
 }

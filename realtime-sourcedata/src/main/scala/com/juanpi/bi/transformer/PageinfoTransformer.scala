@@ -148,7 +148,7 @@ class PageinfoTransformer extends ITransformer {
       val gu_id = pageAndEventParser.getGuid((row \ "jpid").as[String], (row \ "deviceid").as[String], (row \ "os").as[String])
       if(!gu_id.isEmpty) {
         val res = parse(row, dimpage)
-        (DateUtils.dateHour((row \ "endtime").as[String].toLong).toString, res)
+        (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, res)
         } else {
         ("", None)
       }
