@@ -1,5 +1,7 @@
 package com.juanpi.bi.streaming
 
+import java.io.Serializable
+
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.InitConfig
 import com.juanpi.bi.transformer.ITransformer
@@ -44,9 +46,16 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
       .filter(_._1 != "")
       .foreachRDD((rdd, time) =>
       {
+
+        val hbaseConf = HBaseConfiguration.create()
+        hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
+        hbaseConf.setInt("timeout", 120000)
+        // Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
+        val conn = ConnectionFactory.createConnection(hbaseConf)
+
         val table_ticks_history = TableName.valueOf("utm_history")
-        val conn = initHBaseConnection(zkQuorum)
-        @transient val tab = conn.getTable(table_ticks_history)
+//        val conn = initHBaseConnection(zkQuorum)
+        val tab = conn.getTable(table_ticks_history)
 
         val newRdd = rdd.map(record => {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
@@ -73,14 +82,14 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
     }
   }
 
-  private def initHBaseConnection(zkQuorum: String): Connection = {
-    // TODO
-    val hbaseConf = HBaseConfiguration.create()
-    hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
-    hbaseConf.setInt("timeout", 120000)
-    // Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
-    ConnectionFactory.createConnection(hbaseConf)
-  }
+//  private def initHBaseConnection(zkQuorum: String): Connection = {
+//    // TODO
+//    val hbaseConf = HBaseConfiguration.create()
+//    hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
+//    hbaseConf.setInt("timeout", 120000)
+//    // Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
+//    ConnectionFactory.createConnection(hbaseConf)
+//  }
 
   /**
     * 查hbase 从 ticks_history 中查找 ticks 存在的记录
