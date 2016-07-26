@@ -1,16 +1,20 @@
 package com.juanpi.bi.streaming
 
+import java.util
+
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.InitConfig
 import com.juanpi.bi.transformer.ITransformer
 import kafka.serializer.StringDecoder
+import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.Logging
-import org.apache.hadoop.hbase.client.{Get, Put, Result, Table}
+import org.apache.hadoop.hbase.client.{ConnectionFactory, _}
 import org.apache.hadoop.hbase.util.Bytes
+import play.libs.Json
 
 import scala.collection.mutable
 
@@ -41,8 +45,6 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
         .transform(transMessage _)
         .foreachRDD((rdd,time) =>
         {
-
-
           val newRdd = rdd.map(record => {
             val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
             val gu_id = user.gu_id
@@ -58,34 +60,24 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
             .saveAsMultiTextFiles(Config.baseDir+"/"+topic)
         })
 
-
     // 更新kafka offset
     dataDStream.foreachRDD { rdd =>
       km.updateOffsets(rdd)
     }
   }
 
-  //        .foreachRDD((rdd,time) =>
-  //        {
-  //          rdd.mapPartitions( ("", rec) =>
-  //          {
-  //            println("")
-  //          })
 
-  //          rdd.mapPartitions(partitionRecord =>
-  //          {
-  //            // TODO 单独初始化HBase
-  //            // TODO 单独初始化HBase
-  //            partitionRecord.foreach(record =>
-  //            {
-  //              val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
-  //              val gu_id = user.gu_id
-  //              val (utm, gu_create_time) = getGuIdUtmInitDate(gu_id)
-  //              user.utm_id = utm
-  //              user.gu_create_time = gu_create_time
-  //              (record._1, List(user, pageAndEvent, page, event).mkString("\u0001"))
-  //            })
-  //          })
+  /**
+    *
+    * @return
+    */
+  private def getHbaseConf(): Connection = {
+    val hbaseConf = HBaseConfiguration.create()
+    hbaseConf.set("hbase.zookeeper.quorum", "")
+    hbaseConf.setInt("timeout", 120000)
+    //Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
+    ConnectionFactory.createConnection(hbaseConf)
+  }
 
 
   /**
@@ -145,12 +137,21 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
   }
 }
 
+case class SparkKafkaParam (
+
+                           )
 
 object KafkaConsumer{
 
   def main(args: Array[String]) {
 
     println("======>> com.juanpi.bi.streaming.KafkaConsumer 开始运行，参数个数：" + args.length)
+
+    val arg = args(0)
+    println(arg)
+
+    val argJson = Json.parse(arg)
+    println("======>> com.juanpi.bi.streaming.KafkaConsumer 开始运行，参数个数：" + Array(argJson.fields()).length)
 
     if (args.length < 3) {
       System.err.println(s"""
@@ -167,7 +168,35 @@ object KafkaConsumer{
       System.exit(1)
     }
 
-    val Array(zkQuorum, brokerList, topic, groupId, consumerType, consumerTime) = args
+    // test json 格式的参数，结果结果接受参数的时候，直接将double quote 去掉了，如果用转移符，反而又比较麻烦，因此放弃掉
+//    val str =
+//      """
+//        |{"zkQuorum":"GZ-JSQ-JP-BI-KAFKA-001.jp:2181,GZ-JSQ-JP-BI-KAFKA-002.jp:2181,GZ-JSQ-JP-BI-KAFKA-003.jp:2181,GZ-JSQ-JP-BI-KAFKA-004.jp:2181,GZ-JSQ-JP-BI-KAFKA-005.jp:2181",
+//        |"brokerList":"kafka-broker-000.jp:9082,kafka-broker-001.jp:9083,kafka-broker-002.jp:9084,kafka-broker-003.jp:9085,kafka-broker-004.jp:9086,kafka-broker-005.jp:9087,kafka-broker-006.jp:9092,kafka-broker-007.jp:9093,kafka-broker-008.jp:9094,kafka-broker-009.jp:9095,kafka-broker-010.jp:9096,kafka-broker-011.jp:9097",
+//        |"topic":"mb_pageinfo_hash2",
+//        |"groupId":"pageinfo_direct_dw",
+//        |"consumerType":1,
+//        |"consumerTime":5}"
+//      """.stripMargin
+
+    var (zkQuorum, brokerList, topic, groupId, consumerType, consumerTime) = ("", "", "", "", "1", "60")
+
+    val it: util.Iterator[String] = argJson.fieldNames()
+    while(it.hasNext) {
+      val name = it.next()
+      name match {
+        case "zkQuorum" => zkQuorum = argJson.get("zkQuorum").toString
+        case "brokerList" => brokerList = argJson.get("brokerList").toString
+        case "topic" => topic = argJson.get("topic").toString
+        case "groupId" => groupId = argJson.get("topic").toString
+        case "consumerType" => consumerType = argJson.get("consumerType").toString
+        case "consumerTime" => consumerTime = argJson.get("consumerTime").toString
+      }
+    }
+
+    println(zkQuorum, brokerList, topic, groupId, consumerType, consumerTime)
+    System.exit(1)
+//    val Array(zkQuorum, brokerList, topic, groupId, consumerType, consumerTime) = args
 
     val groupIds = Set("pageinfo_direct_dw", "mbevent_direct_dw")
     if(!groupIds.contains(groupId)) {
