@@ -17,7 +17,6 @@ import scala.reflect.BeanProperty
 class InitConfig() {
 
   @BeanProperty var spconf: SparkConf = _
-  @BeanProperty var AppName: String = _
   @BeanProperty var ssc: StreamingContext = _
   @BeanProperty var duration: Duration = _
 
@@ -42,7 +41,8 @@ class InitConfig() {
 
   // 初始化 SparkConf 公共参数
   private def initSparkConfig(appName:String): Unit = {
-    val conf = new SparkConf().set("spark.akka.frameSize", "256")
+    val conf = new SparkConf().setAppName(appName)
+      .set("spark.akka.frameSize", "256")
       .set("spark.kryoserializer.buffer.max", "512m")
       .set("spark.kryoserializer.buffer", "256m")
       .set("spark.scheduler.mode", "FAIR")
@@ -132,14 +132,11 @@ object InitConfig {
   var DIMENT = new mutable.HashMap[String, Int]
 
   def initParam(appName: String, interval: Int) = {
-    // 根据 topic 设置 appName
-    ic.setAppName(appName)
-
     // 初始化 apark 超时时间, spark.mystreaming.batch.interval
     ic.setDuration(Seconds(interval))
 
     // 初始化 SparkConfig
-    ic.initSparkConfig(ic.getAppName)
+    ic.initSparkConfig(appName)
 
     ic.setStreamingContext()
 
