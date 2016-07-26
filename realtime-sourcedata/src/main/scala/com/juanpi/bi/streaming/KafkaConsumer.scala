@@ -191,7 +191,7 @@ object KafkaConsumer{
 
     // 初始化 SparkConfig StreamingContext HiveContext
     val ic = InitConfig
-    ic.initParam(topic, Config.interval)
+    ic.initParam(groupId, Config.interval)
     val ssc = ic.getStreamingContext()
 
     // 连接Kafka参数设置
