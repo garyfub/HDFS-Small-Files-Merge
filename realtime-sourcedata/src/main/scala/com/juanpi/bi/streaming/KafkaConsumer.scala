@@ -4,14 +4,14 @@ import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.InitConfig
 import com.juanpi.bi.transformer.ITransformer
 import kafka.serializer.StringDecoder
-import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
-import org.apache.spark.rdd.RDD
-import org.apache.spark.streaming.dstream.DStream
-import org.apache.spark.streaming.kafka.KafkaManager
-import org.apache.spark.streaming.{Seconds, StreamingContext}
-import org.apache.spark.Logging
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, _}
 import org.apache.hadoop.hbase.util.Bytes
+import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
+import org.apache.spark.Logging
+import org.apache.spark.rdd.RDD
+import org.apache.spark.streaming.StreamingContext
+import org.apache.spark.streaming.dstream.DStream
+import org.apache.spark.streaming.kafka.KafkaManager
 
 import scala.collection.mutable
 

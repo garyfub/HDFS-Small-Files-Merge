@@ -1,13 +1,8 @@
 package com.juanpi.bi.init
 
-import java.io.IOException
-
-import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
-import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Table}
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.SparkConf
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.storage.StorageLevel
-import com.typesafe.config.ConfigFactory
 import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
 /**
   * 默认情况下 Scala 使用不可变 Map。如果你需要使用可变集合，你需要显式的引入 import scala.collection.mutable.Map 类
@@ -31,7 +26,6 @@ class InitConfig() {
   @BeanProperty var hbase_family: String = _
 
   @BeanProperty var ticks_history: None.type = None
-  val table_ticks_history = TableName.valueOf("utm_history")
 
   def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)], mutable.HashMap[String, Int]) = {
     // 查询 hive 中的 dim_page 和 dim_event
@@ -63,20 +57,6 @@ class InitConfig() {
       .set("spark.eventLog.overwrite", "true")
     this.setSpconf(conf)
   }
-
-//  private def loadProperties():Unit = {
-//    val config = ConfigFactory.load("hbase.conf")
-//    zkQuorum = config.getString("hbaseConf.zkQuorum")
-//    this.setHbase_family(config.getString("hbaseConf.hbase_family"))
-//  }
-
-//  private def getHbaseConf(): Connection = {
-//    val hbaseConf = HBaseConfiguration.create()
-//    hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
-//    hbaseConf.setInt("timeout", 120000)
-//    //Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
-//    ConnectionFactory.createConnection(hbaseConf)
-//  }
 
   def initDimPage(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int, String, Int)] =
   {
@@ -163,9 +143,6 @@ object InitConfig {
 
     ic.setStreamingContext()
 
-    // load 配置文件
-//    ic.loadProperties()
-
     // 初始化 page and event
     DIMPAGE = ic.initDimPageEvent()._1
     DIMENT = ic.initDimPageEvent()._2
@@ -175,17 +152,4 @@ object InitConfig {
   def getStreamingContext(): StreamingContext = {
     ic.getSsc()
   }
-
-//  def getHbaseFamily =
-//  {
-//    ic.getHbase_family
-//  }
-
-  // hbase 创建连接
-//  def initTicksHistory(): Table =
-//  {
-//    try {
-//      ic.getHbaseConf().getTable(ic.table_ticks_history)
-//    }
-//  }
 }
