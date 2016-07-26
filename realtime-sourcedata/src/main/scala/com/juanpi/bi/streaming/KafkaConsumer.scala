@@ -40,31 +40,32 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
     // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
     // 数据块中的每一条记录需要处理
     dataDStream.map(_._2.replace("\0",""))
-        .filter(line => !line.contains("collect_api_responsetime"))
-        .transform(transMessage _)
-        .foreachRDD((rdd,time) =>
-        {
-          val conn = initHBaseConnection(zkQuorum)
-          val tab = conn.getTable(table_ticks_history)
+      .filter(line => !line.contains("collect_api_responsetime"))
+      .transform(transMessage _)
+      .filter(_._1 != "")
+      .foreachRDD((rdd, time) =>
+      {
+        val conn = initHBaseConnection(zkQuorum)
+        val tab = conn.getTable(table_ticks_history)
 
-          val newRdd = rdd.map(record => {
-            val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
-            val gu_id = user.gu_id
-            val app_name = user.site_id match {
-              case 1 => "jiu"
-              case 2 => "zhe"
-              case _ => ""
-            }
-            val (utm, gu_create_time) = getGuIdUtmInitDate(tab, gu_id + "_" + app_name)
-            user.utm_id = utm
-            user.gu_create_time = gu_create_time
-            (record._1, List(user, pageAndEvent, page, event).mkString("\u0001"))
-          })
-          // 保存数据至hdfs
-          newRdd.map(v => (v._1+"/"+time.milliseconds,v._2))
-            .repartition(1)
-            .saveAsMultiTextFiles(Config.baseDir+"/"+topic)
+        val newRdd = rdd.map(record => {
+          val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
+          val gu_id = user.gu_id
+          val app_name = user.site_id match {
+            case 1 => "jiu"
+            case 2 => "zhe"
+            case _ => ""
+          }
+          val (utm, gu_create_time) = getGuIdUtmInitDate(tab, gu_id + app_name)
+          user.utm_id = utm
+          user.gu_create_time = gu_create_time
+          (record._1, List(user, pageAndEvent, page, event).mkString("\u0001"))
         })
+        // 保存数据至hdfs
+        newRdd.map(v => (v._1+"/"+time.milliseconds,v._2))
+          .repartition(1)
+          .saveAsMultiTextFiles(Config.baseDir+"/"+topic)
+      })
 
     // 更新kafka offset
     dataDStream.foreachRDD { rdd =>
