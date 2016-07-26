@@ -46,7 +46,7 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
       {
         val table_ticks_history = TableName.valueOf("utm_history")
         val conn = initHBaseConnection(zkQuorum)
-        val tab = conn.getTable(table_ticks_history)
+        @transient val tab = conn.getTable(table_ticks_history)
 
         val newRdd = rdd.map(record => {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
