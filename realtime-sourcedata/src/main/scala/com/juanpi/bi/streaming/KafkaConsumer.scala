@@ -24,8 +24,7 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
 
   var transformer:ITransformer = null
 
-  @transient val HbaseFamily = "dw"
-  @transient val table_ticks_history = TableName.valueOf("utm_history")
+  val HbaseFamily = "dw"
 
   /**
     * event 过滤 collect_api_responsetime
@@ -45,6 +44,7 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
       .filter(_._1 != "")
       .foreachRDD((rdd, time) =>
       {
+        val table_ticks_history = TableName.valueOf("utm_history")
         val conn = initHBaseConnection(zkQuorum)
         val tab = conn.getTable(table_ticks_history)
 
