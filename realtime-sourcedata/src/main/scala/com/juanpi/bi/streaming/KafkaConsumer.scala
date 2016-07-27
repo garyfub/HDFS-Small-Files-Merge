@@ -54,7 +54,7 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
             case 2 => "zhe"
             case _ => ""
           }
-          val table_ticks_history = TableName.valueOf("utm_history")
+          val table_ticks_history = TableName.valueOf("ticks_history")
           val conn = initHBaseConnection(zkQuorum)
           val tab = conn.getTable(table_ticks_history)
           val (utm, gu_create_time) = getGuIdUtmInitDate(tab, gu_id + app_name)
@@ -88,29 +88,28 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
 
   /**
     * 查hbase 从 ticks_history 中查找 ticks 存在的记录
-    * @param gu_id
+    * @param id
     * @return
     */
-  private def getGuIdUtmInitDate(hbaseTable: Table, gu_id: String) = {
+  private def getGuIdUtmInitDate(hbaseTable: Table, id: String) = {
     var utm = ""
     var gu_create_time = ""
     val ticks_history = hbaseTable
-    val key = new Get(Bytes.toBytes(gu_id))
+    val key = new Get(Bytes.toBytes(id))
     println("=======> ticks_history.get:" + key)
     val ticks_res = ticks_history.get(key)
 
     if (!ticks_res.isEmpty) {
       utm = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "utm".getBytes))
-      gu_create_time = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "init_date".getBytes))
+      gu_create_time = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "gu_create_time".getBytes))
       (utm, gu_create_time)
     }
     else {
       // 如果不存在就写入 hbase
-      // 准备插入一条 key 为 id001 的数据
-      val p = new Put(gu_id.getBytes)
+      val p = new Put(id.getBytes)
       // 为put操作指定 column 和 value （以前的 put.add 方法被弃用了）
       p.addColumn(HbaseFamily.getBytes, "utm".getBytes, utm.getBytes)
-      p.addColumn(HbaseFamily.getBytes, "init_date".getBytes, gu_create_time.getBytes)
+      p.addColumn(HbaseFamily.getBytes, "gu_create_time".getBytes, gu_create_time.getBytes)
       //提交
       ticks_history.put(p)
       (utm, gu_create_time)
