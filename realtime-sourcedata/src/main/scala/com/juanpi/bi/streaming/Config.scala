@@ -5,7 +5,7 @@ package com.juanpi.bi.streaming
  */
 object Config {
 
-  val interval = System.getProperty("spark.mystreaming.batch.interval", "60").toInt
+  val interval = System.getProperty("spark.mystreaming.batch.interval", "300").toInt
 
   val dirPrefix = "/user/hadoop/gongzi/"
 
@@ -25,8 +25,10 @@ object Config {
   }
 
   def main(args: Array[String]) {
-    println(getTopicTransformerClass("mbevent"))
-    println(getTopicTransformerClass("pageinfo"))
+
+//    println(getTopicTransformerClass("mbevent"))
+//    println(getTopicTransformerClass("pageinfo"))
+    println(interval)
   }
 
 }

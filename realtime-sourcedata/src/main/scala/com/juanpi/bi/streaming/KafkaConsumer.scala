@@ -47,7 +47,7 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
       .foreachRDD((rdd, time) =>
       {
         val newRdd = rdd.map(record => {
-          println("------------->>::", record._1)
+//          println("------------->>::", record._1)
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
           val gu_id = user.gu_id
           val app_name = user.site_id match {
@@ -68,51 +68,6 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
     // 更新kafka offset
     dataDStream.foreachRDD { rdd =>
       km.updateOffsets(rdd)
-    }
-  }
-
-  private def getHBaseConnection(zkQuorum: String): Connection = {
-    // TODO
-    val hbaseConf = HBaseConfiguration.create()
-
-    hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
-    hbaseConf.setInt("timeout", 120000)
-    // Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
-    val conn = ConnectionFactory.createConnection(hbaseConf)
-    conn
-  }
-
-  /**
-    * 查hbase 从 ticks_history 中查找 ticks 存在的记录
-    * @param id
-    * @return
-    */
-  private def getGuIdUtmInitDate(id: String) = {
-
-    val table_ticks_history = TableName.valueOf("ticks_history")
-    val conn = getHBaseConnection(zkQuorum)
-    val ticks_history = conn.getTable(table_ticks_history)
-
-    var utm = ""
-    var gu_create_time = ""
-    val key = new Get(Bytes.toBytes(id))
-    println("=======> ticks_history.get:" + key)
-    val ticks_res = ticks_history.get(key)
-
-    if (!ticks_res.isEmpty) {
-      utm = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "utm".getBytes))
-      gu_create_time = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "gu_create_time".getBytes))
-      (utm, gu_create_time)
-    }
-    else {
-      // 如果不存在就写入 hbase
-      val p = new Put(id.getBytes)
-      // 为put操作指定 column 和 value （以前的 put.add 方法被弃用了）
-      p.addColumn(HbaseFamily.getBytes, "utm".getBytes, utm.getBytes)
-      p.addColumn(HbaseFamily.getBytes, "gu_create_time".getBytes, gu_create_time.getBytes)
-      //提交
-      ticks_history.put(p)
-      (utm, gu_create_time)
     }
   }
 
