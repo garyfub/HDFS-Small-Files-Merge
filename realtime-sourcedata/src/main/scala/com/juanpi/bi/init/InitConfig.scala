@@ -20,7 +20,7 @@ class InitConfig() {
   @BeanProperty var ssc: StreamingContext = _
   @BeanProperty var duration: Duration = _
 
-  val maxRate = "1000"
+  val maxRate = "100"
 
   def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)], mutable.HashMap[String, Int]) = {
     // 查询 hive 中的 dim_page 和 dim_event
