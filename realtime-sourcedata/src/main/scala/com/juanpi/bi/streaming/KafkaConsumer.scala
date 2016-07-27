@@ -61,7 +61,6 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
         })
         // 保存数据至hdfs
         newRdd.map(v => (v._1+"/"+time.milliseconds,v._2))
-          .repartition(1)
           .saveAsMultiTextFiles(Config.baseDir+"/"+topic)
       })
 
