@@ -25,7 +25,7 @@ hadoop fs -rm hdfs://nameservice1/user/hadoop/spark-jobs/gongzi/bi-dw-gongzi-rea
 #### kill spark 作业
 ```
     ## 查看数据
-    hadoop fs -ls /user/hadoop/gongzi/kafka_realoutput/mb_pageinfo_hash2/date=2016-07-21/hour=/
+    hadoop fs -ls /user/hadoop/gongzi/kafka_realoutput/mb_pageinfo_hash2/date=2016-07-27
 
     hadoop fs -copyToLocal /user/hadoop/gongzi/kafka_realoutput/mb_pageinfo_hash2/date=2016-07-21/hour=9/1469063340000-r-00000 /home/hadoop/users/gongzi/1469063340000.txt
 

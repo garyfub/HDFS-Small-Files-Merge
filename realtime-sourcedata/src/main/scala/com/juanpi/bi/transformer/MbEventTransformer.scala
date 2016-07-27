@@ -120,14 +120,15 @@
 //        }
 //      } else if ("page_h5".equals(pagename))
 //      {
-//        var pid = new GetPageID().evaluate(page_extends_param).toInt
+//        val pid = new GetPageID().evaluate(page_extends_param).toInt
 //        pid match {
 //          case 34 | 65 | 10069 => "page_active"
 //          case _ => (pagename + page_extends_param).toLowerCase()
 //        }
 //      } else if (!"page_tab".equals(pagename))
-//      { pagename }
-//      else
+//      {
+//        pagename
+//      } else
 //      {
 //        (pagename + page_extends_param).toLowerCase()
 //      }

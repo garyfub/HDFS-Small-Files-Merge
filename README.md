@@ -26,11 +26,13 @@ hadoop fs -rm hdfs://nameservice1/user/hadoop/spark-jobs/gongzi/bi-dw-gongzi-rea
 ```
     ## 查看数据
     hadoop fs -ls /user/hadoop/gongzi/kafka_realoutput/mb_pageinfo_hash2/date=2016-07-21/hour=/
+    hadoop fs -ls /user/hadoop/gongzi/kafka_realoutput/mb_pageinfo_hash2/
+
 
     hadoop fs -copyToLocal /user/hadoop/gongzi/kafka_realoutput/mb_pageinfo_hash2/date=2016-07-21/hour=9/1469063340000-r-00000 /home/hadoop/users/gongzi/1469063340000.txt
 
     ## 删除数据
-    hadoop fs -rmr /user/hadoop/gongzi/kafka_realoutput/mb_pageinfo_hash2/date=2016-07-19/hour=9/
+    hadoop fs -rmr /user/hadoop/gongzi/kafka_realoutput/mb_pageinfo_hash2/
 
     org.apache.spark.deploy.Client kill spark://GZ-JSQ-JP-BI-SPARK-001.jp:6066,GZ-JSQ-JP-BI-SPARK-002.jp:6066 <driver ID>
 ```
