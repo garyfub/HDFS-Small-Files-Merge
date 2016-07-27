@@ -3,7 +3,7 @@ package com.juanpi.bi.transformer
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.hiveUDF._
 import com.juanpi.bi.sc_utils.DateUtils
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsResultException, JsValue, Json}
 
 import scala.collection.mutable
 /**
@@ -138,7 +138,21 @@ class PageinfoTransformer extends ITransformer {
 
     if (row != null) {
       // 解析逻辑
-      val gu_id = pageAndEventParser.getGuid((row \ "jpid").as[String], (row \ "deviceid").as[String], (row \ "os").as[String])
+      var gu_id = ""
+      try
+      {
+        gu_id = pageAndEventParser.getGuid((row \ "jpid").asOpt[String].getOrElse(""),
+          (row \ "deviceid").asOpt[String].getOrElse(""),
+          (row \ "os").asOpt[String].getOrElse("")
+        )
+      } catch{
+        //使用模式匹配来处理异常
+        case ex:IllegalArgumentException => println(ex.getMessage())
+        case ex:RuntimeException=> { println(ex.getMessage()) }
+        case ex:JsResultException => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
+        case ex:Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
+      }
+
       if(!gu_id.isEmpty) {
         val res = parse(row, dimpage)
         (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, res)
