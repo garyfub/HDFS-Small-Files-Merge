@@ -43,10 +43,11 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
     dataDStream.map(_._2.replace("\0",""))
       .filter(line => !line.contains("collect_api_responsetime"))
       .transform(transMessage _)
-      .filter(_._1 != "")
+      .filter(!_._1.isEmpty)
       .foreachRDD((rdd, time) =>
       {
         val newRdd = rdd.map(record => {
+          println("------------->>::", record._1)
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
           val gu_id = user.gu_id
           val app_name = user.site_id match {
