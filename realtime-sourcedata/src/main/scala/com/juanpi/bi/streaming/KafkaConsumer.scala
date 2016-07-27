@@ -46,17 +46,6 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
       .filter(_._1 != "")
       .foreachRDD((rdd, time) =>
       {
-
-        val hbaseConf = HBaseConfiguration.create()
-        hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
-        hbaseConf.setInt("timeout", 120000)
-        // Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
-        val conn = ConnectionFactory.createConnection(hbaseConf)
-
-        val table_ticks_history = TableName.valueOf("utm_history")
-//        val conn = initHBaseConnection(zkQuorum)
-        val tab = conn.getTable(table_ticks_history)
-
         val newRdd = rdd.map(record => {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
           val gu_id = user.gu_id
@@ -65,7 +54,11 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
             case 2 => "zhe"
             case _ => ""
           }
+          val table_ticks_history = TableName.valueOf("utm_history")
+          val conn = initHBaseConnection(zkQuorum)
+          val tab = conn.getTable(table_ticks_history)
           val (utm, gu_create_time) = getGuIdUtmInitDate(tab, gu_id + app_name)
+          conn.close()
           user.utm_id = utm
           user.gu_create_time = gu_create_time
           (record._1, List(user, pageAndEvent, page, event).mkString("\u0001"))
@@ -82,14 +75,16 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
     }
   }
 
-//  private def initHBaseConnection(zkQuorum: String): Connection = {
-//    // TODO
-//    val hbaseConf = HBaseConfiguration.create()
-//    hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
-//    hbaseConf.setInt("timeout", 120000)
-//    // Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
-//    ConnectionFactory.createConnection(hbaseConf)
-//  }
+  private def initHBaseConnection(zkQuorum: String): Connection = {
+    // TODO
+    val hbaseConf = HBaseConfiguration.create()
+
+    hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
+    hbaseConf.setInt("timeout", 120000)
+    // Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
+    val conn = ConnectionFactory.createConnection(hbaseConf)
+    conn
+  }
 
   /**
     * 查hbase 从 ticks_history 中查找 ticks 存在的记录
@@ -146,6 +141,49 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
     }
   }
 }
+
+//object HBaseGetAndPut {
+//  private def initHBaseConnection(zkQuorum: String): Connection = {
+//    // TODO
+//    val hbaseConf = HBaseConfiguration.create()
+//    hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
+//    hbaseConf.setInt("timeout", 120000)
+//    // Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
+//    ConnectionFactory.createConnection(hbaseConf)
+//  }
+//
+//  /**
+//    * 查hbase 从 ticks_history 中查找 ticks 存在的记录
+//    * @param gu_id
+//    * @return
+//    */
+//  private def getGuIdUtmInitDate(hbaseTable: Table, gu_id: String) = {
+//    var utm = ""
+//    var gu_create_time = ""
+//    val ticks_history = hbaseTable
+//    val key = new Get(Bytes.toBytes(gu_id))
+//    println("=======> ticks_history.get:" + key)
+//    val ticks_res = ticks_history.get(key)
+//
+//    if (!ticks_res.isEmpty) {
+//      utm = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "utm".getBytes))
+//      gu_create_time = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "init_date".getBytes))
+//      (utm, gu_create_time)
+//    }
+//    else {
+//      // 如果不存在就写入 hbase
+//      // 准备插入一条 key 为 id001 的数据
+//      val p = new Put(gu_id.getBytes)
+//      // 为put操作指定 column 和 value （以前的 put.add 方法被弃用了）
+//      p.addColumn(HbaseFamily.getBytes, "utm".getBytes, utm.getBytes)
+//      p.addColumn(HbaseFamily.getBytes, "init_date".getBytes, gu_create_time.getBytes)
+//      //提交
+//      ticks_history.put(p)
+//      (utm, gu_create_time)
+//    }
+//  }
+//
+//}
 
 object KafkaConsumer{
 
