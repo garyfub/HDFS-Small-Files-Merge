@@ -22,11 +22,11 @@ class InitConfig() {
 
   val maxRate = "100"
 
-  def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)], mutable.HashMap[String, Int]) = {
+  def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)], mutable.HashMap[String, (Int, Int)]) = {
     // 查询 hive 中的 dim_page 和 dim_event
     val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
     val dp: mutable.HashMap[String, (Int, Int, String, Int)] = initDimPage(sqlContext)
-    val de: mutable.HashMap[String, Int] = initDimEvent(sqlContext)
+    val de: mutable.HashMap[String, (Int, Int)] = initDimEvent(sqlContext)
     (dp, de)
   }
 
@@ -90,10 +90,10 @@ class InitConfig() {
     dimPages
   }
 
-  def initDimEvent(sqlContext: HiveContext): mutable.HashMap[String, Int] =
+  def initDimEvent(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int)] =
   {
-    var dimEvents = new mutable.HashMap[String, Int]
-    val dimEventSql = s"""select event_id, event_exp1, event_exp2
+    var dimEvents = new mutable.HashMap[String, (Int, Int)]
+    val dimEventSql = s"""select event_id, event_exp1, event_exp2, event_type_id
                          | from dw.dim_event
                          | where event_id > 0
                          | and terminal_lvl1_id = 2
@@ -104,15 +104,17 @@ class InitConfig() {
 
     dimData.map(line => {
       val event_id = line.getAs[Int]("event_id")
+      val event_type_id = line.getAs[Int]("event_type_id")
       val event_exp1 = line.getAs[String]("event_exp1")
       val event_exp2 = line.getAs[String]("event_exp2")
 
       val key = event_exp1 + event_exp2
-      (event_id, key)
+      (event_id, event_type_id, key)
     }).collect().foreach( items => {
       val event_id: Int = items._1
-      val key = items._2
-      dimEvents += ( key -> event_id)
+      val event_type_id = items._2
+      val key = items._3
+      dimEvents += ( key -> (event_id, event_type_id))
     })
 
     dimData.unpersist(true)
@@ -126,7 +128,7 @@ object InitConfig {
   // 主构造器
   val ic = new InitConfig()
   var DIMPAGE = new mutable.HashMap[String, (Int, Int, String, Int)]
-  var DIMENT = new mutable.HashMap[String, Int]
+  var DIMENT = new mutable.HashMap[String, (Int, Int)]
 
   def initParam(appName: String, interval: Int) = {
     // 初始化 apark 超时时间, spark.mystreaming.batch.interval

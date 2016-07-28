@@ -124,16 +124,20 @@ object pageAndEventParser {
     *
     * @param page_id
     * @param extend_params
-    * @param d_page_level_id
+    * @param page_level_id
     * @return
     */
-  def getPageLevelId(page_id: Int, extend_params: String, d_page_level_id: Int): Int = {
-    val pid = new GetPageID().evaluate(extend_params)
-    pid.toInt match {
-      case 289|154 => d_page_level_id
-      case 34|65 => 2
-      case 10069 => 3
-      case _ => 0
+  def getPageLevelId(page_id: Int, extend_params: String, page_level_id: Int): Int = {
+    if(page_id != 154 || page_id != 289)
+      {
+        page_level_id
+      } else {
+      val pid = new GetPageID().evaluate(extend_params)
+      pid.toInt match {
+        case 34|65 => 2
+        case 10069 => 3
+        case _ => 0
+      }
     }
   }
 

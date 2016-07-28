@@ -21,12 +21,10 @@ import scala.collection.mutable
 import com.juanpi.bi.streaming.MultiOutputRDD._
 
 @SerialVersionUID(42L)
-class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)], zkQuorum: String)
+class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, String, Int)], dimEvent: mutable.HashMap[String, (Int, Int)], zkQuorum: String)
   extends Logging with Serializable {
 
   var transformer:ITransformer = null
-
-  val HbaseFamily = "dw"
 
   /**
     * event 过滤 collect_api_responsetime
@@ -56,7 +54,7 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
             case _ => ""
           }
           val (utm, gu_create_time) = HBaseHandler.getGuIdUtmInitDate(zkQuorum, gu_id + app_name)
-          user.utm_id = utm
+          user.utm = utm
           user.gu_create_time = gu_create_time
           (record._1, List(user, pageAndEvent, page, event).mkString("\u0001"))
         })
@@ -71,12 +69,12 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
     }
   }
 
-  def transMessage(rdd:RDD[String]):RDD[(String, Any)] = {
-    rdd.map{ msg =>parseMessage(msg) }
+  def parseMessage(message:String):(String, Any) = {
+    getTransformer().transform(message, dimPage, dimEvent)
   }
 
-  def parseMessage(message:String):(String, Any) = {
-    getTransformer().transform(message, dimpage)
+  def transMessage(rdd:RDD[String]):RDD[(String, Any)] = {
+    rdd.map { msg => parseMessage(msg) }
   }
 
   def getTransformer():ITransformer = {
@@ -119,6 +117,7 @@ object HBaseHandler {
 
   /**
     * 查hbase 从 ticks_history 中查找 ticks 存在的记录
+    *
     * @param zkQuorum
     * @param id
     * @return
@@ -151,14 +150,13 @@ object HBaseHandler {
       (utm, gu_create_time)
     }
   }
-
-
 }
 
 object KafkaConsumer{
 
   /**
     * "zkQuorum":"GZ-JSQ-JP-BI-KAFKA-001.jp:2181,GZ-JSQ-JP-BI-KAFKA-002.jp:2181,GZ-JSQ-JP-BI-KAFKA-003.jp:2181,GZ-JSQ-JP-BI-KAFKA-004.jp:2181,GZ-JSQ-JP-BI-KAFKA-005.jp:2181" "brokerList":"kafka-broker-000.jp:9082,kafka-broker-001.jp:9083,kafka-broker-002.jp:9084,kafka-broker-003.jp:9085,kafka-broker-004.jp:9086,kafka-broker-005.jp:9087,kafka-broker-006.jp:9092,kafka-broker-007.jp:9093,kafka-broker-008.jp:9094,kafka-broker-009.jp:9095,kafka-broker-010.jp:9096,kafka-broker-011.jp:9097" "topic":"mb_pageinfo_hash2" "groupId":"pageinfo_direct_dw" "consumerType":1 "consumerTime":5
+    *
     * @param args
     */
   def main(args: Array[String]) {
@@ -232,7 +230,7 @@ object KafkaConsumer{
     }
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
-    val consumer = new KafkaConsumer(topic, ic.DIMPAGE, zkQuorum)
+    val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, zkQuorum)
     consumer.process(message, ssc, km)
 
     ssc.start()
