@@ -196,8 +196,6 @@ object HBaseHandler {
       (utm, gu_create_time)
     }
   }
-
-
 }
 
 object KafkaConsumer{
