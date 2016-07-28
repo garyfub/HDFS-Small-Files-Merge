@@ -155,8 +155,8 @@ class PageinfoTransformer extends ITransformer {
 
       if(!gu_id.isEmpty) {
         val res = parse(row, dimpage)
-//        (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, res)
-        (DateUtils.dateHour((row \ "endtime").as[String].toLong).toString, res)
+        (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, res)
+//        (DateUtils.dateHour((row \ "endtime").as[String].toLong).toString, res)
         } else {
         ("", None)
       }
