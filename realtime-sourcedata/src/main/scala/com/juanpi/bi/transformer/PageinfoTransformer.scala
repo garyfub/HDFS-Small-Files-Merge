@@ -114,22 +114,22 @@ class PageinfoTransformer extends ITransformer {
     else ("", "", "", "")
 
     val jpk = 0
-    val table_source = "page"
+    val table_source = "mb_page"
     // 最终返回值
-    val event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadTime = ""
+    val event_id, event_value, rule_id, test_id, select_id, event_lvl2_value, loadTime = ""
 
     println("======>> page_id :: " + page_id)
     val (date, hour) = DateUtils.dateHourStr(endtime.toLong)
 
-    val user = User.apply(gu_id, utm, gu_create_time, session_id, terminal_id, app_version, site_id, ref_site_id, ctag)
-    val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, page_level_id, starttime, endtime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, jpk, pit_type, sortdate, sorthour, lplid, ptplid, gid, ugroup, table_source)
-    val page = Page.apply(source, ip, url,urlref,deviceid,to_switch)
-    val event = Event.apply(event_id,event_value,event_lvl2_value,rule_id,test_id,select_id)
+    val user = User.apply(gu_id, uid, utm, gu_create_time, session_id, terminal_id, app_version, site_id, ref_site_id, ctag, location, jpk, ugroup, date, hour)
+    val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, starttime, endtime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
+    val page = Page.apply(source, ip, url, urlref, deviceid, to_switch)
+    val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
     (user, pe, page, event)
   }
 
   // 返回解析的结果
-  def transform(line: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): (String, Any) = {
+  def transform(line: String, dimPage: mutable.HashMap[String, (Int, Int, String, Int)], dimEvent: mutable.HashMap[String, (Int, Int)]): (String, Any) = {
 
     //play
     val row = Json.parse(line.replaceAll("null", """\\"\\"""") )// .replaceAll("\\n", ""))
@@ -154,7 +154,7 @@ class PageinfoTransformer extends ITransformer {
       }
 
       if(!gu_id.isEmpty) {
-        val res = parse(row, dimpage)
+        val res = parse(row, dimPage)
         (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, res)
         } else {
         ("", None)
@@ -167,15 +167,6 @@ class PageinfoTransformer extends ITransformer {
 
 // for test
 object PageinfoTransformer{
-
-
-  def testCaseClazz(): (User, Page, Event) = {
-    val u = User("1", "1", "1", "1", 0, "1", 0, 0, "1")
-    val p = Page("2", "", "", "", "", "")
-    val e = Event("3", "", "", "", "", "")
-
-    (u, p, e)
-  }
 
   def main(args: Array[String]) {
 
@@ -191,10 +182,6 @@ object PageinfoTransformer{
 
     try{
       val line = Json.parse(pl)
-//      val dp = new mutable.HashMap[String, (Int, Int, String, Int)]
-      val (user:User, page: Page, event: Event) = testCaseClazz()
-      println(user.site_id)
-      println(page.source)
     }catch{
       //使用模式匹配来处理异常
       case ex:IllegalArgumentException=>println(ex.getMessage())

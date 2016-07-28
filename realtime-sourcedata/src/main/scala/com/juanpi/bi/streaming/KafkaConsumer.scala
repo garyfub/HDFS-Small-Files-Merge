@@ -21,12 +21,10 @@ import scala.collection.mutable
 import com.juanpi.bi.streaming.MultiOutputRDD._
 
 @SerialVersionUID(42L)
-class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)], zkQuorum: String)
+class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, String, Int)], dimEvent: mutable.HashMap[String, (Int, Int)], zkQuorum: String)
   extends Logging with Serializable {
 
   var transformer:ITransformer = null
-
-  val HbaseFamily = "dw"
 
   /**
     * event 过滤 collect_api_responsetime
@@ -55,7 +53,7 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
             case _ => ""
           }
           val (utm, gu_create_time) = HBaseHandler.getGuIdUtmInitDate(zkQuorum, gu_id + app_name)
-          user.utm_id = utm
+          user.utm = utm
           user.gu_create_time = gu_create_time
           (record._1, List(user, pageAndEvent, page, event).mkString("\u0001"))
         })
@@ -92,7 +90,7 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
     val table_ticks_history = TableName.valueOf("ticks_history")
     val conn = getHBaseConnection(zkQuorum)
     val ticks_history = conn.getTable(table_ticks_history)
-
+    val HbaseFamily = "dw"
     var utm = ""
     var gu_create_time = ""
     val key = new Get(Bytes.toBytes(id))
@@ -121,7 +119,7 @@ class KafkaConsumer(topic: String, dimpage: mutable.HashMap[String, (Int, Int, S
   }
 
   def parseMessage(message:String):(String, Any) = {
-    getTransformer().transform(message, dimpage)
+    getTransformer().transform(message, dimPage, dimEvent)
   }
 
   def getTransformer():ITransformer = {
@@ -275,7 +273,7 @@ object KafkaConsumer{
     }
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
-    val consumer = new KafkaConsumer(topic, ic.DIMPAGE, zkQuorum)
+    val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, zkQuorum)
     consumer.process(message, ssc, km)
 
     ssc.start()

@@ -26,7 +26,7 @@ class InitConfig() {
 
   @BeanProperty var ticks_history: None.type = None
 
-  def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)], mutable.HashMap[String, Int]) = {
+  def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)], mutable.HashMap[String, (Int, Int)]) = {
     // 查询 hive 中的 dim_page 和 dim_event
     val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
     val dp: mutable.HashMap[String, (Int, Int, String, Int)] = initDimPage(sqlContext)
@@ -131,7 +131,7 @@ object InitConfig {
   // 主构造器
   val ic = new InitConfig()
   var DIMPAGE = new mutable.HashMap[String, (Int, Int, String, Int)]
-  var DIMENT = new mutable.HashMap[String, Int]
+  var DIMENT = new mutable.HashMap[String, (Int, Int)]
 
   def initParam(appName: String, interval: Int) = {
     // 初始化 apark 超时时间, spark.mystreaming.batch.interval
