@@ -4,7 +4,6 @@ import com.juanpi.bi.utils.DecodeURLParam;
 import com.juanpi.bi.utils.DwPageValue;
 import com.juanpi.bi.utils.DwPageValue.Page_Pattern;
 import org.apache.commons.lang.StringUtils;
-import org.apache.hadoop.hive.ql.exec.UDF;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +17,8 @@ import java.util.regex.Pattern;
  * 获取pc端pagevalue
  * 2015年8月28日11:08:05
  */
-public class GetDwPcPageValue extends UDF {
+public class GetDwPcPageValue // extends UDF
+{
 	public String page_value;
 	public String page_type_id;
 	private Pattern pattern = Pattern

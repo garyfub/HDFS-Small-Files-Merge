@@ -1,7 +1,5 @@
 package com.juanpi.bi.hiveUDF;
 
-import org.apache.hadoop.hive.ql.exec.UDF;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -10,7 +8,8 @@ import java.util.regex.Pattern;
 /**
  * Created by gongzi on 2016/4/14.
  */
-public class GetSkcId extends UDF {
+public class GetSkcId // extends UDF
+{
 
     public String evaluate(String s) {
         String result = "";

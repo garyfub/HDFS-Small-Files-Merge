@@ -16,7 +16,8 @@ import java.util.regex.Pattern;
  *
  * @author xiaoqi 用法：GetPcPageValue(url,url_page_id)
  */
-public class GetPcPageValue {
+public class GetPcPageValue
+{
 
     public static String evaluate(String url, String page_id) {
         if (page_id == null || page_id.trim().length() == 0) {

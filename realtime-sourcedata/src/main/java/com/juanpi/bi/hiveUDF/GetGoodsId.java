@@ -1,7 +1,6 @@
 package com.juanpi.bi.hiveUDF;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.hadoop.hive.ql.exec.UDF;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -14,7 +13,8 @@ import java.util.regex.Pattern;
  * 用法：getGoodsId(String url)
  */
 
-public class GetGoodsId extends UDF  {
+public class GetGoodsId // extends UDF
+{
 	
 	private static StringBuilder sb = new StringBuilder();
 

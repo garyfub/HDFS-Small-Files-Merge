@@ -8,7 +8,8 @@ import com.juanpi.bi.utils.URLUtils;
  * @author 吕鹏
  *         用法：GetSiteId(String url)
  */
-public class GetSiteId {
+public class GetSiteId
+{
 
     /**
      * @param url, 传入的url
