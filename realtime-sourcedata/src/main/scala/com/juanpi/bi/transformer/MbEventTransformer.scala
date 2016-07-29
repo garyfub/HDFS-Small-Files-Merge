@@ -145,6 +145,7 @@ class MbEventTransformer extends ITransformer {
           case "-100" => "click_shoppingbag_recommendation"
           case "-101" => "click_orderdetails_recommendation"
           case "-102" => "click_detail_recommendation"
+          case "_1" => (activityname + t_extend_params).toLowerCase()
         }
       }
       else if ("click_navigation".equals(activityname)) {
