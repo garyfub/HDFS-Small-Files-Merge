@@ -113,7 +113,7 @@ class MbEventTransformer extends ITransformer {
       "page_tabjiu"
     } else if ("-5".equals(cid) || "-6".equals(cid)) {
       "page_tabyugao"
-    } else if (cid.toInt > 0 | (cid == "-100" && (f_page_extend_params == "10045" || f_page_extend_params == "100105"))) {
+    } else if ((!cid.isEmpty && cid.toInt > 0) | (cid == "-100" && (f_page_extend_params == "10045" || f_page_extend_params == "100105"))) {
       "page_tab"
     } else if ((cid == "0") && List("all", "past_zhe", "crazy_zhe", "jiu", "yugao").contains(f_page_extend_params)) {
       ""
