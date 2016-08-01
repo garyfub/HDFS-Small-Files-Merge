@@ -96,31 +96,38 @@ class MbEventTransformer extends ITransformer {
         t_extend_params
       }
 
+    // TODO cid = -1
+    var cid = ""
+    if (server_jsonstr.contains("cid")) {
+      val js_server_jsonstr = Json.parse(server_jsonstr)
+      cid = (js_server_jsonstr \ "cid").toString()
+    }
 
-    val for_pageid =
-      if (server_jsonstr.contains("cid")) {
-        var js_server_jsonstr = Json.parse(server_jsonstr)
-        var cid = (js_server_jsonstr \ "cid").toString()
-        cid match {
-          case "-1" => "page_taball"
-          case "-2" => "page_tabpast_zhe"
-          case "-3" => "page_tabcrazy_zhe"
-          case "-4" => "page_tabjiu"
-          case "-5" | "-6" => "page_tabyugao"
-          case _cid if cid.toInt > 0 | (cid == "-100" && (f_page_extend_params == "10045" || f_page_extend_params == "100105")) => "page_tab"
-          case _cid if (cid == "0") && List("all", "past_zhe", "crazy_zhe", "jiu", "yugao").contains(f_page_extend_params) => ""
-        }
-      } else if ("page_h5".equals(pagename)) {
-        val pid = new GetPageID().evaluate(f_page_extend_params).toInt
-        pid match {
-          case 34 | 65 | 10069 => "page_active"
-          case _ => (pagename + f_page_extend_params).toLowerCase()
-        }
-      } else if (!"page_tab".equals(pagename)) {
-        pagename
-      } else {
-        (pagename + f_page_extend_params).toLowerCase()
+    val for_pageid = if("-1".equals(cid)) {
+      "page_taball"
+    } else if("-2".equals(cid)) {
+      "page_tabpast_zhe"
+    } else if("-3".equals(cid)) {
+      "page_tabcrazy_zhe"
+    } else if ("-4".equals(cid)) {
+      "page_tabjiu"
+    } else if ("-5".equals(cid) || "-6".equals(cid)) {
+      "page_tabyugao"
+    } else if (cid.toInt > 0 | (cid == "-100" && (f_page_extend_params == "10045" || f_page_extend_params == "100105"))) {
+      "page_tab"
+    } else if ((cid == "0") && List("all", "past_zhe", "crazy_zhe", "jiu", "yugao").contains(f_page_extend_params)) {
+      ""
+    } else if ("page_h5".equals(pagename)) {
+      val pid = new GetPageID().evaluate(f_page_extend_params).toInt
+      pid match {
+        case 34 | 65 | 10069 => "page_active"
+        case _ => (pagename + f_page_extend_params).toLowerCase()
       }
+    } else if (!"page_tab".equals(pagename)) {
+      pagename
+    } else {
+      (pagename + f_page_extend_params).toLowerCase()
+    }
 
     val for_pre_pageid =
       if ("page_h5".equals(pagename)) {
@@ -136,23 +143,19 @@ class MbEventTransformer extends ITransformer {
         (pre_page + f_pre_extend_params).toLowerCase()
       }
 
-    val for_eventid =
-      if (server_jsonstr.contains("cid")) {
-        val js_server_jsonstr = Json.parse(server_jsonstr)
-        val cid = (js_server_jsonstr \ "cid").toString()
-        cid match {
-          case "-6" => "click_yugao_recommendation"
-          case "-100" => "click_shoppingbag_recommendation"
-          case "-101" => "click_orderdetails_recommendation"
-          case "-102" => "click_detail_recommendation"
-          case "_1" => (activityname + t_extend_params).toLowerCase()
-        }
-      }
-      else if ("click_navigation".equals(activityname)) {
-        activityname
-      } else {
-        (activityname + t_extend_params).toLowerCase()
-      }
+    val for_eventid = if("-6".equals(cid)) {
+      "click_yugao_recommendation"
+    } else if("-100".equals(cid)) {
+      "click_shoppingbag_recommendation"
+    } else if("-101".equals(cid)) {
+      "click_orderdetails_recommendation"
+    } else if ("-102".equals(cid)) {
+      "click_detail_recommendation"
+    } else if ("click_navigation".equals(activityname)) {
+      activityname
+    } else {
+      (activityname + t_extend_params).toLowerCase()
+    }
 
     val rule_id = getAbinfo(extend_params, "rule_id")
     val test_id = getAbinfo(extend_params, "test_id")
