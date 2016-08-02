@@ -12,7 +12,7 @@ object Config {
   val checkpoindDir= dirPrefix + "sparkstreaming/checkpoint"
 
   // todo 配置 baseDir
-  val baseDir = System.getProperty("spark.juanpi.bi.realtime.basedir", dirPrefix + "kafka_realoutput_path_list")
+  val baseDir = System.getProperty("spark.juanpi.bi.realtime.basedir", dirPrefix + "dw_real_for_path_list")
 
   private val transformerPackage="com.juanpi.bi.transformer"
   val kafkaTopicMap:Map[String, Seq[String]] = Map(

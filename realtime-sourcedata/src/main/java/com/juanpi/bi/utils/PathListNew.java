@@ -26,8 +26,8 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
  */
 public class PathListNew {
 
-    static final String INPUT_PATH = "input";
-    static final String OUT_PATH = "output";
+    static final String INPUT_PATH = "/user/hadoop/gongzi/dw_real_for_path_list/date=2016-08-02/";
+    static final String OUT_PATH = "/user/hadoop/gongzi/dw_real_path_list/date=2016-08-02/";
 
     public static void main(String[] args) throws Exception {
 
