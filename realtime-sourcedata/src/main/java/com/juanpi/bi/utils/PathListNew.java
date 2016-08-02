@@ -39,18 +39,19 @@ public class PathListNew {
 
         //FileSystem是用户操作HDFS的核心类，它获得URI对应的HDFS文件系统
         FileSystem fs = null;
+        FileSystem fileSystem = FileSystem.get(new URI(INPUT_PATH), conf);
 //        static FileSystem fs = null;
         try {
-            //默认的hadoop的fs.defaultFS的端口号为8020，这里需要跟集群里面的配置一致
-            conf.set("fs.defaultFS","hdfs://nameservice1/");
+            // 默认的hadoop的fs.defaultFS的端口号为8020，这里需要跟集群里面的配置一致
+            conf.set("fs.defaultFS", "hdfs://nameservice1/");
             fs = FileSystem.get(conf);
-
-            if(fs.exists(new Path(OUT_PATH))){
-                fs.delete(new Path(OUT_PATH), true);
-            }
         } catch (IOException e) {
             System.out.println(("初始化FileSystem失败！"));
             System.out.println(e.getStackTrace());
+        }
+
+        if(fs.exists(new Path(OUT_PATH))){
+            fs.delete(new Path(OUT_PATH), true);
         }
 
         final Job job = new Job(conf, PathListNew.class.getSimpleName());
