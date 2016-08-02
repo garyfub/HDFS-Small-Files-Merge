@@ -26,18 +26,25 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
  */
 public class PathListNew {
 
-    static final String INPUT_PATH = "/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/";
+//    static final Path INPUT_PATH = new Path("hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/");
+    static final String INPUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/";
     static final String OUT_PATH = "/user/hadoop/gongzi/dw_real_path_list/date=2016-07-30/gu_hash=0/";
 
     public static void main(String[] args) throws Exception {
 
-        final Configuration configuration = new Configuration();
+//        第一个参数传递进来的是hadoop文件系统中的某个文件的URI,以hdfs://ip 的theme开头
+//        String uri = args[0];
 
-        final FileSystem fileSystem = FileSystem.get(new URI(INPUT_PATH), configuration);
-        if(fileSystem.exists(new Path(OUT_PATH))){
-            fileSystem.delete(new Path(OUT_PATH), true);
+        final Configuration conf = new Configuration();
+
+        //FileSystem是用户操作HDFS的核心类，它获得URI对应的HDFS文件系统
+        final FileSystem fs = FileSystem.get(URI.create(INPUT_PATH), conf);
+
+        if(fs.exists(new Path(OUT_PATH))){
+            fs.delete(new Path(OUT_PATH), true);
         }
-        final Job job = new Job(configuration, PathListNew.class.getSimpleName());
+
+        final Job job = new Job(conf, PathListNew.class.getSimpleName());
 
         //1.1 指定输入文件路径
         FileInputFormat.setInputPaths(job, INPUT_PATH);
