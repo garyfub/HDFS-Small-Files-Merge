@@ -102,7 +102,7 @@ class MbEventTransformer extends ITransformer {
       val js_server_jsonstr = Json.parse(server_jsonstr)
       cid = (js_server_jsonstr \ "cid").toString()
     }
-
+    println("=======>> server_jsonstr::", server_jsonstr)
     val for_pageid = if("-1".equals(cid)) {
       "page_taball"
     } else if("-2".equals(cid)) {

@@ -34,7 +34,7 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     * @param ssc
     * @param km
     */
-  def process(dataDStream: DStream[(String, String)], ssc: StreamingContext, km: KafkaManager) = {
+  def eventProcess(dataDStream: DStream[(String, String)], ssc: StreamingContext, km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
     // 数据块中的每一条记录需要处理
@@ -44,19 +44,28 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
       .filter(!_._1.isEmpty)
       .foreachRDD((rdd, time) =>
       {
+        // 保存数据至hdfs
+        rdd.map(v => (v._1 + "/" + v._2 + time.milliseconds, v._3))
+          .saveAsMultiTextFiles(Config.baseDir + "/")
+      })
+
+    // 更新kafka offset
+    dataDStream.foreachRDD { rdd =>
+      km.updateOffsets(rdd)
+    }
+  }
+
+  def pageProcess(dataDStream: DStream[(String, String)], ssc: StreamingContext, km: KafkaManager) = {
+    // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
+    // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
+    // 数据块中的每一条记录需要处理
+    dataDStream.map(_._2.replace("\0",""))
+      .transform(transMessage _)
+      .filter(!_._1.isEmpty)
+      .foreachRDD((rdd, time) =>
+      {
         val newRdd = rdd.map(record => {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._3
-          val gu_id = user.gu_id
-
-          val app_name = user.site_id match {
-            case 1 => "jiu"
-            case 2 => "zhe"
-            case _ => ""
-          }
-
-          val (utm, gu_create_time) = HBaseHandler.getGuIdUtmInitDate(zkQuorum, gu_id + app_name)
-          user.utm = utm
-          user.gu_create_time = gu_create_time
 
           (record._1, (record._2, List(user, pageAndEvent, page, event).mkString("\u0001")))
         })
@@ -234,7 +243,14 @@ object KafkaConsumer{
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
     val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, zkQuorum)
-    consumer.process(message, ssc, km)
+    if(topic.contains("page")) {
+      consumer.pageProcess(message, ssc, km)
+    } else if(topic.contains("event")) {
+      consumer.eventProcess(message, ssc, km)
+    } else {
+      println("请指定需要解析的kafka Topic！！")
+      System.exit(1)
+    }
 
     ssc.start()
     ssc.awaitTermination()
