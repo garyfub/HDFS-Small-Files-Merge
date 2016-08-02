@@ -50,7 +50,7 @@ public class PathListNew {
             }
         } catch (IOException e) {
             System.out.println(("初始化FileSystem失败！"));
-            System.out.println(e.getStackTrace());
+            System.out.println(e.getMessage());
         }
 
         final Job job = new Job(conf, PathListNew.class.getSimpleName());
