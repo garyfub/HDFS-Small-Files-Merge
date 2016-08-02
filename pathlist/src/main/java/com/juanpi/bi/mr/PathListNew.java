@@ -1,4 +1,4 @@
-package com.juanpi.bi.utils;
+package com.juanpi.bi.mr;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -25,11 +25,9 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
  * Created by kaenr on 2016/7/13.
  */
 public class PathListNew {
-
     static final String INPUT_PATH = "input";
     static final String OUT_PATH = "output";
-
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception{
         final Configuration configuration = new Configuration();
 
         final FileSystem fileSystem = FileSystem.get(new URI(INPUT_PATH), configuration);
