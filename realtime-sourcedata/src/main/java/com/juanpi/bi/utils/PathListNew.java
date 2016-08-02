@@ -38,7 +38,7 @@ public class PathListNew {
         final Configuration conf = new Configuration();
 
         //FileSystem是用户操作HDFS的核心类，它获得URI对应的HDFS文件系统
-        FileSystem fs = null;
+        FileSystem fs;
 
         try {
             // 默认的hadoop的fs.defaultFS的端口号为8020，这里需要跟集群里面的配置一致
