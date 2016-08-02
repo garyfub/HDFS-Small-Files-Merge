@@ -34,7 +34,7 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     * @param ssc
     * @param km
     */
-  def process(dataDStream: DStream[(String,String)], ssc: StreamingContext, km: KafkaManager) = {
+  def process(dataDStream: DStream[(String, String)], ssc: StreamingContext, km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
     // 数据块中的每一条记录需要处理
@@ -45,22 +45,25 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
       .foreachRDD((rdd, time) =>
       {
         val newRdd = rdd.map(record => {
-//          println("------------->>::", record._1)
-          val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._2
+          val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._3
           val gu_id = user.gu_id
+
           val app_name = user.site_id match {
             case 1 => "jiu"
             case 2 => "zhe"
             case _ => ""
           }
+
           val (utm, gu_create_time) = HBaseHandler.getGuIdUtmInitDate(zkQuorum, gu_id + app_name)
           user.utm = utm
           user.gu_create_time = gu_create_time
-          (record._1, List(user, pageAndEvent, page, event).mkString("\u0001"))
+
+          (record._1, (record._2, List(user, pageAndEvent, page, event).mkString("\u0001")))
         })
+
         // 保存数据至hdfs
-        newRdd.map(v => (v._1+"/"+time.milliseconds,v._2))
-          .saveAsMultiTextFiles(Config.baseDir+"/"+topic)
+        newRdd.map(v => (v._1 + "/" + v._2._1 + time.milliseconds, v._2._2))
+          .saveAsMultiTextFiles(Config.baseDir + "/" + topic)
       })
 
     // 更新kafka offset
@@ -69,11 +72,11 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     }
   }
 
-  def parseMessage(message:String):(String, Any) = {
+  def parseMessage(message:String):(String, String, Any) = {
     getTransformer().transform(message, dimPage, dimEvent)
   }
 
-  def transMessage(rdd:RDD[String]):RDD[(String, Any)] = {
+  def transMessage(rdd:RDD[String]):RDD[(String, String, Any)] = {
     rdd.map { msg => parseMessage(msg) }
   }
 
@@ -88,7 +91,7 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
   def save(page_event: DStream[(String, String)]) = {
     page_event.foreachRDD{ (rdd,time) =>
       rdd.map(v => (v._1+"/"+time.milliseconds,v._2))
-        .repartition(1)
+//        .repartition(1)
         .saveAsMultiTextFiles(Config.baseDir+"/"+topic)
     }
   }

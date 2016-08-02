@@ -104,10 +104,10 @@ class PageinfoTransformer extends ITransformer {
       gsort_key = (js_server_jsonstr \ "_gsort_key").asOpt[String].getOrElse("")
     }
 
-    val (sortdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty) {
+    val (sortdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty && gsort_key.contains("_")) {
       val sortdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
       val sorthour = gsort_key.split("_")(4)
-      val lplid = gsort_key.split("_")(6)
+      val lplid = gsort_key.split("_")(5)
       val ptplid = gsort_key.split("_")(6)
       (sortdate, sorthour, lplid, ptplid)
     }
@@ -129,7 +129,7 @@ class PageinfoTransformer extends ITransformer {
   }
 
   // 返回解析的结果
-  def transform(line: String, dimPage: mutable.HashMap[String, (Int, Int, String, Int)], dimEvent: mutable.HashMap[String, (Int, Int)]): (String, Any) = {
+  def transform(line: String, dimPage: mutable.HashMap[String, (Int, Int, String, Int)], dimEvent: mutable.HashMap[String, (Int, Int)]): (String, String, Any) = {
 
     //play
     val row = Json.parse(line.replaceAll("null", """\\"\\"""") )// .replaceAll("\\n", ""))
@@ -155,13 +155,13 @@ class PageinfoTransformer extends ITransformer {
 
       if(!gu_id.isEmpty) {
         val res = parse(row, dimPage)
-        (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, res)
+        (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, "page", res)
 //        (DateUtils.dateHour((row \ "endtime").as[String].toLong).toString, res)
         } else {
-        ("", None)
+        ("", "", None)
       }
     } else {
-      ("", None)
+      ("", "", None)
     }
   }
 }
