@@ -8,24 +8,29 @@ scp /data/home/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar 
 scp ~/dev_pro/dw-realtime/realtime-sourcedata/target/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/
 
 ssh hadoop@spark001.jp
-## on sparkoo1.jp
+# on sparkoo1.jp
 
 hadoop fs -mkdir /user/hadoop/spark-jobs/gongzi
 hadoop fs -ls /user/hadoop/spark-jobs/gongzi
 
-## 上传
+# 上传
 hadoop fs -put /home/hadoop/users/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar /user/hadoop/spark-jobs/gongzi/
 
-## 删除
+# 删除
 hadoop fs -rm hdfs://nameservice1/user/hadoop/spark-jobs/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 hadoop fs -rm hdfs://nameservice1/user/hadoop/spark-jobs/gongzi/bi-dw-gongzi-realtime.sh
 ```
 
+#### PathList Test
+```
+ java -cp realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.utils.PathListNew
+```
+
 #### kill spark 作业
 ```
     ## 查看数据
-    hadoop fs -ls /user/hadoop/gongzi/kafka_realoutput/mb_pageinfo_hash2/date=2016-07-27
+    hadoop fs -ls /user/hadoop/gongzi/dw_real_for_path_list/date=2016-08-02
 
     hadoop fs -copyToLocal /user/hadoop/gongzi/kafka_realoutput/mb_pageinfo_hash2/date=2016-07-21/hour=9/1469063340000-r-00000 /home/hadoop/users/gongzi/1469063340000.txt
 
