@@ -54,7 +54,7 @@ object pageAndEventParser {
   }
 
   def getGsortPit(server_jsonstr: String): (Int, String) = {
-    if (!server_jsonstr.isEmpty()) {
+    if (!server_jsonstr.isEmpty() && !server_jsonstr.equals("{}")) {
       val js_server_jsonstr = Json.parse(server_jsonstr)
       val pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
       val gsort_key = (js_server_jsonstr \ "_gsort_key").asOpt[String].getOrElse("")

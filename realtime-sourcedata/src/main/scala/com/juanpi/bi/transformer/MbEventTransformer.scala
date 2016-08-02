@@ -316,8 +316,16 @@ class MbEventTransformer extends ITransformer {
         }
 
         if(!gu_id.isEmpty) {
-          val res = parse(row, dimpage, dimevent)
-          (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, "event", res)
+          try {
+            val res = parse(row, dimpage, dimevent)
+            (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, "event", res)
+          } catch {
+            //使用模式匹配来处理异常
+            case ex:Exception => {
+              println(ex.getStackTraceString, "\n======>>异常数据:" + row)
+              ("", "", None)
+            }
+          }
         } else {
           ("", "", None)
         }
