@@ -63,7 +63,7 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
 
         // 保存数据至hdfs
         newRdd.map(v => (v._1 + "/" + v._2._1 + time.milliseconds, v._2._2))
-          .saveAsMultiTextFiles(Config.baseDir + "/" + topic)
+          .saveAsMultiTextFiles(Config.baseDir + "/")
       })
 
     // 更新kafka offset
