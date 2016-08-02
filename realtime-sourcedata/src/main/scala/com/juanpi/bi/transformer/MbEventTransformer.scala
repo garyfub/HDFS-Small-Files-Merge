@@ -100,8 +100,9 @@ class MbEventTransformer extends ITransformer {
     var cid = ""
     if (server_jsonstr.contains("cid")) {
       val js_server_jsonstr = Json.parse(server_jsonstr)
-      cid = (js_server_jsonstr \ "cid").toString()
+      cid = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
     }
+
     println("=======>> server_jsonstr::", server_jsonstr)
     val for_pageid = if("-1".equals(cid)) {
       "page_taball"
@@ -161,26 +162,9 @@ class MbEventTransformer extends ITransformer {
     val test_id = getAbinfo(extend_params, "test_id")
     val select_id = getAbinfo(extend_params, "select")
 
-    var pit_type = 0
-    var gsort_key = ""
-    if (!server_jsonstr.isEmpty()) {
-      val js_server_jsonstr = Json.parse(server_jsonstr)
-      pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
-      gsort_key = (js_server_jsonstr \ "_gsort_key").asOpt[String].getOrElse("")
-    }
+    val (pit_type, gsort_key) = pageAndEventParser.getGsortPit(server_jsonstr)
 
-
-    val (sortdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty && gsort_key.contains("_")) {
-      val sortdate = Array(gsort_key.split("_")(3).substring(0, 4), gsort_key.split("_")(3).substring(4, 6), gsort_key.split("_")(3).substring(6, 8)).mkString("-")
-      val sorthour = gsort_key.split("_")(4)
-      val lplid = gsort_key.split("_")(5)
-      var ptplid = ""
-        if(gsort_key.split("_").length > 6 ){
-        ptplid = gsort_key.split("_")(6)
-      }
-      (sortdate, sorthour, lplid, ptplid)
-    }
-    else ("", "", "", "")
+    val (sortdate, sorthour, lplid, ptplid) = pageAndEventParser.getGsortKey(gsort_key)
 
     // --------------------------------------------------------------------> event_reg ------------------------------------------------------------------
     val (d_event_id: Int, event_type_id: Int) = dimevent.get(for_eventid).getOrElse(0, 0)
