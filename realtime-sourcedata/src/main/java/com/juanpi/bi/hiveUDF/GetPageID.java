@@ -1,11 +1,8 @@
 package com.juanpi.bi.hiveUDF;
 
-import org.apache.hadoop.hive.ql.exec.Description;
-import org.apache.hadoop.hive.ql.exec.UDF;
-
 import com.juanpi.bi.utils.PageTypeUtils;
+import org.apache.hadoop.hive.ql.exec.Description;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,7 +11,8 @@ import java.util.List;
  * 用法：getPageid(String url)
  */
 @Description(name = "GetPageID", value = "_FUNC_(string url1) - Return the page id of  url, can batch used.")
-public class GetPageID extends UDF  {
+public class GetPageID // extends UDF
+{
 	
 	/**
 	 * 获取指定url 对应的一级页面类型

@@ -1,7 +1,7 @@
 package com.juanpi.bi.sc_utils
 
-import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.hive.HiveContext
+import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.io.Source
 

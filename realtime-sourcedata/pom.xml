@@ -15,6 +15,7 @@
         <scala.binary.version>2.10</scala.binary.version>
         <spark.version>1.6.1</spark.version>
         <hbase.version>1.2.0-cdh5.7.1</hbase.version>
+        <hive.version>2.1.0</hive.version>
         <encoding>UTF-8</encoding>
     </properties>
 
@@ -151,26 +152,26 @@
             <artifactId>httpclient</artifactId>
             <version>4.3.2</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-yarn-client</artifactId>
-            <version>2.5.0-cdh5.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-yarn-common</artifactId>
-            <version>2.5.0-cdh5.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-yarn-api</artifactId>
-            <version>2.5.0-cdh5.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-common</artifactId>
-            <version>2.5.0-cdh5.2.0</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.apache.hadoop</groupId>-->
+            <!--<artifactId>hadoop-yarn-client</artifactId>-->
+            <!--<version>2.5.0-cdh5.2.0</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.hadoop</groupId>-->
+            <!--<artifactId>hadoop-yarn-common</artifactId>-->
+            <!--<version>2.5.0-cdh5.2.0</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.hadoop</groupId>-->
+            <!--<artifactId>hadoop-yarn-api</artifactId>-->
+            <!--<version>2.5.0-cdh5.2.0</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.hadoop</groupId>-->
+            <!--<artifactId>hadoop-common</artifactId>-->
+            <!--<version>2.5.0-cdh5.2.0</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>joda-time</groupId>

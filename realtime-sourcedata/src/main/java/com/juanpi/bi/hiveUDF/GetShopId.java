@@ -5,9 +5,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.hadoop.hive.ql.exec.UDF;
-
-public class GetShopId extends UDF{
+public class GetShopId // extends UDF
+{
 	
 	public String evaluate(final String url) {
 		GetGoodsId gh=new GetGoodsId(); 

@@ -3,13 +3,12 @@ package com.juanpi.bi.hiveUDF;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.hadoop.hive.ql.exec.UDF;
-
 /**
  * 获取mbpagevalue
  * 用法：GetMbPageValue(extend_params,page_type_id)
  */
-public class GetDwMbPageValue extends UDF {
+public class GetDwMbPageValue // extends UDF
+{
 	private Pattern p = Pattern.compile("(zhuanti|act|event)/([a-zA-Z0-9]+)");
 
 	public String evaluate(String extend_params, String page_type_id) {

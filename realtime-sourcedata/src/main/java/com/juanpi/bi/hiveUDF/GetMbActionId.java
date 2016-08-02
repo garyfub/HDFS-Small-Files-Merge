@@ -2,14 +2,14 @@ package com.juanpi.bi.hiveUDF;
 
 import com.juanpi.bi.utils.IDSChecker;
 import com.juanpi.bi.utils.IDSChecker.Page_Pattern;
-import org.apache.hadoop.hive.ql.exec.UDF;
 
 import java.util.List;
 
 /**
  * Created by gongzi on 2016/7/11.
  */
-public class GetMbActionId extends UDF{
+public class GetMbActionId // extends UDF
+{
 
     public Integer evaluate(final String s) {
         IDSChecker.getInstance("MbActionID.properties");

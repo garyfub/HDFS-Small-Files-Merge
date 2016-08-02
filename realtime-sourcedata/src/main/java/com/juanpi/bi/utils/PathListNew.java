@@ -25,9 +25,12 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
  * Created by kaenr on 2016/7/13.
  */
 public class PathListNew {
-    static final String INPUT_PATH = "input";
-    static final String OUT_PATH = "output";
-    public static void main(String[] args) throws Exception{
+
+    static final String INPUT_PATH = "/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/";
+    static final String OUT_PATH = "/user/hadoop/gongzi/dw_real_path_list/date=2016-07-30/gu_hash=0/";
+
+    public static void main(String[] args) throws Exception {
+
         final Configuration configuration = new Configuration();
 
         final FileSystem fileSystem = FileSystem.get(new URI(INPUT_PATH), configuration);
@@ -74,7 +77,8 @@ public class PathListNew {
             final NewK2 k2 = new NewK2(splited[2], Long.parseLong(splited[26]));
             //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
             // page_level_id    对应的路径    line
-            String str[] = {splited[13],splited[9]+"\t"+splited[10]+"\t"+splited[14]+"\t"+splited[36]+"\t"+splited[37]+"\t"+splited[41]+"\t"+splited[27],value.toString().replace("\u0001","\t")};
+            String str[] = {splited[13],
+                    splited[9]+"\t"+splited[10]+"\t"+splited[14]+"\t"+splited[36]+"\t"+splited[37]+"\t"+splited[41]+"\t"+splited[27],value.toString().replace("\u0001","\t")};
             final TextArrayWritable v2 = new TextArrayWritable(str);
 
             System.out.println(xx+  splited[2] +  "日志日志"+  splited[26] + "日志日志"+  splited[13]  + "日志日志"+  splited[9]  );

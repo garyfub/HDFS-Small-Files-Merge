@@ -8,24 +8,29 @@ scp /data/home/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar 
 scp ~/dev_pro/dw-realtime/realtime-sourcedata/target/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/
 
 ssh hadoop@spark001.jp
-## on sparkoo1.jp
+# on sparkoo1.jp
 
 hadoop fs -mkdir /user/hadoop/spark-jobs/gongzi
 hadoop fs -ls /user/hadoop/spark-jobs/gongzi
 
-## 上传
+# 上传
 hadoop fs -put /home/hadoop/users/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar /user/hadoop/spark-jobs/gongzi/
 
-## 删除
+# 删除
 hadoop fs -rm hdfs://nameservice1/user/hadoop/spark-jobs/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 hadoop fs -rm hdfs://nameservice1/user/hadoop/spark-jobs/gongzi/bi-dw-gongzi-realtime.sh
 ```
 
+#### PathList Test
+```
+ java -cp realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.utils.PathListNew
+```
+
 #### kill spark 作业
 ```
     ## 查看数据
-    hadoop fs -ls /user/hadoop/gongzi/kafka_realoutput/mb_pageinfo_hash2/date=2016-07-21/hour=/
+    hadoop fs -ls /user/hadoop/gongzi/dw_real_for_path_list/date=2016-08-02
 
     hadoop fs -copyToLocal /user/hadoop/gongzi/kafka_realoutput/mb_pageinfo_hash2/date=2016-07-21/hour=9/1469063340000-r-00000 /home/hadoop/users/gongzi/1469063340000.txt
 
@@ -35,14 +40,18 @@ hadoop fs -rm hdfs://nameservice1/user/hadoop/spark-jobs/gongzi/bi-dw-gongzi-rea
     org.apache.spark.deploy.Client kill spark://GZ-JSQ-JP-BI-SPARK-001.jp:6066,GZ-JSQ-JP-BI-SPARK-002.jp:6066 <driver ID>
 ```
 
-##### 集群模式：上线脚本-V-new bi-dw-gongzi-realtime.sh
-mb_pageinfo_hash2
-mb_event_hash2
+##### Kafka Topic：
+- pageinfo：mb_pageinfo_hash2
+- event：mb_event_hash2
+
+##### 集群模式：pageinfo 测试脚本-V-new bi-dw-gongzi-realtime.sh
 
 ```
 #!/usr/bin/env bash
 
 #params=("$@")
+
+echo "gongzi parse mb_pageinfo_hash2 com.juanpi.bi.streaming.KafkaConsumer start..."
 
 /data/apache_projects/spark-hadoop-2.4.0/bin/spark-submit \
     --class com.juanpi.bi.streaming.KafkaConsumer \
@@ -54,7 +63,7 @@ mb_event_hash2
     --total-executor-cores 12 \
     --conf "spark.default.parallelism=12" \
     --driver-java-options "-XX:PermSize=1024M -XX:MaxPermSize=3072M -Xmx4096M -Xms2048M -Xmn1024M" \
-    hdfs://nameservice1/user/hadoop/spark-jobs/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar GZ-JSQ-JP-BI-KAFKA-001.jp:2181,GZ-JSQ-JP-BI-KAFKA-002.jp:2181,GZ-JSQ-JP-BI-KAFKA-003.jp:2181,GZ-JSQ-JP-BI-KAFKA-004.jp:2181,GZ-JSQ-JP-BI-KAFKA-005.jp:2181 kafka-broker-000.jp:9082,kafka-broker-001.jp:9083,kafka-broker-002.jp:9084,kafka-broker-003.jp:9085,kafka-broker-004.jp:9086,kafka-broker-005.jp:9087,kafka-broker-006.jp:9092,kafka-broker-007.jp:9093,kafka-broker-008.jp:9094,kafka-broker-009.jp:9095,kafka-broker-010.jp:9096,kafka-broker-011.jp:9097 mb_pageinfo_hash2 pageinfo_direct_dw 1 1
+    hdfs://nameservice1/user/hadoop/spark-jobs/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar "zkQuorum"="GZ-JSQ-JP-BI-KAFKA-001.jp:2181,GZ-JSQ-JP-BI-KAFKA-002.jp:2181,GZ-JSQ-JP-BI-KAFKA-003.jp:2181,GZ-JSQ-JP-BI-KAFKA-004.jp:2181,GZ-JSQ-JP-BI-KAFKA-005.jp:2181" "brokerList"="kafka-broker-000.jp:9082,kafka-broker-001.jp:9083,kafka-broker-002.jp:9084,kafka-broker-003.jp:9085,kafka-broker-004.jp:9086,kafka-broker-005.jp:9087,kafka-broker-006.jp:9092,kafka-broker-007.jp:9093,kafka-broker-008.jp:9094,kafka-broker-009.jp:9095,kafka-broker-010.jp:9096,kafka-broker-011.jp:9097" "topic"="mb_pageinfo_hash2" "groupId"="bi_mb_pageinfo_real_direct_by_dw" "consumerType"=1 "consumerTime"=5
 
 if test $? -ne 0
 then
@@ -64,14 +73,14 @@ fi
 
 ```
 
-##### client模式：上线脚本-V-new bi-dw-gongzi-realtime.sh
+##### client模式：Event 测试脚本 bi-dw-gongzi-realtime.sh
 
 ```
 #!/usr/bin/env bash
 
 #params=("$@")
 
-echo "gongzi. com.juanpi.bi.streaming.KafkaConsumer start..."
+echo "gongzi parse mb_event_hash2 com.juanpi.bi.streaming.KafkaConsumer start..."
 
 /data/apache_projects/spark-hadoop-2.4.0/bin/spark-submit \
     --class com.juanpi.bi.streaming.KafkaConsumer \
@@ -83,7 +92,7 @@ echo "gongzi. com.juanpi.bi.streaming.KafkaConsumer start..."
     --total-executor-cores 12 \
     --conf "spark.default.parallelism=12" \
     --driver-java-options "-XX:PermSize=1024M -XX:MaxPermSize=3072M -Xmx4096M -Xms2048M -Xmn1024M" \
-    /home/hadoop/users/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar GZ-JSQ-JP-BI-KAFKA-001.jp:2181,GZ-JSQ-JP-BI-KAFKA-002.jp:2181,GZ-JSQ-JP-BI-KAFKA-003.jp:2181,GZ-JSQ-JP-BI-KAFKA-004.jp:2181,GZ-JSQ-JP-BI-KAFKA-005.jp:2181 kafka-broker-000.jp:9082,kafka-broker-001.jp:9083,kafka-broker-002.jp:9084,kafka-broker-003.jp:9085,kafka-broker-004.jp:9086,kafka-broker-005.jp:9087,kafka-broker-006.jp:9092,kafka-broker-007.jp:9093,kafka-broker-008.jp:9094,kafka-broker-009.jp:9095,kafka-broker-010.jp:9096,kafka-broker-011.jp:9097 pageinfo pageinfo_direct_dw 1 1
+    /home/hadoop/users/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar "zkQuorum"="GZ-JSQ-JP-BI-KAFKA-001.jp:2181,GZ-JSQ-JP-BI-KAFKA-002.jp:2181,GZ-JSQ-JP-BI-KAFKA-003.jp:2181,GZ-JSQ-JP-BI-KAFKA-004.jp:2181,GZ-JSQ-JP-BI-KAFKA-005.jp:2181" "brokerList"="kafka-broker-000.jp:9082,kafka-broker-001.jp:9083,kafka-broker-002.jp:9084,kafka-broker-003.jp:9085,kafka-broker-004.jp:9086,kafka-broker-005.jp:9087,kafka-broker-006.jp:9092,kafka-broker-007.jp:9093,kafka-broker-008.jp:9094,kafka-broker-009.jp:9095,kafka-broker-010.jp:9096,kafka-broker-011.jp:9097" "topic"="mb_event_hash2" "groupId"="bi_mb_event_real_direct_by_dw" "consumerType"=1 "consumerTime"=5
 
 if test $? -ne 0
 then

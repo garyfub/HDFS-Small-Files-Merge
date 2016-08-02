@@ -1,10 +1,8 @@
 package com.juanpi.bi.commonUtils;
 
 
-
 import com.google.gson.Gson;
 import net.sf.json.JSONArray;
-import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 import java.util.Iterator;

@@ -12,7 +12,8 @@ import java.util.regex.Pattern;
  *
  * @author xiaoqi 用法：GetMbPageValue(extend_params,page_id)
  */
-public class GetMbPageValue {
+public class GetMbPageValue
+{
 
     public static String evaluate(String extend_params, String page_id) {
         if (page_id == null || page_id.trim().length() == 0) {

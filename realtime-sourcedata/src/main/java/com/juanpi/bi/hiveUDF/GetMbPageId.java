@@ -10,7 +10,8 @@ import java.util.List;
  * @author qingtian
  *         用法：GetMbPageId(String pageName)
  */
-public class GetMbPageId {
+public class GetMbPageId
+{
 
     public static Integer evaluate(final String name, String extendname) {
 

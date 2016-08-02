@@ -1,9 +1,9 @@
 package com.juanpi.bi.utils;
 
+import org.apache.hadoop.hive.ql.exec.Description;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.hadoop.hive.ql.exec.Description;
 
 /**
  * 使用URLDecoder递归解码URL加密的参数

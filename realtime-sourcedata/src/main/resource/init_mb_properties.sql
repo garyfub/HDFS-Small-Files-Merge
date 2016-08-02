@@ -46,3 +46,22 @@ where event_id>0
 and a.del_flag = 0
 and a.terminal_lvl1_id = 2
 order by event_id;
+
+-- PcPageValue.properties
+select
+concat(page_value,
+',',
+replace(page_type_id, ',', '，'),
+',',
+IFNULL(url1, 'null'),
+',',
+IFNULL(url2, 'null'),
+',',
+IFNULL(url3,'null'),
+',',
+IFNULL(regexp1, 'null'),
+',',
+IFNULL(regexp2, 'null'),
+',',
+IFNULL(regexp3,'null')) as url
+from dw.dim_page a where a.page_type_id > 1 and a.terminal_lvl1_id = 1 order by a.page_type_id

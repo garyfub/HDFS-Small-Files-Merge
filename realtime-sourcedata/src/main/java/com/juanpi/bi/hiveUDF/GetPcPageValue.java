@@ -1,5 +1,9 @@
 package com.juanpi.bi.hiveUDF;
 
+import com.juanpi.bi.utils.CateNameChecker;
+import com.juanpi.bi.utils.DecodeURLParam;
+import org.apache.commons.lang.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -7,16 +11,13 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.juanpi.bi.utils.CateNameChecker;
-import com.juanpi.bi.utils.DecodeURLParam;
-import org.apache.commons.lang.StringUtils;
-
 /**
  * 获取pc端pagevalue
  *
  * @author xiaoqi 用法：GetPcPageValue(url,url_page_id)
  */
-public class GetPcPageValue {
+public class GetPcPageValue
+{
 
     public static String evaluate(String url, String page_id) {
         if (page_id == null || page_id.trim().length() == 0) {

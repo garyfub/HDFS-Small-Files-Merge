@@ -1,10 +1,9 @@
 package com.juanpi.bi.transformer
 
-import com.juanpi.bi.bean.{User, Page, PageAndEvent, Event}
+import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.hiveUDF._
 import com.juanpi.bi.sc_utils.DateUtils
-import com.juanpi.bi.streaming.DateHour
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsResultException, JsValue, Json}
 
 import scala.collection.mutable
 /**
@@ -12,7 +11,7 @@ import scala.collection.mutable
   */
 class PageinfoTransformer extends ITransformer {
 
-  def parse(row: JsValue, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): (User.type, PageAndEvent.type, Page.type, Event.type) = {
+  def parse(row: JsValue, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): (User, PageAndEvent, Page, Event) = {
     // mb_pageinfo
     val ticks = (row \ "ticks").asOpt[String].getOrElse("")
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
@@ -96,48 +95,27 @@ class PageinfoTransformer extends ITransformer {
 
     val ref_page_lvl2_value = pageAndEventParser.getPageLvl2Value(d_pre_page_id, preExtendParams1, server_jsonstr)
 
-    var pit_type = 0
-    var gsort_key = ""
-    if(!server_jsonstr.isEmpty())
-    {
-      val js_server_jsonstr = Json.parse(server_jsonstr)
-      pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
-      gsort_key = (js_server_jsonstr \ "_gsort_key").asOpt[String].getOrElse("")
-    }
+    val (pit_type, gsort_key) = pageAndEventParser.getGsortPit(server_jsonstr)
 
-    val (sortdate, sorthour, lplid, ptplid) = if(!gsort_key.isEmpty) {
-      val sortdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
-      val sorthour = gsort_key.split("_")(4)
-      val lplid = gsort_key.split("_")(6)
-      val ptplid = gsort_key.split("_")(6)
-      (sortdate, sorthour, lplid, ptplid)
-    }
-    else ("", "", "", "")
+    val (sortdate, sorthour, lplid, ptplid) = pageAndEventParser.getGsortKey(gsort_key)
 
     val jpk = 0
-    val table_source = "page"
+    val table_source = "mb_page"
     // 最终返回值
-    val event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadTime = ""
+    val event_id, event_value, rule_id, test_id, select_id, event_lvl2_value, loadTime = ""
 
     println("======>> page_id :: " + page_id)
     val (date, hour) = DateUtils.dateHourStr(endtime.toLong)
 
-//    Array(terminal_id,app_version,gu_id,utm,site_id,ref_site_id,uid,session_id,deviceid,page_id,
-//      page_value,ref_page_id,ref_page_value,page_level_id,page_lvl2_value,ref_page_lvl2_value,jpk,pit_type,sortdate,
-//      sorthour,lplid,ptplid,gid,ugroup,shop_id,ref_shop_id,starttime,endtime,hot_goods_id,ctag,location,ip,url,urlref,
-//      to_switch,parsed_source,event_id,event_value,rule_id,test_id,select_id,event_lvl2_value,loadTime,gu_create_time,tab_source
-//      ,date,hour
-//    ).mkString("\u0001")
-
-    User.apply(gu_id, utm, gu_create_time, session_id, terminal_id, app_version, site_id, ref_site_id, ctag)
-    PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, page_level_id, starttime, endtime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, jpk, pit_type, sortdate, sorthour, lplid, ptplid, gid, ugroup, table_source)
-    Page.apply(source, ip, url,urlref,deviceid,to_switch)
-    Event.apply(event_id,event_value,event_lvl2_value,rule_id,test_id,select_id)
-    (User, PageAndEvent, Page, Event)
+    val user = User.apply(gu_id, uid, utm, gu_create_time, session_id, terminal_id, app_version, site_id, ref_site_id, ctag, location, jpk, ugroup, date, hour)
+    val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, starttime, endtime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
+    val page = Page.apply(source, ip, url, urlref, deviceid, to_switch)
+    val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
+    (user, pe, page, event)
   }
 
   // 返回解析的结果
-  def transform(line: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): (String, Any) = {
+  def transform(line: String, dimPage: mutable.HashMap[String, (Int, Int, String, Int)], dimEvent: mutable.HashMap[String, (Int, Int)]): (String, String, Any) = {
 
     //play
     val row = Json.parse(line.replaceAll("null", """\\"\\"""") )// .replaceAll("\\n", ""))
@@ -146,26 +124,51 @@ class PageinfoTransformer extends ITransformer {
 
     if (row != null) {
       // 解析逻辑
-      val gu_id = pageAndEventParser.getGuid((row \ "jpid").as[String], (row \ "deviceid").as[String], (row \ "os").as[String])
+      var gu_id = ""
+      try
+      {
+        gu_id = pageAndEventParser.getGuid((row \ "jpid").asOpt[String].getOrElse(""),
+          (row \ "deviceid").asOpt[String].getOrElse(""),
+          (row \ "os").asOpt[String].getOrElse("")
+        )
+      } catch{
+        //使用模式匹配来处理异常
+        case ex:IllegalArgumentException => println(ex.getMessage())
+        case ex:RuntimeException=> { println(ex.getMessage()) }
+        case ex:JsResultException => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
+        case ex:Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
+      }
+
       if(!gu_id.isEmpty) {
-        val res = parse(row, dimpage)
-        (DateUtils.dateHour((row \ "endtime").as[String].toLong).toString, res)
-        } else {
-        ("", None)
+        try {
+          val res = parse(row, dimPage)
+          (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, "page", res)
+          //        (DateUtils.dateHour((row \ "endtime").as[String].toLong).toString, res)
+        } catch{
+          //使用模式匹配来处理异常
+          case ex:Exception => {
+            println(ex.getStackTraceString, "\n======>>异常数据:" + row)
+            ("", "", None)
+          }
+        }
+      } else {
+        ("", "", None)
       }
     } else {
-      ("", None)
+      ("", "", None)
     }
   }
 }
 
 // for test
 object PageinfoTransformer{
+
   def main(args: Array[String]) {
 
+    val pp = new PageinfoTransformer
     val liuliang =
       """
-        |{"app_name":"zhe","app_version":"3.4.6","c_label":"C3","c_server":"{\"gid\":\"C3\",\"ugroup\":\"143_223_112_142\"}","deviceid":"867568022962029","endtime":"1468929132822","endtime_origin":"1468929131796","extend_params":" {\n  "uid" : "36371591",\n  "validate" : 1\n}","gj_ext_params":"past_zhe,1580540_1500762_13504152,past_zhe,crazy_zhe","gj_page_names":"page_tab,page_home_brand_in,page_tab,page_tab","ip":"119.109.179.179","jpid":"ffffffff-bc21-7da8-ffff-ffffe4de7969","location":"辽宁省","os":"android","os_version":"4.4.4","pagename":"page_tab","pre_extend_params":"past_zhe","pre_page":"page_tab","server_jsonstr":"{\"ab_info\":{\"rule_id\":\"\",\"test_id\":\"\",\"select\":\"\"},\"ab_attr\":\"7\"}","session_id":"1468155168409_zhe_1468929047609","source":"","starttime":"1468929130209","starttime_origin":"1468929129183","ticks":"1468155168409","to_switch":"0","uid":"40102432","utm":"104954","wap_pre_url":"","wap_url":""}
+        |{"app_name":"zhe","app_version":"3.4.6","c_label":"C3","c_server":"{\"gid\":\"C3\",\"ugroup\":\"143_223_112_142\"}","deviceid":"867568022962029","endtime":"1468929132822","endtime_origin":"1468929131796","extend_params":"1","gj_ext_params":"past_zhe,1580540_1500762_13504152,past_zhe,crazy_zhe","gj_page_names":"page_tab,page_home_brand_in,page_tab,page_tab","ip":"119.109.179.179","jpid":"ffffffff-bc21-7da8-ffff-ffffe4de7969","location":"辽宁省","os":"android","os_version":"4.4.4","pagename":"page_tab","pre_extend_params":"past_zhe","pre_page":"page_tab","server_jsonstr":"{\"ab_info\":{\"rule_id\":\"\",\"test_id\":\"\",\"select\":\"\"},\"ab_attr\":\"7\"}","session_id":"1468155168409_zhe_1468929047609","source":"","starttime":"1468929130209","starttime_origin":"1468929129183","ticks":"1468155168409","to_switch":"0","uid":"40102432","utm":"104954","wap_pre_url":"","wap_url":""}
         |""".stripMargin
 
 
@@ -173,9 +176,7 @@ object PageinfoTransformer{
     println(pl)
 
     try{
-
       val line = Json.parse(pl)
-      println(line)
     }catch{
       //使用模式匹配来处理异常
       case ex:IllegalArgumentException=>println(ex.getMessage())
@@ -183,11 +184,5 @@ object PageinfoTransformer{
       case ex:StringIndexOutOfBoundsException=>println("Invalid Index")
       case ex:Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + pl)
     }
-
-    val aa = (Json.parse("{}") \ "order_status").asOpt[String].getOrElse("")
-    println(aa)
-
-    println(if("a_b".split("_").length > 2) {"a_b_c".split("_")(2)})
-
   }
 }

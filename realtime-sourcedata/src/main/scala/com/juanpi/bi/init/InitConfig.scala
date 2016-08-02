@@ -1,13 +1,8 @@
 package com.juanpi.bi.init
 
-import java.io.IOException
-
-import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
-import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Table}
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.SparkConf
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.storage.StorageLevel
-import com.typesafe.config.ConfigFactory
 import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
 /**
   * 默认情况下 Scala 使用不可变 Map。如果你需要使用可变集合，你需要显式的引入 import scala.collection.mutable.Map 类
@@ -22,22 +17,16 @@ import scala.reflect.BeanProperty
 class InitConfig() {
 
   @BeanProperty var spconf: SparkConf = _
-  @BeanProperty var AppName: String = _
   @BeanProperty var ssc: StreamingContext = _
   @BeanProperty var duration: Duration = _
 
-//  var hbasePort = ""
-  var zkQuorum = ""
-  @BeanProperty var hbase_family: String = _
+  val maxRate = "100"
 
-  @BeanProperty var ticks_history: None.type = None
-  val table_ticks_history = TableName.valueOf("utm_history")
-
-  def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)], mutable.HashMap[String, Int]) = {
+  def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)], mutable.HashMap[String, (Int, Int)]) = {
     // 查询 hive 中的 dim_page 和 dim_event
     val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
     val dp: mutable.HashMap[String, (Int, Int, String, Int)] = initDimPage(sqlContext)
-    val de: mutable.HashMap[String, Int] = initDimEvent(sqlContext)
+    val de: mutable.HashMap[String, (Int, Int)] = initDimEvent(sqlContext)
     (dp, de)
   }
 
@@ -48,7 +37,8 @@ class InitConfig() {
 
   // 初始化 SparkConf 公共参数
   private def initSparkConfig(appName:String): Unit = {
-    val conf = new SparkConf().set("spark.akka.frameSize", "256")
+    val conf = new SparkConf().setAppName(appName)
+      .set("spark.akka.frameSize", "256")
       .set("spark.kryoserializer.buffer.max", "512m")
       .set("spark.kryoserializer.buffer", "256m")
       .set("spark.scheduler.mode", "FAIR")
@@ -61,21 +51,8 @@ class InitConfig() {
       .set("spark.streaming.blockInterval", "10000")
       .set("spark.shuffle.manager", "SORT")
       .set("spark.eventLog.overwrite", "true")
+      .set("spark.streaming.kafka.maxRatePerPartition", maxRate)
     this.setSpconf(conf)
-  }
-
-  private def loadProperties():Unit = {
-    val config = ConfigFactory.load("hbase.conf")
-    zkQuorum = config.getString("hbaseConf.zkQuorum")
-    this.setHbase_family(config.getString("hbaseConf.hbase_family"))
-  }
-
-  private def getHbaseConf(): Connection = {
-    val hbaseConf = HBaseConfiguration.create()
-    hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
-    hbaseConf.setInt("timeout", 120000)
-    //Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
-    ConnectionFactory.createConnection(hbaseConf)
   }
 
   def initDimPage(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int, String, Int)] =
@@ -113,10 +90,10 @@ class InitConfig() {
     dimPages
   }
 
-  def initDimEvent(sqlContext: HiveContext): mutable.HashMap[String, Int] =
+  def initDimEvent(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int)] =
   {
-    var dimEvents = new mutable.HashMap[String, Int]
-    val dimEventSql = s"""select event_id, event_exp1, event_exp2
+    var dimEvents = new mutable.HashMap[String, (Int, Int)]
+    val dimEventSql = s"""select event_id, event_exp1, event_exp2, event_type_id
                          | from dw.dim_event
                          | where event_id > 0
                          | and terminal_lvl1_id = 2
@@ -127,15 +104,17 @@ class InitConfig() {
 
     dimData.map(line => {
       val event_id = line.getAs[Int]("event_id")
+      val event_type_id = line.getAs[Int]("event_type_id")
       val event_exp1 = line.getAs[String]("event_exp1")
       val event_exp2 = line.getAs[String]("event_exp2")
 
       val key = event_exp1 + event_exp2
-      (event_id, key)
+      (event_id, event_type_id, key)
     }).collect().foreach( items => {
       val event_id: Int = items._1
-      val key = items._2
-      dimEvents += ( key -> event_id)
+      val event_type_id = items._2
+      val key = items._3
+      dimEvents += ( key -> (event_id, event_type_id))
     })
 
     dimData.unpersist(true)
@@ -149,22 +128,16 @@ object InitConfig {
   // 主构造器
   val ic = new InitConfig()
   var DIMPAGE = new mutable.HashMap[String, (Int, Int, String, Int)]
-  var DIMENT = new mutable.HashMap[String, Int]
+  var DIMENT = new mutable.HashMap[String, (Int, Int)]
 
   def initParam(appName: String, interval: Int) = {
-    // 根据 topic 设置 appName
-    ic.setAppName(appName)
-
     // 初始化 apark 超时时间, spark.mystreaming.batch.interval
     ic.setDuration(Seconds(interval))
 
     // 初始化 SparkConfig
-    ic.initSparkConfig(ic.getAppName)
+    ic.initSparkConfig(appName)
 
     ic.setStreamingContext()
-
-    // load 配置文件
-    ic.loadProperties()
 
     // 初始化 page and event
     DIMPAGE = ic.initDimPageEvent()._1
@@ -174,18 +147,5 @@ object InitConfig {
 
   def getStreamingContext(): StreamingContext = {
     ic.getSsc()
-  }
-
-  def getHbaseFamily =
-  {
-    ic.getHbase_family
-  }
-
-  // hbase 创建连接
-  def initTicksHistory(): Table =
-  {
-    try {
-      ic.getHbaseConf().getTable(ic.table_ticks_history)
-    }
   }
 }

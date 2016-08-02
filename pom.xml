@@ -10,7 +10,56 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>realtime-sourcedata</module>
+        <module>pathlist</module>
     </modules>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-mapreduce-client-core</artifactId>
+            <version>2.5.0-cdh5.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-yarn-client</artifactId>
+            <version>2.5.0-cdh5.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-yarn-common</artifactId>
+            <version>2.5.0-cdh5.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-yarn-api</artifactId>
+            <version>2.5.0-cdh5.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>2.5.0-cdh5.2.0</version>
+        </dependency>
 
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <!--
+<repository>
+            <id>releases</id>
+            <name>Nexus Release Repository</name>
+            <url>http://192.168.16.50:8181/nexus/content/repositories/releases/</url>
+        </repository>
+        -->
+    <repository>
+            <id>cloudera</id>
+            <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+        </repository>
+
+    </repositories>
 </project>

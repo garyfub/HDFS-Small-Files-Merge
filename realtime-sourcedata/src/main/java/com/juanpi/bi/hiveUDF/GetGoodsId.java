@@ -1,12 +1,11 @@
 package com.juanpi.bi.hiveUDF;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.hadoop.hive.ql.exec.UDF;
 
 /**
  * 获取页面参数， pagevalue的值是goodid 。
@@ -14,7 +13,8 @@ import org.apache.hadoop.hive.ql.exec.UDF;
  * 用法：getGoodsId(String url)
  */
 
-public class GetGoodsId extends UDF  {
+public class GetGoodsId // extends UDF
+{
 	
 	private static StringBuilder sb = new StringBuilder();
 
