@@ -30,6 +30,7 @@ public class PathListNew {
     static final String OUT_PATH = "output";
 
     public static void main(String[] args) throws Exception {
+
         final Configuration configuration = new Configuration();
 
         final FileSystem fileSystem = FileSystem.get(new URI(INPUT_PATH), configuration);
