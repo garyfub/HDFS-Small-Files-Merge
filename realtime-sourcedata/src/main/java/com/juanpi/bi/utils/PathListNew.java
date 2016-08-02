@@ -27,7 +27,7 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
 public class PathListNew {
 
 //    static final Path INPUT_PATH = new Path("hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/");
-    static final String INPUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/";
+    static final String INPUT_PATH = "/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/";
     static final String OUT_PATH = "/user/hadoop/gongzi/dw_real_path_list/date=2016-07-30/gu_hash=0/";
 
     public static void main(String[] args) throws Exception {
