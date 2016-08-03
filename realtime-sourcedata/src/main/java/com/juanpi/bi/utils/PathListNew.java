@@ -18,6 +18,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import static org.apache.hadoop.io.WritableComparator.readVLong;
 
@@ -42,15 +43,6 @@ public class PathListNew {
         conf.set("fs.hdfs.impl","org.apache.hadoop.hdfs.DistributedFileSystem");
 //        path = "/usr/java/hbase-0.90.3/conf/";
 //        conf.addResource(new Path(path + "hbase-site.xml"));
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        listFiles(INPUT_PATH);
-
-//        第一个参数传递进来的是hadoop文件系统中的某个文件的URI,以hdfs://ip 的theme开头
-//        String uri = args[0];
-
         try {
             // 默认的hadoop的fs.defaultFS的端口号为8020，这里需要跟集群里面的配置一致
             fs = FileSystem.get(new URI(INPUT_PATH), conf);
@@ -61,7 +53,18 @@ public class PathListNew {
         } catch (IOException e) {
             System.out.println(("初始化FileSystem失败！"));
             System.out.println(e.getMessage());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
+
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        listFiles(INPUT_PATH);
+
+//        第一个参数传递进来的是hadoop文件系统中的某个文件的URI,以hdfs://ip 的theme开头
+//        String uri = args[0];
 
         final Job job = new Job(conf, PathListNew.class.getSimpleName());
 
