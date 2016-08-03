@@ -36,22 +36,14 @@ public class PathListNew {
     static FileSystem fs;
 
     static {
-//        String path = "/etc/hadoop/conf/";
-//        conf.addResource(new Path(path + "core-site.xml"));
-//        conf.addResource(new Path(path + "hdfs-site.xml"));
-//        conf.addResource(new Path(path + "mapred-site.xml"));
-//        conf.addResource(new Path(path + "hbase-site.xml"));
-//        conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("hadoop_conf/core-site.xml").getFile()));
-//        conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("hadoop_conf/hdfs-site.xml").getFile()));
-//        conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("hadoop_conf/mapred-site.xml").getFile()));
-        conf.addResource("hadoop_conf/core-site.xml");
-        conf.addResource("hadoop_conf/hdfs-site.xml");
-        conf.addResource("hadoop_conf/mapred-site.xml");
+//        conf.addResource("hadoop_conf/core-site.xml");
+//        conf.addResource("hadoop_conf/hdfs-site.xml");
+//        conf.addResource("hadoop_conf/mapred-site.xml");
         conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
 
         try {
 
-            System.out.println(conf.get("fs.defaultFS"));
+//            System.out.println(conf.get("fs.defaultFS"));
             // 默认的hadoop的fs.defaultFS的端口号为8020，这里需要跟集群里面的配置一致
             fs = FileSystem.get(URI.create(INPUT_PATH), conf);
 
