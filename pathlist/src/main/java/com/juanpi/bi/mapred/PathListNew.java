@@ -26,8 +26,8 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
  */
 public class PathListNew {
 
-//    static final Path INPUT_PATH = new Path("hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/");
-    static final String INPUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/page1470127080000-r-00006";
+//    static final Path INPUT_PATH = new Path("hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/page1470127080000-r-00006");
+    static final String INPUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/";
     static final String OUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-07-30/gu_hash=0/";
 
     static Configuration conf = new Configuration();
@@ -41,9 +41,9 @@ public class PathListNew {
 
         try {
             System.out.println(conf.get("fs.defaultFS"));
-            // 默认的hadoop的fs.defaultFS的端口号为8020，这里需要跟集群里面的配置一致
 
             fs = FileSystem.get(new Path(INPUT_PATH).toUri(), conf);
+            listFiles(INPUT_PATH);
 
 //            if(fs.exists(new Path(OUT_PATH))){
 //                fs.delete(new Path(OUT_PATH), true);
@@ -101,8 +101,6 @@ public class PathListNew {
             System.out.println(files[i].getPath().toString());
         }
     }
-
-
 
     static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
         int xx = 0;
