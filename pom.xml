@@ -64,8 +64,15 @@
     </dependencies>
 
     <repositories>
+
+        <!--共有的仓库-->
+        <!--http://repo1.maven.org/maven2/-->
+        <!--http://repository.jboss.com/maven2/-->
+        <!--http://repository.sonatype.org/content/groups/public/-->
+        <!--http://mirrors.ibiblio.org/pub/mirrors/maven2/org/acegisecurity/-->
+
         <!--
-<repository>
+        <repository>
             <id>releases</id>
             <name>Nexus Release Repository</name>
             <url>http://192.168.16.50:8181/nexus/content/repositories/releases/</url>
@@ -75,7 +82,6 @@
             <id>cloudera</id>
             <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
         </repository>
-
 
         <repository>
             <id>OSChina</id>

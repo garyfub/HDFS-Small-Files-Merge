@@ -26,7 +26,7 @@ hadoop fs -rm hdfs://nameservice1/user/hadoop/spark-jobs/gongzi/bi-dw-gongzi-rea
 ```
  java -cp realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.utils.PathListNew
 
- java -classpath ./conf/:./realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.utils.PathListNew
+ java -classpath ./conf/:./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapred.PathListNew
 ```
 
 #### kill spark 作业
