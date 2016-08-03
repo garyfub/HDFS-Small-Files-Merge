@@ -35,16 +35,13 @@ public class PathListNew {
     static Configuration conf = new Configuration();
     static FileSystem fs;
 
-//    static {
+    static {
 //        String path = "/etc/hadoop/conf/";
 //        conf.addResource(new Path(path + "core-site.xml"));
 //        conf.addResource(new Path(path + "hdfs-site.xml"));
 //        conf.addResource(new Path(path + "mapred-site.xml"));
 //        conf.addResource(new Path(path + "hbase-site.xml"));
-//    }
 
-    public static void main(String[] args) throws Exception {
-//        System.out.println(PathListNew.class.getClassLoader().getResource("hadoop_conf/core-site.xml"));
         conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("hadoop_conf/core-site.xml").getFile()));
         conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("hadoop_conf/hdfs-site.xml").getFile()));
         conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("hadoop_conf/mapred-site.xml").getFile()));
@@ -64,6 +61,10 @@ public class PathListNew {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+//        System.out.println(PathListNew.class.getClassLoader().getResource("hadoop_conf/core-site.xml"));
 
 //        listFiles(INPUT_PATH);
 
