@@ -32,26 +32,21 @@ public class PathListNew {
     static final String OUT_PATH = "/user/hadoop/gongzi/dw_real_path_list/date=2016-07-30/gu_hash=0/";
 
     static Configuration conf = new Configuration();
-    static FileSystem hdfs;
+    static FileSystem fs;
 
     static {
-//        String path = "/usr/java/hadoop-1.0.3/conf/";
-//        conf.addResource(new Path(path + "core-site.xml"));
-//        conf.addResource(new Path(path + "hdfs-site.xml"));
-//        conf.addResource(new Path(path + "mapred-site.xml"));
+        String path = "/etc/hadoop/conf/";
+        conf.addResource(new Path(path + "core-site.xml"));
+        conf.addResource(new Path(path + "hdfs-site.xml"));
+        conf.addResource(new Path(path + "mapred-site.xml"));
 //        path = "/usr/java/hbase-0.90.3/conf/";
 //        conf.addResource(new Path(path + "hbase-site.xml"));
-        try {
-            hdfs = FileSystem.get(conf);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     //list all files
     public void listFiles(String dirName) throws IOException {
         Path f = new Path(dirName);
-        FileStatus[] files = hdfs.listStatus(f);
+        FileStatus[] files = fs.listStatus(f);
         System.out.println(dirName + " has all files:");
         for (int i = 0; i< files.length; i++) {
             System.out.println(files[i].getPath().toString());
@@ -64,14 +59,8 @@ public class PathListNew {
 //        第一个参数传递进来的是hadoop文件系统中的某个文件的URI,以hdfs://ip 的theme开头
 //        String uri = args[0];
 
-//        final Configuration conf = new Configuration();
-
-        //FileSystem是用户操作HDFS的核心类，它获得URI对应的HDFS文件系统
-        FileSystem fs;
-
         try {
             // 默认的hadoop的fs.defaultFS的端口号为8020，这里需要跟集群里面的配置一致
-//            conf.set("fs.defaultFS", "hdfs://nameservice1/");
             fs = FileSystem.get(new URI(INPUT_PATH), conf);
 
             if(fs.exists(new Path(OUT_PATH))){
