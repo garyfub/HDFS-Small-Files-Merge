@@ -76,5 +76,11 @@
             <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
         </repository>
 
+
+        <repository>
+            <id>OSChina</id>
+            <url>http://maven.oschina.net/content/groups/public/</url>
+        </repository>
+
     </repositories>
 </project>

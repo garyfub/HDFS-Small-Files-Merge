@@ -28,7 +28,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="dw-realtime" target="1.5" />
-      <module name="pathlist" target="1.6" />
+      <module name="pathlist" target="1.7" />
       <module name="realtime-souredata" target="1.7" />
     </bytecodeTargetLevel>
   </component>
