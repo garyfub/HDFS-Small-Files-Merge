@@ -35,16 +35,19 @@ public class PathListNew {
     static Configuration conf = new Configuration();
     static FileSystem fs;
 
-    static {
+//    static {
 //        String path = "/etc/hadoop/conf/";
 //        conf.addResource(new Path(path + "core-site.xml"));
 //        conf.addResource(new Path(path + "hdfs-site.xml"));
 //        conf.addResource(new Path(path + "mapred-site.xml"));
 //        conf.addResource(new Path(path + "hbase-site.xml"));
+//    }
 
-        conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("/hadoop_conf/core-site.xml").getFile()));
-        conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("/hadoop_conf/hdfs-site.xml").getFile()));
-        conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("/hadoop_conf/mapred-site.xml").getFile()));
+    public static void main(String[] args) throws Exception {
+//        System.out.println(PathListNew.class.getClassLoader().getResource("hadoop_conf/core-site.xml"));
+        conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("hadoop_conf/core-site.xml").getFile()));
+        conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("hadoop_conf/hdfs-site.xml").getFile()));
+        conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("hadoop_conf/mapred-site.xml").getFile()));
 
         conf.set("fs.hdfs.impl","org.apache.hadoop.hdfs.DistributedFileSystem");
 
@@ -61,11 +64,8 @@ public class PathListNew {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-    }
 
-    public static void main(String[] args) throws Exception {
-
-        listFiles(INPUT_PATH);
+//        listFiles(INPUT_PATH);
 
 //        第一个参数传递进来的是hadoop文件系统中的某个文件的URI,以hdfs://ip 的theme开头
 //        String uri = args[0];
