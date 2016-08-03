@@ -28,8 +28,8 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
 public class PathListNew {
 
 //    static final Path INPUT_PATH = new Path("hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/");
-    static final String INPUT_PATH = "/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/";
-    static final String OUT_PATH = "/user/hadoop/gongzi/dw_real_path_list/date=2016-07-30/gu_hash=0/";
+    static final String INPUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/";
+    static final String OUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-07-30/gu_hash=0/";
 
     static Configuration conf = new Configuration();
     static FileSystem fs;
@@ -43,16 +43,6 @@ public class PathListNew {
 //        path = "/usr/java/hbase-0.90.3/conf/";
 //        conf.addResource(new Path(path + "hbase-site.xml"));
     }
-
-    //list all files
-//    public void listFiles(String dirName) throws IOException {
-//        Path f = new Path(dirName);
-//        FileStatus[] files = fs.listStatus(f);
-//        System.out.println(dirName + " has all files:");
-//        for (int i = 0; i< files.length; i++) {
-//            System.out.println(files[i].getPath().toString());
-//        }
-//    }
 
     public static void main(String[] args) throws Exception {
 
@@ -100,6 +90,17 @@ public class PathListNew {
         job.setOutputFormatClass(TextOutputFormat.class);//设定输出文件的格式化类
         job.waitForCompletion(true);//把代码提交给JobTracker执行
     }
+
+    //list all files
+//    public void listFiles(String dirName) throws IOException {
+//        Path f = new Path(dirName);
+//        FileStatus[] files = fs.listStatus(f);
+//        System.out.println(dirName + " has all files:");
+//        for (int i = 0; i< files.length; i++) {
+//            System.out.println(files[i].getPath().toString());
+//        }
+//    }
+
 
 
     static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
