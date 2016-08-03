@@ -30,6 +30,12 @@
             <version>${hadoop.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-auth</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
