@@ -36,13 +36,19 @@ public class PathListNew {
     static FileSystem fs;
 
     static {
-        String path = "/etc/hadoop/conf/";
-        conf.addResource(new Path(path + "core-site.xml"));
-        conf.addResource(new Path(path + "hdfs-site.xml"));
-        conf.addResource(new Path(path + "mapred-site.xml"));
-        conf.set("fs.hdfs.impl","org.apache.hadoop.hdfs.DistributedFileSystem");
-//        path = "/usr/java/hbase-0.90.3/conf/";
+//        String path = "/etc/hadoop/conf/";
+//        conf.addResource(new Path(path + "core-site.xml"));
+//        conf.addResource(new Path(path + "hdfs-site.xml"));
+//        conf.addResource(new Path(path + "mapred-site.xml"));
 //        conf.addResource(new Path(path + "hbase-site.xml"));
+
+        conf.addResource("hadoop_conf/core-site.xml");
+        conf.addResource("hadoop_conf/hdfs-site.xml");
+        conf.addResource("hadoop_conf/mapred-site.xml");
+        conf.addResource("hadoop_conf/hadopp_conf/hbase-site.xml");
+
+        conf.set("fs.hdfs.impl","org.apache.hadoop.hdfs.DistributedFileSystem");
+
         try {
             // 默认的hadoop的fs.defaultFS的端口号为8020，这里需要跟集群里面的配置一致
             fs = FileSystem.get(new URI(INPUT_PATH), conf);
