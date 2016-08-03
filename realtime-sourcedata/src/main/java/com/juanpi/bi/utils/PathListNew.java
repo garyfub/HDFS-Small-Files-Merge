@@ -29,7 +29,7 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
 public class PathListNew {
 
 //    static final Path INPUT_PATH = new Path("hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/");
-    static final String INPUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/";
+    static final String INPUT_PATH = "/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/";
     static final String OUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-07-30/gu_hash=0/";
 
     static Configuration conf = new Configuration();
@@ -41,7 +41,6 @@ public class PathListNew {
 //        conf.addResource(new Path(path + "hdfs-site.xml"));
 //        conf.addResource(new Path(path + "mapred-site.xml"));
 //        conf.addResource(new Path(path + "hbase-site.xml"));
-
         conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("hadoop_conf/core-site.xml").getFile()));
         conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("hadoop_conf/hdfs-site.xml").getFile()));
         conf.addResource(new Path(PathListNew.class.getClassLoader().getResource("hadoop_conf/mapred-site.xml").getFile()));
