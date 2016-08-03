@@ -46,6 +46,8 @@ public class PathListNew {
 
     public static void main(String[] args) throws Exception {
 
+        listFiles(INPUT_PATH);
+
 //        第一个参数传递进来的是hadoop文件系统中的某个文件的URI,以hdfs://ip 的theme开头
 //        String uri = args[0];
 
@@ -91,15 +93,15 @@ public class PathListNew {
         job.waitForCompletion(true);//把代码提交给JobTracker执行
     }
 
-    //list all files
-//    public void listFiles(String dirName) throws IOException {
-//        Path f = new Path(dirName);
-//        FileStatus[] files = fs.listStatus(f);
-//        System.out.println(dirName + " has all files:");
-//        for (int i = 0; i< files.length; i++) {
-//            System.out.println(files[i].getPath().toString());
-//        }
-//    }
+//    list all files
+    public static void listFiles(String dirName) throws IOException {
+        Path f = new Path(dirName);
+        FileStatus[] files = fs.listStatus(f);
+        System.out.println(dirName + " has all files:");
+        for (int i = 0; i< files.length; i++) {
+            System.out.println(files[i].getPath().toString());
+        }
+    }
 
 
 
