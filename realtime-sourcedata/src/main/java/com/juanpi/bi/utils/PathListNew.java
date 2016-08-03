@@ -30,7 +30,7 @@ public class PathListNew {
 
 //    static final Path INPUT_PATH = new Path("hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/");
     static final String INPUT_PATH = "/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/";
-    static final String OUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-07-30/gu_hash=0/";
+    static final String OUT_PATH = "/user/hadoop/gongzi/dw_real_path_list/date=2016-07-30/gu_hash=0/";
 
     static Configuration conf = new Configuration();
     static FileSystem fs;
