@@ -42,8 +42,8 @@ public class PathListNew {
 
         try {
             // 默认的hadoop的fs.defaultFS的端口号为8020，这里需要跟集群里面的配置一致
-//            conf.set("fs.defaultFS", "hdfs://nameservice1/");
-            fs = FileSystem.get(conf);
+            conf.set("fs.defaultFS", "hdfs://nameservice1/");
+            fs = FileSystem.get(new URI(INPUT_PATH), conf);
 
             if(fs.exists(new Path(OUT_PATH))){
                 fs.delete(new Path(OUT_PATH), true);
