@@ -47,8 +47,8 @@ public class PathListNew {
         conf.addResource("hadoop_conf/core-site.xml");
         conf.addResource("hadoop_conf/hdfs-site.xml");
         conf.addResource("hadoop_conf/mapred-site.xml");
-        conf.set("fs.hdfs.impl","org.apache.hadoop.hdfs.DistributedFileSystem");
-
+//        conf.set("fs.hdfs.impl","org.apache.hadoop.hdfs.DistributedFileSystem");
+        System.out.println(conf.get("fs.defaultFS"));
         try {
             // 默认的hadoop的fs.defaultFS的端口号为8020，这里需要跟集群里面的配置一致
             fs = FileSystem.get(new URI(INPUT_PATH), conf);
