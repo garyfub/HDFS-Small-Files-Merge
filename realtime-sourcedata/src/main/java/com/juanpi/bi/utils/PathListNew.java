@@ -41,11 +41,10 @@ public class PathListNew {
 //        conf.addResource(new Path(path + "hdfs-site.xml"));
 //        conf.addResource(new Path(path + "mapred-site.xml"));
 //        conf.addResource(new Path(path + "hbase-site.xml"));
-
-        conf.addResource("hadoop_conf/core-site.xml");
-        conf.addResource("hadoop_conf/hdfs-site.xml");
-        conf.addResource("hadoop_conf/mapred-site.xml");
-        conf.addResource("hadopp_conf/hbase-site.xml");
+        
+        conf.addResource(new Path(PathListNew.class.getResource("/hadoop_conf/core-site.xml").getFile()));
+        conf.addResource(new Path(PathListNew.class.getResource("/hadoop_conf/hdfs-site.xml").getFile()));
+        conf.addResource(new Path(PathListNew.class.getResource("/hadoop_conf/mapred-site.xml").getFile()));
 
         conf.set("fs.hdfs.impl","org.apache.hadoop.hdfs.DistributedFileSystem");
 
