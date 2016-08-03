@@ -1,6 +1,7 @@
 package com.juanpi.bi.utils;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.*;
@@ -27,15 +28,43 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
 public class PathListNew {
 
 //    static final Path INPUT_PATH = new Path("hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/");
-    static final String INPUT_PATH = "/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/";
+    static final String INPUT_PATH = "/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/page1470127140000-r-00011";
     static final String OUT_PATH = "/user/hadoop/gongzi/dw_real_path_list/date=2016-07-30/gu_hash=0/";
+
+    static Configuration conf = new Configuration();
+    static FileSystem hdfs;
+
+    static {
+//        String path = "/usr/java/hadoop-1.0.3/conf/";
+//        conf.addResource(new Path(path + "core-site.xml"));
+//        conf.addResource(new Path(path + "hdfs-site.xml"));
+//        conf.addResource(new Path(path + "mapred-site.xml"));
+//        path = "/usr/java/hbase-0.90.3/conf/";
+//        conf.addResource(new Path(path + "hbase-site.xml"));
+        try {
+            hdfs = FileSystem.get(conf);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //list all files
+    public void listFiles(String dirName) throws IOException {
+        Path f = new Path(dirName);
+        FileStatus[] files = hdfs.listStatus(f);
+        System.out.println(dirName + " has all files:");
+        for (int i = 0; i< files.length; i++) {
+            System.out.println(files[i].getPath().toString());
+        }
+    }
+
 
     public static void main(String[] args) throws Exception {
 
 //        第一个参数传递进来的是hadoop文件系统中的某个文件的URI,以hdfs://ip 的theme开头
 //        String uri = args[0];
 
-        final Configuration conf = new Configuration();
+//        final Configuration conf = new Configuration();
 
         //FileSystem是用户操作HDFS的核心类，它获得URI对应的HDFS文件系统
         FileSystem fs;
