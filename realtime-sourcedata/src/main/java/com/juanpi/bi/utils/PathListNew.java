@@ -36,9 +36,9 @@ public class PathListNew {
 
     static {
         String path = "/etc/hadoop/conf/";
-        conf.addResource(new Path(path + "core-site.xml"));
-        conf.addResource(new Path(path + "hdfs-site.xml"));
-        conf.addResource(new Path(path + "mapred-site.xml"));
+//        conf.addResource(new Path(path + "core-site.xml"));
+//        conf.addResource(new Path(path + "hdfs-site.xml"));
+//        conf.addResource(new Path(path + "mapred-site.xml"));
         conf.set("fs.hdfs.impl","org.apache.hadoop.hdfs.DistributedFileSystem");
 //        path = "/usr/java/hbase-0.90.3/conf/";
 //        conf.addResource(new Path(path + "hbase-site.xml"));
