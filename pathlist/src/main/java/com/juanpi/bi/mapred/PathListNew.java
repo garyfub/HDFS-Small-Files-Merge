@@ -34,9 +34,6 @@ public class PathListNew {
     static FileSystem fs;
 
     static {
-//        conf.addResource("hadoop_conf/core-site.xml");
-//        conf.addResource("hadoop_conf/hdfs-site.xml");
-//        conf.addResource("hadoop_conf/mapred-site.xml");
         conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
 
         try {
