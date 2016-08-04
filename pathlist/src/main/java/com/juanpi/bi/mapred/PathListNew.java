@@ -34,6 +34,7 @@ public class PathListNew {
     static FileSystem fs;
 
     static {
+
         conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
 
         try {
