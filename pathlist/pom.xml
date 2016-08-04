@@ -30,9 +30,15 @@
             <version>${hadoop.version}</version>
         </dependency>
 
-        <dependency>
+<!--         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-auth</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency> -->
+
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
             <version>${hadoop.version}</version>
         </dependency>
 
