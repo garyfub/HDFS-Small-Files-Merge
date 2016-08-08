@@ -41,7 +41,7 @@ public class PathListNew {
             System.out.println(conf.get("fs.defaultFS"));
 
             fs = FileSystem.get(new Path(INPUT_PATH).toUri(), conf);
-            listFiles(INPUT_PATH);
+//            listFiles(INPUT_PATH);
 
             if(fs.exists(new Path(OUT_PATH))){
                 fs.delete(new Path(OUT_PATH), true);
