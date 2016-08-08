@@ -43,9 +43,9 @@ public class PathListNew {
             fs = FileSystem.get(new Path(INPUT_PATH).toUri(), conf);
             listFiles(INPUT_PATH);
 
-//            if(fs.exists(new Path(OUT_PATH))){
-//                fs.delete(new Path(OUT_PATH), true);
-//            }
+            if(fs.exists(new Path(OUT_PATH))){
+                fs.delete(new Path(OUT_PATH), true);
+            }
         } catch (IOException e) {
             System.out.println(("初始化FileSystem失败！"));
             System.out.println(e.getMessage());

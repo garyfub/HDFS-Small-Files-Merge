@@ -37,6 +37,9 @@ scp hadoop-common/2.5.0-cdh5.2.0/hadoop-common-2.5.0-cdh5.2.0.jar hadoop@spark00
 
 hadoop jar ./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapred.PathListNew
 
+# 文件结果
+hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-07-30/gu_hash=0
+
 ```
 
 #### kill spark 作业
