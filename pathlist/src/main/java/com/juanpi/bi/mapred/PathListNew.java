@@ -63,7 +63,7 @@ public class PathListNew {
         final Job job = new Job(conf, PathListNew.class.getSimpleName());
 
         // http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
-        job.setJar("PathListNew.jar");
+        job.setJar("pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar");
 
         //1.1 指定输入文件路径
         FileInputFormat.setInputPaths(job, INPUT_PATH);
