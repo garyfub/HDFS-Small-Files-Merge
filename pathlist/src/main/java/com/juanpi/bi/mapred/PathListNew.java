@@ -100,7 +100,7 @@ public class PathListNew {
         }
     }
 
-    static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
+    class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
         int xx = 0;
         protected void map(LongWritable key, Text value, Context context) throws IOException ,InterruptedException {
             final String[] splited = value.toString().split("\u0001");
@@ -122,7 +122,7 @@ public class PathListNew {
 
     //static class NewValue
 
-    static class MyReducer extends Reducer<NewK2, TextArrayWritable, Text, Text> {
+    class MyReducer extends Reducer<NewK2, TextArrayWritable, Text, Text> {
         protected void reduce(NewK2 k2, Iterable<TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
             //long min = Long.MAX_VALUE;
             String initstr = ""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+"";

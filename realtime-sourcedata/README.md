@@ -24,12 +24,19 @@ hadoop fs -rm hdfs://nameservice1/user/hadoop/spark-jobs/gongzi/bi-dw-gongzi-rea
 
 #### PathList Test
 ```
- java -cp realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.utils.PathListNew
-
 scp hadoop-mapreduce-client-common/2.5.0-cdh5.2.0/hadoop-mapreduce-client-common-cdh5.2.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/pl_libs/
 scp hadoop-mapreduce-client-common/2.5.0-cdh5.2.0/hadoop-mapreduce-client-common-2.5.0-cdh5.2.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/pl_libs/
+
+cd ~/.m2/repository/org/apache/hadoop/
+scp hadoop-mapreduce-client-core/2.5.0-cdh5.2.0/hadoop-mapreduce-client-core-2.5.0-cdh5.2.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/pl_libs/
+
 scp hadoop-mapreduce-client-shuffle/2.5.0-cdh5.2.0/hadoop-mapreduce-client-shuffle-2.5.0-cdh5.2.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/pl_libs/
-java -classpath ./conf/:./pl_libs/:./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapred.PathListNew
+
+hadoop-common
+scp hadoop-common/2.5.0-cdh5.2.0/hadoop-common-2.5.0-cdh5.2.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/pl_libs/
+
+hadoop jar ./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapred.PathListNew
+
 ```
 
 #### kill spark 作业
