@@ -107,7 +107,7 @@ public class PathListNew {
         int xx = 0;
         protected void map(LongWritable key, Text value, Context context) throws IOException ,InterruptedException {
             final String[] splited = value.toString().split("\u0001");
-
+            System.out.println("======>>" + splited.toString());
             // gu_id和starttime作为联合主键
             // gu_id + starttime
             final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
