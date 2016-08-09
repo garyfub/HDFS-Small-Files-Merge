@@ -107,16 +107,20 @@ public class PathListNew {
         int xx = 0;
         protected void map(LongWritable key, Text value, Context context) throws IOException ,InterruptedException {
             final String[] splited = value.toString().split("\u0001");
-            // gu_id和starttime作为联合主键
 
-            final NewK2 k2 = new NewK2(splited[2], Long.parseLong(splited[26]));
+            // gu_id和starttime作为联合主键
+            // gu_id + starttime
+            final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
             //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
             // page_level_id    对应的路径    line
-            String str[] = {splited[13],
-                    splited[9]+"\t"+splited[10]+"\t"+splited[14]+"\t"+splited[36]+"\t"+splited[37]+"\t"+splited[41]+"\t"+splited[27],value.toString().replace("\u0001","\t")};
+            // 21 page_level_id
+            // 9 page_id
+            // 10    page_value  14: page_lvl2_value,36: event_id,37: event_value,41: event_lvl2_value, 27: starttime
+            String str[] = {splited[21],
+                    splited[15]+"\t"+splited[16]+"\t"+splited[25]+"\t"+splited[34]+"\t"+splited[35]+"\t"+splited[36]+"\t"+splited[22],value.toString().replace("\u0001","\t")};
             final TextArrayWritable v2 = new TextArrayWritable(str);
 
-            System.out.println(xx+  splited[2] +  "日志日志"+  splited[26] + "日志日志"+  splited[13]  + "日志日志"+  splited[9]  );
+//            System.out.println(xx+  splited[2] +  "日志日志"+  splited[26] + "日志日志"+  splited[13]  + "日志日志"+  splited[9]  );
             xx ++;
 
             context.write(k2, v2);
