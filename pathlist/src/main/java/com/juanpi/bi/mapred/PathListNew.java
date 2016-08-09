@@ -109,7 +109,10 @@ public class PathListNew {
             final String[] splited = value.toString().split("\u0001");
             System.out.println("======>>" + splited.toString());
             // gu_id和starttime作为联合主键
+
             // gu_id + starttime
+            // gu_id + starttime
+
             final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
             //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
             // page_level_id    对应的路径    line
