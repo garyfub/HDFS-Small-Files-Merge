@@ -69,15 +69,28 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     */
   def pageProcess(dataDStream: DStream[(String, String)], ssc: StreamingContext, km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
-    // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
     // 数据块中的每一条记录需要处理
     dataDStream.map(_._2.replace("\0",""))
       .transform(transMessage _)
       .filter(!_._1.isEmpty)
       .foreachRDD((rdd, time) =>
       {
+        //  需要从 hbase 查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
         val newRdd = rdd.map(record => {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._3
+
+          val gu_id = user.gu_id
+
+          val app_name = user.site_id match {
+            case 1 => "jiu"
+            case 2 => "zhe"
+            case _ => ""
+          }
+
+          val (utm, gu_create_time) = HBaseHandler.getGuIdUtmInitDate(zkQuorum, gu_id + app_name)
+          user.utm = utm
+          user.gu_create_time = gu_create_time
+
           (record._1, (record._2, combine(user, pageAndEvent, page, event).mkString("\u0001")))
         })
 
