@@ -27,6 +27,7 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
   var transformer:ITransformer = null
 
   /**
+    * 解析 event
     * event 过滤 collect_api_responsetime
     * page 和 event 都需要过滤 gu_id 为空的数据，需要过滤 site_id 不为（2, 3）的数据
     *
@@ -44,30 +45,9 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
       .filter(!_._1.isEmpty)
       .foreachRDD((rdd, time) =>
       {
-        // 保存数据至hdfs
-        rdd.map(v => (v._1 + "/" + v._2 + time.milliseconds, v._3))
-          .saveAsMultiTextFiles(Config.baseDir + "/")
-      })
-
-    // 更新kafka offset
-    dataDStream.foreachRDD { rdd =>
-      km.updateOffsets(rdd)
-    }
-  }
-
-  def pageProcess(dataDStream: DStream[(String, String)], ssc: StreamingContext, km: KafkaManager) = {
-    // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
-    // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
-    // 数据块中的每一条记录需要处理
-    dataDStream.map(_._2.replace("\0",""))
-      .transform(transMessage _)
-      .filter(!_._1.isEmpty)
-      .foreachRDD((rdd, time) =>
-      {
         val newRdd = rdd.map(record => {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._3
-
-          (record._1, (record._2, List(user, pageAndEvent, page, event).mkString("\u0001")))
+          (record._1, (record._2, combine(user, pageAndEvent, page, event).mkString("\u0001")))
         })
 
         // 保存数据至hdfs
@@ -80,6 +60,40 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
       km.updateOffsets(rdd)
     }
   }
+
+  /**
+    * 解析 pageinfo
+    * @param dataDStream
+    * @param ssc
+    * @param km
+    */
+  def pageProcess(dataDStream: DStream[(String, String)], ssc: StreamingContext, km: KafkaManager) = {
+    // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
+    // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
+    // 数据块中的每一条记录需要处理
+    dataDStream.map(_._2.replace("\0",""))
+      .transform(transMessage _)
+      .filter(!_._1.isEmpty)
+      .foreachRDD((rdd, time) =>
+      {
+        val newRdd = rdd.map(record => {
+          val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._3
+          (record._1, (record._2, combine(user, pageAndEvent, page, event).mkString("\u0001")))
+        })
+
+        // 保存数据至hdfs
+        newRdd.map(v => (v._1 + "/" + v._2._1 + time.milliseconds, v._2._2))
+          .saveAsMultiTextFiles(Config.baseDir + "/")
+      })
+
+    // 更新kafka offset
+    dataDStream.foreachRDD { rdd =>
+      km.updateOffsets(rdd)
+    }
+  }
+
+  // http://stackoverflow.com/questions/9028459/a-clean-way-to-combine-two-tuples-into-a-new-larger-tuple-in-scala
+  def combine(xss: Product*) = xss.toList.flatten(_.productIterator)
 
   def parseMessage(message:String):(String, String, Any) = {
     getTransformer().transform(message, dimPage, dimEvent)
