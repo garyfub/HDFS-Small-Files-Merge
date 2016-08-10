@@ -48,6 +48,8 @@ hadoop fs -ls hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016
     ## 查看数据
     hadoop fs -ls /user/hadoop/gongzi/dw_real_for_path_list/date=2016-08-02
 
+    hadoop fs -tail hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=f/page1470127920000-r-00011
+
     hadoop fs -copyToLocal /user/hadoop/gongzi/kafka_realoutput/mb_pageinfo_hash2/date=2016-07-21/hour=9/1469063340000-r-00000 /home/hadoop/users/gongzi/1469063340000.txt
 
     ## 删除数据
