@@ -166,8 +166,8 @@ class KafkaManager(val kafkaParams: Map[String, String],
           * 如果streaming程序执行的时候出现kafka.common.OffsetOutOfRangeException，
           * 说明zk上保存的offsets已经过时了，即kafka的定时清理策略已经将包含该offsets的文件删除。
           * 针对这种情况，只要判断一下zk上的consumerOffsets和earliestLeaderOffsets的大小，
-          * 如果consumerOffsets比earliestLeaderOffsets还小的话，说明consumerOffsets已过时,
-          * 这时把consumerOffsets更新为earliestLeaderOffsets
+          * 如果 consumerOffsets 比 earliestLeaderOffsets 还小的话，说明 consumerOffsets 已过时,
+          * 这时把 consumerOffsets 更新为 earliestLeaderOffsets
           */
         val earliestLeaderOffsetsE = kc.getEarliestLeaderOffsets(partitions)
         if (earliestLeaderOffsetsE.isLeft)
