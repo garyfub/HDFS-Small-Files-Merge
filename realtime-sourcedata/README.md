@@ -11,7 +11,7 @@ ssh hadoop@spark001.jp
 # on sparkoo1.jp
 
 hadoop fs -mkdir /user/hadoop/spark-jobs/gongzi
-hadoop fs -ls /user/hadoop/spark-jobs/gongzi
+hadoop fs -ls hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-08-07/
 
 # 上传
 hadoop fs -put /home/hadoop/users/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar /user/hadoop/spark-jobs/gongzi/
@@ -61,6 +61,7 @@ hadoop fs -ls hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016
 ##### Kafka Topic：
 - pageinfo：mb_pageinfo_hash2
 - event：mb_event_hash2
+> 当同时消费这两个topic、且结果写同一个目录时，数据会出现异常。测试的时候，数据都写dw_real_for_path_list，当出现写数据延迟，系统会自动创建临时目录：dw_real_for_path_list/_temporary/0/task_201608121541_0130_r_000006，此时两个解析程序就会产生同名的临时文件，会导致两个程序读写文件冲突而退出。
 
 ##### 集群模式：pageinfo 测试脚本-V-new bi-dw-gongzi-realtime.sh
 
