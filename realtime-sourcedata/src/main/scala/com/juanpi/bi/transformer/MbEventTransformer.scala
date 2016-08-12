@@ -18,7 +18,7 @@ class MbEventTransformer extends ITransformer {
             dimevent: mutable.HashMap[String, (Int, Int)]): (User, PageAndEvent, Page, Event) = {
 
     // ---------------------------------------------------------------- mb_event ----------------------------------------------------------------
-    val ticks = (row \ "ticks").asOpt[String].getOrElse("")
+//    val ticks = (row \ "ticks").asOpt[String].getOrElse("")
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
     val activityname = (row \ "activityname").asOpt[String].getOrElse("").toLowerCase()
     val starttime = (row \ "starttime").asOpt[String].getOrElse("")
@@ -27,10 +27,10 @@ class MbEventTransformer extends ITransformer {
     val uid = (row \ "uid").asOpt[String].getOrElse("")
     val extend_params = (row \ "extend_params").asOpt[String].getOrElse("")
     // utm 的值还会改变，故定义成var
-    var utm = (row \ "utm").asOpt[String].getOrElse("")
+    val utm = (row \ "utm").asOpt[String].getOrElse("")
     val source = ""
-    val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
-    val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
+//    val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
+//    val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
     val app_name = (row \ "app_name").asOpt[String].getOrElse("")
     val app_version = (row \ "app_version").asOpt[String].getOrElse("")
     val os = (row \ "os").asOpt[String].getOrElse("")
@@ -77,7 +77,7 @@ class MbEventTransformer extends ITransformer {
       if ("click_cube_banner".equals(activityname)) {
         if (t_extend_params.contains("ads_id")) {
           val js_t_extend_params = Json.parse(t_extend_params)
-          val ads_id = (js_t_extend_params \ "ads_id").asOpt[String]
+          val ads_id = (js_t_extend_params \ "ads_id").toString()
           "banner" + "::" + ads_id + cube_position
         } else {
           "banner" + "::" + t_extend_params + "::" + cube_position
@@ -100,7 +100,7 @@ class MbEventTransformer extends ITransformer {
     var cid = ""
     if (server_jsonstr.contains("cid")) {
       val js_server_jsonstr = Json.parse(server_jsonstr)
-      cid = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
+      cid = (js_server_jsonstr \ "cid").toString()
     }
 
     println("=======>> server_jsonstr::", server_jsonstr)
@@ -132,7 +132,7 @@ class MbEventTransformer extends ITransformer {
 
     val for_pre_pageid =
       if ("page_h5".equals(pagename)) {
-        var pid = new GetPageID().evaluate(f_pre_extend_params).toInt
+        val pid = new GetPageID().evaluate(f_pre_extend_params).toInt
         pid match {
           case 34 | 65 | 10069 => "page_active"
           case _ => (pagename + f_pre_extend_params).toLowerCase()
@@ -196,13 +196,13 @@ class MbEventTransformer extends ITransformer {
 
     // 品宣页点击存储质检类型
     val event_lvl2_value = event_id match {
-      case "360" => getJsonValueByKey(server_jsonstr, "item").toString
-      case "482"|"481"|"480"|"479"=> getJsonValueByKey(server_jsonstr, "item").toString
+      case "360" => getJsonValueByKey(server_jsonstr, "item")
+      case "482"|"481"|"480"|"479" => getJsonValueByKey(server_jsonstr, "_rmd")
       case _ => ""
     }
 
     val jpk = 0
-    val loadTime = getJsonValueByKey(server_jsonstr, "_t").toString
+    val loadTime = getJsonValueByKey(server_jsonstr, "_t")
 
     println("======>> page_id :: " + page_id)
     val (date, hour) = DateUtils.dateHourStr(endtime.toLong)
@@ -216,9 +216,13 @@ class MbEventTransformer extends ITransformer {
     (user, pe, page, event)
   }
 
-  def getJsonValueByKey(jsonStr: String, key: String): Unit = {
-    val js = Json.parse(jsonStr)
-    (js \ key).asOpt[String].getOrElse("")
+  def getJsonValueByKey(jsonStr: String, key: String): String = {
+    if(jsonStr.contains(key)){
+      val js = Json.parse(jsonStr)
+      (js \ key).toString()
+    } else {
+      ""
+    }
   }
 
   def getEventId(d_event_id: Int, app_version: String): Int = {
@@ -232,12 +236,9 @@ class MbEventTransformer extends ITransformer {
 
     def getEventValue(event_type_id: Int, activityname: String, extend_params: String, server_jsonstr: String): String =
     {
-      //  -- gognzi && lielie,过滤掉商品流坑位数据中非当天的数据
-      val js = Json.parse(server_jsonstr)
-      var oper_time = ""
-      if (server_jsonstr.contains("_t")) {
-        oper_time = (js \ "_t").asOpt[String].getOrElse("")
-      }
+      //  TODO -- gognzi && lielie,过滤掉商品流坑位数据中非当天的数据
+      val oper_time = getJsonValueByKey(server_jsonstr, "_t")
+
       // TODO
       if (event_type_id == 10) {
         if (activityname.contains("click_cube")) {
@@ -247,13 +248,15 @@ class MbEventTransformer extends ITransformer {
         } else {
           extend_params
         }
-      } else extend_params
+      } else {
+        extend_params
+      }
     }
 
     def getAbinfo(extend_params: String, arg: String): String = {
       if (extend_params.contains(arg)) {
-        var ab_info = (Json.parse(extend_params) \ "ab_info").toString()
-        (Json.parse(ab_info) \ arg).toString()
+        val ab_info = getJsonValueByKey(extend_params, "ab_info")
+        getJsonValueByKey(ab_info, arg)
       }
       else ""
     }
@@ -340,20 +343,34 @@ class MbEventTransformer extends ITransformer {
 }
 
 // for test
-object MbEventTransformer{
+object MbEventTransformer {
+
+  def getJsonValueByKey(jsonStr: String, key: String): String = {
+    if(jsonStr.contains(key)){
+      val js = Json.parse(jsonStr)
+      (js \ key).toString()
+    } else {
+      ""
+    }
+  }
+
   def main(args: Array[String]) {
 //    val event = """{"session_id":"1453286581908_jiu_1457423937672","ticks":"1453286581908","uid":"16739625","utm":"101225","app_name":"jiu","app_version":"3.3.8","os":"android","os_version":"5.1.1","deviceid":"0","jpid":"00000000-3be0-c4d6-b09c-156062841d62","to_switch":"1","location":"河北省","c_label":"C2","activityname":"click_cube_goods","extend_params":{"pit_info":"goods::5208686::1_22","ab_info":{"rule_id":"","test_id":"","select":""}},"source":"","cube_position":"1_22","server_jsonstr":{},"starttime":"1457425815507","endtime":"1457425815507","result":"1","pagename":"page_home_brand_in","page_extends_param":"1620540_1345584_5608626","pre_page":"page_temai_goods","pre_extends_param":"5508676","gj_page_names":"page_home_brand_in,page_home_brand_in,page_tab,page_home_brand_in","gj_ext_params":"1435453_1445587_5139662,1435453_1445587_5139662,all,1620540_1345584_5608626","starttime_origin":"1457425815189","endtime_origin":"1457425815189","ip":"106.8.147.163"}"""
 //    val b = JSON.parseObject(event)
 //    println(b.get("session_id"))
-    val gsort_key = "POSTION_SORT_65_20160525_12_63"
-    val sortdate = Array(gsort_key.split("_")(3).substring(0, 4), gsort_key.split("_")(3).substring(4, 6), gsort_key.split("_")(3).substring(6, 8)).mkString("-")
-    val sorthour = gsort_key.split("_")(4)
-    val lplid = gsort_key.split("_")(5)
-    var ptplid = ""
-    if(gsort_key.split("_").length > 6 ){
-      ptplid = gsort_key.split("_")(6)
-    }
-    println(sortdate, sorthour, lplid, ptplid)
 
+
+//    val gsort_key = "POSTION_SORT_65_20160525_12_63"
+//    val sortdate = Array(gsort_key.split("_")(3).substring(0, 4), gsort_key.split("_")(3).substring(4, 6), gsort_key.split("_")(3).substring(6, 8)).mkString("-")
+//    val sorthour = gsort_key.split("_")(4)
+//    val lplid = gsort_key.split("_")(5)
+//    var ptplid = ""
+//    if(gsort_key.split("_").length > 6 ){
+//      ptplid = gsort_key.split("_")(6)
+//    }
+//    println(sortdate, sorthour, lplid, ptplid)
+
+    val t = getJsonValueByKey("""{"pit_info":"goods::16915719::2_19","cid":0,"_t":1470639193}""", "_t")
+    println(t)
   }
 }

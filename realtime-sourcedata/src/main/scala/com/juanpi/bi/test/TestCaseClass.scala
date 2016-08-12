@@ -26,8 +26,7 @@ object TestCaseClass {
   def combine(xss: Product*) = xss.toList.flatten(_.productIterator)
 
   def main(args: Array[String]) {
-    val p1 = Page1("p11", "p22")
-    val e1 = Event1("p11", "p22")
+    val p1 = Page1("p11", "p2TestCaseClass1 = Event1("p11", "p22")
     println(Page1.unapply(p1).get)
     val plist = Page1.unapply(p1).get
     println(plist.productIterator.toList)
