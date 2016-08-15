@@ -26,6 +26,7 @@ object TestCaseClass {
   def combine(xss: Product*) = xss.toList.flatten(_.productIterator)
 
   def main(args: Array[String]) {
+    timestamp
 //    println(Page1.unapply(p1).get)
 //    val plist = Page1.unapply(p1).get
 //    println(plist.productIterator.toList)

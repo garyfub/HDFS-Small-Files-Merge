@@ -9,6 +9,8 @@ import kafka.serializer.StringDecoder
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, _}
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
+import org.apache.hadoop.io.NullWritable
+import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat
 import org.apache.spark.Logging
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.StreamingContext
@@ -16,9 +18,6 @@ import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
 
 import scala.collection.mutable
-
-// todo
-import com.juanpi.bi.streaming.MultiOutputRDD._
 
 @SerialVersionUID(42L)
 class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, String, Int)], dimEvent: mutable.HashMap[String, (Int, Int)], zkQuorum: String)
@@ -52,7 +51,11 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
 
         // 保存数据至hdfs
         newRdd.map(v => (v._1 + "/" + v._2._1 + time.milliseconds, v._2._2))
-          .saveAsMultiTextFiles(Config.baseDir + "/" + topic)
+          .groupByKey()
+          .saveAsHadoopFile(Config.baseDir + "/" + topic,
+            classOf[String],
+            classOf[String],
+            classOf[RDDMultipleTextOutputFormat])
       })
 
     // 更新kafka offset
@@ -96,7 +99,11 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
 
         // 保存数据至hdfs
         newRdd.map(v => (v._1 + "/" + v._2._1 + time.milliseconds, v._2._2))
-          .saveAsMultiTextFiles(Config.baseDir + "/" + topic)
+          .groupByKey()
+          .saveAsHadoopFile(Config.baseDir + "/" + topic,
+            classOf[String],
+            classOf[String],
+            classOf[RDDMultipleTextOutputFormat])
       })
 
     // 更新kafka offset
@@ -123,15 +130,22 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     transformer
   }
 
-  // 保存 page 或者 event的数据
-  def save(page_event: DStream[(String, String)]) = {
-    page_event.foreachRDD{ (rdd,time) =>
-      rdd.map(v => (v._1+"/"+time.milliseconds,v._2))
-//        .repartition(1)
-        .saveAsMultiTextFiles(Config.baseDir+"/"+topic)
-    }
+}
+
+class RDDMultipleTextOutputFormat extends MultipleTextOutputFormat[Any, Any] {
+  override def generateActualKey(key: Any, value: Any): Any = {
+    NullWritable.get()
+  }
+
+  override def generateFileNameForKeyValue(key: Any, value: Any, name: String): String = {
+    key.asInstanceOf[String]
+//    val keyAndTime = key.asInstanceOf[(String, Long)]
+//    val realKey = keyAndTime._1
+//    val timestamp = keyAndTime._2
+//    realKey + "/" + timePartition(timestamp) + "/" + realKey + "_" + timePartition(timestamp) + "_binlog.txt"
   }
 }
+
 
 object HBaseHandler {
   val HbaseFamily = "dw"

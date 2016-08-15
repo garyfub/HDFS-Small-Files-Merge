@@ -1,6 +1,5 @@
 package com.juanpi.bi.transformer
 
-import com.alibaba.fastjson.JSON
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.hiveUDF.{GetGoodsId, GetMbActionId, GetPageID}
 import com.juanpi.bi.sc_utils.DateUtils
