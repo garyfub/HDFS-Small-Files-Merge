@@ -27,14 +27,13 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
 public class PathListNew {
 
 //    static final Path INPUT_PATH = new Path("hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/page1470127080000-r-00006");
-    static final String INPUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_event_hash2/date=2016-08-09/gu_hash=f/,hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-09/gu_hash=f";
-    static final String OUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-07/gu_hash=f/";
+    static final String INPUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_event_hash2/date=2016-08-12/gu_hash=f/,hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-12/gu_hash=f";
+    static final String OUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-12/gu_hash=f/";
 
     static Configuration conf = new Configuration();
     static FileSystem fs;
 
-    static {
-
+    public static FileSystem getFileSystem(String inputPath, String outPath) {
         conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
 
         try {
@@ -50,6 +49,7 @@ public class PathListNew {
             System.out.println(("初始化FileSystem失败！"));
             System.out.println(e.getMessage());
         }
+        return fs;
     }
 
     public static void main(String[] args) throws Exception {
