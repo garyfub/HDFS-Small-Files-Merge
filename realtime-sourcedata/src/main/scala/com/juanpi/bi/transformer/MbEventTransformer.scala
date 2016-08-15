@@ -321,8 +321,8 @@ class MbEventTransformer extends ITransformer {
         if(!gu_id.isEmpty) {
           try {
             val res = parse(row, dimpage, dimevent)
-
-            (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, "event", res)
+            val res_str =  combine(res).mkString("\u0001")
+            (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, "event", res_str)
           } catch {
             //使用模式匹配来处理异常
             case ex:Exception => {
@@ -337,9 +337,11 @@ class MbEventTransformer extends ITransformer {
       else {
         ("", "", None)
       }
-  }
+    }
 
-}
+  // http://stackoverflow.com/questions/9028459/a-clean-way-to-combine-two-tuples-into-a-new-larger-tuple-in-scala
+  def combine(xss: Product*) = xss.toList.flatten(_.productIterator)
+  }
 
 // for test
 object MbEventTransformer {

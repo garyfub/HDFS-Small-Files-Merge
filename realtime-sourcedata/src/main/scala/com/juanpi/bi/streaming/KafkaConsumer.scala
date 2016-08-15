@@ -38,24 +38,20 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
     // 数据块中的每一条记录需要处理
-    dataDStream.map(_._2.replace("\0",""))
+    val data = dataDStream.map(_._2.replace("\0",""))
       .filter(line => !line.contains("collect_api_responsetime"))
       .transform(transMessage _)
       .filter(!_._1.isEmpty)
-      .foreachRDD((rdd, time) =>
-      {
-        val newRdd = rdd.map(record => {
-          val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._3
-          (record._1, (record._2, combine(user, pageAndEvent, page, event).mkString("\u0001")))
-        })
 
-        // 保存数据至hdfs
-        newRdd.map(v => (v._1 + "/" + v._2._1 + time.milliseconds, v._2._2))
-          .saveAsHadoopFile(Config.baseDir + "/" + topic,
-            classOf[String],
-            classOf[String],
-            classOf[RDDMultipleTextOutputFormat])
-      })
+    data.foreachRDD((rdd, time) =>
+    {
+      // 保存数据至hdfs
+      rdd.map(v => (v._1 + "/event_" + time.milliseconds, v._2))
+        .saveAsHadoopFile(Config.baseDir + "/" + topic,
+          classOf[String],
+          classOf[String],
+          classOf[RDDMultipleTextOutputFormat])
+    })
 
     // 更新kafka offset
     dataDStream.foreachRDD { rdd =>
@@ -72,10 +68,11 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
   def pageProcess(dataDStream: DStream[(String, String)], ssc: StreamingContext, km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 数据块中的每一条记录需要处理
-    dataDStream.map(_._2.replace("\0",""))
+    val data = dataDStream.map(_._2.replace("\0",""))
       .transform(transMessage _)
       .filter(!_._1.isEmpty)
-      .foreachRDD((rdd, time) =>
+
+     data.foreachRDD((rdd, time) =>
       {
         //  需要从 hbase 查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
         val newRdd = rdd.map(record => {
@@ -92,12 +89,12 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
           val (utm, gu_create_time) = HBaseHandler.getGuIdUtmInitDate(zkQuorum, gu_id + app_name)
           user.utm = utm
           user.gu_create_time = gu_create_time
-
+          // record._2 就是 page
           (record._1, (record._2, combine(user, pageAndEvent, page, event).mkString("\u0001")))
         })
 
         // 保存数据至hdfs
-        newRdd.map(v => (v._1 + "/" + v._2._1 + time.milliseconds, v._2._2))
+        newRdd.map(v => (v._1 + "/" + "page_" + time.milliseconds, v._2._2))
           .saveAsHadoopFile(Config.baseDir + "/" + topic,
             classOf[String],
             classOf[String],
