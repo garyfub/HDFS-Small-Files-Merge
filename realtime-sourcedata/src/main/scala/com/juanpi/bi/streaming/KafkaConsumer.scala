@@ -51,7 +51,6 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
 
         // 保存数据至hdfs
         newRdd.map(v => (v._1 + "/" + v._2._1 + time.milliseconds, v._2._2))
-          .groupByKey()
           .saveAsHadoopFile(Config.baseDir + "/" + topic,
             classOf[String],
             classOf[String],
@@ -99,7 +98,6 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
 
         // 保存数据至hdfs
         newRdd.map(v => (v._1 + "/" + v._2._1 + time.milliseconds, v._2._2))
-          .groupByKey()
           .saveAsHadoopFile(Config.baseDir + "/" + topic,
             classOf[String],
             classOf[String],

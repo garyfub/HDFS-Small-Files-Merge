@@ -303,7 +303,7 @@ class KafkaManager(val kafkaParams: Map[String, String],
 
       if (zc.exists(baseDir, false) == null) {
         val ret = zc.create(baseDir, "".getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT)
-        println("create path:" + baseDir)
+        println("updateOffsets-create path:" + baseDir)
       }
 
       if (zc.exists(nodePath, false) == null) {
