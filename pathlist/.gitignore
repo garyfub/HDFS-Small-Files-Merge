@@ -1,5 +1,4 @@
 .idea/workspace.xml
 *workspace.xml
-*/target/*
-pathlist/target/*
+target/*
 *.iml
