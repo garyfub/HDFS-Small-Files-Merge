@@ -29,8 +29,6 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
  */
 public class PathListNew {
 
-//    static final Path INPUT_PATH = new Path("hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/page1470127080000-r-00006");
-
     static String base = "hdfs://nameservice1/user/hadoop/gongzi";
 
     static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list";
@@ -73,17 +71,21 @@ public class PathListNew {
         }
 
         for(int i=0x0; i<=0xf; i++) {
-            String gu = String.format("%x ", i);
+            String gu = String.format("%x", i);
 //            System.out.println(gu);
 
             String str = "{0}/{1}/date={2}/gu_hash={3}/";
-            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, i);
-            String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, i);
+            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, gu);
+            String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, gu);
             // 文件输入路径
             String inputPath = strEvent + "," + strPage;
 
             // PathList文件落地路径
-            String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, "dw_real_path_list", dateStr, i);
+            String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, "dw_real_path_list", dateStr, gu);
+
+            System.out.println(base);
+            System.out.println(inputPath);
+            System.out.println(outputPath);
 
             getFileSystem(base, outputPath);
 
@@ -151,13 +153,9 @@ public class PathListNew {
             final String[] splited = value.toString().split("\u0001");
             System.out.println("======>>" + splited.toString());
             // gu_id和starttime作为联合主键
-
-            // gu_id + starttime
-            // gu_id + starttime
-
             final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
             //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
-            // page_level_id    对应的路径    line
+            // page_level_id  对应的路径    line
             // 21 page_level_id
             // 9 page_id
             // 10    page_value  14: page_lvl2_value,36: event_id,37: event_value,41: event_lvl2_value, 27: starttime
@@ -165,7 +163,6 @@ public class PathListNew {
                     splited[15]+"\t"+splited[16]+"\t"+splited[25]+"\t"+splited[34]+"\t"+splited[35]+"\t"+splited[36]+"\t"+splited[22],value.toString().replace("\u0001","\t")};
             final TextArrayWritable v2 = new TextArrayWritable(str);
 
-//            System.out.println(xx+  splited[2] +  "日志日志"+  splited[26] + "日志日志"+  splited[13]  + "日志日志"+  splited[9]  );
             xx ++;
 
             context.write(k2, v2);
@@ -310,7 +307,7 @@ public class PathListNew {
     }
 
 
-    /*新增IntArrayWritable的writable类*/
+    // 新增IntArrayWritable的writable类
     static class IntArrayWritable extends ArrayWritable {
 
         private Long[] values = null;
@@ -369,8 +366,12 @@ public class PathListNew {
         }
     }
     public static void main(String[] args){
-//        String dateStr = args[0];
-        JobsControl("2016-08-13");
-        System.out.println(getDateStr());
+        String dateStr = args[0];
+        if(dateStr== null || dateStr.isEmpty()){
+            JobsControl("");
+        } else
+        {
+            JobsControl(dateStr);
+        }
     }
 }

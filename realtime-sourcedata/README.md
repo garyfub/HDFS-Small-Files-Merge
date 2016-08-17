@@ -11,7 +11,9 @@ ssh hadoop@spark001.jp
 # on sparkoo1.jp
 
 hadoop fs -mkdir /user/hadoop/spark-jobs/gongzi
-hadoop fs -ls hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-08-07/
+
+hadoop fs -ls hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_event_hash2
+hadoop fs -ls hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2
 
 # 上传
 hadoop fs -put /home/hadoop/users/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar /user/hadoop/spark-jobs/gongzi/
@@ -39,7 +41,7 @@ hadoop jar ./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapre
 yarn jar ./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapred.PathListNew
 
 # 文件结果
-hadoop fs -ls hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-07-30/gu_hash=0
+hadoop fs -ls hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-13/gu_hash=0
 
 ```
 
