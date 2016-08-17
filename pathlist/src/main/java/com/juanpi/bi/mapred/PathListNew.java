@@ -10,7 +10,6 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
-import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
@@ -21,7 +20,6 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 import static org.apache.hadoop.io.WritableComparator.readVLong;
 
@@ -32,22 +30,22 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
 public class PathListNew {
 
 //    static final Path INPUT_PATH = new Path("hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/page1470127080000-r-00006");
-    static final String INPUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_event_hash2/date=2016-08-12/gu_hash=f/,hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-12/gu_hash=f";
 
-    static final String OUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-12/gu_hash=f/";
+    static String base = "hdfs://nameservice1/user/hadoop/gongzi";
 
     static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list";
 
     static Configuration conf = new Configuration();
+
     static FileSystem fs;
 
-    public static FileSystem getFileSystem(String inputPath, String outPath) {
+    public static void getFileSystem(String basePath, String outPath) {
+
         conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
 
         try {
-            fs = FileSystem.get(new Path("hdfs://nameservice1/user/hadoop/gongzi/").toUri(), conf);
-//            listFiles(INPUT_PATH);
-
+            fs = FileSystem.get(new Path(basePath).toUri(), conf);
+            // 清理待存放数据的目录
             if(fs.exists(new Path(outPath))){
                 fs.delete(new Path(outPath), true);
             }
@@ -55,20 +53,16 @@ public class PathListNew {
             System.out.println(("初始化FileSystem失败！"));
             System.out.println(e.getMessage());
         }
-        return fs;
     }
 
+    /**
+     * 参考 http://bijian1013.iteye.com/blog/2306763
+     * @return
+     */
     public static String getDateStr()
     {
         Calendar c1 = Calendar.getInstance();
-        c1.setTime(new Date());
-
-        // 当Calendar中设置的时间超过每项的最大值时,会以减去最大值后的值设置时间,例如月份设置13,最后会变成13-11=02
-        Calendar c2 = Calendar.getInstance();
-        c2.set(1920, 13, 24, 22, 32, 22);
-        //使用pattern http://bijian1013.iteye.com/blog/2306763
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd H:m:s");
         return format.format(c1.getTime());
     }
 
@@ -78,44 +72,43 @@ public class PathListNew {
             dateStr = getDateStr();
         }
 
-        for(int i=0x0; i<=0xf; i++){
+        for(int i=0x0; i<=0xf; i++) {
             String gu = String.format("%x ", i);
-            System.out.println(gu);
+//            System.out.println(gu);
+
             String str = "{0}/{1}/date={2}/gu_hash={3}/";
+            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, i);
+            String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, i);
+            // 文件输入路径
+            String inputPath = strEvent + "," + strPage;
 
-            String str_event = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, i);
-            String str_page = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, i);
+            // PathList文件落地路径
+            String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, "dw_real_path_list", dateStr, i);
 
-            String inputPath = str_event + "," + str_page;
+            getFileSystem(base, outputPath);
 
-            System.out.println(inputPath);
-
-//            Configuration conf = new Configuration();
-//            conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
-//            getFileSystem("", "");
-//            try {
-//                runner();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
+            try {
+                runner(inputPath, outputPath);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public static void runner() throws Exception {
-//        System.out.println(PathListNew.class.getClassLoader().getResource("hadoop_conf/core-site.xml"));
-
-//        listFiles(INPUT_PATH);
-
-//        第一个参数传递进来的是hadoop文件系统中的某个文件的URI,以hdfs://ip 的theme开头
-//        String uri = args[0];
-
+    /**
+     *
+     * @param inputPath
+     * @param outputPath
+     * @throws Exception
+     */
+    public static void runner(String inputPath, String outputPath) throws Exception {
         final Job job = new Job(conf, PathListNew.class.getSimpleName());
 
-        // http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
+        // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
         job.setJar("pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar");
 
         //1.1 指定输入文件路径
-        FileInputFormat.setInputPaths(job, INPUT_PATH);
+        FileInputFormat.setInputPaths(job, inputPath);
         job.setInputFormatClass(TextInputFormat.class);//指定哪个类用来格式化输入文件
 
         //1.2指定自定义的Mapper类
@@ -137,13 +130,13 @@ public class PathListNew {
         job.setOutputValueClass(Text.class);
 
         //2.3 指定输出到哪里
-        FileOutputFormat.setOutputPath(job, new Path(OUT_PATH));
+        FileOutputFormat.setOutputPath(job, new Path(outputPath));
         job.setOutputFormatClass(TextOutputFormat.class);//设定输出文件的格式化类
         job.waitForCompletion(true);//把代码提交给JobTracker执行
     }
 
-//    list all files
-    public static void listFiles(String dirName) throws IOException {
+    // list all files
+    private static void listFiles(String dirName) throws IOException {
         Path f = new Path(dirName);
         FileStatus[] files = fs.listStatus(f);
         System.out.println(dirName + " has all files:");
@@ -332,7 +325,6 @@ public class PathListNew {
             for (int i = 0; i < strings.length; i++) {
                 values[i] = Long.parseLong(strings[i]);
             }
-
         }
 
         @Override
@@ -377,6 +369,8 @@ public class PathListNew {
         }
     }
     public static void main(String[] args){
+//        String dateStr = args[0];
         JobsControl("2016-08-13");
+        System.out.println(getDateStr());
     }
 }
