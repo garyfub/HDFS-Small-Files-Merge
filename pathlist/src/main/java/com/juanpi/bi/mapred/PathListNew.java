@@ -10,6 +10,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
@@ -17,6 +18,10 @@ import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import static org.apache.hadoop.io.WritableComparator.readVLong;
 
@@ -28,7 +33,10 @@ public class PathListNew {
 
 //    static final Path INPUT_PATH = new Path("hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/date=2016-07-30/gu_hash=0/page1470127080000-r-00006");
     static final String INPUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_event_hash2/date=2016-08-12/gu_hash=f/,hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-12/gu_hash=f";
+
     static final String OUT_PATH = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-12/gu_hash=f/";
+
+    static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list";
 
     static Configuration conf = new Configuration();
     static FileSystem fs;
@@ -37,13 +45,11 @@ public class PathListNew {
         conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
 
         try {
-            System.out.println(conf.get("fs.defaultFS"));
-
             fs = FileSystem.get(new Path("hdfs://nameservice1/user/hadoop/gongzi/").toUri(), conf);
 //            listFiles(INPUT_PATH);
 
-            if(fs.exists(new Path(OUT_PATH))){
-                fs.delete(new Path(OUT_PATH), true);
+            if(fs.exists(new Path(outPath))){
+                fs.delete(new Path(outPath), true);
             }
         } catch (IOException e) {
             System.out.println(("初始化FileSystem失败！"));
@@ -52,7 +58,50 @@ public class PathListNew {
         return fs;
     }
 
-    public static void main(String[] args) throws Exception {
+    public static String getDateStr()
+    {
+        Calendar c1 = Calendar.getInstance();
+        c1.setTime(new Date());
+
+        // 当Calendar中设置的时间超过每项的最大值时,会以减去最大值后的值设置时间,例如月份设置13,最后会变成13-11=02
+        Calendar c2 = Calendar.getInstance();
+        c2.set(1920, 13, 24, 22, 32, 22);
+        //使用pattern http://bijian1013.iteye.com/blog/2306763
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd H:m:s");
+        return format.format(c1.getTime());
+    }
+
+    public static void JobsControl(String dateStr){
+
+        if(dateStr== null || dateStr.isEmpty()){
+            dateStr = getDateStr();
+        }
+
+        for(int i=0x0; i<=0xf; i++){
+            String gu = String.format("%x ", i);
+            System.out.println(gu);
+            String str = "{0}/{1}/date={2}/gu_hash={3}/";
+
+            String str_event = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, i);
+            String str_page = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, i);
+
+            String inputPath = str_event + "," + str_page;
+
+            System.out.println(inputPath);
+
+//            Configuration conf = new Configuration();
+//            conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
+//            getFileSystem("", "");
+//            try {
+//                runner();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+        }
+    }
+
+    public static void runner() throws Exception {
 //        System.out.println(PathListNew.class.getClassLoader().getResource("hadoop_conf/core-site.xml"));
 
 //        listFiles(INPUT_PATH);
@@ -167,7 +216,7 @@ public class PathListNew {
             }
 
             //context.write(new LongWritable(k2.first), new LongWritable(min));
-        };
+        }
     }
 
     /**
@@ -326,5 +375,8 @@ public class PathListNew {
             }
             set(texts);
         }
+    }
+    public static void main(String[] args){
+        JobsControl("2016-08-13");
     }
 }
