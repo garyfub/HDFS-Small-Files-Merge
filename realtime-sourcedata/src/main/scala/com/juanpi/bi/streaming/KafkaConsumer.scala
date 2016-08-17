@@ -46,7 +46,7 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     data.foreachRDD((rdd, time) =>
     {
       // 保存数据至hdfs
-      rdd.map(v => (v._1 + "/event_" + time.milliseconds, v._2))
+      rdd.map(v => (v._1 + "/event_" + time.milliseconds, v._3))
         .saveAsHadoopFile(Config.baseDir + "/" + topic,
           classOf[String],
           classOf[String],
