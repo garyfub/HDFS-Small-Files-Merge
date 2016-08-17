@@ -245,9 +245,9 @@ object KafkaConsumer{
       }
     )
 
-    val groupIds = Set("bi_mb_pageinfo_real_direct_by_dw", "bi_mb_event_real_direct_by_dw")
+    val groupIds = Set("bi_gongzi_mb_pageinfo_real_direct_by_dw", "bi_gongzi_mb_event_real_direct_by_dw")
     if(!groupIds.contains(groupId)) {
-      println("groupId有误！！约定的groupId是：mbevent_direct_dw 或者 pageinfo_direct_dw")
+      println("groupId有误！！约定的groupId是：bi_gongzi_mb_pageinfo_real_direct_by_dw 或者 bi_gongzi_mb_event_real_direct_by_dw")
       System.exit(1)
     }
 
