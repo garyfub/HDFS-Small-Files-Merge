@@ -63,6 +63,7 @@ object pageAndEventParser {
       (0, "")
     }
   }
+
   /**
     *
     * @param gsort_key
@@ -142,7 +143,7 @@ object pageAndEventParser {
         } else ""
       }
       else if(x_page_id == 169 && server_jsonstr.contains("order_status")) {
-        (Json.parse(server_jsonstr) \ "order_status").asOpt[String].getOrElse("")
+        (Json.parse(server_jsonstr) \ "order_status").toString()
       }
       else ""
     page_lel2_value

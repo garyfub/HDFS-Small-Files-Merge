@@ -9,6 +9,8 @@ import kafka.serializer.StringDecoder
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, _}
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
+import org.apache.hadoop.io.NullWritable
+import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat
 import org.apache.spark.Logging
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.StreamingContext
@@ -17,9 +19,6 @@ import org.apache.spark.streaming.kafka.KafkaManager
 
 import scala.collection.mutable
 
-// todo
-import com.juanpi.bi.streaming.MultiOutputRDD._
-
 @SerialVersionUID(42L)
 class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, String, Int)], dimEvent: mutable.HashMap[String, (Int, Int)], zkQuorum: String)
   extends Logging with Serializable {
@@ -27,6 +26,7 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
   var transformer:ITransformer = null
 
   /**
+    * 解析 event
     * event 过滤 collect_api_responsetime
     * page 和 event 都需要过滤 gu_id 为空的数据，需要过滤 site_id 不为（2, 3）的数据
     *
@@ -38,16 +38,20 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
     // 数据块中的每一条记录需要处理
-    dataDStream.map(_._2.replace("\0",""))
+    val data = dataDStream.map(_._2.replace("\0",""))
       .filter(line => !line.contains("collect_api_responsetime"))
       .transform(transMessage _)
       .filter(!_._1.isEmpty)
-      .foreachRDD((rdd, time) =>
-      {
-        // 保存数据至hdfs
-        rdd.map(v => (v._1 + "/" + v._2 + time.milliseconds, v._3))
-          .saveAsMultiTextFiles(Config.baseDir + "/")
-      })
+
+    data.foreachRDD((rdd, time) =>
+    {
+      // 保存数据至hdfs
+      rdd.map(v => (v._1 + "/event_" + time.milliseconds, v._2))
+        .saveAsHadoopFile(Config.baseDir + "/" + topic,
+          classOf[String],
+          classOf[String],
+          classOf[RDDMultipleTextOutputFormat])
+    })
 
     // 更新kafka offset
     dataDStream.foreachRDD { rdd =>
@@ -55,24 +59,46 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     }
   }
 
+  /**
+    * 解析 pageinfo
+    * @param dataDStream
+    * @param ssc
+    * @param km
+    */
   def pageProcess(dataDStream: DStream[(String, String)], ssc: StreamingContext, km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
-    // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
     // 数据块中的每一条记录需要处理
-    dataDStream.map(_._2.replace("\0",""))
+    val data = dataDStream.map(_._2.replace("\0",""))
       .transform(transMessage _)
       .filter(!_._1.isEmpty)
-      .foreachRDD((rdd, time) =>
+
+     data.foreachRDD((rdd, time) =>
       {
+        //  需要从 hbase 查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
         val newRdd = rdd.map(record => {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._3
 
-          (record._1, (record._2, List(user, pageAndEvent, page, event).mkString("\u0001")))
+          val gu_id = user.gu_id
+
+          val app_name = user.site_id match {
+            case 1 => "jiu"
+            case 2 => "zhe"
+            case _ => ""
+          }
+
+          val (utm, gu_create_time) = HBaseHandler.getGuIdUtmInitDate(zkQuorum, gu_id + app_name)
+          user.utm = utm
+          user.gu_create_time = gu_create_time
+          // record._2 就是 page
+          (record._1, (record._2, combine(user, pageAndEvent, page, event).mkString("\u0001")))
         })
 
         // 保存数据至hdfs
-        newRdd.map(v => (v._1 + "/" + v._2._1 + time.milliseconds, v._2._2))
-          .saveAsMultiTextFiles(Config.baseDir + "/")
+        newRdd.map(v => (v._1 + "/" + "page_" + time.milliseconds, v._2._2))
+          .saveAsHadoopFile(Config.baseDir + "/" + topic,
+            classOf[String],
+            classOf[String],
+            classOf[RDDMultipleTextOutputFormat])
       })
 
     // 更新kafka offset
@@ -80,6 +106,9 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
       km.updateOffsets(rdd)
     }
   }
+
+  // http://stackoverflow.com/questions/9028459/a-clean-way-to-combine-two-tuples-into-a-new-larger-tuple-in-scala
+  def combine(xss: Product*) = xss.toList.flatten(_.productIterator)
 
   def parseMessage(message:String):(String, String, Any) = {
     getTransformer().transform(message, dimPage, dimEvent)
@@ -96,15 +125,22 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     transformer
   }
 
-  // 保存 page 或者 event的数据
-  def save(page_event: DStream[(String, String)]) = {
-    page_event.foreachRDD{ (rdd,time) =>
-      rdd.map(v => (v._1+"/"+time.milliseconds,v._2))
-//        .repartition(1)
-        .saveAsMultiTextFiles(Config.baseDir+"/"+topic)
-    }
+}
+
+class RDDMultipleTextOutputFormat extends MultipleTextOutputFormat[Any, Any] {
+  override def generateActualKey(key: Any, value: Any): Any = {
+    NullWritable.get()
+  }
+
+  override def generateFileNameForKeyValue(key: Any, value: Any, name: String): String = {
+    key.asInstanceOf[String]
+//    val keyAndTime = key.asInstanceOf[(String, Long)]
+//    val realKey = keyAndTime._1
+//    val timestamp = keyAndTime._2
+//    realKey + "/" + timePartition(timestamp) + "/" + realKey + "_" + timePartition(timestamp) + "_binlog.txt"
   }
 }
+
 
 object HBaseHandler {
   val HbaseFamily = "dw"
@@ -209,9 +245,9 @@ object KafkaConsumer{
       }
     )
 
-    val groupIds = Set("bi_mb_pageinfo_real_direct_by_dw", "bi_mb_event_real_direct_by_dw")
+    val groupIds = Set("bi_gongzi_mb_pageinfo_real_direct_by_dw", "bi_gongzi_mb_event_real_direct_by_dw")
     if(!groupIds.contains(groupId)) {
-      println("groupId有误！！约定的groupId是：mbevent_direct_dw 或者 pageinfo_direct_dw")
+      println("groupId有误！！约定的groupId是：bi_gongzi_mb_pageinfo_real_direct_by_dw 或者 bi_gongzi_mb_event_real_direct_by_dw")
       System.exit(1)
     }
 

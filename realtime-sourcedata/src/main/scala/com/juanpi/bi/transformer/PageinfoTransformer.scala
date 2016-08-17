@@ -13,7 +13,7 @@ class PageinfoTransformer extends ITransformer {
 
   def parse(row: JsValue, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): (User, PageAndEvent, Page, Event) = {
     // mb_pageinfo
-    val ticks = (row \ "ticks").asOpt[String].getOrElse("")
+//    val ticks = (row \ "ticks").asOpt[String].getOrElse("")
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
     val pagename = (row \ "pagename").asOpt[String].getOrElse("").toLowerCase()
     val starttime = (row \ "starttime").asOpt[String].getOrElse("0")
@@ -27,8 +27,8 @@ class PageinfoTransformer extends ITransformer {
     val os = (row \ "os").asOpt[String].getOrElse("")
     val utm = (row \ "utm").asOpt[String].getOrElse("0")
     val source = (row \ "source").asOpt[String].getOrElse("")
-    val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
-    val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
+//    val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
+//    val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
     val pre_extend_params = (row \ "pre_extend_params").asOpt[String].getOrElse("")
     val url = (row \ "wap_url").asOpt[String].getOrElse("")
     val urlref = (row \ "wap_pre_url").asOpt[String].getOrElse("")
@@ -109,7 +109,7 @@ class PageinfoTransformer extends ITransformer {
 
     val user = User.apply(gu_id, uid, utm, gu_create_time, session_id, terminal_id, app_version, site_id, ref_site_id, ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, starttime, endtime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
-    val page = Page.apply(source, ip, url, urlref, deviceid, to_switch)
+    val page = Page.apply(parsed_source, ip, url, urlref, deviceid, to_switch)
     val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
     (user, pe, page, event)
   }
@@ -128,9 +128,9 @@ class PageinfoTransformer extends ITransformer {
       try
       {
         gu_id = pageAndEventParser.getGuid((row \ "jpid").asOpt[String].getOrElse(""),
-          (row \ "deviceid").asOpt[String].getOrElse(""),
-          (row \ "os").asOpt[String].getOrElse("")
-        )
+                                            (row \ "deviceid").asOpt[String].getOrElse(""),
+                                            (row \ "os").asOpt[String].getOrElse("")
+                                          )
       } catch{
         //使用模式匹配来处理异常
         case ex:IllegalArgumentException => println(ex.getMessage())
