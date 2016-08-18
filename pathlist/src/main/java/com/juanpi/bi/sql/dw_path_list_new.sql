@@ -1,5 +1,37 @@
 use test;
-create table dw_path_list_new (
+create external table dw_path_list_new (
+-- 入口页
+last_entrance_page_id int,
+last_entrance_page_value string,
+last_entrance_page_lvl2_value string,
+last_entrance_event_id int,
+last_entrance_event_value string,
+last_entrance_event_lvl2_value string,
+last_entrance_starttime string,
+-- 导航页
+last_guide_page_id int,
+last_guide_page_value string,
+last_guide_page_lvl2_value string,
+last_guide_event_id int,
+last_guide_event_value string,
+last_guide_event_lvl2_value string,
+last_guide_starttime string,
+-- 二级导航
+last_guide_lvl2_page_id int,
+last_guide_lvl2_page_value string,
+last_guide_lvl2_page_lvl2_value string,
+last_guide_lvl2_event_id int,
+last_guide_lvl2_event_value string,
+last_guide_lvl2_event_lvl2_value string,
+last_guide_lvl2_starttime string,
+-- 前站
+last_before_goods_page_id int,
+last_before_goods_page_value string,
+last_before_goods_page_lvl2_value string,
+last_before_goods_event_id int,
+last_before_goods_event_value string,
+last_before_goods_event_lvl2_value string,
+last_before_goods_starttime string,
 gu_id string,
 user_id string,
 utm string,
@@ -13,7 +45,7 @@ ctag string,
 location string,
 jpk int,
 ugroup string,
-date string,
+date_id string,
 hour string,
 page_id int,
 page_value string,
@@ -48,4 +80,11 @@ test_id string,
 select_id string,
 loadtime string
 )
-PARTITIONED BY (`date` string, `hour` string)
+PARTITIONED BY (`date` string, `gu_hash` string)
+row format delimited fields terminated by '\t'
+lines terminated by '\n';
+-- location 'hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list';
+
+drop table dw_path_list_new;
+
+load data inpath 'hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-18/gu_hash=0/part-r-00000' overwrite into table dw_path_list_new partition (date="2016-08-18",gu_hash="0");
