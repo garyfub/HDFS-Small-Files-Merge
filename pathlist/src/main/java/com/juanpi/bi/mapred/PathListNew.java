@@ -1,7 +1,6 @@
 package com.juanpi.bi.mapred;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.*;
@@ -115,7 +114,10 @@ public class PathListNew {
 
         //1.2指定自定义的Mapper类
         job.setMapperClass(MyMapper.class);
-        job.setMapOutputKeyClass(NewK2.class);//指定输出<k2,v2>的类型
+
+        //指定输出<k2,v2>的类型
+        job.setMapOutputKeyClass(NewK2.class);
+
         job.setMapOutputValueClass(TextArrayWritable.class);
 
         //1.3 指定分区类
@@ -128,39 +130,35 @@ public class PathListNew {
 
         //2.2 指定自定义的reduce类
         job.setReducerClass(MyReducer.class);
-        job.setOutputKeyClass(Text.class);//指定输出<k3,v3>的类型
+
+        //指定输出<k3,v3>的类型
+        job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
 
         //2.3 指定输出到哪里
         FileOutputFormat.setOutputPath(job, new Path(outputPath));
-        job.setOutputFormatClass(TextOutputFormat.class);//设定输出文件的格式化类
-        job.waitForCompletion(true);//把代码提交给JobTracker执行
-    }
 
-    // list all files
-    private static void listFiles(String dirName) throws IOException {
-        Path f = new Path(dirName);
-        FileStatus[] files = fs.listStatus(f);
-        System.out.println(dirName + " has all files:");
-        for (int i = 0; i< files.length; i++) {
-            System.out.println(files[i].getPath().toString());
-        }
+        //设定输出文件的格式化类
+        job.setOutputFormatClass(TextOutputFormat.class);
+
+        //把代码提交给JobTracker执行
+        job.waitForCompletion(true);
     }
 
     static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
         int xx = 0;
         protected void map(LongWritable key, Text value, Context context) throws IOException ,InterruptedException {
+
             final String[] splited = value.toString().split("\u0001");
-            System.out.println("======>>" + splited.toString());
-            // gu_id和starttime作为联合主键
+
+            // gu_id 和starttime 作为联合主键
             final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
+
             //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
-            // page_level_id  对应的路径    line
-            // 21 page_level_id
-            // 9 page_id
-            // 10    page_value  14: page_lvl2_value,36: event_id,37: event_value,41: event_lvl2_value, 27: starttime
-            String str[] = {splited[21],
-                    splited[15]+"\t"+splited[16]+"\t"+splited[25]+"\t"+splited[34]+"\t"+splited[35]+"\t"+splited[36]+"\t"+splited[22],value.toString().replace("\u0001","\t")};
+
+            // page_level_id  对应的路径 line
+            // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 35: event_value; 36: event_lvl2_value; 22: starttime
+            String str[] = {splited[21], splited[15]+"\t"+splited[16]+"\t"+splited[25]+"\t"+splited[34]+"\t"+splited[35]+"\t"+splited[36]+"\t"+splited[22], value.toString().replace("\u0001","\t")};
             final TextArrayWritable v2 = new TextArrayWritable(str);
 
             xx ++;
@@ -197,15 +195,12 @@ public class PathListNew {
                     level4 = v2.toStrings()[1];
                 }
 
-/*                Text key2 = new Text(k2.first.toString()+"\t"+k2.second.toString());
-                Text value2 = new Text(  level1+"\t"+ level2+"\t"+level3+"\t"+level4+"\t"+v2.toStrings()[2]);*/
-
+                // 4 个级别
                 Text key2 = new Text(level1+"\t"+ level2+"\t"+level3+"\t"+level4);
                 Text value2 = new Text(v2.toStrings()[2]);
                 context.write(key2, value2);
             }
 
-            //context.write(new LongWritable(k2.first), new LongWritable(min));
         }
     }
 
@@ -236,6 +231,7 @@ public class PathListNew {
             out.writeUTF(first);
             out.writeLong(second);
         }
+
         /**
          * 当k2进行排序时，会调用该方法.
          * 当第一列不同时，升序；当第一列相同时，第二列升序
@@ -272,10 +268,6 @@ public class PathListNew {
         }
 
         @Override
-        /*public int compare(byte[] arg0, int arg1, int arg2, byte[] arg3,
-                           int arg4, int arg5) {
-            return WritableComparator.compareBytes(arg0, arg1, 8, arg3, arg4, 8);
-        }*/
         public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
 
             int cmp = 1;
@@ -305,51 +297,6 @@ public class PathListNew {
         }
 
     }
-
-
-    // 新增IntArrayWritable的writable类
-    static class IntArrayWritable extends ArrayWritable {
-
-        private Long[] values = null;
-
-        public IntArrayWritable() {
-            super(LongWritable.class);
-        }
-
-        public IntArrayWritable(String[] strings) {
-            super(LongWritable.class);
-            values = new Long[strings.length];
-            for (int i = 0; i < strings.length; i++) {
-                values[i] = Long.parseLong(strings[i]);
-            }
-        }
-
-        @Override
-        public String[] toStrings() {
-            String[] strings = new String[values.length];
-            for (int i = 0; i < values.length; i++) {
-                strings[i] = values[i] + "";
-            }
-            return strings;
-        }
-
-
-        @Override
-        public void readFields(DataInput in) throws IOException {
-            values = new Long[2];
-            for (int i = 0; i < values.length; i++) {
-                values[i] = in.readLong();                          // store it in values
-            }
-        }
-
-        @Override
-        public void write(DataOutput out) throws IOException {
-            for (int i = 0; i < values.length; i++) {
-                out.writeLong(values[i]);
-            }
-        }
-    }
-
 
     public static class TextArrayWritable extends ArrayWritable {
         public TextArrayWritable() {
