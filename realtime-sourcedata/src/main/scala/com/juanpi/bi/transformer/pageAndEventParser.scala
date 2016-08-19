@@ -182,13 +182,11 @@ object pageAndEventParser {
       new GetGoodsId().evaluate(extend_params.split("_")(1))
     }
     else {
-      println("page_id=250, but cannot get shop_id, extend_params is: " + extend_params)
+      println("pageAndEventParser.getPageLvl2Value ====> page_id=250, but cannot get shop_id, extend_params is: " + extend_params)
       0
     }
     shop_id.toString()
   }
-
-
 
   /**
     *

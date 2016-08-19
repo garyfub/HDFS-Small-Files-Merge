@@ -99,7 +99,7 @@ class MbEventTransformer extends ITransformer {
     var cid = ""
     if (server_jsonstr.contains("cid")) {
       val js_server_jsonstr = Json.parse(server_jsonstr)
-      cid = (js_server_jsonstr \ "cid").toString()
+      cid = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
     }
 
     println("=======>> server_jsonstr::", server_jsonstr)
@@ -355,6 +355,8 @@ object MbEventTransformer {
     }
   }
 
+  def combine(xss: Product*) = xss.toList.flatten(_.productIterator)
+
   def main(args: Array[String]) {
 //    val event = """{"session_id":"1453286581908_jiu_1457423937672","ticks":"1453286581908","uid":"16739625","utm":"101225","app_name":"jiu","app_version":"3.3.8","os":"android","os_version":"5.1.1","deviceid":"0","jpid":"00000000-3be0-c4d6-b09c-156062841d62","to_switch":"1","location":"河北省","c_label":"C2","activityname":"click_cube_goods","extend_params":{"pit_info":"goods::5208686::1_22","ab_info":{"rule_id":"","test_id":"","select":""}},"source":"","cube_position":"1_22","server_jsonstr":{},"starttime":"1457425815507","endtime":"1457425815507","result":"1","pagename":"page_home_brand_in","page_extends_param":"1620540_1345584_5608626","pre_page":"page_temai_goods","pre_extends_param":"5508676","gj_page_names":"page_home_brand_in,page_home_brand_in,page_tab,page_home_brand_in","gj_ext_params":"1435453_1445587_5139662,1435453_1445587_5139662,all,1620540_1345584_5608626","starttime_origin":"1457425815189","endtime_origin":"1457425815189","ip":"106.8.147.163"}"""
 //    val b = JSON.parseObject(event)
@@ -373,5 +375,18 @@ object MbEventTransformer {
 
     val t = getJsonValueByKey("""{"pit_info":"goods::16915719::2_19","cid":0,"_t":1470639193}""", "_t")
     println(t)
+    var cid = ""
+    var cid2 = ""
+    val server_jsonstr = """{"pit_info":"ad_id::135::block_id::618::img_id::386::3_1","cid":"","_t":1471509688}"""
+    if (server_jsonstr.contains("cid")) {
+      val js_server_jsonstr = Json.parse(server_jsonstr)
+      cid = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
+      cid2 = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
+    }
+    if(!cid.isEmpty) println(cid.toInt)
+    val tu = (t, cid, cid2)
+    val tu1 = (t, cid)
+    val res = combine(tu, tu1).mkString("\u0001")
+    println(res)
   }
 }
