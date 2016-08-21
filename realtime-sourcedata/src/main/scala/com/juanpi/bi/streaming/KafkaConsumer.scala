@@ -23,6 +23,7 @@ import scala.collection.mutable
 @SerialVersionUID(42L)
 class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, String, Int)], dimEvent: mutable.HashMap[String, (Int, Int)], zkQuorum: String)
   extends Logging with Serializable {
+  import KafkaConsumer._
 
   var transformer:ITransformer = null
 
