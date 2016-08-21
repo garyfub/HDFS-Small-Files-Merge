@@ -108,8 +108,12 @@ public class PathListNew {
             }
         }
 
+        Thread jcThread = new Thread(jc);
+        jcThread.start();
+        
         while(true){
             if(jc.allFinished()){
+                System.out.println("16个目录的数据处理完毕！");
                 System.out.println(jc.getSuccessfulJobList());
                 jc.stop();
             }
