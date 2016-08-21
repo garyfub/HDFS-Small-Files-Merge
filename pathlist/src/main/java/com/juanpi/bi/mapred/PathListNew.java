@@ -4,7 +4,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.*;
-import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -12,6 +12,9 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
+
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -69,9 +72,14 @@ public class PathListNew {
             dateStr = getDateStr();
         }
 
+        Configuration conf = new Configuration();
+
+        //新建作业控制器
+        JobControl jc = new JobControl("mult-job");
+
+            // 遍历16个分区
         for(int i=0x0; i<=0xf; i++) {
             String gu = String.format("%x", i);
-//            System.out.println(gu);
 
             String str = "{0}/{1}/date={2}/gu_hash={3}/";
             String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, gu);
@@ -88,10 +96,27 @@ public class PathListNew {
 
             getFileSystem(base, outputPath);
 
+            //将受控作业添加到控制器中
+            //添加控制job
             try {
-                runner(inputPath, outputPath);
+                Job job = jobConstructor(inputPath, outputPath);
+                ControlledJob cj = new ControlledJob(conf);
+                cj.setJob(job);
+                jc.addJob(cj);
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+        }
+
+        while(true){
+            if(jc.allFinished()){
+                System.out.println(jc.getSuccessfulJobList());
+                jc.stop();
+            }
+
+            if(jc.getFailedJobList().size() > 0){
+                System.out.println(jc.getFailedJobList());
+                jc.stop();
             }
         }
     }
@@ -102,11 +127,14 @@ public class PathListNew {
      * @param outputPath
      * @throws Exception
      */
-    public static void runner(String inputPath, String outputPath) throws Exception {
-        final Job job = new Job(conf, PathListNew.class.getSimpleName());
+    public static Job jobConstructor(String inputPath, String outputPath) throws Exception {
+
+        Job job = Job.getInstance(conf, "split");
 
         // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
-        job.setJar("pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar");
+//        job.setJar("pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar");
+        job.setJarByClass(PathListNew.class);
+
 
         //1.1 指定输入文件路径
         FileInputFormat.setInputPaths(job, inputPath);
@@ -141,8 +169,9 @@ public class PathListNew {
         //设定输出文件的格式化类
         job.setOutputFormatClass(TextOutputFormat.class);
 
+        return job;
         //把代码提交给JobTracker执行
-        job.waitForCompletion(true);
+//        job.waitForCompletion(true);
     }
 
     static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
