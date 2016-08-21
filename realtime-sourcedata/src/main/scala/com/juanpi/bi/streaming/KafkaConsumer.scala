@@ -192,12 +192,12 @@ object HBaseHandler {
 object KafkaConsumer{
 
   private val timePartition = (timestamp: Long) => {
-    val sdf = new SimpleDateFormat("yyyyMMddHHmm")
+    val sdf = new SimpleDateFormat("yyyyMMddHH")
     val dayDate: String = try {
       sdf.format(timestamp)
     } catch {
       case _: Throwable => {
-        "197201010105"
+        "19720101"
       }
     }
 
@@ -212,9 +212,8 @@ object KafkaConsumer{
     override def generateFileNameForKeyValue(key: Any, value: Any, name: String): String = {
       val keyAndTime = key.asInstanceOf[(String, Long)]
       val realKey = keyAndTime._1
-//      val timestamp = keyAndTime._2
-//      realKey + "/part_" + timePartition(timestamp)
-      realKey + "/part_0000" + realKey.last
+      val timestamp = keyAndTime._2
+      realKey + "/part_" + timePartition(timestamp)
     }
   }
 
