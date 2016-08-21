@@ -150,7 +150,7 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
       val keyAndTime = key.asInstanceOf[(String, Long)]
       val realKey = keyAndTime._1
       val timestamp = keyAndTime._2
-      realKey + "/" + timePartition(timestamp)
+      realKey + "/part_" + timePartition(timestamp)
     }
   }
 
