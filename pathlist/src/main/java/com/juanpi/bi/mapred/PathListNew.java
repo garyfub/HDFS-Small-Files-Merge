@@ -99,7 +99,7 @@ public class PathListNew {
             //将受控作业添加到控制器中
             //添加控制job
             try {
-                Job job = jobConstructor(inputPath, outputPath);
+                Job job = jobConstructor(inputPath, outputPath, gu);
                 ControlledJob cj = new ControlledJob(conf);
                 cj.setJob(job);
                 jc.addJob(cj);
@@ -110,17 +110,19 @@ public class PathListNew {
 
         Thread jcThread = new Thread(jc);
         jcThread.start();
-        
+
         while(true){
             if(jc.allFinished()){
                 System.out.println("16个目录的数据处理完毕！");
                 System.out.println(jc.getSuccessfulJobList());
                 jc.stop();
+                break;
             }
 
             if(jc.getFailedJobList().size() > 0){
                 System.out.println(jc.getFailedJobList());
                 jc.stop();
+                break;
             }
         }
     }
@@ -131,9 +133,9 @@ public class PathListNew {
      * @param outputPath
      * @throws Exception
      */
-    public static Job jobConstructor(String inputPath, String outputPath) throws Exception {
+    public static Job jobConstructor(String inputPath, String outputPath, String gu) throws Exception {
 
-        Job job = Job.getInstance(conf, "split");
+        Job job = Job.getInstance(conf, "pathListMR_" + gu);
 
         // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
 //        job.setJar("pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar");

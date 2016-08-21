@@ -1,6 +1,7 @@
 package com.juanpi.bi.streaming
 
 import java.io.Serializable
+import java.text.SimpleDateFormat
 
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.InitConfig
@@ -46,7 +47,7 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     data.foreachRDD((rdd, time) =>
     {
       // 保存数据至hdfs
-      rdd.map(v => (v._1 + "/event_" + time.milliseconds, v._3))
+      rdd.map(v => ((v._1, time.milliseconds), v._3))
         .repartition(1)
         .saveAsHadoopFile(Config.baseDir + "/" + topic,
           classOf[String],
@@ -95,7 +96,7 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
         })
 
         // 保存数据至hdfs
-        newRdd.map(v => (v._1 + "/" + "page_" + time.milliseconds, v._2._2))
+        newRdd.map(v => ((v._1, time.milliseconds), v._2._2))
           .repartition(1)
           .saveAsHadoopFile(Config.baseDir + "/" + topic,
             classOf[String],
@@ -127,20 +128,32 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     transformer
   }
 
-}
+  private val timePartition = (timestamp: Long) => {
+    val sdf = new SimpleDateFormat("yyyyMMddHHmm")
+    val dayDate: String = try {
+      sdf.format(timestamp)
+    } catch {
+      case _: Throwable => {
+        "197201010105"
+      }
+    }
 
-class RDDMultipleTextOutputFormat extends MultipleTextOutputFormat[Any, Any] {
-  override def generateActualKey(key: Any, value: Any): Any = {
-    NullWritable.get()
+    dayDate
   }
 
-  override def generateFileNameForKeyValue(key: Any, value: Any, name: String): String = {
-    key.asInstanceOf[String]
-//    val keyAndTime = key.asInstanceOf[(String, Long)]
-//    val realKey = keyAndTime._1
-//    val timestamp = keyAndTime._2
-//    realKey + "/" + timePartition(timestamp) + "/" + realKey + "_" + timePartition(timestamp) + "_binlog.txt"
+  class RDDMultipleTextOutputFormat extends MultipleTextOutputFormat[Any, Any] {
+    override def generateActualKey(key: Any, value: Any): Any = {
+      NullWritable.get()
+    }
+
+    override def generateFileNameForKeyValue(key: Any, value: Any, name: String): String = {
+      val keyAndTime = key.asInstanceOf[(String, Long)]
+      val realKey = keyAndTime._1
+      val timestamp = keyAndTime._2
+      realKey + "/" + timePartition(timestamp)
+    }
   }
+
 }
 
 
