@@ -128,34 +128,7 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     transformer
   }
 
-  private val timePartition = (timestamp: Long) => {
-    val sdf = new SimpleDateFormat("yyyyMMddHHmm")
-    val dayDate: String = try {
-      sdf.format(timestamp)
-    } catch {
-      case _: Throwable => {
-        "197201010105"
-      }
-    }
-
-    dayDate
-  }
-
-  class RDDMultipleTextOutputFormat extends MultipleTextOutputFormat[Any, Any] {
-    override def generateActualKey(key: Any, value: Any): Any = {
-      NullWritable.get()
-    }
-
-    override def generateFileNameForKeyValue(key: Any, value: Any, name: String): String = {
-      val keyAndTime = key.asInstanceOf[(String, Long)]
-      val realKey = keyAndTime._1
-      val timestamp = keyAndTime._2
-      realKey + "/part_" + timePartition(timestamp)
-    }
-  }
-
 }
-
 
 object HBaseHandler {
   val HbaseFamily = "dw"
@@ -216,6 +189,32 @@ object HBaseHandler {
 }
 
 object KafkaConsumer{
+
+  private val timePartition = (timestamp: Long) => {
+    val sdf = new SimpleDateFormat("yyyyMMddHHmm")
+    val dayDate: String = try {
+      sdf.format(timestamp)
+    } catch {
+      case _: Throwable => {
+        "197201010105"
+      }
+    }
+
+    dayDate
+  }
+
+  class RDDMultipleTextOutputFormat extends MultipleTextOutputFormat[Any, Any] {
+    override def generateActualKey(key: Any, value: Any): Any = {
+      NullWritable.get()
+    }
+
+    override def generateFileNameForKeyValue(key: Any, value: Any, name: String): String = {
+      val keyAndTime = key.asInstanceOf[(String, Long)]
+      val realKey = keyAndTime._1
+      val timestamp = keyAndTime._2
+      realKey + "/part_" + timePartition(timestamp)
+    }
+  }
 
   /**
     * "zkQuorum":"GZ-JSQ-JP-BI-KAFKA-001.jp:2181,GZ-JSQ-JP-BI-KAFKA-002.jp:2181,GZ-JSQ-JP-BI-KAFKA-003.jp:2181,GZ-JSQ-JP-BI-KAFKA-004.jp:2181,GZ-JSQ-JP-BI-KAFKA-005.jp:2181" "brokerList":"kafka-broker-000.jp:9082,kafka-broker-001.jp:9083,kafka-broker-002.jp:9084,kafka-broker-003.jp:9085,kafka-broker-004.jp:9086,kafka-broker-005.jp:9087,kafka-broker-006.jp:9092,kafka-broker-007.jp:9093,kafka-broker-008.jp:9094,kafka-broker-009.jp:9095,kafka-broker-010.jp:9096,kafka-broker-011.jp:9097" "topic":"mb_pageinfo_hash2" "groupId":"pageinfo_direct_dw" "consumerType":1 "consumerTime":5
