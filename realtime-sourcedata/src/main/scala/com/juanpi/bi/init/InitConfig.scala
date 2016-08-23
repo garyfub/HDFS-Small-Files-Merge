@@ -51,6 +51,7 @@ class InitConfig() {
       .set("spark.streaming.blockInterval", "10000")
       .set("spark.shuffle.manager", "SORT")
       .set("spark.eventLog.overwrite", "true")
+      // max number of records per second
       .set("spark.streaming.kafka.maxRatePerPartition", maxRate)
     this.setSpconf(conf)
   }

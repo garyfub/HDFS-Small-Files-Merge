@@ -14,13 +14,13 @@ import org.apache.hadoop.io.NullWritable
 import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat
 import org.apache.spark.Logging
 import org.apache.spark.rdd.RDD
+import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
 
 import scala.collection.mutable
 
-@SerialVersionUID(42L)
 class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, String, Int)], dimEvent: mutable.HashMap[String, (Int, Int)], zkQuorum: String)
   extends Logging with Serializable {
   import KafkaConsumer._
@@ -36,20 +36,22 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     * @param ssc
     * @param km
     */
-  def eventProcess(dataDStream: DStream[(String, String)], ssc: StreamingContext, km: KafkaManager) = {
+  def eventProcess(dataDStream: DStream[((Long, Long), String)], ssc: StreamingContext, km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
     // 数据块中的每一条记录需要处理
-    val data = dataDStream.map(_._2.replace("\0",""))
+    val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    val data = sourceLog.map(_._2.replace("\0",""))
       .filter(line => !line.contains("collect_api_responsetime"))
       .transform(transMessage _)
       .filter(!_._1.isEmpty)
+      .cache()
 
     data.foreachRDD((rdd, time) =>
     {
       // 保存数据至hdfs
       rdd.map(v => ((v._1, time.milliseconds), v._3))
-        .repartition(1)
+//        .repartition(1)
         .saveAsHadoopFile(Config.baseDir + "/" + topic,
           classOf[String],
           classOf[String],
@@ -57,7 +59,7 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     })
 
     // 更新kafka offset
-    dataDStream.foreachRDD { rdd =>
+    sourceLog.foreachRDD { rdd =>
       km.updateOffsets(rdd)
     }
   }
@@ -68,12 +70,15 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     * @param ssc
     * @param km
     */
-  def pageProcess(dataDStream: DStream[(String, String)], ssc: StreamingContext, km: KafkaManager) = {
+  def pageProcess(dataDStream: DStream[((Long, Long), String)], ssc: StreamingContext, km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 数据块中的每一条记录需要处理
-    val data = dataDStream.map(_._2.replace("\0",""))
+    val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
+
+    val data = sourceLog.map(_._2.replace("\0",""))
       .transform(transMessage _)
       .filter(!_._1.isEmpty)
+      .cache()
 
      data.foreachRDD((rdd, time) =>
       {
@@ -98,7 +103,7 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
 
         // 保存数据至hdfs
         newRdd.map(v => ((v._1, time.milliseconds), v._2._2))
-          .repartition(1)
+//          .repartition(1)
           .saveAsHadoopFile(Config.baseDir + "/" + topic,
             classOf[String],
             classOf[String],
@@ -106,7 +111,7 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
       })
 
     // 更新kafka offset
-    dataDStream.foreachRDD { rdd =>
+    sourceLog.foreachRDD { rdd =>
       km.updateOffsets(rdd)
     }
   }
@@ -243,7 +248,7 @@ object KafkaConsumer{
 
     var (zkQuorum, brokerList, topic, groupId, consumerType, consumerTime) = ("", "", "", "", "1", "60")
 
-    println("com.juanpi.bi.streaming.KafkaConsumer 开始运行，传入参数：")
+    println("com.juanpi.bi.streaming.KafkaConsumer 开始运行。。。。。。传入参数如下：")
     args.foreach(
       arg => {
         println(arg)
@@ -260,11 +265,7 @@ object KafkaConsumer{
       }
     )
 
-    val groupIds = Set("bi_gongzi_mb_pageinfo_real_direct_by_dw", "bi_gongzi_mb_event_real_direct_by_dw")
-    if(!groupIds.contains(groupId)) {
-      println("groupId有误！！约定的groupId是：bi_gongzi_mb_pageinfo_real_direct_by_dw 或者 bi_gongzi_mb_event_real_direct_by_dw")
-      System.exit(1)
-    }
+    println("约定的groupId是：bi_gongzi_mb_pageinfo_real_direct_by_dw 或者 bi_gongzi_mb_event_real_direct_by_dw")
 
     if(!Config.kafkaTopicMap.contains(topic)){
       System.err.println(s"没有找到表:${topic}配置信息")
@@ -285,15 +286,17 @@ object KafkaConsumer{
     // init beginning offset number, it could consumer which data with config file
     val km = new KafkaManager(kafkaParams, zkQuorum)
 
-    // consumerType = "2", 用于当解析数据出错后，手动刷数据之用
-    // 需要手动指定offset
-    // 运行之前需要跟架构沟通
+    /**
+      * consumerType = "2", 用于当解析数据出错后，手动刷数据之用，需要手动指定offset
+      * ！运行之前需要跟架构沟通
+     */
     if (consumerType.equals("2")) {
       km.setConfigOffset(Set(topic), groupId, consumerTime, ssc)
     }
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
     val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, zkQuorum)
+    // page 和 event 分开解析
     if(topic.contains("page")) {
       consumer.pageProcess(message, ssc, km)
     } else if(topic.contains("event")) {
