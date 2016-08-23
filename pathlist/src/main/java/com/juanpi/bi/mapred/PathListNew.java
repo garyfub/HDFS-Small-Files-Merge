@@ -10,6 +10,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
 
@@ -101,13 +102,15 @@ public class PathListNew {
             try {
                 Job job = jobConstructor(inputPath, outputPath, gu);
                 ControlledJob cj = new ControlledJob(conf);
+                if("f".equals(gu)){
+
+                }
                 cj.setJob(job);
                 jc.addJob(cj);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
         Thread jcThread = new Thread(jc);
         jcThread.start();
 
@@ -146,6 +149,8 @@ public class PathListNew {
         FileInputFormat.setInputPaths(job, inputPath);
         job.setInputFormatClass(TextInputFormat.class);//指定哪个类用来格式化输入文件
 
+        // -- -- -- -- -- -- -- -- Map -- -- -- -- -- -- -- --
+
         //1.2指定自定义的Mapper类
         job.setMapperClass(MyMapper.class);
 
@@ -161,6 +166,8 @@ public class PathListNew {
         //1.4 TODO 排序、分区
         job.setGroupingComparatorClass(MyGroupingComparator.class);
         //1.5  TODO （可选）合并
+
+        // -- -- -- -- -- -- -- -- Reduce -- -- -- -- -- -- -- --
 
         //2.2 指定自定义的reduce类
         job.setReducerClass(MyReducer.class);
@@ -182,11 +189,27 @@ public class PathListNew {
 
     static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
         int xx = 0;
+
+        private MultipleOutputs mos;
+
+        @Override
+        protected void setup(Context context)
+                throws IOException, InterruptedException {
+            super.setup(context);
+            mos = new MultipleOutputs(context);
+        }
+
+        @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException ,InterruptedException {
 
             final String[] splited = value.toString().split("\u0001");
 
+            String gu_id = splited[0];
+            String gu = gu_id.substring(gu_id.length() - 1).toLowerCase();
+            String dateStr = splited[13];
+
             // gu_id 和starttime 作为联合主键
+
             final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
 
             //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
@@ -198,16 +221,45 @@ public class PathListNew {
 
             xx ++;
 
-            context.write(k2, v2);
+            mos.write(k2, v2, generateFileName(gu, dateStr));
+        }
+
+        // hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-13/gu_hash=0
+        // 目录输出格式 date=2016-08-13/gu_hash=0
+        private String generateFileName(String gu_hash, String dateStr) {
+            return "date=" + dateStr + "/gu_hash=" + gu_hash;
+        }
+
+        @Override
+        protected void cleanup(Context context)
+                throws IOException, InterruptedException {
+            super.cleanup(context);
+            mos.close();
         }
     }
 
     //static class NewValue
 
     static class MyReducer extends Reducer<NewK2, TextArrayWritable, Text, Text> {
+
+        //1. 定义MultipleOutputs类型变量
+        private MultipleOutputs mos;
+
+        @Override
+        protected void setup(Reducer.Context context)
+                throws IOException, InterruptedException {
+            super.setup(context);
+            mos = new MultipleOutputs(context);
+        }
+
         protected void reduce(NewK2 k2, Iterable<TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
             //long min = Long.MAX_VALUE;
             String initstr = ""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+"";
+
+            String gu_id = k2.first;
+
+            String gu = gu_id.substring(gu_id.length() - 1).toLowerCase();
+            Long timeSecond = k2.second;
 
             for (TextArrayWritable v2 : v2s) {
                 String level1 = initstr;
@@ -233,15 +285,30 @@ public class PathListNew {
                 // 4 个级别
                 Text key2 = new Text(level1+"\t"+ level2+"\t"+level3+"\t"+level4);
                 Text value2 = new Text(v2.toStrings()[2]);
-                context.write(key2, value2);
-            }
+//                context.write(key2, value2);
 
+                mos.write(key2, value2, generateFileName(gu, timeSecond));
+            }
+        }
+
+        // hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-13/gu_hash=0
+        // 目录输出格式 date=2016-08-13/gu_hash=0
+        private String generateFileName(String gu_hash, Long timeSecond) {
+            SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String dateStr = mDateFormat.format(timeSecond);
+            return "date=" + dateStr + "/gu_hash=" + gu_hash;
+        }
+
+        @Override
+        protected void cleanup(Reducer.Context context)
+                throws IOException, InterruptedException {
+            super.cleanup(context);
+            mos.close();
         }
     }
 
     /**
      原来的v2不能参与排序，把原来的k2和v2封装到一个类中，作为新的k2
-     *
      */
     static class  NewK2 implements WritableComparable<NewK2> {
         String first;

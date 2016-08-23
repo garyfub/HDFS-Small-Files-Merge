@@ -114,7 +114,7 @@ public class MultJobDependences {
         cj2.setJob(job2);
         cj2.addDependingJob(cj1);
 
-        //job2的输入数据是job1的输出目录
+        // job2的输入数据是job1的输出目录
         FileInputFormat.addInputPath(job2,new Path("/output/mult-job/tmp"));
         FileOutputFormat.setOutputPath(job2,new Path("/output/mult-job/mjob"));
 
