@@ -31,5 +31,4 @@ object Config {
     println(getTopicTransformerClass("pageinfo"))
     println(interval)
   }
-
 }

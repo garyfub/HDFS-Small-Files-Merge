@@ -20,8 +20,6 @@ class InitConfig() {
   @BeanProperty var ssc: StreamingContext = _
   @BeanProperty var duration: Duration = _
 
-  val maxRate = "100"
-
   def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)], mutable.HashMap[String, (Int, Int)]) = {
     // 查询 hive 中的 dim_page 和 dim_event
     val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
@@ -36,7 +34,7 @@ class InitConfig() {
   }
 
   // 初始化 SparkConf 公共参数
-  private def initSparkConfig(appName:String): Unit = {
+  private def initSparkConfig(appName:String, maxRecords: String): Unit = {
     val conf = new SparkConf().setAppName(appName)
       .set("spark.akka.frameSize", "256")
       .set("spark.kryoserializer.buffer.max", "512m")
@@ -52,7 +50,7 @@ class InitConfig() {
       .set("spark.shuffle.manager", "SORT")
       .set("spark.eventLog.overwrite", "true")
       // max number of records per second
-      .set("spark.streaming.kafka.maxRatePerPartition", maxRate)
+      .set("spark.streaming.kafka.maxRatePerPartition", maxRecords)
     this.setSpconf(conf)
   }
 
@@ -135,12 +133,12 @@ object InitConfig {
   var DIMPAGE = new mutable.HashMap[String, (Int, Int, String, Int)]
   var DIMENT = new mutable.HashMap[String, (Int, Int)]
 
-  def initParam(appName: String, interval: Int) = {
+  def initParam(appName: String, interval: Int, maxRecords: String) = {
     // 初始化 apark 超时时间, spark.mystreaming.batch.interval
     ic.setDuration(Seconds(interval))
 
     // 初始化 SparkConfig
-    ic.initSparkConfig(appName)
+    ic.initSparkConfig(appName, maxRecords)
 
     ic.setStreamingContext()
 

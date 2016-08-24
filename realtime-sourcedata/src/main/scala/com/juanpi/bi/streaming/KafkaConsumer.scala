@@ -242,11 +242,12 @@ object KafkaConsumer{
                             |  <groupId> consumer groupId name
                             |  <consumerType> consumer type 1-every batch offset save 2-recove from 5 minutes save datetime
                             |  <consumerTime> recoved time
+                            |  <maxRecords> max number of records per second
         """.stripMargin)
       System.exit(1)
     }
 
-    var (zkQuorum, brokerList, topic, groupId, consumerType, consumerTime) = ("", "", "", "", "1", "60")
+    var (zkQuorum, brokerList, topic, groupId, consumerType, consumerTime, maxRecords) = ("", "", "", "", "1", "60", "100")
 
     println("com.juanpi.bi.streaming.KafkaConsumer 开始运行。。。。。。传入参数如下：")
     args.foreach(
@@ -261,6 +262,7 @@ object KafkaConsumer{
           case "groupId" => groupId = v
           case "consumerType" => consumerType = v
           case "consumerTime" => consumerTime = v
+          case "maxRecords" => maxRecords = v
         }
       }
     )
@@ -274,7 +276,7 @@ object KafkaConsumer{
 
     // 初始化 SparkConfig StreamingContext HiveContext
     val ic = InitConfig
-    ic.initParam(groupId, Config.interval)
+    ic.initParam(groupId, Config.interval, maxRecords)
     val ssc = ic.getStreamingContext()
 
     // 连接Kafka参数设置
