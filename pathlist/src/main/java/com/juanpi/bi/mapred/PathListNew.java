@@ -39,28 +39,28 @@ public class PathListNew {
     static String base = "hdfs://nameservice1/user/hadoop/gongzi";
 
     static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list";
+    static final String OUTPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list";
 
     static Configuration conf = new Configuration();
 
     static FileSystem fs;
 
-    public static void getFileSystem(String basePath, String outPath) {
-
+    private static void getFileSystem(String basePath) throws IOException {
         conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
+        fs = FileSystem.get(new Path(basePath).toUri(), conf);
+    }
 
+    /**
+     *
+     * @param outPath
+     */
+    public static void cleanDataPath(String outPath)
+    {
         // 清空数据输出的目录
         try {
-            fs = FileSystem.get(new Path(basePath).toUri(), conf);
-            // 清理待存放数据的目录
             if(fs.exists(new Path(outPath))){
                 fs.delete(new Path(outPath), true);
             }
-
-            // 预创建目录
-            createHDFSPath(fs);
-
-            //加载数据
-
         } catch (IOException e) {
             System.out.println(("初始化FileSystem失败！"));
             System.out.println(e.getMessage());
@@ -68,7 +68,7 @@ public class PathListNew {
     }
 
     /**
-     * 加载数据至hive外表
+     * 加载数据至hive外表 TODO
      */
     public static void loadDataByLocation(FileSystem fs)
     {
@@ -84,22 +84,24 @@ public class PathListNew {
     {
         // 清空数据输出的目录
         String dateStr = getTomorrow();
-        // 创建目录
+        String outputPath = MessageFormat.format("{0}/{1}/date={2}", base, "dw_real_path_list", dateStr);
+
+        // 必须先创建父级目录
+        if (fs.exists(new Path(outputPath))) {
+            fs.create(new Path(outputPath));
+        }
+
+        // 然后才能创建子目录
         for (int i = 0x0; i <= 0xf; i++) {
             String gu = String.format("%x", i);
 
-            String str = "{0}/{1}/date={2}/gu_hash={3}/";
-            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, gu);
-            String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, gu);
+            String strfmt = "{0}/gu_hash={1}/";
+            String strRes = MessageFormat.format(strfmt, outputPath, gu);
 
-            // 创建 page 数据目录
-            if (fs.exists(new Path(strPage))) {
-                fs.create(new Path(strPage));
-            }
+            System.out.println(strRes);
 
-            // 创建 event 数据目录
-            if (fs.exists(new Path(strEvent))) {
-                fs.create(new Path(strEvent));
+            if (fs.exists(new Path(strRes))) {
+                fs.create(new Path(strRes));
             }
         }
     }
@@ -135,13 +137,21 @@ public class PathListNew {
             dateStr = getDateStr();
         }
 
-        List<String> paths = new ArrayList<>();
 
         String outputPath = MessageFormat.format("{0}/{1}/", base, "dw_real_path_list");
         System.out.println(outputPath);
         System.out.println(base);
 
-        getFileSystem(base, outputPath);
+        // 预创建目录
+        try {
+            getFileSystem(base);
+            cleanDataPath(outputPath);
+            createHDFSPath(fs);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        List<String> paths = new ArrayList<>();
 
         // 遍历16个分区
         for(int i=0x0; i<=0xf; i++) {
@@ -182,7 +192,7 @@ public class PathListNew {
 
         //1.1 指定输入文件路径
         FileInputFormat.setInputPaths(job, inputPath);
-        job.setInputFormatClass(TextInputFormat.class);//指定哪个类用来格式化输入文件
+        job.setInputFormatClass(TextInputFormat.class);// 指定哪个类用来格式化输入文件
 
         // -- -- -- -- -- -- -- -- Map -- -- -- -- -- -- -- --
 
@@ -456,5 +466,11 @@ public class PathListNew {
         {
             JobsControl(dateStr);
         }
+
+//        try {
+//            createHDFSPath(null);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 }
