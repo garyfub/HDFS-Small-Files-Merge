@@ -172,7 +172,9 @@ THIS="$0"
 THIS_DIR=`dirname "$THIS"`
 cd ${THIS_DIR}
 
-hiveF ./script/fct_sample_qc_ab.sql -date $date
+### 传递空参
+yarn jar ./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapred.PathListNew ""
+
 if test $? -ne 0
 then
 exit 11
