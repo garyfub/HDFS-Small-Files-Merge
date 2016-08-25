@@ -3,7 +3,7 @@ package com.juanpi.bi.transformer
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.hiveUDF.{GetGoodsId, GetMbActionId, GetPageID}
 import com.juanpi.bi.sc_utils.DateUtils
-import play.api.libs.json.{JsResultException, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 
 import scala.collection.mutable
 
@@ -17,7 +17,6 @@ class MbEventTransformer extends ITransformer {
             dimevent: mutable.HashMap[String, (Int, Int)]): (User, PageAndEvent, Page, Event) = {
 
     // ---------------------------------------------------------------- mb_event ----------------------------------------------------------------
-//    val ticks = (row \ "ticks").asOpt[String].getOrElse("")
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
     val activityname = (row \ "activityname").asOpt[String].getOrElse("").toLowerCase()
     val starttime = (row \ "starttime").asOpt[String].getOrElse("")
@@ -28,8 +27,7 @@ class MbEventTransformer extends ITransformer {
     // utm 的值还会改变，故定义成var
     val utm = (row \ "utm").asOpt[String].getOrElse("")
     val source = ""
-//    val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
-//    val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
+
     val app_name = (row \ "app_name").asOpt[String].getOrElse("")
     val app_version = (row \ "app_version").asOpt[String].getOrElse("")
     val os = (row \ "os").asOpt[String].getOrElse("")
@@ -39,8 +37,6 @@ class MbEventTransformer extends ITransformer {
     val pre_page = (row \ "pre_page").asOpt[String].getOrElse("")
     // 字段与pageinfo中的不太一样
     val pre_extends_param = (row \ "pre_extends_param").asOpt[String].getOrElse("")
-    val gj_page_names = (row \ "gj_page_names").asOpt[String].getOrElse("")
-    val gj_ext_params = (row \ "gj_ext_params").asOpt[String].getOrElse("")
     val jpid = (row \ "jpid").asOpt[String].getOrElse("")
     val ip = ""
     val to_switch = (row \ "to_switch").asOpt[String].getOrElse("")
@@ -50,15 +46,15 @@ class MbEventTransformer extends ITransformer {
     val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
 
     // 用户画像中定义的
-    var gid = ""
-    var ugroup = ""
 
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
-    if(!c_server.isEmpty())
-    {
+    val (gid, ugroup) = if(!c_server.isEmpty()) {
       val js_c_server = Json.parse(c_server)
-      gid = (js_c_server \ "gid").asOpt[String].getOrElse("0")
-      ugroup = (js_c_server \ "ugroup").asOpt[String].getOrElse("0")
+      val gid = (js_c_server \ "gid").asOpt[String].getOrElse("0")
+      val ugroup = (js_c_server \ "ugroup").asOpt[String].getOrElse("0")
+      (gid, ugroup)
+    } else {
+      ("0", "0")
     }
 
     // ------------------------------------------------------------- mb_event -> mb_event_log --------------------------------------------------------------
@@ -102,7 +98,6 @@ class MbEventTransformer extends ITransformer {
       cid = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
     }
 
-    println("=======>> server_jsonstr::", server_jsonstr)
     val for_pageid = if("-1".equals(cid)) {
       "page_taball"
     } else if("-2".equals(cid)) {
@@ -203,7 +198,6 @@ class MbEventTransformer extends ITransformer {
     val jpk = 0
     val loadTime = getJsonValueByKey(server_jsonstr, "_t")
 
-    println("======>> page_id :: " + page_id)
     val (date, hour) = DateUtils.dateHourStr(endtime.toLong)
     val table_source = "mb_event"
 
@@ -211,7 +205,7 @@ class MbEventTransformer extends ITransformer {
     val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, starttime, endtime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceid, to_switch)
     val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
-    println("======> event", event)
+    println("======> event="+event + ",page_id=" + page_id + "=======>> server_jsonstr::", server_jsonstr)
     (user, pe, page, event)
   }
 
@@ -233,8 +227,8 @@ class MbEventTransformer extends ITransformer {
     }
   }
 
-    def getEventValue(event_type_id: Int, activityname: String, extend_params: String, server_jsonstr: String): String =
-    {
+  def getEventValue(event_type_id: Int, activityname: String, extend_params: String, server_jsonstr: String): String =
+  {
       //  TODO -- gognzi && lielie,过滤掉商品流坑位数据中非当天的数据
       val oper_time = getJsonValueByKey(server_jsonstr, "_t")
 
@@ -250,7 +244,7 @@ class MbEventTransformer extends ITransformer {
       } else {
         extend_params
       }
-    }
+  }
 
     def getAbinfo(extend_params: String, arg: String): String = {
       if (extend_params.contains(arg)) {
@@ -294,7 +288,8 @@ class MbEventTransformer extends ITransformer {
     }
 
     // 返回解析的结果
-    def transform(line: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)], dimevent: mutable.HashMap[String, (Int, Int)]): (String, String, Any) = {
+    def logParser(line: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
+                  dimevent: mutable.HashMap[String, (Int, Int)]): (String, String, Any) = {
       //play
       val row = Json.parse(line)
       val ticks = (row \ "ticks").asOpt[String].getOrElse("")
@@ -304,21 +299,17 @@ class MbEventTransformer extends ITransformer {
         // 解析逻辑
         var gu_id = ""
         try {
-          gu_id = pageAndEventParser.getGuid((row \ "jpid").asOpt[String].getOrElse(""),
+          gu_id = pageAndEventParser.getGuid(
+            (row \ "jpid").asOpt[String].getOrElse(""),
             (row \ "deviceid").asOpt[String].getOrElse(""),
             (row \ "os").asOpt[String].getOrElse("")
           )
         } catch {
           //使用模式匹配来处理异常
-          case ex: IllegalArgumentException => println(ex.getMessage())
-          case ex: RuntimeException => {
-            println(ex.getMessage())
-          }
-          case ex: JsResultException => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
           case ex: Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
         }
 
-        if(!gu_id.isEmpty) {
+        val ret = if(gu_id.nonEmpty) {
           try {
             val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = parse(row, dimpage, dimevent)
             val res_str =  combine(user, pageAndEvent, page, event).mkString("\u0001")
@@ -327,14 +318,14 @@ class MbEventTransformer extends ITransformer {
             //使用模式匹配来处理异常
             case ex:Exception => {
               println(ex.getStackTraceString, "\n======>>异常数据:" + row)
-              ("", "", None)
             }
+            ("", "", None)
           }
         } else {
           ("", "", None)
         }
-      }
-      else {
+        ret
+      } else {
         ("", "", None)
       }
     }

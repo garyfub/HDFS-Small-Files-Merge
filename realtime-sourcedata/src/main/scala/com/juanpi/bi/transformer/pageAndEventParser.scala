@@ -54,7 +54,7 @@ object pageAndEventParser {
   }
 
   def getGsortPit(server_jsonstr: String): (Int, String) = {
-    if (!server_jsonstr.isEmpty() && !server_jsonstr.equals("{}")) {
+    if (server_jsonstr.nonEmpty && !server_jsonstr.equals("{}")) {
       val js_server_jsonstr = Json.parse(server_jsonstr)
       val pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
       val gsort_key = (js_server_jsonstr \ "_gsort_key").asOpt[String].getOrElse("")
@@ -70,7 +70,7 @@ object pageAndEventParser {
     * @return
     */
   def getGsortKey(gsort_key: String): (String, String, String, String) = {
-    if(!gsort_key.isEmpty && gsort_key.contains("_")) {
+    if(gsort_key.nonEmpty && gsort_key.contains("_")) {
       val sortdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
       val sorthour = gsort_key.split("_")(4)
       val lplid = gsort_key.split("_")(5)
@@ -94,7 +94,7 @@ object pageAndEventParser {
 
     val for_pageid = pagename.toLowerCase() match {
       case a if pagename.toLowerCase() == "page_tab" && isInteger(extend_params) && (extend_params.toLong > 0 && extend_params.toLong < 9999999) => "page_tab"
-      case c if pagename.toLowerCase() == "page_tab" && !server_jsonstr.isEmpty() && (Json.parse(server_jsonstr) \ "cid").asOpt[Int].getOrElse(0) < 0 => (pagename+(Json.parse(server_jsonstr) \ "cid").asOpt[String]).toLowerCase()
+      case c if pagename.toLowerCase() == "page_tab" && server_jsonstr.nonEmpty() && (Json.parse(server_jsonstr) \ "cid").asOpt[Int].getOrElse(0) < 0 => (pagename+(Json.parse(server_jsonstr) \ "cid").asOpt[String]).toLowerCase()
       case b if pagename.toLowerCase() != "page_tab" => pagename.toLowerCase()
       case _ => (pagename+extend_params).toLowerCase()
     }
@@ -128,7 +128,7 @@ object pageAndEventParser {
     */
   def getPageLvl2Value(x_page_id: Int, x_extend_params: String, server_jsonstr: String): String = {
     val page_lel2_value =
-      if(x_page_id == 250 && !x_extend_params.isEmpty()
+      if(x_page_id == 250 && x_extend_params.nonEmpty
         && x_extend_params.contains("_")
         && x_extend_params.split("_").length > 2){
         new GetGoodsId().evaluate(x_extend_params.split("_")(2))
@@ -182,7 +182,6 @@ object pageAndEventParser {
       new GetGoodsId().evaluate(extend_params.split("_")(1))
     }
     else {
-      println("pageAndEventParser.getPageLvl2Value ====> page_id=250, but cannot get shop_id, extend_params is: " + extend_params)
       0
     }
     shop_id.toString()
@@ -247,7 +246,7 @@ object pageAndEventParser {
 */
   def  isInteger(str: String): Boolean = {
     val pattern: Pattern = Pattern.compile("^[-\\+]?[\\d]*$")
-    if (!str.isEmpty()) {
+    if (str.nonEmpty) {
       pattern.matcher(str).matches()
     } else {
       false
@@ -274,12 +273,12 @@ object pageAndEventParser {
   }
 
   def main(args: Array[String]) {
-    println(getSource("push:小卷温馨提醒！=购物车的商品等你好久啦！你爱的时尚亲肤卡通床品套件低至49.00元疯抢中，果断带宝贝回家→=3465969792363098765"))
+//    println(getSource("push:小卷温馨提醒！=购物车的商品等你好久啦！你爱的时尚亲肤卡通床品套件低至49.00元疯抢中，果断带宝贝回家→=3465969792363098765"))
 
     val dimPages_test = new mutable.HashMap[String, (Int, Int, String, Int)]
     dimPages_test += ("page_taball" -> (219,10,"最新折扣",1))
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPages_test.get("page_taball").getOrElse(0, 0, "", 0)
-    println(d_page_id, page_type_id, d_page_value,d_page_level_id)
+//    println(d_page_id, page_type_id, d_page_value,d_page_level_id)
   }
 
 

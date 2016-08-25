@@ -21,11 +21,13 @@ import org.apache.spark.streaming.kafka.KafkaManager
 
 import scala.collection.mutable
 
-class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, String, Int)], dimEvent: mutable.HashMap[String, (Int, Int)], zkQuorum: String)
+class KafkaConsumer(topic: String,
+                    dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
+                    dimEvent: mutable.HashMap[String, (Int, Int)], zkQuorum: String)
   extends Logging with Serializable {
   import KafkaConsumer._
 
-  var transformer:ITransformer = null
+  var logTransformer:ITransformer = null
 
   /**
     * 解析 event
@@ -36,9 +38,9 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     * @param ssc
     * @param km
     */
-  def eventProcess(dataDStream: DStream[((Long, Long), String)], ssc: StreamingContext, km: KafkaManager) = {
+  def eventProcess(dataDStream: DStream[((Long, Long), String)],
+                   ssc: StreamingContext, km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
-    // 需要查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
     // 数据块中的每一条记录需要处理
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
     val data = sourceLog.map(_._2.replace("\0",""))
@@ -70,7 +72,9 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
     * @param ssc
     * @param km
     */
-  def pageProcess(dataDStream: DStream[((Long, Long), String)], ssc: StreamingContext, km: KafkaManager) = {
+  def pageProcess(dataDStream: DStream[((Long, Long), String)],
+                  ssc: StreamingContext,
+                  km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 数据块中的每一条记录需要处理
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
@@ -98,12 +102,11 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
           user.utm = utm
           user.gu_create_time = gu_create_time
           // record._2 就是 page
-          (record._1, (record._2, combine(user, pageAndEvent, page, event).mkString("\u0001")))
+          (record._1, (record._2, combineTuple(user, pageAndEvent, page, event).mkString("\u0001")))
         })
 
         // 保存数据至hdfs
         newRdd.map(v => ((v._1, time.milliseconds), v._2._2))
-//          .repartition(1)
           .saveAsHadoopFile(Config.baseDir + "/" + topic,
             classOf[String],
             classOf[String],
@@ -117,10 +120,10 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
   }
 
   // http://stackoverflow.com/questions/9028459/a-clean-way-to-combine-two-tuples-into-a-new-larger-tuple-in-scala
-  def combine(xss: Product*) = xss.toList.flatten(_.productIterator)
+  def combineTuple(xss: Product*) = xss.toList.flatten(_.productIterator)
 
   def parseMessage(message:String):(String, String, Any) = {
-    getTransformer().transform(message, dimPage, dimEvent)
+    getTransformer().logParser(message, dimPage, dimEvent)
   }
 
   def transMessage(rdd:RDD[String]):RDD[(String, String, Any)] = {
@@ -128,10 +131,10 @@ class KafkaConsumer(topic: String, dimPage: mutable.HashMap[String, (Int, Int, S
   }
 
   def getTransformer():ITransformer = {
-    if(transformer == null){
-      transformer = Class.forName(Config.getTopicTransformerClass(topic)).newInstance().asInstanceOf[ITransformer]
+    if(logTransformer == null){
+      logTransformer = Class.forName(Config.getTopicTransformerClass(topic)).newInstance().asInstanceOf[ITransformer]
     }
-    transformer
+    logTransformer
   }
 
 }
