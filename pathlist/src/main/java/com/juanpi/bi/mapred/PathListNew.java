@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import static org.apache.hadoop.io.WritableComparator.readVLong;
@@ -47,12 +48,19 @@ public class PathListNew {
 
         conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
 
+        // 清空数据输出的目录
         try {
             fs = FileSystem.get(new Path(basePath).toUri(), conf);
             // 清理待存放数据的目录
             if(fs.exists(new Path(outPath))){
                 fs.delete(new Path(outPath), true);
             }
+
+            // 预创建目录
+            createHDFSPath(fs);
+
+            //加载数据
+
         } catch (IOException e) {
             System.out.println(("初始化FileSystem失败！"));
             System.out.println(e.getMessage());
@@ -60,6 +68,44 @@ public class PathListNew {
     }
 
     /**
+     * 加载数据至hive外表
+     */
+    public static void loadDataByLocation(FileSystem fs)
+    {
+
+    }
+
+    /**
+     * 创建hdfs目录
+     * @param fs
+     * @throws IOException
+     */
+    public static void createHDFSPath(FileSystem fs) throws IOException
+    {
+        // 清空数据输出的目录
+        String dateStr = getTomorrow();
+        // 创建目录
+        for (int i = 0x0; i <= 0xf; i++) {
+            String gu = String.format("%x", i);
+
+            String str = "{0}/{1}/date={2}/gu_hash={3}/";
+            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, gu);
+            String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, gu);
+
+            // 创建 page 数据目录
+            if (fs.exists(new Path(strPage))) {
+                fs.create(new Path(strPage));
+            }
+
+            // 创建 event 数据目录
+            if (fs.exists(new Path(strEvent))) {
+                fs.create(new Path(strEvent));
+            }
+        }
+    }
+
+    /**
+     * 日期格式化
      * 参考 http://bijian1013.iteye.com/blog/2306763
      * @return
      */
@@ -68,6 +114,19 @@ public class PathListNew {
         Calendar c1 = Calendar.getInstance();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         return format.format(c1.getTime());
+    }
+
+    /**
+     * 当前日期的后一天
+     * @return
+     */
+    public static String getTomorrow()
+    {
+        Calendar c1 = Calendar.getInstance();
+        c1.add(Calendar.DAY_OF_YEAR, 1);
+        Date tomorrow = c1.getTime();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        return format.format(tomorrow);
     }
 
     public static void JobsControl(String dateStr){

@@ -112,20 +112,3 @@ alter table dw_path_list_new add partition (date="2016-08-18", gu_hash="e") loca
 alter table dw_path_list_new add partition (date="2016-08-18", gu_hash="f") location '/user/hadoop/gongzi/dw_real_path_list/date=2016-08-18/gu_hash=f/';
 -- 看看效果
  > show partitions test.dw_path_list_new;
-OK
-date=2016-08-18/gu_hash=0
-date=2016-08-18/gu_hash=1
-date=2016-08-18/gu_hash=2
-date=2016-08-18/gu_hash=3
-date=2016-08-18/gu_hash=4
-date=2016-08-18/gu_hash=5
-date=2016-08-18/gu_hash=6
-date=2016-08-18/gu_hash=7
-date=2016-08-18/gu_hash=8
-date=2016-08-18/gu_hash=9
-date=2016-08-18/gu_hash=a
-date=2016-08-18/gu_hash=b
-date=2016-08-18/gu_hash=c
-date=2016-08-18/gu_hash=d
-date=2016-08-18/gu_hash=e
-date=2016-08-18/gu_hash=f
