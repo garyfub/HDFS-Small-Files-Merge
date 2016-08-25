@@ -12,8 +12,8 @@ ssh hadoop@spark001.jp
 
 hadoop fs -mkdir /user/hadoop/spark-jobs/gongzi
 
-hadoop fs -du -h hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_event_hash2/date=2016-08-20
-hadoop fs -du -h hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-20
+hadoop fs -du -h hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_event_hash2/date=2016-08-21
+hadoop fs -du -h hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-21
 
 # 上传
 hadoop fs -put /home/hadoop/users/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar /user/hadoop/spark-jobs/gongzi/
@@ -38,7 +38,7 @@ hadoop-common
 scp hadoop-common/2.5.0-cdh5.2.0/hadoop-common-2.5.0-cdh5.2.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/pl_libs/
 
 hadoop jar ./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapred.PathListNew
-yarn jar ./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapred.PathListNew 2016-08-20
+yarn jar ./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapred.PathListNew 2016-08-21
 
 # 文件结果
 hadoop fs -ls hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-20
@@ -154,4 +154,28 @@ fi
 #### 解析文件输出路径
 ```
 select substring(gu_id, length(gu_id)), count(gu_id) from dw.fct_session where date = '2016-07-21' group by substring(gu_id, length(gu_id));
+```
+
+```
+#!/bin/sh
+
+. /etc/profile
+
+if [ $# == 1 ]; then
+   date=$1
+else
+   date=`date -d -1days '+%Y-%m-%d'`
+fi
+
+
+THIS="$0"
+THIS_DIR=`dirname "$THIS"`
+cd ${THIS_DIR}
+
+hiveF ./script/fct_sample_qc_ab.sql -date $date
+if test $? -ne 0
+then
+exit 11
+fi
+
 ```

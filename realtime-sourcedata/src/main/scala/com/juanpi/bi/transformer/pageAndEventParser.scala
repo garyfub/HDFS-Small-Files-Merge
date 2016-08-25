@@ -94,7 +94,7 @@ object pageAndEventParser {
 
     val for_pageid = pagename.toLowerCase() match {
       case a if pagename.toLowerCase() == "page_tab" && isInteger(extend_params) && (extend_params.toLong > 0 && extend_params.toLong < 9999999) => "page_tab"
-      case c if pagename.toLowerCase() == "page_tab" && server_jsonstr.nonEmpty() && (Json.parse(server_jsonstr) \ "cid").asOpt[Int].getOrElse(0) < 0 => (pagename+(Json.parse(server_jsonstr) \ "cid").asOpt[String]).toLowerCase()
+      case c if pagename.toLowerCase() == "page_tab" && server_jsonstr.nonEmpty && (Json.parse(server_jsonstr) \ "cid").asOpt[Int].getOrElse(0) < 0 => (pagename+(Json.parse(server_jsonstr) \ "cid").asOpt[String]).toLowerCase()
       case b if pagename.toLowerCase() != "page_tab" => pagename.toLowerCase()
       case _ => (pagename+extend_params).toLowerCase()
     }
