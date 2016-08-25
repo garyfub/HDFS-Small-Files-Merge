@@ -39,7 +39,6 @@ public class PathListNew {
     static String base = "hdfs://nameservice1/user/hadoop/gongzi";
 
     static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list";
-    static final String OUTPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list";
 
     static Configuration conf = new Configuration();
 
@@ -136,7 +135,6 @@ public class PathListNew {
         if(dateStr== null || dateStr.isEmpty()){
             dateStr = getDateStr();
         }
-
 
         String outputPath = MessageFormat.format("{0}/{1}/", base, "dw_real_path_list");
         System.out.println(outputPath);
@@ -441,7 +439,6 @@ public class PathListNew {
                 throw new RuntimeException(e);
             }
         }
-
     }
 
     public static class TextArrayWritable extends ArrayWritable {
@@ -466,11 +463,5 @@ public class PathListNew {
         {
             JobsControl(dateStr);
         }
-
-//        try {
-//            createHDFSPath(null);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 }
