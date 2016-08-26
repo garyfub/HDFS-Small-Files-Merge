@@ -11,6 +11,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.LazyOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
@@ -223,7 +224,8 @@ public class PathListNew {
         FileOutputFormat.setOutputPath(job, new Path(outputPath));
 
         //设定输出文件的格式化类
-        job.setOutputFormatClass(TextOutputFormat.class);
+//        job.setOutputFormatClass(TextOutputFormat.class);
+        LazyOutputFormat.setOutputFormatClass(job, TextOutputFormat.class);
 
         //把代码提交给JobTracker执行
         job.waitForCompletion(true);
@@ -270,7 +272,7 @@ public class PathListNew {
         // 目录输出格式 date=2016-08-13/gu_hash=0
         private String generateFileName(String gu_hash, String dateStr) {
 //            return "date=" + dateStr + "/gu_hash=" + gu_hash;
-            return "gu_hash=" + gu_hash;
+            return "gu_hash=" + gu_hash + "/";
         }
 
         @Override
@@ -339,7 +341,7 @@ public class PathListNew {
         private String generateFileName(String gu_hash, Long timeSecond) {
 //            SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 //            String dateStr = mDateFormat.format(timeSecond);
-            return "gu_hash=" + gu_hash;
+            return "gu_hash=" + gu_hash + "/";
         }
 
         @Override
