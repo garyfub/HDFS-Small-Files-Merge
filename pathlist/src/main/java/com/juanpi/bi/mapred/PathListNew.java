@@ -136,14 +136,14 @@ public class PathListNew {
             dateStr = getDateStr();
         }
 
-        String outputPath = MessageFormat.format("{0}/{1}/date={2}", base, "dw_real_path_list", dateStr);
-        System.out.println(outputPath);
+        String outputPathClean = MessageFormat.format("{0}/{1}/date={2}", base, "dw_real_path_list", dateStr);
+        System.out.println(outputPathClean);
         System.out.println(base);
 
         // 预创建目录
         try {
             getFileSystem(base);
-            cleanDataPath(outputPath);
+            cleanDataPath(outputPathClean);
             createHDFSPath(fs);
         } catch (IOException e) {
             e.printStackTrace();
@@ -165,6 +165,8 @@ public class PathListNew {
         }
 
         String inputPath = Joiner.on(",").join(paths);
+
+        String outputPath = MessageFormat.format("{0}/{1}/", base, "dw_real_path_list");
 
         try {
             jobConstructor(inputPath, outputPath);
