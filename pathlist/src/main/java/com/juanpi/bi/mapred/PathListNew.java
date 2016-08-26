@@ -97,7 +97,7 @@ public class PathListNew {
             String strfmt = "{0}/gu_hash={1}/";
             String strRes = MessageFormat.format(strfmt, outputPath, gu);
 
-            System.out.println(strRes);
+            System.out.println("预创建数据输出目录:" + strRes);
 
             if (fs.exists(new Path(strRes))) {
                 fs.create(new Path(strRes));
@@ -136,7 +136,7 @@ public class PathListNew {
             dateStr = getDateStr();
         }
 
-        String outputPathClean = MessageFormat.format("{0}/{1}/date={2}", base, "dw_real_path_list", dateStr);
+        String outputPathClean = MessageFormat.format("{0}/{1}/date={2}/", base, "dw_real_path_list", dateStr);
         System.out.println(outputPathClean);
         System.out.println(base);
 
@@ -166,10 +166,8 @@ public class PathListNew {
 
         String inputPath = Joiner.on(",").join(paths);
 
-        String outputPath = MessageFormat.format("{0}/{1}/", base, "dw_real_path_list");
-
         try {
-            jobConstructor(inputPath, outputPath);
+            jobConstructor(inputPath, outputPathClean);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -271,7 +269,8 @@ public class PathListNew {
         // hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-13/gu_hash=0
         // 目录输出格式 date=2016-08-13/gu_hash=0
         private String generateFileName(String gu_hash, String dateStr) {
-            return "date=" + dateStr + "/gu_hash=" + gu_hash;
+//            return "date=" + dateStr + "/gu_hash=" + gu_hash;
+            return "gu_hash=" + gu_hash;
         }
 
         @Override
@@ -338,9 +337,9 @@ public class PathListNew {
         // hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-13/gu_hash=0
         // 目录输出格式 date=2016-08-13/gu_hash=0
         private String generateFileName(String gu_hash, Long timeSecond) {
-            SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String dateStr = mDateFormat.format(timeSecond);
-            return "date=" + dateStr + "/gu_hash=" + gu_hash;
+//            SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//            String dateStr = mDateFormat.format(timeSecond);
+            return "gu_hash=" + gu_hash;
         }
 
         @Override
