@@ -136,7 +136,7 @@ public class PathListNew {
             dateStr = getDateStr();
         }
 
-        String outputPath = MessageFormat.format("{0}/{1}/", base, "dw_real_path_list");
+        String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, "dw_real_path_list", dateStr);
         System.out.println(outputPath);
         System.out.println(base);
 
