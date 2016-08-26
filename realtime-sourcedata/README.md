@@ -157,9 +157,8 @@ select substring(gu_id, length(gu_id)), count(gu_id) from dw.fct_session where d
 ```
 
 ```
-#!/bin/sh
-
-. /etc/profile
+#!/bin/bash
+. /home/hadoop/.bash_profile
 
 if [ $# == 1 ]; then
    date=$1
@@ -181,3 +180,9 @@ exit 11
 fi
 
 ```
+
+0 * * * * sh /home/hadoop/users/gongzi/run_pathlist.sh > /home/hadoop/users/gongzi/out_event-real-bi-dw-gongzi.txt 2>&1
+
+
+nohup ./event-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/out_event-real-bi-dw-gongzi.txt 2>&1
+nohup ./page-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/out_page-real-bi-dw-gongzi.txt 2>&1
