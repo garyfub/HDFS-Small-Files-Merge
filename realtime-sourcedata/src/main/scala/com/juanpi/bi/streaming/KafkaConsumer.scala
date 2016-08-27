@@ -281,11 +281,15 @@ object KafkaConsumer{
     // 时间间隔采用的是写死的，目前是 60 s
     ic.initParam(groupId, Config.interval, maxRecords)
 
+    println(ic.DIMENT.keys)
+    println(ic.DIMENT.values)
+
     ic.DIMENT.foreach(s => println("=======>> key="+ s._1, ", value="+ s._2))
     ic.DIMPAGE.foreach(s => println("=======>> key="+ s._1, ", value="+ s._2))
 
     val (d_event_id: Int, event_type_id: Int) = ic.DIMENT.get("click_cube_goods").getOrElse(0, 0)
     println(d_event_id, event_type_id)
+
     System.exit(1)
 
     val ssc = ic.getStreamingContext()
