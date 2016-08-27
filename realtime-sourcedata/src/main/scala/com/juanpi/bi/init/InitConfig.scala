@@ -144,12 +144,6 @@ object InitConfig {
     // 初始化 page and event
     DIMPAGE = ic.initDimPageEvent()._1
     DIMENT = ic.initDimPageEvent()._2
-    println(DIMENT.keys)
-    println(DIMENT.values)
-
-    val (d_event_id: Int, event_type_id: Int) = DIMENT.get("click_cube_goods").getOrElse(0, 0)
-    println(d_event_id, event_type_id)
-
   }
 
   def getStreamingContext(): StreamingContext = {

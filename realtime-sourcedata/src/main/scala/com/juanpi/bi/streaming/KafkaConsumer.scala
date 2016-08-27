@@ -280,12 +280,6 @@ object KafkaConsumer{
     val ic = InitConfig
     // 时间间隔采用的是写死的，目前是 60 s
     ic.initParam(groupId, Config.interval, maxRecords)
-
-//    ic.DIMENT.foreach(s => println("=======>> key="+ s._1, ", value="+ s._2))
-//    ic.DIMPAGE.foreach(s => println("=======>> key="+ s._1, ", value="+ s._2))
-
-    System.exit(1)
-
     val ssc = ic.getStreamingContext()
 
     // 连接Kafka参数设置
