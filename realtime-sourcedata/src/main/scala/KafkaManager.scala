@@ -140,6 +140,11 @@ class KafkaManager(val kafkaParams: Map[String, String],
       throw new SparkException(s"get kafka consumer offsets failed: ${consumerOffsetsE.left.get}")
     val consumerOffsets = consumerOffsetsE.right.get
 
+    println(consumerOffsets.keys)
+    println(consumerOffsets.values)
+
+    System.exit(1)
+
     val messages = KafkaUtils.createDirectStream[K, V, KD, VD, ((Long, Long), V)](
       ssc, kafkaParams, consumerOffsets, (mmd: MessageAndMetadata[K, V]) => ((mmd.partition.toLong, mmd.offset), mmd.message))
     messages
