@@ -78,7 +78,7 @@ class InitConfig() {
       val key = page_exp1 + page_exp2
       (page_id, page_type_id, page_value, page_level_id, key)
     })
-//      .collect()
+      .collect()
       .foreach( items => {
       val page_id: Int = items._1
       val page_type_id = items._2
@@ -112,6 +112,7 @@ class InitConfig() {
       val key = event_exp1 + event_exp2
       (event_id, event_type_id, key)
     })
+    .collect()
     .foreach( items => {
       val event_id: Int = items._1
       val event_type_id = items._2
