@@ -280,6 +280,7 @@ object KafkaConsumer{
     val ic = InitConfig
     // 时间间隔采用的是写死的，目前是 60 s。TODO 采用
     ic.initParam(groupId, Config.interval, maxRecords)
+    System.exit(1)
     val ssc = ic.getStreamingContext()
 
     // 连接Kafka参数设置
