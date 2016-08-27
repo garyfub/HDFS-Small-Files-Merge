@@ -20,7 +20,8 @@ class InitConfig() {
   @BeanProperty var ssc: StreamingContext = _
   @BeanProperty var duration: Duration = _
 
-  def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)], mutable.HashMap[String, (Int, Int)]) = {
+  def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)],
+                          mutable.HashMap[String, (Int, Int)]) = {
     // 查询 hive 中的 dim_page 和 dim_event
     val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
     val dp: mutable.HashMap[String, (Int, Int, String, Int)] = initDimPage(sqlContext)
@@ -142,6 +143,11 @@ object InitConfig {
     // 初始化 page and event
     DIMPAGE = ic.initDimPageEvent()._1
     DIMENT = ic.initDimPageEvent()._2
+    println(DIMENT.keys)
+    println(DIMENT.values)
+
+    val (d_event_id: Int, event_type_id: Int) = DIMENT.get("click_cube_goods").getOrElse(0, 0)
+    println(d_event_id, event_type_id)
 
   }
 
