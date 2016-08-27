@@ -18,6 +18,7 @@ import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
+import play.api.libs.json.Json
 
 import scala.collection.mutable
 
@@ -46,8 +47,7 @@ class KafkaConsumer(topic: String,
     val data = sourceLog.map(_._2.replace("\0",""))
       .filter(line => !line.contains("collect_api_responsetime"))
       .transform(transMessage _)
-      .filter(!_._1.isEmpty)
-      .cache()
+      .filter(_._1.nonEmpty)
 
     data.foreachRDD((rdd, time) =>
     {
@@ -81,8 +81,7 @@ class KafkaConsumer(topic: String,
 
     val data = sourceLog.map(_._2.replace("\0",""))
       .transform(transMessage _)
-      .filter(!_._1.isEmpty)
-      .cache()
+      .filter(_._1.nonEmpty)
 
      data.foreachRDD((rdd, time) =>
       {
@@ -279,6 +278,7 @@ object KafkaConsumer{
 
     // 初始化 SparkConfig StreamingContext HiveContext
     val ic = InitConfig
+    // 时间间隔采用的是写死的，目前是 60 s。TODO 采用
     ic.initParam(groupId, Config.interval, maxRecords)
     val ssc = ic.getStreamingContext()
 

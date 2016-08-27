@@ -239,6 +239,9 @@ object pageAndEventParser {
     page_value
   }
 
+  // http://stackoverflow.com/questions/9028459/a-clean-way-to-combine-two-tuples-into-a-new-larger-tuple-in-scala
+  def myCombine(xss: Product*) = xss.toList.flatten(_.productIterator)
+
   /*
 * 判断是否为整数
 * @param str 传入的字符串

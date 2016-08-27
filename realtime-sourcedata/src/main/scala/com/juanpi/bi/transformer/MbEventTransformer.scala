@@ -12,6 +12,56 @@ import scala.collection.mutable
   */
 class MbEventTransformer extends ITransformer {
 
+  /**
+    *
+    * @param line
+    * @param dimpage
+    * @param dimevent
+    * @return
+    */
+  def logParser(line: String,
+                dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
+                dimevent: mutable.HashMap[String, (Int, Int)]): (String, String, Any) = {
+
+    val row = Json.parse(line)
+    val ticks = (row \ "ticks").asOpt[String].getOrElse("")
+    val jpid = (row \ "jpid").asOpt[String].getOrElse("")
+    val deviceid = (row \ "deviceid").asOpt[String].getOrElse("")
+    val os = (row \ "os").asOpt[String].getOrElse("")
+    val endtime = (row \ "endtime").as[String].toLong
+
+    // TODO 逻辑待优化
+    if (ticks.length() >= 13) {
+      // 解析逻辑
+      var gu_id = ""
+      try {
+        gu_id = pageAndEventParser.getGuid(jpid, deviceid, os)
+      } catch {
+        //使用模式匹配来处理异常
+        case ex: Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
+      }
+
+      println("=======>> ticks:" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceid + "#, os=" + os + "#, gu_id" + gu_id + "#, endtime" + endtime)
+
+      val ret = if(gu_id.nonEmpty) {
+        try {
+          val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = parse(row, dimpage, dimevent)
+          val res_str =  pageAndEventParser.myCombine(user, pageAndEvent, page, event).mkString("\u0001")
+          (DateUtils.dateGuidPartitions(endtime, gu_id).toString, "event", res_str)
+        } catch {
+          //使用模式匹配来处理异常
+          case ex:Exception => {println(ex.getStackTraceString, "\n======>>异常数据:" + row)}
+          ("", "", None)
+        }
+      } else {
+        ("", "", None)
+      }
+      ret
+    } else {
+      ("", "", None)
+    }
+  }
+
   def parse(row: JsValue,
             dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
             dimevent: mutable.HashMap[String, (Int, Int)]): (User, PageAndEvent, Page, Event) = {
@@ -286,52 +336,6 @@ class MbEventTransformer extends ITransformer {
       // TODO
       app_version.replace(".", "").toInt
     }
-
-    // 返回解析的结果
-    def logParser(line: String, dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
-                  dimevent: mutable.HashMap[String, (Int, Int)]): (String, String, Any) = {
-      //play
-      val row = Json.parse(line)
-      val ticks = (row \ "ticks").asOpt[String].getOrElse("")
-
-      // TODO 逻辑待优化
-      if (ticks.length() >= 13) {
-        // 解析逻辑
-        var gu_id = ""
-        try {
-          gu_id = pageAndEventParser.getGuid(
-            (row \ "jpid").asOpt[String].getOrElse(""),
-            (row \ "deviceid").asOpt[String].getOrElse(""),
-            (row \ "os").asOpt[String].getOrElse("")
-          )
-        } catch {
-          //使用模式匹配来处理异常
-          case ex: Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
-        }
-
-        val ret = if(gu_id.nonEmpty) {
-          try {
-            val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = parse(row, dimpage, dimevent)
-            val res_str =  combine(user, pageAndEvent, page, event).mkString("\u0001")
-            (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, "event", res_str)
-          } catch {
-            //使用模式匹配来处理异常
-            case ex:Exception => {
-              println(ex.getStackTraceString, "\n======>>异常数据:" + row)
-            }
-            ("", "", None)
-          }
-        } else {
-          ("", "", None)
-        }
-        ret
-      } else {
-        ("", "", None)
-      }
-    }
-
-  // http://stackoverflow.com/questions/9028459/a-clean-way-to-combine-two-tuples-into-a-new-larger-tuple-in-scala
-  def combine(xss: Product*) = xss.toList.flatten(_.productIterator)
   }
 
 // for test
