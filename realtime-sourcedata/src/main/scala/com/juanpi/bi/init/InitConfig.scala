@@ -86,7 +86,6 @@ class InitConfig() {
       val key = items._5
       dimPages += ( key -> (page_id, page_type_id, page_value, page_level_id))
     })
-    dimPages.foreach(s => println("key="+ s._1, ", value="+ s._2))
     dimPageData.unpersist(true)
     dimPages
   }
@@ -120,7 +119,6 @@ class InitConfig() {
     })
 
     dimData.unpersist(true)
-    dimEvents.foreach(s => println("key="+ s._1, ", value="+ s._2))
     dimEvents
   }
 }

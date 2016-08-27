@@ -278,9 +278,16 @@ object KafkaConsumer{
 
     // 初始化 SparkConfig StreamingContext HiveContext
     val ic = InitConfig
-    // 时间间隔采用的是写死的，目前是 60 s。TODO 采用
+    // 时间间隔采用的是写死的，目前是 60 s
     ic.initParam(groupId, Config.interval, maxRecords)
+
+    ic.DIMENT.foreach(s => println("=======>> key="+ s._1, ", value="+ s._2))
+    ic.DIMPAGE.foreach(s => println("=======>> key="+ s._1, ", value="+ s._2))
+
+    val (d_event_id: Int, event_type_id: Int) = ic.DIMENT.get("click_cube_goods").getOrElse(0, 0)
+    println(d_event_id, event_type_id)
     System.exit(1)
+
     val ssc = ic.getStreamingContext()
 
     // 连接Kafka参数设置
