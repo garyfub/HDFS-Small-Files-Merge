@@ -41,7 +41,7 @@ class MbEventTransformer extends ITransformer {
         case ex: Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
       }
 
-      println("=======>> ticks:" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceid + "#, os=" + os + "#, gu_id" + gu_id + "#, endtime" + endtime)
+      println("=======>> ticks=" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceid + "#, os=" + os + "#, gu_id=" + gu_id + "#, endtime=" + endtime)
 
       val ret = if(gu_id.nonEmpty) {
         try {
@@ -255,7 +255,7 @@ class MbEventTransformer extends ITransformer {
     val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, starttime, endtime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceid, to_switch)
     val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
-    println("======> event="+event + ",page_id=" + page_id + "=======>> server_jsonstr::", server_jsonstr)
+    println("======> for_eventid:"+ for_eventid + "#, event=" + event + "#, for_pageid=" + for_pageid + ",page_id=" + page_id + "=======>> server_jsonstr::", server_jsonstr)
     (user, pe, page, event)
   }
 
@@ -270,11 +270,12 @@ class MbEventTransformer extends ITransformer {
 
   def getEventId(d_event_id: Int, app_version: String): Int = {
     val app_ver = getVersionNum(app_version)
-    d_event_id match {
-      case 0 => -1
-      case b if (app_ver > 323 && d_event_id != 279) => d_event_id
+    val eid = d_event_id match {
+      case a if (d_event_id == 0) => -1
+      case b if (app_ver > 323 || d_event_id != 279) => d_event_id
       case _ => -999
     }
+    eid
   }
 
   def getEventValue(event_type_id: Int, activityname: String, extend_params: String, server_jsonstr: String): String =
