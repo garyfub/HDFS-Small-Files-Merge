@@ -47,7 +47,9 @@ class MbEventTransformer extends ITransformer {
         try {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = parse(row, dimpage, dimevent)
           val res_str =  pageAndEventParser.myCombine(user, pageAndEvent, page, event).mkString("\u0001")
-          (DateUtils.dateGuidPartitions(endtime, gu_id).toString, "event", res_str)
+          val dtStr = (row \ "endtime").as[String].toLong
+          val partitionStr = DateUtils.dateGuidPartitions(dtStr, gu_id)
+          (partitionStr, "event", res_str)
         } catch {
           //使用模式匹配来处理异常
           case ex:Exception => {println(ex.getStackTraceString, "\n======>>异常数据:" + row)}

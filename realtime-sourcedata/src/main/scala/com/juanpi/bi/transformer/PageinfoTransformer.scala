@@ -139,20 +139,22 @@ class PageinfoTransformer extends ITransformer {
       val ret = if(gu_id.nonEmpty) {
         try {
           val res = parse(row, dimPage)
-          (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, "page", res)
+          val dtStr = (row \ "endtime").as[String].toLong
+          val partitionStr = DateUtils.dateGuidPartitions(dtStr, gu_id)
+          (partitionStr, "page", res)
         } catch{
           //使用模式匹配来处理异常
-          case ex:Exception => {
-            println(ex.getStackTraceString, "\n======>>异常数据:" + row)
-          }
-          ("", "", None)
+          case ex:Exception => {println(ex.getStackTraceString, "\n======>>异常数据:" + row)}
+            println("=======>> Page: parse Exception!!")
+            ("", "", None)
         }
       } else {
+        println("=======>> Page: GU_ID IS NULL!!")
         ("", "", None)
       }
-
       ret
     } else {
+      println("=======>> Page: ROW IS NULL!!")
       ("", "", None)
     }
   }
