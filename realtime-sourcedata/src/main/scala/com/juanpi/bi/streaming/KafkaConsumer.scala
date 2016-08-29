@@ -82,7 +82,7 @@ class KafkaConsumer(topic: String,
         .map(msg => parseMessage(msg))
         .filter(_._1.nonEmpty)
 //
-//    val cnt = data.count()
+//    val cnt = dataDStream.count()
 //
 //
 //    println("=======>> 数据量：" + cnt.count())
@@ -107,8 +107,13 @@ class KafkaConsumer(topic: String,
 //          user.utm = utm
 //          user.gu_create_time = gu_create_time
           // record._2 就是 page
+          // date=2016-08-26/gu_hash=f
           (record._1, (record._2, combineTuple(user, pageAndEvent, page, event).mkString("\u0001")))
         })
+
+        val cnt = newRdd.count()
+        println("=======>> cnt:" + cnt)
+
 
         // 保存数据至hdfs
         newRdd.map(v => ((v._1, time.milliseconds), v._2._2))
