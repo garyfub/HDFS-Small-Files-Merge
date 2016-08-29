@@ -82,9 +82,9 @@ class KafkaConsumer(topic: String,
         .map(msg => parseMessage(msg))
         .filter(_._1.nonEmpty)
 
-//    val data = sourceLog.map(_._2.replace("\0",""))
-//      .transform(transMessage _)
-//      .filter(_._1.nonEmpty)
+    val cnt = data.count()
+
+    println("=======>> 数据量：" + cnt)
 
      data.foreachRDD((rdd, time) =>
       {

@@ -104,7 +104,6 @@ class PageinfoTransformer extends ITransformer {
     // 最终返回值
     val event_id, event_value, rule_id, test_id, select_id, event_lvl2_value, loadTime = ""
 
-    println("======>> page_id :: " + page_id)
     val (date, hour) = DateUtils.dateHourStr(endtime.toLong)
 
     val user = User.apply(gu_id, uid, utm, gu_create_time, session_id, terminal_id, app_version, site_id, ref_site_id, ctag, location, jpk, ugroup, date, hour)
@@ -120,27 +119,31 @@ class PageinfoTransformer extends ITransformer {
                 dimEvent: mutable.HashMap[String, (Int, Int)]): (String, String, Any) = {
 
     //play
-    val row = Json.parse(line.replaceAll("null", """\\"\\"""") )// .replaceAll("\\n", ""))
+    val row = Json.parse(line.replaceAll("null", """\\"\\""""))
 
     if (row != null) {
       // 解析逻辑
       var gu_id = ""
+      val ticks = (row \ "ticks").asOpt[String].getOrElse("")
+      val jpid = (row \ "jpid").asOpt[String].getOrElse("")
+      val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
+      val os = (row \ "os").asOpt[String].getOrElse("")
+      val endTime = (row \ "endtime").as[String].toLong
+
       try
       {
-        gu_id = pageAndEventParser.getGuid((row \ "jpid").asOpt[String].getOrElse(""),
-                                            (row \ "deviceid").asOpt[String].getOrElse(""),
-                                            (row \ "os").asOpt[String].getOrElse("")
-                                          )
+        gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
       } catch{
         //使用模式匹配来处理异常
         case ex:Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
       }
 
+      println("=======>> ticks=" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceId + "#, os=" + os + "#, gu_id=" + gu_id + "#, endtime=" + endTime)
+
       val ret = if(gu_id.nonEmpty) {
         try {
           val res = parse(row, dimPage)
-          val dtStr = (row \ "endtime").as[String].toLong
-          val partitionStr = DateUtils.dateGuidPartitions(dtStr, gu_id)
+          val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
           (partitionStr, "page", res)
         } catch{
           //使用模式匹配来处理异常
@@ -158,6 +161,7 @@ class PageinfoTransformer extends ITransformer {
       ("", "", None)
     }
   }
+
 }
 
 // for test

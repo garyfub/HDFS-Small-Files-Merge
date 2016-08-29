@@ -26,29 +26,28 @@ class MbEventTransformer extends ITransformer {
     val row = Json.parse(line)
     val ticks = (row \ "ticks").asOpt[String].getOrElse("")
     val jpid = (row \ "jpid").asOpt[String].getOrElse("")
-    val deviceid = (row \ "deviceid").asOpt[String].getOrElse("")
+    val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
     val os = (row \ "os").asOpt[String].getOrElse("")
-    val endtime = (row \ "endtime").as[String].toLong
+    val endTime = (row \ "endtime").as[String].toLong
 
     // TODO 逻辑待优化
     if (ticks.length() >= 13) {
       // 解析逻辑
       var gu_id = ""
       try {
-        gu_id = pageAndEventParser.getGuid(jpid, deviceid, os)
+        gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
       } catch {
         //使用模式匹配来处理异常
         case ex: Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
       }
 
-      println("=======>> ticks=" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceid + "#, os=" + os + "#, gu_id=" + gu_id + "#, endtime=" + endtime)
+      println("=======>> ticks=" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceId + "#, os=" + os + "#, gu_id=" + gu_id + "#, endtime=" + endTime)
 
       val ret = if(gu_id.nonEmpty) {
         try {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = parse(row, dimpage, dimevent)
           val res_str =  pageAndEventParser.myCombine(user, pageAndEvent, page, event).mkString("\u0001")
-          val dtStr = (row \ "endtime").as[String].toLong
-          val partitionStr = DateUtils.dateGuidPartitions(dtStr, gu_id)
+          val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
           (partitionStr, "event", res_str)
         } catch {
           //使用模式匹配来处理异常
