@@ -84,7 +84,8 @@ class KafkaConsumer(topic: String,
 
     val cnt = data.count()
 
-    println("=======>> 数据量：" + cnt)
+
+    println("=======>> 数据量：" + cnt.count())
 
      data.foreachRDD((rdd, time) =>
       {
