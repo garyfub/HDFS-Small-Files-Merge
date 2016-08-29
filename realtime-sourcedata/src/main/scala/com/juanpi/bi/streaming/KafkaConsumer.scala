@@ -18,7 +18,6 @@ import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
-import play.api.libs.json.Json
 
 import scala.collection.mutable
 
@@ -97,9 +96,9 @@ class KafkaConsumer(topic: String,
             case _ => ""
           }
 
-          val (utm, gu_create_time) = HBaseHandler.getGuIdUtmInitDate(zkQuorum, gu_id + app_name)
-          user.utm = utm
-          user.gu_create_time = gu_create_time
+//          val (utm, gu_create_time) = HBaseHandler.getGuIdUtmInitDate(zkQuorum, gu_id + app_name)
+//          user.utm = utm
+//          user.gu_create_time = gu_create_time
           // record._2 就是 page
           (record._1, (record._2, combineTuple(user, pageAndEvent, page, event).mkString("\u0001")))
         })
