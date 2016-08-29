@@ -119,7 +119,7 @@ class KafkaConsumer(topic: String,
       })
 
     // 更新kafka offset
-    sourceLog.foreachRDD { rdd =>
+    dataDStream.foreachRDD { rdd =>
       km.updateOffsets(rdd)
     }
   }
