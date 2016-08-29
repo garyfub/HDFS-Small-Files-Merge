@@ -15,7 +15,7 @@ import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat
 import org.apache.spark.Logging
 import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
-import org.apache.spark.streaming.StreamingContext
+import org.apache.spark.streaming.{StreamingContext, Time}
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
 
@@ -102,10 +102,13 @@ class KafkaConsumer(topic: String,
 //          user.gu_create_time = gu_create_time
           // record._2 就是 page
           // date=2016-08-26/gu_hash=f
-          (record._1, combineTuple(user, pageAndEvent, page, event).mkString("\u0001"))
-        })
 
-        // 保存数据至hdfs
+          ((record._1, time.milliseconds), combineTuple(user, pageAndEvent, page, event).mkString("\u0001")))
+        })
+//
+
+        // 保存数据至hdfs: /user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/
+        // /user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-28/gu_hash=0
         newRdd
 //          .map(v => ((v._1, time.milliseconds), v._2._2))
           .saveAsHadoopFile(Config.baseDir + "/" + topic,
@@ -118,6 +121,14 @@ class KafkaConsumer(topic: String,
     dataDStream.foreachRDD { rdd =>
       km.updateOffsets(rdd)
     }
+  }
+
+  //
+  // 添加时间戳
+  //
+  def addTime[C, T](rdd: RDD[(C, T)], time: Time) = {
+    val timestamp = time.milliseconds
+    rdd.map(t => ((t._1, timestamp), t._2))
   }
 
   // http://stackoverflow.com/questions/9028459/a-clean-way-to-combine-two-tuples-into-a-new-larger-tuple-in-scala
@@ -200,13 +211,26 @@ object HBaseHandler {
 
 object KafkaConsumer{
 
-  private val timePartition = (timestamp: Long) => {
-    val sdf = new SimpleDateFormat("yyyyMMddHH")
+//  private val timePartition = (timestamp: Long) => {
+//    val sdf = new SimpleDateFormat("yyyyMMddHH")
+//    val dayDate: String = try {
+//      sdf.format(timestamp)
+//    } catch {
+//      case _: Throwable => {
+//        "19720101"
+//      }
+//    }
+//
+//    dayDate
+//  }
+
+  private val timeMinutesPartition = (timestamp: Long) => {
+    val sdf = new SimpleDateFormat("yyyyMMddHHmm")
     val dayDate: String = try {
       sdf.format(timestamp)
     } catch {
       case _: Throwable => {
-        "19720101"
+        "197201010105"
       }
     }
 
@@ -219,11 +243,11 @@ object KafkaConsumer{
     }
 
     override def generateFileNameForKeyValue(key: Any, value: Any, name: String): String = {
-      key.asInstanceOf[String]
-//      val keyAndTime = key.asInstanceOf[(String, Long)]
-//      val realKey = keyAndTime._1
-//      val timestamp = keyAndTime._2
-//      realKey + "/part_" + timePartition(timestamp)
+      // date=2016-08-28/gu_hash=0
+      val keyAndTime = key.asInstanceOf[(String, Long)]
+      val realKey = keyAndTime._1
+      val timestamp = keyAndTime._2
+      realKey + "/part_" + timeMinutesPartition(timestamp)
     }
   }
 
