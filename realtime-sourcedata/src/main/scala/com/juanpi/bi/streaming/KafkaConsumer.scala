@@ -76,11 +76,11 @@ class KafkaConsumer(topic: String,
                   km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 数据块中的每一条记录需要处理
-    val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
+//    val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
 
-    val data = sourceLog.map(_._2.replace("\0",""))
+    val data = dataDStream.map(_._2.replace("\0",""))
         .map(msg => parseMessage(msg))
-//        .filter(_._1.nonEmpty)
+        .filter(_._1.nonEmpty)
 //
 //    val cnt = data.count()
 //
@@ -89,6 +89,8 @@ class KafkaConsumer(topic: String,
 
      data.foreachRDD((rdd, time) =>
       {
+        val countRDD = rdd.count()
+        println("=======>> countRDD:" + countRDD)
         //  需要从 hbase 查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
         val newRdd = rdd.map(record => {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._3
