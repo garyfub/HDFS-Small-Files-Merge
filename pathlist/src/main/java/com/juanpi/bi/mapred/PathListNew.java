@@ -34,6 +34,8 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
 /**
  * 烈烈
  * Created by kaenr on 2016/7/13.
+ *
+ * TODO 5级：入口拆成：2级
  */
 public class PathListNew {
 
@@ -258,9 +260,11 @@ public class PathListNew {
 
             //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
 
-            // page_level_id  对应的路径 line
+            // page_level_id  对应的路径 line 每一级别加上 loadtime
             // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 35: event_value; 36: event_lvl2_value; 22: starttime
-            String str[] = {splited[21], splited[15]+"\t"+splited[16]+"\t"+splited[25]+"\t"+splited[34]+"\t"+splited[35]+"\t"+splited[36]+"\t"+splited[22], value.toString().replace("\u0001","\t")};
+            String str[] = {splited[21],
+                    splited[15]+"\t"+splited[16]+"\t"+splited[25]+"\t"+splited[34]+"\t"+splited[35]+"\t"+splited[36]+"\t"+splited[22] + "\t" + splited[46],
+                    value.toString().replace("\u0001","\t")};
             final TextArrayWritable v2 = new TextArrayWritable(str);
 
             xx ++;
@@ -311,24 +315,31 @@ public class PathListNew {
                 String level2 = initstr;
                 String level3 = initstr;
                 String level4 = initstr;
+                String level5 = initstr;
                 if(Integer.parseInt(v2.toStrings()[0]) == 1){
                     level1=v2.toStrings()[1];
                     level2 = initstr;
                     level3 = initstr;
                     level4 = initstr;
+                    level5 = initstr;
                 } else if(Integer.parseInt(v2.toStrings()[0]) == 2){
                     level2=v2.toStrings()[1];
                     level3 = initstr;
                     level4 = initstr;
+                    level5 = initstr;
                 } else if(Integer.parseInt(v2.toStrings()[0]) == 3){
                     level3 = v2.toStrings()[1];
                     level4 = initstr;
+                    level5 = initstr;
                 } else if(Integer.parseInt(v2.toStrings()[0]) == 4){
                     level4 = v2.toStrings()[1];
+                    level5 = initstr;
+                } else if(Integer.parseInt(v2.toStrings()[0]) == 5){
+                    level5 = v2.toStrings()[1];
                 }
 
                 // 4 个级别
-                Text key2 = new Text(level1+"\t"+ level2+"\t"+level3+"\t"+level4);
+                Text key2 = new Text(level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5);
                 Text value2 = new Text(v2.toStrings()[2]);
 //                context.write(key2, value2);
 
