@@ -103,7 +103,7 @@ class KafkaConsumer(topic: String,
           // record._2 就是 page
           // date=2016-08-26/gu_hash=f
 
-          ((record._1, time.milliseconds), combineTuple(user, pageAndEvent, page, event).mkString("\u0001")))
+          ((record._1, time.milliseconds), combineTuple(user, pageAndEvent, page, event).mkString("\u0001"))
         })
 //
 
