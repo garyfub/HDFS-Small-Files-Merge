@@ -81,16 +81,10 @@ class KafkaConsumer(topic: String,
     val data = dataDStream.map(_._2.replace("\0",""))
         .map(msg => parseMessage(msg))
         .filter(_._1.nonEmpty)
-//
-//    val cnt = dataDStream.count()
-//
-//
-//    println("=======>> 数据量：" + cnt.count())
 
      data.foreachRDD((rdd, time) =>
       {
-        val countRDD = rdd.count()
-        println("=======>> countRDD:" + countRDD)
+
         //  需要从 hbase 查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
         val newRdd = rdd.map(record => {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._3
@@ -108,15 +102,12 @@ class KafkaConsumer(topic: String,
 //          user.gu_create_time = gu_create_time
           // record._2 就是 page
           // date=2016-08-26/gu_hash=f
-          (record._1, (record._2, combineTuple(user, pageAndEvent, page, event).mkString("\u0001")))
+          (record._1, combineTuple(user, pageAndEvent, page, event).mkString("\u0001"))
         })
 
-        val cnt = newRdd.count()
-        println("=======>> cnt:" + cnt)
-
-
         // 保存数据至hdfs
-        newRdd.map(v => ((v._1, time.milliseconds), v._2._2))
+        newRdd
+//          .map(v => ((v._1, time.milliseconds), v._2._2))
           .saveAsHadoopFile(Config.baseDir + "/" + topic,
             classOf[String],
             classOf[String],
@@ -228,10 +219,11 @@ object KafkaConsumer{
     }
 
     override def generateFileNameForKeyValue(key: Any, value: Any, name: String): String = {
-      val keyAndTime = key.asInstanceOf[(String, Long)]
-      val realKey = keyAndTime._1
-      val timestamp = keyAndTime._2
-      realKey + "/part_" + timePartition(timestamp)
+      key.asInstanceOf[String]
+//      val keyAndTime = key.asInstanceOf[(String, Long)]
+//      val realKey = keyAndTime._1
+//      val timestamp = keyAndTime._2
+//      realKey + "/part_" + timePartition(timestamp)
     }
   }
 
