@@ -12,8 +12,26 @@ ssh hadoop@spark001.jp
 
 hadoop fs -mkdir /user/hadoop/spark-jobs/gongzi
 
-hadoop fs -du -h hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_event_hash2/date=2016-08-21
+hadoop fs -du -h hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_event_hash2/date=2016-08-28
 hadoop fs -du -h hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-21
+
+#### 架构做的实时解析的数据参考
+[hadoop@GZ-JSQ-JP-BI-SPARK-001 gongzi]$   hadoop fs -du -h hdfs://nameservice1/user/hadoop/kafka_realoutput/mbevent
+0        hdfs://nameservice1/user/hadoop/kafka_realoutput/mbevent/_SUCCESS
+5.1 G    hdfs://nameservice1/user/hadoop/kafka_realoutput/mbevent/date=2016-04-10
+51.5 K   hdfs://nameservice1/user/hadoop/kafka_realoutput/mbevent/date=2016-04-28
+153.1 K  hdfs://nameservice1/user/hadoop/kafka_realoutput/mbevent/date=2016-04-29
+24.1 G   hdfs://nameservice1/user/hadoop/kafka_realoutput/mbevent/date=2016-08-27
+21.8 G   hdfs://nameservice1/user/hadoop/kafka_realoutput/mbevent/date=2016-08-28
+4.2 G    hdfs://nameservice1/user/hadoop/kafka_realoutput/mbevent/date=2016-08-29
+
+[hadoop@GZ-JSQ-JP-BI-SPARK-001 gongzi]$   hadoop fs -du -h hdfs://nameservice1/user/hadoop/kafka_realoutput/pageinfo
+4.7 G    hdfs://nameservice1/user/hadoop/kafka_realoutput/pageinfo/date=2016-04-10
+154.2 K  hdfs://nameservice1/user/hadoop/kafka_realoutput/pageinfo/date=2016-04-28
+291.6 K  hdfs://nameservice1/user/hadoop/kafka_realoutput/pageinfo/date=2016-04-29
+34.0 G   hdfs://nameservice1/user/hadoop/kafka_realoutput/pageinfo/date=2016-08-27
+33.0 G   hdfs://nameservice1/user/hadoop/kafka_realoutput/pageinfo/date=2016-08-28
+6.6 G    hdfs://nameservice1/user/hadoop/kafka_realoutput/pageinfo/date=2016-08-29
 
 # 上传
 hadoop fs -put /home/hadoop/users/gongzi/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar /user/hadoop/spark-jobs/gongzi/
@@ -41,7 +59,7 @@ hadoop jar ./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapre
 yarn jar ./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapred.PathListNew 2016-08-21
 
 # 文件结果
-hadoop fs -ls hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-20
+hadoop fs -ls hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-21
 
 ```
 
@@ -184,5 +202,5 @@ fi
 0 * * * * sh /home/hadoop/users/gongzi/run_pathlist.sh > /home/hadoop/users/gongzi/out_event-real-bi-dw-gongzi.txt 2>&1
 
 
-nohup ./event-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/out_event-real-bi-dw-gongzi.txt 2>&1
-nohup ./page-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/out_page-real-bi-dw-gongzi.txt 2>&1
+nohup ./event-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/out_event-real-bi-dw-gongzi.txt 2>&1 &
+nohup ./page-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/out_page-real-bi-dw-gongzi.txt 2>&1 &

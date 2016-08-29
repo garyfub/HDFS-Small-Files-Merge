@@ -45,7 +45,7 @@ class KafkaConsumer(topic: String,
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
     val data = sourceLog.map(_._2.replace("\0",""))
       .filter(line => !line.contains("collect_api_responsetime"))
-      .transform(transMessage _)
+      .map(msg => parseMessage(msg))
       .filter(_._1.nonEmpty)
 
     data.foreachRDD((rdd, time) =>
@@ -79,8 +79,12 @@ class KafkaConsumer(topic: String,
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
 
     val data = sourceLog.map(_._2.replace("\0",""))
-      .transform(transMessage _)
-      .filter(_._1.nonEmpty)
+        .map(msg => parseMessage(msg))
+        .filter(_._1.nonEmpty)
+
+//    val data = sourceLog.map(_._2.replace("\0",""))
+//      .transform(transMessage _)
+//      .filter(_._1.nonEmpty)
 
      data.foreachRDD((rdd, time) =>
       {
@@ -88,13 +92,13 @@ class KafkaConsumer(topic: String,
         val newRdd = rdd.map(record => {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._3
 
-          val gu_id = user.gu_id
-
-          val app_name = user.site_id match {
-            case 1 => "jiu"
-            case 2 => "zhe"
-            case _ => ""
-          }
+//          val gu_id = user.gu_id
+//
+//          val app_name = user.site_id match {
+//            case 1 => "jiu"
+//            case 2 => "zhe"
+//            case _ => ""
+//          }
 
 //          val (utm, gu_create_time) = HBaseHandler.getGuIdUtmInitDate(zkQuorum, gu_id + app_name)
 //          user.utm = utm
