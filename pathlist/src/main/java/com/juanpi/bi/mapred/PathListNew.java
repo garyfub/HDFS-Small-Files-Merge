@@ -34,8 +34,9 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
 /**
  * 烈烈
  * Created by kaenr on 2016/7/13.
+ * Updated by gongzi@juanpi.com on 2016-08-12
  *
- * TODO 5级：入口拆成：2级
+ * TODO 当前逻辑是：当前阶段中，本程序计算完以后加载数据至hive；至下一个阶段，删除数据目录，重新写
  */
 public class PathListNew {
 
@@ -70,15 +71,7 @@ public class PathListNew {
     }
 
     /**
-     * 加载数据至hive外表 TODO
-     */
-    public static void loadDataByLocation(FileSystem fs)
-    {
-
-    }
-
-    /**
-     * 创建hdfs目录
+     * 创建hdfs目录,
      * @param fs
      * @throws IOException
      */
@@ -139,6 +132,7 @@ public class PathListNew {
             dateStr = getDateStr();
         }
 
+        // path_list 数据的目录: /user/hadoop/gongzi/dw_real_path_list/date=2016-08-30/
         String outputPathClean = MessageFormat.format("{0}/{1}/date={2}/", base, "dw_real_path_list", dateStr);
         System.out.println(outputPathClean);
         System.out.println(base);
@@ -146,10 +140,13 @@ public class PathListNew {
         // 预创建目录
         try {
             getFileSystem(base);
+            // 清空即将写 path_list 数据的目录
             cleanDataPath(outputPathClean);
-            createHDFSPath(fs);
+            // 避免没有数据目录而加载数据失败?
+//            createHDFSPath(fs);
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("=======>> hadoop FileSystem IOException:" + e.getStackTrace());
         }
 
         List<String> paths = new ArrayList<>();
@@ -173,6 +170,7 @@ public class PathListNew {
             jobConstructor(inputPath, outputPathClean);
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("=======>> hadoop FileSystem IOException:" + e.getStackTrace());
         }
     }
 
