@@ -20,11 +20,11 @@ then
 exit 11
 fi
 
+
 DB="test"
 TABLE="dw_path_list_new"
 DataPath="gongzi"
-hiveF ./load_to_hive.sql -dbName $DB -tableName $TABLE -dataPath $DATAPath -date $today
-
+hive  -d dbName=$DB -d tableName=$TABLE -d dataPath=$DATAPath -d date=$today -f ./load_to_hive.sql
 if test $? -ne 0
 then
 exit 11
