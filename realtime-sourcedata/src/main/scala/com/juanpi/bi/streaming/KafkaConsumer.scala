@@ -52,7 +52,6 @@ class KafkaConsumer(topic: String,
     {
       // 保存数据至hdfs
       rdd.map(v => ((v._1, time.milliseconds), v._3))
-//        .repartition(1)
         .saveAsHadoopFile(Config.baseDir + "/" + topic,
           classOf[String],
           classOf[String],
@@ -110,7 +109,6 @@ class KafkaConsumer(topic: String,
         // 保存数据至hdfs: /user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/
         // /user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-28/gu_hash=0
         newRdd
-//          .map(v => ((v._1, time.milliseconds), v._2._2))
           .saveAsHadoopFile(Config.baseDir + "/" + topic,
             classOf[String],
             classOf[String],
