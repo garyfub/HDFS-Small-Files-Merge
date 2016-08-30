@@ -103,6 +103,7 @@ class KafkaConsumer(topic: String,
           // date=2016-08-26/gu_hash=f
 
           ((record._1, time.milliseconds), pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x=> x match {
+            case null => "\\N"
             case y if y.toString.isEmpty => "\\N"
             case _ => x
           }).mkString("\001"))
