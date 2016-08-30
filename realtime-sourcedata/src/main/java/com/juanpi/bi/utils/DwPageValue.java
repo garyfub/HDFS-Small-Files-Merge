@@ -178,8 +178,3 @@ public class DwPageValue
     }
   }
 }
-
-/* Location:           C:\Users\kaenrion\OneDrive\
- * Qualified Name:     com.juanpi.hive.utils.DwPageValue
- * JD-Core Version:    0.6.0
- */
