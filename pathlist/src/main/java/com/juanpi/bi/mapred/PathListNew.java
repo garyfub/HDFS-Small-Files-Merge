@@ -134,8 +134,8 @@ public class PathListNew {
 
         // path_list 数据的目录: /user/hadoop/gongzi/dw_real_path_list/date=2016-08-30/
         String outputPathClean = MessageFormat.format("{0}/{1}/date={2}/", base, "dw_real_path_list", dateStr);
-        System.out.println(outputPathClean);
-        System.out.println(base);
+        System.out.println("outputPathClean===:" + outputPathClean);
+        System.out.println("base===:" + base);
 
         // 预创建目录
         try {
@@ -165,6 +165,8 @@ public class PathListNew {
         }
 
         String inputPath = Joiner.on(",").join(paths);
+
+        System.out.println("待处理的数据目录===:" + inputPath);
 
         try {
             jobConstructor(inputPath, outputPathClean);
