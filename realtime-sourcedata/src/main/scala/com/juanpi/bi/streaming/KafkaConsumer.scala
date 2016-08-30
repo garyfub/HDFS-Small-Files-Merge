@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat
 
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.InitConfig
-import com.juanpi.bi.transformer.ITransformer
+import com.juanpi.bi.transformer.{ITransformer, pageAndEventParser}
 import kafka.serializer.StringDecoder
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, _}
 import org.apache.hadoop.hbase.util.Bytes
@@ -102,7 +102,10 @@ class KafkaConsumer(topic: String,
           // record._2 就是 page
           // date=2016-08-26/gu_hash=f
 
-          ((record._1, time.milliseconds), combineTuple(user, pageAndEvent, page, event).mkString("\u0001"))
+          ((record._1, time.milliseconds), pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x=> x match {
+            case y if y.toString.isEmpty => "\\N"
+            case _ => x
+          }).mkString("\001"))
         })
 //
 
@@ -128,9 +131,6 @@ class KafkaConsumer(topic: String,
     val timestamp = time.milliseconds
     rdd.map(t => ((t._1, timestamp), t._2))
   }
-
-  // http://stackoverflow.com/questions/9028459/a-clean-way-to-combine-two-tuples-into-a-new-larger-tuple-in-scala
-  def combineTuple(xss: Product*) = xss.toList.flatten(_.productIterator)
 
   def parseMessage(message:String):(String, String, Any) = {
     getTransformer().logParser(message, dimPage, dimEvent)
