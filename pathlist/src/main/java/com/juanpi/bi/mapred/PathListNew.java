@@ -245,11 +245,19 @@ public class PathListNew {
             mos = new MultipleOutputs(context);
         }
 
+        //  throws IOException ,InterruptedException
         @Override
-        protected void map(LongWritable key, Text value, Context context) throws IOException ,InterruptedException {
+        protected void map(LongWritable key, Text value, Context context){
 
             final String[] splited = value.toString().split("\u0001");
-
+            try {
+                String guid = splited[0];
+                String dates = splited[13];
+            } catch (Exception e) {
+                System.out.println("======>>" + value.toString());
+                System.out.println("======>>" + splited);
+                e.printStackTrace();
+            }
             String gu_id = splited[0];
             String gu = gu_id.substring(gu_id.length() - 1).toLowerCase();
             String dateStr = splited[13];
@@ -272,7 +280,13 @@ public class PathListNew {
 
             xx ++;
 
-            mos.write(k2, v2, generateFileName(gu, dateStr));
+            try {
+                mos.write(k2, v2, generateFileName(gu, dateStr));
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         // hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-13/gu_hash=0
