@@ -101,12 +101,12 @@ class KafkaConsumer(topic: String,
 //          user.gu_create_time = gu_create_time
           // record._2 就是 page
           // date=2016-08-26/gu_hash=f
-
-          ((record._1, time.milliseconds), pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x=> x match {
-            case null => "\\N"
+          val res_str =  pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x=> x match {
+            case z if z == null => "\\N"
             case y if y.toString.isEmpty => "\\N"
             case _ => x
-          }).mkString("\001"))
+          }).mkString("\001")
+          ((record._1, time.milliseconds), res_str)
         })
 //
 
