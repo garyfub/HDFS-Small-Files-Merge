@@ -250,16 +250,11 @@ public class PathListNew {
         protected void map(LongWritable key, Text value, Context context){
 
             final String[] splited = value.toString().split("\001");
+
+            System.out.println("======>>Oooooo: " + value.toString());
+            System.out.println("======>>Oooooo: " + splited);
+
             try {
-//                try {
-//                    String guid = splited[0];
-//                    String dates = splited[13];
-//                    String str22 = splited[22];
-//                } catch (Exception e) {
-//                    System.out.println("======>>" + value.toString());
-//                    System.out.println("======>>" + splited);
-//                    e.printStackTrace();
-//                }
                 String gu_id = splited[0];
                 String gu = gu_id.substring(gu_id.length() - 1).toLowerCase();
                 String dateStr = splited[13];
@@ -273,7 +268,6 @@ public class PathListNew {
                 // page_level_id  对应的路径 line 每一级别加上 loadtime
                 // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 35: event_value; 36: event_lvl2_value; 22: starttime
 
-    //            String loadTime = "";
                 String loadTime = splited[46];
                 String str[] = {splited[21],
                         splited[15]+"\t"+splited[16]+"\t"+splited[25]+"\t"+splited[34]+"\t"+splited[35]+"\t"+splited[36]+"\t"+splited[22] + "\t" + loadTime,
