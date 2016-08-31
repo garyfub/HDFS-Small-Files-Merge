@@ -35,8 +35,8 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
  * 烈烈
  * Created by kaenr on 2016/7/13.
  * Updated by gongzi@juanpi.com on 2016-08-12
+ * 使用 MultipleOutputs 的原因：数据目录时同时读取，需要根据数据中的gu_id，才能将数据分开
  *
- * TODO 当前逻辑是：当前阶段中，本程序计算完以后加载数据至hive；至下一个阶段，删除数据目录，重新写
  */
 public class PathListNew {
 
@@ -71,37 +71,6 @@ public class PathListNew {
     }
 
     /**
-     * 创建hdfs目录,
-     * @param fs
-     * @throws IOException
-     */
-    public static void createHDFSPath(FileSystem fs) throws IOException
-    {
-        // 清空数据输出的目录
-        String dateStr = getTomorrow();
-        String outputPath = MessageFormat.format("{0}/{1}/date={2}", base, "dw_real_path_list", dateStr);
-
-        // 必须先创建父级目录
-        if (fs.exists(new Path(outputPath))) {
-            fs.create(new Path(outputPath));
-        }
-
-        // 然后才能创建子目录
-        for (int i = 0x0; i <= 0xf; i++) {
-            String gu = String.format("%x", i);
-
-            String strfmt = "{0}/gu_hash={1}/";
-            String strRes = MessageFormat.format(strfmt, outputPath, gu);
-
-            System.out.println("预创建数据输出目录:" + strRes);
-
-            if (fs.exists(new Path(strRes))) {
-                fs.create(new Path(strRes));
-            }
-        }
-    }
-
-    /**
      * 日期格式化
      * 参考 http://bijian1013.iteye.com/blog/2306763
      * @return
@@ -113,19 +82,6 @@ public class PathListNew {
         return format.format(c1.getTime());
     }
 
-    /**
-     * 当前日期的后一天
-     * @return
-     */
-    public static String getTomorrow()
-    {
-        Calendar c1 = Calendar.getInstance();
-        c1.add(Calendar.DAY_OF_YEAR, 1);
-        Date tomorrow = c1.getTime();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        return format.format(tomorrow);
-    }
-
     public static void JobsControl(String dateStr){
 
         if(dateStr== null || dateStr.isEmpty()){
@@ -134,16 +90,13 @@ public class PathListNew {
 
         // path_list 数据的目录: /user/hadoop/gongzi/dw_real_path_list/date=2016-08-30/
         String outputPathClean = MessageFormat.format("{0}/{1}/date={2}/", base, "dw_real_path_list", dateStr);
-        System.out.println("outputPathClean===:" + outputPathClean);
-        System.out.println("base===:" + base);
 
         // 预创建目录
         try {
             getFileSystem(base);
             // 清空即将写 path_list 数据的目录
             cleanDataPath(outputPathClean);
-            // 避免没有数据目录而加载数据失败?
-//            createHDFSPath(fs);
+
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("=======>> hadoop FileSystem IOException:" + e.getStackTrace());
@@ -276,7 +229,8 @@ public class PathListNew {
 
                 xx ++;
 
-                mos.write(k2, v2, generateFileName(gu, dateStr));
+                mos.write(k2, v2, generateFileName(gu));
+                
             } catch (IOException e)
             {
                 e.printStackTrace();
@@ -298,8 +252,7 @@ public class PathListNew {
 
         // hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-13/gu_hash=0
         // 目录输出格式 date=2016-08-13/gu_hash=0
-        private String generateFileName(String gu_hash, String dateStr) {
-//            return "date=" + dateStr + "/gu_hash=" + gu_hash;
+        private String generateFileName(String gu_hash) {
             return "gu_hash=" + gu_hash + "/";
         }
 
