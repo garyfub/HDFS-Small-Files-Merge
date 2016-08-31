@@ -118,11 +118,15 @@ public class PathListControledJobs {
                 System.out.println("16个目录的数据处理完毕！");
                 System.out.println(jc.getSuccessfulJobList());
                 jc.stop();
+                // 如果不加 break 或者 return，程序会一直循环
+                break;
             }
 
             if(jc.getFailedJobList().size() > 0){
                 System.out.println(jc.getFailedJobList());
                 jc.stop();
+                // 如果不加 break 或者 return，程序会一直循环
+                break;
             }
         }
     }
