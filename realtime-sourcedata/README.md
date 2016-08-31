@@ -190,7 +190,7 @@ THIS_DIR=`dirname "$THIS"`
 cd ${THIS_DIR}
 
 ### 传递空参
-yarn jar ./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapred.PathListNew ""
+yarn jar ./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapred.PathListNew 2016-08-29
 
 if test $? -ne 0
 then
@@ -204,3 +204,14 @@ fi
 
 nohup ./event-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/out_event-real-bi-dw-gongzi.txt 2>&1 &
 nohup ./page-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/out_page-real-bi-dw-gongzi.txt 2>&1 &
+
+nohup ./reget_event-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/out_reget_event-real-bi-dw-gongzi.txt 2>&1 &
+nohup ./reget_page-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/out_reget_page-real-bi-dw-gongzi.txt 2>&1 &
+
+hadoop fs -du -h hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_event_hash2/date=2016-08-30
+hadoop fs -du -h hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-30
+
+hadoop fs -du -h hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-29
+hadoop fs -ls -h hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-30
+
+yarn jar ./pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.juanpi.bi.mapred.PathListControledJobs 2016-08-30
