@@ -35,6 +35,8 @@ public class PathListControledJobs {
 
     static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list";
 
+    static final String PATH_JOBS = "dw_real_path_list_jobs";
+
     static Configuration conf = new Configuration();
 
     static FileSystem fs;
@@ -88,7 +90,7 @@ public class PathListControledJobs {
             String inputPath = strEvent + "," + strPage;
 
             // PathList文件落地路径
-            String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, "dw_real_path_list", dateStr, gu);
+            String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, PATH_JOBS, dateStr, gu);
 
             System.out.println(base);
             System.out.println(inputPath);
