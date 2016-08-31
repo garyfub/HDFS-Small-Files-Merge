@@ -289,7 +289,12 @@ public class PathListNew {
             } catch (InterruptedException e)
             {
                 e.printStackTrace();
-            } catch(ArrayIndexOutOfBoundsException | NumberFormatException e)
+            } catch(ArrayIndexOutOfBoundsException | NumberFormatException | StringIndexOutOfBoundsException e)
+            {
+                e.printStackTrace();
+                System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
+                System.out.println("======>>ArrayIndexOutOfBoundsException: " + splited);
+            } catch (Exception e)
             {
                 e.printStackTrace();
                 System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
