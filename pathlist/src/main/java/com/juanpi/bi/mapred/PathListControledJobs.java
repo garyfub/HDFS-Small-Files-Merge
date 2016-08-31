@@ -75,7 +75,7 @@ public class PathListControledJobs {
         Configuration conf = new Configuration();
 
         //新建作业控制器
-        JobControl jc = new JobControl("mult-job");
+        JobControl jc = new JobControl("PathListControledJobs");
 
         // 遍历16个分区
         for(int i=0x0; i<=0xf; i++) {
@@ -96,8 +96,8 @@ public class PathListControledJobs {
 
             getFileSystem(base, outputPath);
 
-            //将受控作业添加到控制器中
-            //添加控制job
+            // 将受控作业添加到控制器中
+            // 添加控制job
             try {
                 Job job = jobConstructor(inputPath, outputPath);
                 ControlledJob cj = new ControlledJob(conf);
@@ -174,24 +174,26 @@ public class PathListControledJobs {
         job.setOutputFormatClass(TextOutputFormat.class);
 
         return job;
-        //把代码提交给JobTracker执行
-//        job.waitForCompletion(true);
+
     }
 
     static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
         int xx = 0;
         protected void map(LongWritable key, Text value, Context context) throws IOException ,InterruptedException {
 
-            final String[] splited = value.toString().split("\u0001");
+            final String[] splited = value.toString().split("\001");
 
             // gu_id 和starttime 作为联合主键
             final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
 
             //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
-
             // page_level_id  对应的路径 line
             // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 35: event_value; 36: event_lvl2_value; 22: starttime
-            String str[] = {splited[21], splited[15]+"\t"+splited[16]+"\t"+splited[25]+"\t"+splited[34]+"\t"+splited[35]+"\t"+splited[36]+"\t"+splited[22], value.toString().replace("\u0001","\t")};
+            String loadTime = splited[46];
+            String str[] = {splited[21],
+                    splited[15]+"\t"+splited[16]+"\t"+splited[25]+"\t"+splited[34]+"\t"+splited[35]+"\t"+splited[36]+"\t"+splited[22] + "\t" + loadTime,
+                    value.toString().replace("\001","\t")};
+
             final TextArrayWritable v2 = new TextArrayWritable(str);
 
             xx ++;
