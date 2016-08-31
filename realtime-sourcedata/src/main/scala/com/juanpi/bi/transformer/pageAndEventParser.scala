@@ -2,8 +2,9 @@ package com.juanpi.bi.transformer
 
 import java.util.regex.Pattern
 
+import com.fasterxml.jackson.core.JsonParseException
 import com.juanpi.bi.hiveUDF.{GetShopId, _}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsNull, JsValue, Json}
 
 import scala.collection.mutable
 
@@ -53,9 +54,27 @@ object pageAndEventParser {
     else jpid
   }
 
+  def getParsedJsonValue(jsonStr: String): JsValue = {
+    val v = if (jsonStr.nonEmpty && jsonStr.startsWith("{")) {
+      try {
+        Json.parse(jsonStr)
+      } catch {
+        //使用模式匹配来处理异常
+        case ex: JsonParseException => {
+          println(ex.getStackTraceString, "\n======>>异常的json数据: " + jsonStr)
+        }
+          JsNull
+      }
+    }
+    else {
+      JsNull
+    }
+    v
+  }
+
   def getGsortPit(server_jsonstr: String): (Int, String) = {
-    if (!server_jsonstr.isEmpty() && !server_jsonstr.equals("{}")) {
-      val js_server_jsonstr = Json.parse(server_jsonstr)
+    val js_server_jsonstr = getParsedJsonValue(server_jsonstr)
+    if (!js_server_jsonstr.equals(JsNull) && !server_jsonstr.equals("{}")) {
       val pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
       val gsort_key = (js_server_jsonstr \ "_gsort_key").asOpt[String].getOrElse("")
       (pit_type, gsort_key)
@@ -70,7 +89,7 @@ object pageAndEventParser {
     * @return
     */
   def getGsortKey(gsort_key: String): (String, String, String, String) = {
-    if(!gsort_key.isEmpty && gsort_key.contains("_")) {
+    if(gsort_key.nonEmpty && gsort_key.contains("_")) {
       val sortdate = Array(gsort_key.split("_")(3).substring(0, 4),gsort_key.split("_")(3).substring(4, 6),gsort_key.split("_")(3).substring(6, 8)).mkString("-")
       val sorthour = gsort_key.split("_")(4)
       val lplid = gsort_key.split("_")(5)
@@ -91,10 +110,10 @@ object pageAndEventParser {
     * @return
     */
   def forPageId(pagename: String, extend_params: String, server_jsonstr: String): String = {
-
+    val strValue = getParsedJsonValue(server_jsonstr)
     val for_pageid = pagename.toLowerCase() match {
       case a if pagename.toLowerCase() == "page_tab" && isInteger(extend_params) && (extend_params.toLong > 0 && extend_params.toLong < 9999999) => "page_tab"
-      case c if pagename.toLowerCase() == "page_tab" && !server_jsonstr.isEmpty() && (Json.parse(server_jsonstr) \ "cid").asOpt[Int].getOrElse(0) < 0 => (pagename+(Json.parse(server_jsonstr) \ "cid").asOpt[String]).toLowerCase()
+      case c if pagename.toLowerCase() == "page_tab" && !strValue.equals(JsNull) && (strValue \ "cid").asOpt[Int].getOrElse(0) < 0 => (pagename+(strValue \ "cid").asOpt[String]).toLowerCase()
       case b if pagename.toLowerCase() != "page_tab" => pagename.toLowerCase()
       case _ => (pagename+extend_params).toLowerCase()
     }
@@ -103,6 +122,7 @@ object pageAndEventParser {
 
   /**
     * for page and event
+    *
     * @param pagename
     * @param extend_params
     * @return
@@ -121,16 +141,19 @@ object pageAndEventParser {
 
   /**
     * 二级页面值(品牌页：引流款ID等)
+    *
     * @param x_page_id
     * @param x_extend_params
     * @param server_jsonstr
     * @return
     */
   def getPageLvl2Value(x_page_id: Int, x_extend_params: String, server_jsonstr: String): String = {
+    val strValue = getParsedJsonValue(server_jsonstr)
     val page_lel2_value =
-      if(x_page_id == 250 && !x_extend_params.isEmpty()
+      if(x_page_id == 250 && x_extend_params.nonEmpty
         && x_extend_params.contains("_")
-        && x_extend_params.split("_").length > 2){
+        && x_extend_params.split("_").length > 2)
+      {
         new GetGoodsId().evaluate(x_extend_params.split("_")(2))
       }
       else if(x_page_id == 154 || x_page_id == 289) {
@@ -142,8 +165,8 @@ object pageAndEventParser {
           new GetShopId().evaluate(x_extend_params)
         } else ""
       }
-      else if(x_page_id == 169 && server_jsonstr.contains("order_status")) {
-        (Json.parse(server_jsonstr) \ "order_status").toString()
+      else if(x_page_id == 169 && !strValue.equals(JsNull) && server_jsonstr.contains("order_status")) {
+        (strValue \ "order_status").toString()
       }
       else ""
     page_lel2_value
@@ -182,13 +205,10 @@ object pageAndEventParser {
       new GetGoodsId().evaluate(extend_params.split("_")(1))
     }
     else {
-      println("page_id=250, but cannot get shop_id, extend_params is: " + extend_params)
       0
     }
     shop_id.toString()
   }
-
-
 
   /**
     *
@@ -242,6 +262,9 @@ object pageAndEventParser {
     page_value
   }
 
+  // http://stackoverflow.com/questions/9028459/a-clean-way-to-combine-two-tuples-into-a-new-larger-tuple-in-scala
+  def combineTuple(xss: Product*) = xss.toList.flatten(_.productIterator)
+
   /*
 * 判断是否为整数
 * @param str 传入的字符串
@@ -249,7 +272,7 @@ object pageAndEventParser {
 */
   def  isInteger(str: String): Boolean = {
     val pattern: Pattern = Pattern.compile("^[-\\+]?[\\d]*$")
-    if (!str.isEmpty()) {
+    if (str.nonEmpty) {
       pattern.matcher(str).matches()
     } else {
       false
@@ -258,6 +281,7 @@ object pageAndEventParser {
 
   /**
     * 只在pageinfo中有
+    *
     * @param source
     * @return
     */
@@ -276,12 +300,19 @@ object pageAndEventParser {
   }
 
   def main(args: Array[String]) {
-    println(getSource("push:小卷温馨提醒！=购物车的商品等你好久啦！你爱的时尚亲肤卡通床品套件低至49.00元疯抢中，果断带宝贝回家→=3465969792363098765"))
+//    println(getSource("push:小卷温馨提醒！=购物车的商品等你好久啦！你爱的时尚亲肤卡通床品套件低至49.00元疯抢中，果断带宝贝回家→=3465969792363098765"))
 
     val dimPages_test = new mutable.HashMap[String, (Int, Int, String, Int)]
     dimPages_test += ("page_taball" -> (219,10,"最新折扣",1))
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPages_test.get("page_taball").getOrElse(0, 0, "", 0)
-    println(d_page_id, page_type_id, d_page_value,d_page_level_id)
+//    println(d_page_id, page_type_id, d_page_value,d_page_level_id)
+
+    val s = "{a}"
+    val sr = getParsedJsonValue(s)
+    println(sr)
+
+    if(getParsedJsonValue(s).equals(JsNull)) println("test")
+
   }
 
 

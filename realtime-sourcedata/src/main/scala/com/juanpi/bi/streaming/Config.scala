@@ -1,7 +1,8 @@
 package com.juanpi.bi.streaming
 
 /**
- * Created by juanpi on 2015/7/9.
+ * Created by gongzi on 2016/7/9.
+  * email:
  */
 object Config {
 
@@ -26,9 +27,8 @@ object Config {
 
   def main(args: Array[String]) {
 
-//    println(getTopicTransformerClass("mbevent"))
-//    println(getTopicTransformerClass("pageinfo"))
+    println(getTopicTransformerClass("mbevent"))
+    println(getTopicTransformerClass("pageinfo"))
     println(interval)
   }
-
 }

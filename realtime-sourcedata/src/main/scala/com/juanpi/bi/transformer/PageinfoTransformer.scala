@@ -3,7 +3,7 @@ package com.juanpi.bi.transformer
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.hiveUDF._
 import com.juanpi.bi.sc_utils.DateUtils
-import play.api.libs.json.{JsResultException, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 
 import scala.collection.mutable
 /**
@@ -11,7 +11,7 @@ import scala.collection.mutable
   */
 class PageinfoTransformer extends ITransformer {
 
-  def parse(row: JsValue, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): (User, PageAndEvent, Page, Event) = {
+  private def parse(row: JsValue, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): (User, PageAndEvent, Page, Event) = {
     // mb_pageinfo
 //    val ticks = (row \ "ticks").asOpt[String].getOrElse("")
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
@@ -54,7 +54,7 @@ class PageinfoTransformer extends ITransformer {
     var ugroup = ""
 
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
-    if(!c_server.isEmpty())
+    if(c_server.nonEmpty)
     {
       val js_c_server = Json.parse(c_server)
       gid = (js_c_server \ "gid").asOpt[String].getOrElse("0")
@@ -85,7 +85,7 @@ class PageinfoTransformer extends ITransformer {
     val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, extendParams1, d_page_level_id)
 
     // WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extendParams1,'_')[2],''))
-    val hot_goods_id = if(d_page_id == 250 && !extendParams1.isEmpty && extendParams1.contains("_") && extendParams1.split("_").length > 2)
+    val hot_goods_id = if(d_page_id == 250 && extendParams1.nonEmpty && extendParams1.contains("_") && extendParams1.split("_").length > 2)
     {
       new GetGoodsId().evaluate(extendParams1.split("_")(2))
     }
@@ -104,7 +104,6 @@ class PageinfoTransformer extends ITransformer {
     // 最终返回值
     val event_id, event_value, rule_id, test_id, select_id, event_lvl2_value, loadTime = ""
 
-    println("======>> page_id :: " + page_id)
     val (date, hour) = DateUtils.dateHourStr(endtime.toLong)
 
     val user = User.apply(gu_id, uid, utm, gu_create_time, session_id, terminal_id, app_version, site_id, ref_site_id, ctag, location, jpk, ugroup, date, hour)
@@ -115,49 +114,54 @@ class PageinfoTransformer extends ITransformer {
   }
 
   // 返回解析的结果
-  def transform(line: String, dimPage: mutable.HashMap[String, (Int, Int, String, Int)], dimEvent: mutable.HashMap[String, (Int, Int)]): (String, String, Any) = {
+  def logParser(line: String,
+                dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
+                dimEvent: mutable.HashMap[String, (Int, Int)]): (String, String, Any) = {
 
     //play
-    val row = Json.parse(line.replaceAll("null", """\\"\\"""") )// .replaceAll("\\n", ""))
-
-    println("===#transform#===>> row:: " + row)
+    val row = Json.parse(line.replaceAll("null", """\\"\\""""))
 
     if (row != null) {
       // 解析逻辑
       var gu_id = ""
+      val ticks = (row \ "ticks").asOpt[String].getOrElse("")
+      val jpid = (row \ "jpid").asOpt[String].getOrElse("")
+      val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
+      val os = (row \ "os").asOpt[String].getOrElse("")
+      val endTime = (row \ "endtime").as[String].toLong
+
       try
       {
-        gu_id = pageAndEventParser.getGuid((row \ "jpid").asOpt[String].getOrElse(""),
-                                            (row \ "deviceid").asOpt[String].getOrElse(""),
-                                            (row \ "os").asOpt[String].getOrElse("")
-                                          )
+        gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
       } catch{
         //使用模式匹配来处理异常
-        case ex:IllegalArgumentException => println(ex.getMessage())
-        case ex:RuntimeException=> { println(ex.getMessage()) }
-        case ex:JsResultException => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
         case ex:Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
       }
 
-      if(!gu_id.isEmpty) {
+      println("=======>> ticks=" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceId + "#, os=" + os + "#, gu_id=" + gu_id + "#, endtime=" + endTime)
+
+      val ret = if(gu_id.nonEmpty) {
         try {
           val res = parse(row, dimPage)
-          (DateUtils.dateGuidPartitions((row \ "endtime").as[String].toLong, gu_id).toString, "page", res)
-          //        (DateUtils.dateHour((row \ "endtime").as[String].toLong).toString, res)
+          val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
+          (partitionStr, "page", res)
         } catch{
           //使用模式匹配来处理异常
-          case ex:Exception => {
-            println(ex.getStackTraceString, "\n======>>异常数据:" + row)
+          case ex:Exception => {println(ex.getStackTraceString, "\n======>>异常数据:" + row)}
+            println("=======>> Page: parse Exception!!")
             ("", "", None)
-          }
         }
       } else {
+        println("=======>> Page: GU_ID IS NULL!!")
         ("", "", None)
       }
+      ret
     } else {
+      println("=======>> Page: ROW IS NULL!!")
       ("", "", None)
     }
   }
+
 }
 
 // for test
@@ -173,7 +177,7 @@ object PageinfoTransformer{
 
 
     val pl = liuliang.replaceAll("null", """\\"\\"""").replaceAll("\\\\n\\s+", "\\\\")
-    println(pl)
+//    println(pl)
 
     try{
       val line = Json.parse(pl)

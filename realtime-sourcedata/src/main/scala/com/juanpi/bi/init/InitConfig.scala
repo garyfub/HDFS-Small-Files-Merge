@@ -20,9 +20,8 @@ class InitConfig() {
   @BeanProperty var ssc: StreamingContext = _
   @BeanProperty var duration: Duration = _
 
-  val maxRate = "100"
-
-  def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)], mutable.HashMap[String, (Int, Int)]) = {
+  def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)],
+                          mutable.HashMap[String, (Int, Int)]) = {
     // 查询 hive 中的 dim_page 和 dim_event
     val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
     val dp: mutable.HashMap[String, (Int, Int, String, Int)] = initDimPage(sqlContext)
@@ -36,7 +35,7 @@ class InitConfig() {
   }
 
   // 初始化 SparkConf 公共参数
-  private def initSparkConfig(appName:String): Unit = {
+  private def initSparkConfig(appName:String, maxRecords: String): Unit = {
     val conf = new SparkConf().setAppName(appName)
       .set("spark.akka.frameSize", "256")
       .set("spark.kryoserializer.buffer.max", "512m")
@@ -51,7 +50,8 @@ class InitConfig() {
       .set("spark.streaming.blockInterval", "10000")
       .set("spark.shuffle.manager", "SORT")
       .set("spark.eventLog.overwrite", "true")
-      .set("spark.streaming.kafka.maxRatePerPartition", maxRate)
+      // max number of records per second
+      .set("spark.streaming.kafka.maxRatePerPartition", maxRecords)
     this.setSpconf(conf)
   }
 
@@ -76,8 +76,10 @@ class InitConfig() {
       val page_level_id = line.getAs[Int]("page_level_id")
 
       val key = page_exp1 + page_exp2
-      (page_id, page_type_id, page_value, page_level_id,key)
-    }).collect().foreach( items => {
+      (page_id, page_type_id, page_value, page_level_id, key)
+    })
+      .collect()
+      .foreach( items => {
       val page_id: Int = items._1
       val page_type_id = items._2
       val page_value = items._3
@@ -85,7 +87,6 @@ class InitConfig() {
       val key = items._5
       dimPages += ( key -> (page_id, page_type_id, page_value, page_level_id))
     })
-
     dimPageData.unpersist(true)
     dimPages
   }
@@ -110,7 +111,9 @@ class InitConfig() {
 
       val key = event_exp1 + event_exp2
       (event_id, event_type_id, key)
-    }).collect().foreach( items => {
+    })
+    .collect()
+    .foreach( items => {
       val event_id: Int = items._1
       val event_type_id = items._2
       val key = items._3
@@ -118,7 +121,6 @@ class InitConfig() {
     })
 
     dimData.unpersist(true)
-
     dimEvents
   }
 }
@@ -130,19 +132,18 @@ object InitConfig {
   var DIMPAGE = new mutable.HashMap[String, (Int, Int, String, Int)]
   var DIMENT = new mutable.HashMap[String, (Int, Int)]
 
-  def initParam(appName: String, interval: Int) = {
+  def initParam(appName: String, interval: Int, maxRecords: String) = {
     // 初始化 apark 超时时间, spark.mystreaming.batch.interval
     ic.setDuration(Seconds(interval))
 
     // 初始化 SparkConfig
-    ic.initSparkConfig(appName)
+    ic.initSparkConfig(appName, maxRecords)
 
     ic.setStreamingContext()
 
     // 初始化 page and event
     DIMPAGE = ic.initDimPageEvent()._1
     DIMENT = ic.initDimPageEvent()._2
-
   }
 
   def getStreamingContext(): StreamingContext = {
