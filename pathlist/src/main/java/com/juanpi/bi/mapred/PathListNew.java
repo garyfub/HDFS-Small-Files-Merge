@@ -200,15 +200,18 @@ public class PathListNew {
 
         //  throws IOException ,InterruptedException
         @Override
-        protected void map(LongWritable key, Text value, Context context){
+        protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
             final String[] splited = value.toString().split("\001");
 
             System.out.println("======>>Oooooo: " + splited);
             NewK2 k2 = new NewK2("",0);
+            TextArrayWritable v2 = null;
+            String gu = "";
+
             try {
                 String gu_id = splited[0];
-                String gu = gu_id.substring(gu_id.length() - 1).toLowerCase();
+                gu = gu_id.substring(gu_id.length() - 1).toLowerCase();
                 String dateStr = splited[13];
 
                 // gu_id 和starttime 作为联合主键
@@ -225,19 +228,19 @@ public class PathListNew {
                 String str[] = {splited[21],
                         splited[15]+"\t"+splited[16]+"\t"+splited[25]+"\t"+splited[34]+"\t"+splited[35]+"\t"+splited[36]+"\t"+splited[22] + "\t" + loadTime,
                         value.toString().replace("\001","\t")};
-                final TextArrayWritable v2 = new TextArrayWritable(str);
+                v2 = new TextArrayWritable(str);
 
                 xx ++;
 
-                mos.write(k2, v2, generateFileName(gu));
-                
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-            } catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            } catch(ArrayIndexOutOfBoundsException | NumberFormatException | StringIndexOutOfBoundsException e)
+            }
+//            catch (IOException e)
+//            {
+//                e.printStackTrace();
+//            } catch (InterruptedException e)
+//            {
+//                e.printStackTrace();
+//            }
+            catch(ArrayIndexOutOfBoundsException | NumberFormatException | StringIndexOutOfBoundsException e)
             {
                 e.printStackTrace();
                 System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
@@ -248,6 +251,8 @@ public class PathListNew {
                 System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
                 System.out.println("======>>ArrayIndexOutOfBoundsException: " + splited);
             }
+
+            mos.write(k2, v2, generateFileName(gu));
         }
 
         // hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-13/gu_hash=0
