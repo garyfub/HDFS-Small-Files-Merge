@@ -179,7 +179,7 @@ public class PathListControledJobs {
 
     static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
         int xx = 0;
-        protected void map(LongWritable key, Text value, Context context) throws IOException ,InterruptedException {
+        protected void map(LongWritable key, Text value, Context context) throws IOException ,InterruptedException, ArrayIndexOutOfBoundsException, NumberFormatException {
 
             final String[] splited = value.toString().split("\001");
 

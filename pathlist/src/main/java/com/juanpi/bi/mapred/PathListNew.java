@@ -205,14 +205,12 @@ public class PathListNew {
             final String[] splited = value.toString().split("\001");
 
             System.out.println("======>>Oooooo: " + splited);
-            NewK2 k2 = new NewK2("",0);
             try {
                 String gu_id = splited[0];
                 String gu = gu_id.substring(gu_id.length() - 1).toLowerCase();
 
                 // gu_id 和starttime 作为联合主键
-
-                k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
+                NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
 
                 //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
                 // page_level_id  对应的路径 line 每一级别加上 loadtime
