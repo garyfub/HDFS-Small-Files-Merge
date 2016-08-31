@@ -189,14 +189,14 @@ public class PathListNew {
     static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
         int xx = 0;
 
-        private MultipleOutputs mos;
+//        private MultipleOutputs mos;
 
-        @Override
-        protected void setup(Context context)
-                throws IOException, InterruptedException {
-            super.setup(context);
-            mos = new MultipleOutputs(context);
-        }
+//        @Override
+//        protected void setup(Context context)
+//                throws IOException, InterruptedException {
+//            super.setup(context);
+//            mos = new MultipleOutputs(context);
+//        }
 
         //  throws IOException ,InterruptedException
         @Override
@@ -206,11 +206,11 @@ public class PathListNew {
 
             System.out.println("======>>Oooooo: " + splited);
             try {
-                String gu_id = splited[0];
-                String gu = gu_id.substring(gu_id.length() - 1).toLowerCase();
+//                String gu_id = splited[0];
+//                String gu = gu_id.substring(gu_id.length() - 1).toLowerCase();
 
                 // gu_id 和starttime 作为联合主键
-                NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
+                final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
 
                 //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
                 // page_level_id  对应的路径 line 每一级别加上 loadtime
@@ -222,8 +222,8 @@ public class PathListNew {
                 final TextArrayWritable v2 = new TextArrayWritable(str);
 
                 xx ++;
-
-                mos.write(k2, v2, generateFileName(gu));
+                context.write(k2, v2);
+//                mos.write(k2, v2, generateFileName(gu));
             } catch (IOException e)
             {
                 e.printStackTrace();
@@ -245,16 +245,16 @@ public class PathListNew {
 
         // hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-13/gu_hash=0
         // 目录输出格式 date=2016-08-13/gu_hash=0
-        private String generateFileName(String gu_hash) {
-            return "gu_hash=" + gu_hash + "/";
-        }
+//        private String generateFileName(String gu_hash) {
+//            return "gu_hash=" + gu_hash + "/";
+//        }
 
-        @Override
-        protected void cleanup(Context context)
-                throws IOException, InterruptedException {
-            super.cleanup(context);
-            mos.close();
-        }
+//        @Override
+//        protected void cleanup(Context context)
+//                throws IOException, InterruptedException {
+//            super.cleanup(context);
+//            mos.close();
+//        }
     }
 
     //static class NewValue
@@ -311,6 +311,8 @@ public class PathListNew {
                 // 4 个级别
                 Text key2 = new Text(level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5);
                 Text value2 = new Text(v2.toStrings()[2]);
+
+//                context.write(key2, value2);
                 mos.write(key2, value2, generateFileName(gu, timeSecond));
             }
         }

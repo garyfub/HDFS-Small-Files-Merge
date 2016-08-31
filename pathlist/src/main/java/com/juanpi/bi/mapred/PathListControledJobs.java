@@ -137,7 +137,7 @@ public class PathListControledJobs {
 
         // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
 //        job.setJar("pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar");
-        job.setJarByClass(PathListNew.class);
+        job.setJarByClass(PathListControledJobs.class);
 
 
         //1.1 指定输入文件路径
