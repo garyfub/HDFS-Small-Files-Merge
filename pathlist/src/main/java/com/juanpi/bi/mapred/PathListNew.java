@@ -251,9 +251,8 @@ public class PathListNew {
 
             final String[] splited = value.toString().split("\001");
 
-            System.out.println("======>>Oooooo: " + value.toString());
             System.out.println("======>>Oooooo: " + splited);
-
+            NewK2 k2 = new NewK2("",0);
             try {
                 String gu_id = splited[0];
                 String gu = gu_id.substring(gu_id.length() - 1).toLowerCase();
@@ -261,13 +260,14 @@ public class PathListNew {
 
                 // gu_id 和starttime 作为联合主键
 
-                final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
+//                k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
+                k2.first = splited[0];
+                k2.second = Long.parseLong(splited[22]);
 
                 //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
 
                 // page_level_id  对应的路径 line 每一级别加上 loadtime
                 // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 35: event_value; 36: event_lvl2_value; 22: starttime
-
                 String loadTime = splited[46];
                 String str[] = {splited[21],
                         splited[15]+"\t"+splited[16]+"\t"+splited[25]+"\t"+splited[34]+"\t"+splited[35]+"\t"+splited[36]+"\t"+splited[22] + "\t" + loadTime,
@@ -365,8 +365,6 @@ public class PathListNew {
                 // 4 个级别
                 Text key2 = new Text(level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5);
                 Text value2 = new Text(v2.toStrings()[2]);
-//                context.write(key2, value2);
-
                 mos.write(key2, value2, generateFileName(gu, timeSecond));
             }
         }
