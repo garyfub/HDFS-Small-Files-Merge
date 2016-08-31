@@ -204,7 +204,7 @@ public class PathListNew {
 
             final String[] splited = value.toString().split("\001");
 
-            System.out.println("======>>Oooooo: " + splited);
+//            System.out.println("======>>Oooooo: " + splited);
             try {
 //                String gu_id = splited[0];
 //                String gu = gu_id.substring(gu_id.length() - 1).toLowerCase();
