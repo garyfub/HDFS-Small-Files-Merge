@@ -249,43 +249,52 @@ public class PathListNew {
         @Override
         protected void map(LongWritable key, Text value, Context context){
 
-            final String[] splited = value.toString().split("\u0001");
+            final String[] splited = value.toString().split("\001");
             try {
-                String guid = splited[0];
-                String dates = splited[13];
-            } catch (Exception e) {
-                System.out.println("======>>" + value.toString());
-                System.out.println("======>>" + splited);
-                e.printStackTrace();
-            }
-            String gu_id = splited[0];
-            String gu = gu_id.substring(gu_id.length() - 1).toLowerCase();
-            String dateStr = splited[13];
+//                try {
+//                    String guid = splited[0];
+//                    String dates = splited[13];
+//                    String str22 = splited[22];
+//                } catch (Exception e) {
+//                    System.out.println("======>>" + value.toString());
+//                    System.out.println("======>>" + splited);
+//                    e.printStackTrace();
+//                }
+                String gu_id = splited[0];
+                String gu = gu_id.substring(gu_id.length() - 1).toLowerCase();
+                String dateStr = splited[13];
 
-            // gu_id 和starttime 作为联合主键
+                // gu_id 和starttime 作为联合主键
 
-            final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
+                final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
 
-            //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
+                //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
 
-            // page_level_id  对应的路径 line 每一级别加上 loadtime
-            // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 35: event_value; 36: event_lvl2_value; 22: starttime
+                // page_level_id  对应的路径 line 每一级别加上 loadtime
+                // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 35: event_value; 36: event_lvl2_value; 22: starttime
 
-            String loadTime = "";
-//            loadTime = splited[46];
-            String str[] = {splited[21],
-                    splited[15]+"\t"+splited[16]+"\t"+splited[25]+"\t"+splited[34]+"\t"+splited[35]+"\t"+splited[36]+"\t"+splited[22] + "\t" + loadTime,
-                    value.toString().replace("\u0001","\t")};
-            final TextArrayWritable v2 = new TextArrayWritable(str);
+    //            String loadTime = "";
+                String loadTime = splited[46];
+                String str[] = {splited[21],
+                        splited[15]+"\t"+splited[16]+"\t"+splited[25]+"\t"+splited[34]+"\t"+splited[35]+"\t"+splited[36]+"\t"+splited[22] + "\t" + loadTime,
+                        value.toString().replace("\001","\t")};
+                final TextArrayWritable v2 = new TextArrayWritable(str);
 
-            xx ++;
+                xx ++;
 
-            try {
+
                 mos.write(k2, v2, generateFileName(gu, dateStr));
-            } catch (IOException e) {
+            } catch (IOException e)
+            {
                 e.printStackTrace();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException e)
+            {
                 e.printStackTrace();
+            } catch(ArrayIndexOutOfBoundsException e)
+            {
+                e.printStackTrace();
+                System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
+                System.out.println("======>>ArrayIndexOutOfBoundsException: " + splited);
             }
         }
 
