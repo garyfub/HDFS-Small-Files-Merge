@@ -246,7 +246,7 @@ object KafkaConsumer{
       val keyAndTime = key.asInstanceOf[(String, Long)]
       val realKey = keyAndTime._1
       val timestamp = keyAndTime._2
-      realKey + "/part_" + timeMinutesPartition(timestamp)
+      realKey + timeMinutesPartition(timestamp) + "/part_"
     }
   }
 
