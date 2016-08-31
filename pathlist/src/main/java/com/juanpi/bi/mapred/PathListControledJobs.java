@@ -80,7 +80,7 @@ public class PathListControledJobs {
         JobControl jc = new JobControl("PathListControledJobs");
 
         // 遍历16个分区
-        for(int i=0x0; i<=0x1; i++) {
+        for(int i=0x0; i<=0xf; i++) {
             String gu = String.format("%x", i);
 
             String str = "{0}/{1}/date={2}/gu_hash={3}/";
