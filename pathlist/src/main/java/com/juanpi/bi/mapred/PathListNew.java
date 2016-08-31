@@ -282,7 +282,6 @@ public class PathListNew {
 
                 xx ++;
 
-
                 mos.write(k2, v2, generateFileName(gu, dateStr));
             } catch (IOException e)
             {
@@ -290,7 +289,7 @@ public class PathListNew {
             } catch (InterruptedException e)
             {
                 e.printStackTrace();
-            } catch(ArrayIndexOutOfBoundsException e)
+            } catch(ArrayIndexOutOfBoundsException | NumberFormatException e)
             {
                 e.printStackTrace();
                 System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
