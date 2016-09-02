@@ -52,6 +52,7 @@ class KafkaConsumer(topic: String,
     {
       // 保存数据至hdfs
       rdd.map(v => ((v._1, time.milliseconds), v._3))
+        .repartition(1)
         .saveAsHadoopFile(Config.baseDir + "/" + topic,
           classOf[String],
           classOf[String],
@@ -112,7 +113,7 @@ class KafkaConsumer(topic: String,
 
         // 保存数据至hdfs: /user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/
         // /user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-28/gu_hash=0
-        newRdd
+        newRdd.repartition(1)
           .saveAsHadoopFile(Config.baseDir + "/" + topic,
             classOf[String],
             classOf[String],
@@ -210,19 +211,6 @@ object HBaseHandler {
 
 object KafkaConsumer{
 
-//  private val timePartition = (timestamp: Long) => {
-//    val sdf = new SimpleDateFormat("yyyyMMddHH")
-//    val dayDate: String = try {
-//      sdf.format(timestamp)
-//    } catch {
-//      case _: Throwable => {
-//        "19720101"
-//      }
-//    }
-//
-//    dayDate
-//  }
-
   private val timeMinutesPartition = (timestamp: Long) => {
     val sdf = new SimpleDateFormat("yyyyMMddHHmm")
     val dayDate: String = try {
@@ -246,8 +234,10 @@ object KafkaConsumer{
       val keyAndTime = key.asInstanceOf[(String, Long)]
       val realKey = keyAndTime._1
       val timestamp = keyAndTime._2
-      val timeStr = timeMinutesPartition(timestamp)
-      realKey + "/" + timeStr + "/part_" + timeStr
+//      val timeStr = timeMinutesPartition(timestamp)
+//      重楼
+//      realKey + "/" + timePartition(timestamp) + "/" + realKey + "_" + timePartition(timestamp) + "_binlog.txt"
+      realKey + "/part_" + timestamp
     }
   }
 
