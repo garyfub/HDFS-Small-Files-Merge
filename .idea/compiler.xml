@@ -22,12 +22,14 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
+        <module name="hdfs-files-merge" />
         <module name="pathlist" />
         <module name="realtime-souredata" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="dw-realtime" target="1.5" />
+      <module name="hdfs-files-merge" target="1.7" />
       <module name="pathlist" target="1.7" />
       <module name="realtime-souredata" target="1.7" />
     </bytecodeTargetLevel>

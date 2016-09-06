@@ -1,0 +1,53 @@
+package com.juanpi.bi.merge;
+
+import java.io.IOException;
+
+import com.juanpi.bi.merge.util.ProcessUtil;
+
+/**
+ * 
+ * @author yunduan  
+ * @date 2016年6月25日 下午1:20:38    
+ * 任务管理
+ */
+public class TaskManager {
+	
+	private String date = null;
+	private String gu_hash = null;
+	private String baseDir = null;
+	
+	public TaskManager(String baseDir) {
+		this.baseDir = baseDir;
+		this.date = ProcessUtil.getBeforeOneHourDate();	// yyyy-mm-dd
+		this.gu_hash = "0"; // HH
+	}
+	
+	// 
+	// 路径正则
+	//	
+	private String getDirRegex() {
+		return baseDir + "/date=" + date + "/gu_hash=" + gu_hash + "/*/";
+	}
+	
+	/**
+	 * 开始任务
+	 * @throws IOException
+	 */
+	public void start() throws IOException {
+		String srcDirRegex = getDirRegex();
+		MergeTask mergeTask = new MergeTask(srcDirRegex, null, true);
+		mergeTask.doMerge();
+	}
+	
+	public static void main(String[] args) {
+        String dir = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list";
+//		TaskManager manager = new TaskManager(args[0]);
+		TaskManager manager = new TaskManager(dir);
+		try {
+			manager.start();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+}

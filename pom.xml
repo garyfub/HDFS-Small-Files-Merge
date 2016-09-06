@@ -12,6 +12,7 @@
     <modules>
         <module>realtime-sourcedata</module>
         <module>pathlist</module>
+        <module>hdfs-files-merge</module>
     </modules>
 
     <properties>
