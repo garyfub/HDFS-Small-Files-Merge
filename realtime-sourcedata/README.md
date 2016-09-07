@@ -105,6 +105,13 @@ hadoop fs -du -h hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb
 hadoop fs -du -h hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-29
 hadoop fs -ls -h hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-30
 
-hadoop fs -ls hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list_jobs/date=2016-08-30/
+hadoop fs -ls hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list_jobs/date=2016-08-31/
 
 yarn jar ./pathlist-jar-with-dependencies.jar com.juanpi.bi.mapred.PathListControledJobs 2016-08-31
+
+group_id:
+bi_gongzi_mb_event_real_direct_by_dw
+bi_gongzi_mb_pageinfo_real_direct_by_dw
+
+java -jar hdfs-files-merge-jar-with-dependencies.jar com.juanpi.bi.merge.TaskManager
+
