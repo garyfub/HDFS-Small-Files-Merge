@@ -108,9 +108,9 @@ public class MergeTask {
 			System.out.println("=======>> dstFile:" + dstFile);
 //			merge(matchDir, dstFile, false);
 			
-			if (deleteSource) {
-				delete(files);
-			}
+//			if (deleteSource) {
+//				delete(files);
+//			}
 		}
 	}
 }
