@@ -54,7 +54,27 @@ object pageAndEventParser {
     else jpid
   }
 
-  def getParsedJsonValue(jsonStr: String): JsValue = {
+  /**
+    *
+    * @param jsonStr
+    * @param key
+    * @return
+    */
+  def getJsonValueByKey(jsonStr: String, key: String): String = {
+    if(jsonStr.contains(key)) {
+      val js = Json.parse(jsonStr)
+      (js \ key).toString()
+    } else {
+      ""
+    }
+  }
+
+  /**
+    *
+    * @param jsonStr
+    * @return
+    */
+  def getParsedJson(jsonStr: String): JsValue = {
     val v = if (jsonStr.nonEmpty && jsonStr.startsWith("{")) {
       try {
         Json.parse(jsonStr)
@@ -73,7 +93,7 @@ object pageAndEventParser {
   }
 
   def getGsortPit(server_jsonstr: String): (Int, String) = {
-    val js_server_jsonstr = getParsedJsonValue(server_jsonstr)
+    val js_server_jsonstr = getParsedJson(server_jsonstr)
     if (!js_server_jsonstr.equals(JsNull) && !server_jsonstr.equals("{}")) {
       val pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
       val gsort_key = (js_server_jsonstr \ "_gsort_key").asOpt[String].getOrElse("")
@@ -110,7 +130,7 @@ object pageAndEventParser {
     * @return
     */
   def forPageId(pagename: String, extend_params: String, server_jsonstr: String): String = {
-    val strValue = getParsedJsonValue(server_jsonstr)
+    val strValue = getParsedJson(server_jsonstr)
     val for_pageid = pagename.toLowerCase() match {
       case a if pagename.toLowerCase() == "page_tab" && isInteger(extend_params) && (extend_params.toLong > 0 && extend_params.toLong < 9999999) => "page_tab"
       case c if pagename.toLowerCase() == "page_tab" && !strValue.equals(JsNull) && (strValue \ "cid").asOpt[Int].getOrElse(0) < 0 => (pagename+(strValue \ "cid").asOpt[String]).toLowerCase()
@@ -148,7 +168,7 @@ object pageAndEventParser {
     * @return
     */
   def getPageLvl2Value(x_page_id: Int, x_extend_params: String, server_jsonstr: String): String = {
-    val strValue = getParsedJsonValue(server_jsonstr)
+    val strValue = getParsedJson(server_jsonstr)
     val page_lel2_value =
       if(x_page_id == 250 && x_extend_params.nonEmpty
         && x_extend_params.contains("_")
@@ -307,11 +327,33 @@ object pageAndEventParser {
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPages_test.get("page_taball").getOrElse(0, 0, "", 0)
 //    println(d_page_id, page_type_id, d_page_value,d_page_level_id)
 
-    val s = "{a}"
-    val sr = getParsedJsonValue(s)
+    val s = """"server_jsonstr":"{\"ads_id\":\"1928\",\"user_group_id\":\"\"}""""
+    val sr = getParsedJson(s)
     println(sr)
 
-    if(getParsedJsonValue(s).equals(JsNull)) println("test")
+    if(getParsedJson(s).equals(JsNull)) println("test")
+
+    val extend_params = ""
+
+    println(getGsortPit(s))
+
+    println(getJsonValueByKey(s, "item"))
+
+    println(getJsonValueByKey(s, "_rmd"))
+
+    println(getJsonValueByKey(s, "_t"))
+
+    val ab_info = pageAndEventParser.getJsonValueByKey(extend_params, "ab_info")
+    println(ab_info)
+    println(pageAndEventParser.getJsonValueByKey(ab_info, "rule_id"))
+
+    val strValue = getParsedJson(extend_params)
+    println((strValue \ "cid").asOpt[Int].getOrElse(0))
+
+    if(!strValue.equals(JsNull) && s.contains("order_status")) {
+      val res = (strValue \ "order_status").toString()
+      println("res:==" + res)
+    }
 
   }
 

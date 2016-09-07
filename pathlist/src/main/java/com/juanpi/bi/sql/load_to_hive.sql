@@ -15,3 +15,5 @@ alter table ${tableName} add partition (date="${date}", gu_hash="c") location 'h
 alter table ${tableName} add partition (date="${date}", gu_hash="d") location 'hdfs://nameservice1/user/hadoop/${DataPath}/dw_real_path_list_jobs/date=${date}/gu_hash=d/';
 alter table ${tableName} add partition (date="${date}", gu_hash="e") location 'hdfs://nameservice1/user/hadoop/${DataPath}/dw_real_path_list_jobs/date=${date}/gu_hash=e/';
 alter table ${tableName} add partition (date="${date}", gu_hash="f") location 'hdfs://nameservice1/user/hadoop/${DataPath}/dw_real_path_list_jobs/date=${date}/gu_hash=f/';
+
+-- alter table dw_path_list_new partition (date="2016-08-31", gu_hash="0") set location 'hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list/date=2016-08-31/gu_hash=0';

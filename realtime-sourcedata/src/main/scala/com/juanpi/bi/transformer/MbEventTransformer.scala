@@ -47,7 +47,7 @@ class MbEventTransformer extends ITransformer {
 //        try {
           val endtime = (row \ "endtime").asOpt[String].getOrElse("")
           val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
-          val loadTime = getJsonValueByKey(server_jsonstr, "_t")
+          val loadTime = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_t")
 
           // 如果loadTime非空，就需要判断是否是当天的数据，如果不是，需要过滤掉,因此不需要处理
           if(loadTime.nonEmpty &&
@@ -109,7 +109,7 @@ class MbEventTransformer extends ITransformer {
     val ctag = (row \ "c_label").asOpt[String].getOrElse("")
     val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
 
-    val loadTime = getJsonValueByKey(server_jsonstr, "_t")
+    val loadTime = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_t")
 
     // 用户画像中定义的
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
@@ -256,8 +256,8 @@ class MbEventTransformer extends ITransformer {
 
     // 品宣页点击存储质检类型
     val event_lvl2_value = event_id match {
-      case "360" => getJsonValueByKey(server_jsonstr, "item")
-      case "482"|"481"|"480"|"479" => getJsonValueByKey(server_jsonstr, "_rmd")
+      case "360" => pageAndEventParser.getJsonValueByKey(server_jsonstr, "item")
+      case "482"|"481"|"480"|"479" => pageAndEventParser.getJsonValueByKey(server_jsonstr, "_rmd")
       case _ => ""
     }
 
@@ -274,15 +274,6 @@ class MbEventTransformer extends ITransformer {
     (user, pe, page, event)
   }
 
-  def getJsonValueByKey(jsonStr: String, key: String): String = {
-    if(jsonStr.contains(key)){
-      val js = Json.parse(jsonStr)
-      (js \ key).toString()
-    } else {
-      ""
-    }
-  }
-
   def getEventId(d_event_id: Int, app_version: String): Int = {
     val app_ver = getVersionNum(app_version)
     val eid = d_event_id match {
@@ -296,7 +287,7 @@ class MbEventTransformer extends ITransformer {
   def getEventValue(event_type_id: Int, activityname: String, extend_params: String, server_jsonstr: String): String =
   {
       //  TODO -- gognzi && lielie,过滤掉商品流坑位数据中非当天的数据
-      val oper_time = getJsonValueByKey(server_jsonstr, "_t")
+      val oper_time = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_t")
 
       // TODO
       if (event_type_id == 10) {
@@ -314,8 +305,8 @@ class MbEventTransformer extends ITransformer {
 
     def getAbinfo(extend_params: String, arg: String): String = {
       if (extend_params.contains(arg)) {
-        val ab_info = getJsonValueByKey(extend_params, "ab_info")
-        getJsonValueByKey(ab_info, arg)
+        val ab_info = pageAndEventParser.getJsonValueByKey(extend_params, "ab_info")
+        pageAndEventParser.getJsonValueByKey(ab_info, arg)
       }
       else ""
     }
@@ -357,18 +348,8 @@ class MbEventTransformer extends ITransformer {
 // for test
 object MbEventTransformer {
 
-  def getJsonValueByKey(jsonStr: String, key: String): String = {
-    if(jsonStr.contains(key)){
-      val js = Json.parse(jsonStr)
-      (js \ key).toString()
-    } else {
-      ""
-    }
-  }
-
-
   def main(args: Array[String]) {
-    val t = getJsonValueByKey("""{"pit_info":"goods::16915719::2_19","cid":0,"_t":1470639193}""", "_t")
+    val t = pageAndEventParser.getJsonValueByKey("""{"pit_info":"goods::16915719::2_19","cid":0,"_t":1470639193}""", "_t")
     println(t)
     var cid = ""
     var cid2 = ""
