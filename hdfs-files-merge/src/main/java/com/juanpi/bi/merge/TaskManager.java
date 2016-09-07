@@ -41,6 +41,7 @@ public class TaskManager {
 	
 	public static void main(String[] args) {
         String dir = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list";
+        System.out.println("======>>main_dir:" + dir);
 //		TaskManager manager = new TaskManager(args[0]);
 		TaskManager manager = new TaskManager(dir);
 		try {
