@@ -1,5 +1,6 @@
 package com.juanpi.bi.mapred;
 
+import com.google.common.base.Joiner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -198,9 +199,17 @@ public class PathListControledJobs {
                 //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
                 // page_level_id  对应的路径 line
                 // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 35: event_value; 36: event_lvl2_value; 22: starttime
-                String loadTime = splited[46];
-                String str[] = {splited[21],
-                        splited[15] + "\t" + splited[16] + "\t" + splited[25] + "\t" + splited[34] + "\t" + splited[35] + "\t" + splited[36] + "\t" + splited[22] + "\t" + loadTime,
+                String page_level_id = (splited[21] == null)? "\\N":splited[21];
+                String page_id = (splited[15] == null) ? "\\N":splited[15];
+                String page_value = (splited[16] == null) ? "\\N":splited[16];
+                String page_lvl2_value = (splited[25] == null) ? "\\N":splited[25];
+                String event_id = (splited[34] == null) ? "\\N":splited[34];
+                String event_value = (splited[35] == null) ? "\\N":splited[35];
+                String event_lvl2_value = (splited[36] == null) ? "\\N":splited[36];
+                String startTime = (splited[22] == null) ? "\\N":splited[22];
+                String loadTime = (splited[46] == null) ? "\\N":splited[46];
+                String str[] = {page_level_id,
+                        page_id + "\t" + page_value + "\t" + page_lvl2_value + "\t" + event_id + "\t" + event_value + "\t" + event_lvl2_value + "\t" + startTime + "\t" + loadTime,
                         value.toString().replace("\001", "\t")};
 
                 final TextArrayWritable v2 = new TextArrayWritable(str);
@@ -225,11 +234,13 @@ public class PathListControledJobs {
     }
 
     //static class NewValue
-
     static class MyReducer extends Reducer<NewK2, TextArrayWritable, Text, Text> {
         protected void reduce(NewK2 k2, Iterable<TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
             //long min = Long.MAX_VALUE;
-            String initstr = ""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+"";
+//            String initstr = "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N";
+
+            String[] initstrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
+            String initstr = Joiner.on("\t").join(initstrArray);
 
             for (TextArrayWritable v2 : v2s) {
                 String level1 = initstr;
@@ -369,6 +380,7 @@ public class PathListControledJobs {
             set(texts);
         }
     }
+
     public static void main(String[] args){
         String dateStr = args[0];
         if(dateStr== null || dateStr.isEmpty()){
