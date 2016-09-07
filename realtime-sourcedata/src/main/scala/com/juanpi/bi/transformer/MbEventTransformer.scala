@@ -56,7 +56,7 @@ class MbEventTransformer extends ITransformer {
           } else {
             val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = parse(row, dimpage, dimevent)
             val res_str =  pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x=> x match {
-              case y if y.toString.isEmpty => "\\N"
+              case y if y == null || y.toString.isEmpty => "\\N"
               case _ => x
             }).mkString("\001")
             val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
@@ -113,7 +113,7 @@ class MbEventTransformer extends ITransformer {
 
     // 用户画像中定义的
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
-    val (gid, ugroup) = if(!c_server.isEmpty()) {
+    val (gid, ugroup) = if(c_server.nonEmpty) {
       val js_c_server = Json.parse(c_server)
       val gid = (js_c_server \ "gid").asOpt[String].getOrElse("0")
       val ugroup = (js_c_server \ "ugroup").asOpt[String].getOrElse("0")

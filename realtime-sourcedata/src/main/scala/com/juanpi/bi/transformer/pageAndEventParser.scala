@@ -327,7 +327,8 @@ object pageAndEventParser {
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPages_test.get("page_taball").getOrElse(0, 0, "", 0)
 //    println(d_page_id, page_type_id, d_page_value,d_page_level_id)
 
-    val s = """"server_jsonstr":"{\"ads_id\":\"1928\",\"user_group_id\":\"\"}""""
+//    val s = """"server_jsonstr":"{\"ads_id\":\"1928\",\"user_group_id\":\"\"}""""
+    val s = "{}"
     val sr = getParsedJson(s)
     println(sr)
 

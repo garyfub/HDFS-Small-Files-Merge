@@ -54,5 +54,9 @@ object DateUtils {
     println((gu_id.last).toLower)
 
     println(dateGuidPartitions("1468929132822".toLong, "13a69d96f245ab71b"))
+
+    val (date, hour) = dateHourStr("1473233633320".toLong)
+    println(date)
+    println(hour)
   }
 }
