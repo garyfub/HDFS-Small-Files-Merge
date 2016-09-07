@@ -38,7 +38,7 @@ class MbEventTransformer extends ITransformer {
         gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
       } catch {
         //使用模式匹配来处理异常
-        case ex: Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
+        case ex: Exception => println(ex.printStackTrace() + "==>>gu_id======>>异常数据:" + row)
       }
 
       println("=======>> ticks=" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceId + "#, os=" + os + "#, gu_id=" + gu_id + "#, endtime=" + endTime)
@@ -54,7 +54,7 @@ class MbEventTransformer extends ITransformer {
           (partitionStr, "event", res_str)
         } catch {
           //使用模式匹配来处理异常
-          case ex:Exception => {println(ex.getStackTraceString, "\n======>>异常数据:" + row)}
+          case ex:Exception => {println(ex.printStackTrace() + "==>>combine======>>异常数据:" + row)}
           ("", "", None)
         }
       } else {
