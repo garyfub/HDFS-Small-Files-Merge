@@ -44,7 +44,7 @@ class MbEventTransformer extends ITransformer {
 //      println("=======>> ticks=" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceId + "#, os=" + os + "#, gu_id=" + gu_id + "#, endtime=" + endTime)
 
       val ret = if(gu_id.nonEmpty) {
-        try {
+//        try {
           val endtime = (row \ "endtime").asOpt[String].getOrElse("")
           val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
           val loadTime = getJsonValueByKey(server_jsonstr, "_t")
@@ -62,11 +62,11 @@ class MbEventTransformer extends ITransformer {
             val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
             (partitionStr, "event", res_str)
           }
-        } catch {
-          //使用模式匹配来处理异常
-          case ex:Exception => {println(ex.getMessage() + "==>>combine======>>异常数据:" + row)}
-          ("", "", None)
-        }
+//        } catch {
+//          //使用模式匹配来处理异常
+//          case ex:Exception => {println(ex.getMessage() + "==>>combine======>>异常数据:" + row)}
+//          ("", "", None)
+//        }
       } else {
         ("", "", None)
       }
@@ -174,6 +174,7 @@ class MbEventTransformer extends ITransformer {
     } else if ("-5".equals(cid) || "-6".equals(cid)) {
       "page_tabyugao"
     } else if ((!cid.isEmpty && cid.toInt > 0) | (cid == "-100" && (f_page_extend_params == "10045" || f_page_extend_params == "100105"))) {
+      // when cast(get_json_object(server_jsonstr, '$.cid') as int) > 0 or (cast(get_json_object(server_jsonstr, '$.cid') as int) = -100 and page_extends_param in (10045,100105)) then 'page_tab'
       "page_tab"
     } else if ((cid == "0") && List("all", "past_zhe", "crazy_zhe", "jiu", "yugao").contains(f_page_extend_params)) {
       ""
