@@ -341,7 +341,13 @@ class MbEventTransformer extends ITransformer {
 
     def getVersionNum(app_version: String): Int = {
       // TODO
-      app_version.replace(".", "").toInt
+      val resInt = if (app_version.nonEmpty) {
+        app_version.replace(".", "").toInt
+      }
+      else {
+        0
+      }
+      resInt
     }
   }
 

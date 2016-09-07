@@ -222,7 +222,13 @@ object pageAndEventParser {
     */
   def getShopId(x_page_id: Int, extend_params: String): String = {
     val shop_id = if(x_page_id == 250 && extend_params.contains("_")){
-      new GetGoodsId().evaluate(extend_params.split("_")(1))
+      try {
+          new GetGoodsId().evaluate(extend_params.split("_")(1))
+        }catch {
+        //使用模式匹配来处理异常
+        case ex: Exception => println(ex.printStackTrace() + "==>>getShopId======>>异常数据:" + extend_params)
+        0
+        }
     }
     else {
       0
