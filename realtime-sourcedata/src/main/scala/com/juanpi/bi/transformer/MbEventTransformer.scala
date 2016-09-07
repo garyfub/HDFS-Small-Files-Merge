@@ -368,21 +368,6 @@ object MbEventTransformer {
 
 
   def main(args: Array[String]) {
-//    val event = """{"session_id":"1453286581908_jiu_1457423937672","ticks":"1453286581908","uid":"16739625","utm":"101225","app_name":"jiu","app_version":"3.3.8","os":"android","os_version":"5.1.1","deviceid":"0","jpid":"00000000-3be0-c4d6-b09c-156062841d62","to_switch":"1","location":"河北省","c_label":"C2","activityname":"click_cube_goods","extend_params":{"pit_info":"goods::5208686::1_22","ab_info":{"rule_id":"","test_id":"","select":""}},"source":"","cube_position":"1_22","server_jsonstr":{},"starttime":"1457425815507","endtime":"1457425815507","result":"1","pagename":"page_home_brand_in","page_extends_param":"1620540_1345584_5608626","pre_page":"page_temai_goods","pre_extends_param":"5508676","gj_page_names":"page_home_brand_in,page_home_brand_in,page_tab,page_home_brand_in","gj_ext_params":"1435453_1445587_5139662,1435453_1445587_5139662,all,1620540_1345584_5608626","starttime_origin":"1457425815189","endtime_origin":"1457425815189","ip":"106.8.147.163"}"""
-//    val b = JSON.parseObject(event)
-//    println(b.get("session_id"))
-
-
-//    val gsort_key = "POSTION_SORT_65_20160525_12_63"
-//    val sortdate = Array(gsort_key.split("_")(3).substring(0, 4), gsort_key.split("_")(3).substring(4, 6), gsort_key.split("_")(3).substring(6, 8)).mkString("-")
-//    val sorthour = gsort_key.split("_")(4)
-//    val lplid = gsort_key.split("_")(5)
-//    var ptplid = ""
-//    if(gsort_key.split("_").length > 6 ){
-//      ptplid = gsort_key.split("_")(6)
-//    }
-//    println(sortdate, sorthour, lplid, ptplid)
-
     val t = getJsonValueByKey("""{"pit_info":"goods::16915719::2_19","cid":0,"_t":1470639193}""", "_t")
     println(t)
     var cid = ""
