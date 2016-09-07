@@ -27,7 +27,7 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
 
 /**
  * 烈烈
- * Created by kaenr on 2016/7/13.
+ * Created by kaenr && gongzi on 2016/7/13.
  */
 public class PathListControledJobs {
 

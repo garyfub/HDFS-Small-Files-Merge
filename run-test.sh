@@ -6,15 +6,21 @@ git pull origin dev
 
 mvn clean package
 
-scp ~/dev_pro/dw-realtime/realtime-sourcedata/target/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/
+scp ~/dev_pro/dw-realtime/realtime-sourcedata/target/realtime-souredata-1.0-SNAPSHOT-jar-with-dependencies.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/run_realtime
 
+# pathlist
 cd ~/dev_pro/dw-realtime/pathlist/
-
-#git pull origin dev
 
 mvn clean package
 
-scp ~/dev_pro/dw-realtime/pathlist/target/pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/
+scp ~/dev_pro/dw-realtime/pathlist/target/pathlist-jar-with-dependencies.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/run_pathList/
+
+# hdfs-files-merge
+cd ~/dev_pro/dw-realtime/hdfs-files-merge/
+
+mvn clean package
+
+scp ~/dev_pro/dw-realtime/pathlist/target/hdfs-files-merge-jar-with-dependencies.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/run_filesmerge/
 
 
 if test $? -ne 0
