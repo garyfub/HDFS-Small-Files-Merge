@@ -26,6 +26,16 @@ object DateUtils {
   }
 
   /**
+    * 返回 yyyy-MM-dd 格式的日期
+    * @param milliseconds
+    * @return
+    */
+  def dateStr(milliseconds: Long): String = {
+    val dateTime = new DateTime(milliseconds)
+    dateTime.toString("yyyy-MM-dd")
+  }
+
+  /**
     * 接受一个时间戳的参数，返回日期和小时
     * @param milliseconds
     * @return
