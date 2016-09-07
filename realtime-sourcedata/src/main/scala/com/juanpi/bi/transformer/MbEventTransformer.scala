@@ -41,20 +41,30 @@ class MbEventTransformer extends ITransformer {
         case ex: Exception => println(ex.printStackTrace() + "==>>gu_id======>>异常数据:" + row)
       }
 
-      println("=======>> ticks=" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceId + "#, os=" + os + "#, gu_id=" + gu_id + "#, endtime=" + endTime)
+//      println("=======>> ticks=" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceId + "#, os=" + os + "#, gu_id=" + gu_id + "#, endtime=" + endTime)
 
       val ret = if(gu_id.nonEmpty) {
         try {
-          val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = parse(row, dimpage, dimevent)
-          val res_str =  pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x=> x match {
-            case y if y.toString.isEmpty => "\\N"
-            case _ => x
-          }).mkString("\001")
-          val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
-          (partitionStr, "event", res_str)
+          val endtime = (row \ "endtime").asOpt[String].getOrElse("")
+          val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
+          val loadTime = getJsonValueByKey(server_jsonstr, "_t")
+
+          // 如果loadTime非空，就需要判断是否是当天的数据，如果不是，需要过滤掉,因此不需要处理
+          if(loadTime.nonEmpty &&
+            DateUtils.dateStr(endtime.toLong) != DateUtils.dateStr(loadTime.toLong)) {
+            ("", "", None)
+          } else {
+            val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = parse(row, dimpage, dimevent)
+            val res_str =  pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x=> x match {
+              case y if y.toString.isEmpty => "\\N"
+              case _ => x
+            }).mkString("\001")
+            val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
+            (partitionStr, "event", res_str)
+          }
         } catch {
           //使用模式匹配来处理异常
-          case ex:Exception => {println(ex.printStackTrace() + "==>>combine======>>异常数据:" + row)}
+          case ex:Exception => {println(ex.getMessage() + "==>>combine======>>异常数据:" + row)}
           ("", "", None)
         }
       } else {
@@ -99,8 +109,9 @@ class MbEventTransformer extends ITransformer {
     val ctag = (row \ "c_label").asOpt[String].getOrElse("")
     val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
 
-    // 用户画像中定义的
+    val loadTime = getJsonValueByKey(server_jsonstr, "_t")
 
+    // 用户画像中定义的
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
     val (gid, ugroup) = if(!c_server.isEmpty()) {
       val js_c_server = Json.parse(c_server)
@@ -250,7 +261,6 @@ class MbEventTransformer extends ITransformer {
     }
 
     val jpk = 0
-    val loadTime = getJsonValueByKey(server_jsonstr, "_t")
 
     val (date, hour) = DateUtils.dateHourStr(endtime.toLong)
     val table_source = "mb_event"
