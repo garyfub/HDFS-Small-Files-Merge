@@ -203,9 +203,9 @@ public class PathListControledJobs {
                 String page_id = (splited[15] == null) ? "\\N":splited[15];
                 String page_value = (splited[16] == null) ? "\\N":splited[16];
                 String page_lvl2_value = (splited[25] == null) ? "\\N":splited[25];
-                String event_id = (splited[34] == null) ? "\\N":splited[34];
+                String event_id = (splited[40] == null) ? "\\N":splited[40];
                 String event_value = (splited[35] == null) ? "\\N":splited[35];
-                String event_lvl2_value = (splited[36] == null) ? "\\N":splited[36];
+                String event_lvl2_value = (splited[41] == null) ? "\\N":splited[41];
                 String startTime = (splited[22] == null) ? "\\N":splited[22];
                 String loadTime = (splited[46] == null) ? "\\N":splited[46];
                 String str[] = {page_level_id,
@@ -247,24 +247,31 @@ public class PathListControledJobs {
                 String level2 = initstr;
                 String level3 = initstr;
                 String level4 = initstr;
+                String level5 = initstr;
                 if(Integer.parseInt(v2.toStrings()[0]) == 1){
                     level1=v2.toStrings()[1];
                     level2 = initstr;
                     level3 = initstr;
                     level4 = initstr;
+                    level5 = initstr;
                 } else if(Integer.parseInt(v2.toStrings()[0]) == 2){
                     level2=v2.toStrings()[1];
                     level3 = initstr;
                     level4 = initstr;
+                    level5 = initstr;
                 } else if(Integer.parseInt(v2.toStrings()[0]) == 3){
                     level3 = v2.toStrings()[1];
                     level4 = initstr;
+                    level5 = initstr;
                 } else if(Integer.parseInt(v2.toStrings()[0]) == 4){
                     level4 = v2.toStrings()[1];
+                    level5 = initstr;
+                } else if(Integer.parseInt(v2.toStrings()[0]) == 5){
+                    level5 = v2.toStrings()[1];
                 }
 
-                // 4 个级别
-                Text key2 = new Text(level1+"\t"+ level2+"\t"+level3+"\t"+level4);
+                // 5 个级别
+                Text key2 = new Text(level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5);
                 Text value2 = new Text(v2.toStrings()[2]);
                 context.write(key2, value2);
             }
@@ -324,7 +331,7 @@ public class PathListControledJobs {
                 return false;
             }
             NewK2 oK2 = (NewK2)obj;
-            return (this.first.equals(oK2.first))&&(this.second==oK2.second);
+            return (this.first.equals(oK2.first))&&(this.second == oK2.second);
         }
     }
 
@@ -389,5 +396,6 @@ public class PathListControledJobs {
         {
             JobsControl(dateStr);
         }
+
     }
 }
