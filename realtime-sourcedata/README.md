@@ -113,5 +113,7 @@ group_id:
 bi_gongzi_mb_event_real_direct_by_dw
 bi_gongzi_mb_pageinfo_real_direct_by_dw
 
-java -jar hdfs-files-merge-jar-with-dependencies.jar com.juanpi.bi.merge.TaskManager
+java -jar ./hdfs-files-merge-jar-with-dependencies.jar com.juanpi.bi.merge.TaskManager
+
+select * from dw_path_list_new where date = "2016-08-31" and gu_hash="0" limit 20;
 
