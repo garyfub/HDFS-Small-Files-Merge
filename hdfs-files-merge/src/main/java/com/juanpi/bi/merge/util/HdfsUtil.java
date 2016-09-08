@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Joiner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -51,8 +52,9 @@ public class HdfsUtil extends FileUtil {
 	 */
 	public static Path[] getHdfsFiles(String hdfsDirRegex, String regex, boolean isInclude) throws IOException {
 		FileSystem fs = FileSystem.get(configuration);
+		System.out.println("hdfsDirRegex is:" + hdfsDirRegex);
 		FileStatus[] files = fs.globStatus(new Path(hdfsDirRegex), new RegexPathFilter(regex, isInclude));
-		
+		System.out.println("getHdfsFiles are:" + Joiner.on(";").join(files));
 		return FileUtil.stat2Paths(files);
 	}
 	
