@@ -20,7 +20,7 @@ cd ~/dev_pro/dw-realtime/hdfs-files-merge/
 
 mvn clean package
 
-scp ~/dev_pro/dw-realtime/hdfs-files-merge/target/hdfs-files-merge-jar-with-dependencies.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/run_filesmerge/
+scp ~/dev_pro/dw-realtime/hdfs-files-merge/target/hdfs-files-merge.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/run_filesmerge/
 
 
 if test $? -ne 0

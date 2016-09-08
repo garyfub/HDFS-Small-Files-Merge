@@ -92,8 +92,9 @@ fi
 0 * * * * sh /home/hadoop/users/gongzi/run_pathlist.sh > /home/hadoop/users/gongzi/out_event-real-bi-dw-gongzi.txt 2>&1
 
 
-<!-- nohup ./event-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/out_event-real-bi-dw-gongzi.txt 2>&1 &
-nohup ./page-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/out_page-real-bi-dw-gongzi.txt 2>&1 & -->
+nohup ./spark_event/event-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/spark_event/out_event-real-bi-dw-gongzi.txt 2>&1 &
+
+nohup ./spark_page/page-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/spark_page/out_page-real-bi-dw-gongzi.txt 2>&1 &
 
 nohup ./reget_event-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/out_reget_event-real-bi-dw-gongzi.txt 2>&1 &
 nohup ./reget_page-real-bi-dw-gongzi.sh > /home/hadoop/users/gongzi/out_reget_page-real-bi-dw-gongzi.txt 2>&1 &
@@ -115,5 +116,14 @@ bi_gongzi_mb_pageinfo_real_direct_by_dw
 
 java -jar ./hdfs-files-merge-jar-with-dependencies.jar com.juanpi.bi.merge.TaskManager
 
-select * from dw_path_list_new where date = "2016-08-31" and gu_hash="0" limit 20;
+alter table dw_path_list_new partition (date="2016-09-02", gu_hash="0") set location 'hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list_jobs/date=2016-09-02/gu_hash=0';
+
+select entrance_page_id,entrance_page_value, page_id, page_value, table_source from dw_path_list_new where
+date = "2016-09-08"
+and gu_hash="0"
+and entrance_page_id=219
+and page_id = 158
+limit 20;
+
+select * from dw_path_list_new where date = "2016-09-02" and gu_hash="0" limit 20;
 
