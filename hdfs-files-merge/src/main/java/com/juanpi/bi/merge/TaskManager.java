@@ -19,14 +19,14 @@ public class TaskManager {
 	public TaskManager(String baseDir) {
 		this.baseDir = baseDir;
 		this.date = ProcessUtil.getBeforeOneHourDate();	// yyyy-mm-dd
-		this.gu_hash = "0"; // HH
+		this.gu_hash = "*"; // HH
 	}
 	
 	// 
 	// 路径正则
 	//	
 	private String getDirRegex() {
-		return baseDir + "/date=" + date + "/gu_hash=" + gu_hash + "/*/";
+		return baseDir + "/date=" + date + "/gu_hash=" + gu_hash + "/";
 	}
 	
 	/**
