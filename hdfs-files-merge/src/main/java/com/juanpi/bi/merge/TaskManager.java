@@ -26,7 +26,7 @@ public class TaskManager {
 	// 路径正则
 	//	
 	private String getDirRegex() {
-		return baseDir + "/date=" + date + "/gu_hash=" + gu_hash + "/";
+		return baseDir + "/date=" + date + "/*/";
 	}
 	
 	/**
