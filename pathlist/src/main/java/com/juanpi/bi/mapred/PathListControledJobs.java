@@ -246,12 +246,13 @@ public class PathListControledJobs {
             String[] initstrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
             String initstr = Joiner.on("\t").join(initstrArray);
 
+            String level1 = initstr;
+            String level2 = initstr;
+            String level3 = initstr;
+            String level4 = initstr;
+            String level5 = initstr;
+
             for (TextArrayWritable v2 : v2s) {
-                String level1 = initstr;
-                String level2 = initstr;
-                String level3 = initstr;
-                String level4 = initstr;
-                String level5 = initstr;
                 if(Integer.parseInt(v2.toStrings()[0]) == 1){
                     level1=v2.toStrings()[1];
                     level2 = initstr;
