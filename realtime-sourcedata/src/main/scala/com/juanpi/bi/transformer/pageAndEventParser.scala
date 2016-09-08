@@ -41,17 +41,24 @@ object pageAndEventParser {
 
   /**
     * 2016-02-16 加逻辑：IOS直接使用设备号作为gu_id
-    *
     * @param jpid
     * @param deviceid
     * @param os
     * @return
     */
   def getGuid(jpid: String, deviceid: String, os: String): String = {
-    if(jpid.equals("0") || jpid.isEmpty() ) {
+    val devId = if(deviceid.equals("0") || deviceid.isEmpty()){
+      ""
+    }
+    else {
       deviceid
     }
-    else jpid
+
+    val gu_id = if(jpid.equals("0") || jpid.isEmpty()) {
+      devId
+    }
+    else { jpid }
+    gu_id
   }
 
   /**
@@ -362,6 +369,7 @@ object pageAndEventParser {
       println("res:==" + res)
     }
 
+      println("gu_id:" + getGuid("0", "0", ""))
   }
 
 
