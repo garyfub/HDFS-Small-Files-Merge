@@ -34,7 +34,8 @@ public class TaskManager {
 	 * @throws IOException
 	 */
 	public void start() throws IOException {
-		String srcDirRegex = getDirRegex();
+        System.out.println("开始任务======>>....");
+        String srcDirRegex = getDirRegex();
 		MergeTask mergeTask = new MergeTask(srcDirRegex, null, true);
 		mergeTask.doMerge();
 	}

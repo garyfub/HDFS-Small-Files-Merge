@@ -94,9 +94,11 @@ public class MergeTask {
 	}
 	
 	public void doMerge() throws IOException {
-		Path[] matchDirs = getMatchDir();
+        System.out.println("doMerge start======>>....");
+        Path[] matchDirs = getMatchDir();
 		if (matchDirs == null || matchDirs.length < 1) {
-			return;
+            System.out.println("matchDirs is null....");
+            return;
 		}
 		
 		for (Path matchDir : matchDirs) {
