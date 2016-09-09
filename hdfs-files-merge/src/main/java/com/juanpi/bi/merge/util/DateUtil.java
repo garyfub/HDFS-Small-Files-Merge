@@ -2,6 +2,7 @@ package com.juanpi.bi.merge.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 
@@ -9,6 +10,28 @@ import java.util.Date;
  * Created by gongzi on 2016/9/9.
  */
 public class DateUtil {
+
+    /**
+     *
+     * @param hourInterval 间隔的小时数量
+     * @param fmt
+     * @return
+     */
+    public static String getHourIntervalDate(int hourInterval, String fmt) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.HOUR, hourInterval);
+        String hourIntervalDate = new SimpleDateFormat(fmt).format(cal.getTime());
+
+        return hourIntervalDate;
+    }
+
+    public static String getHourIntervalMillis(int hourInterval, String fmt) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.HOUR, hourInterval);
+        String hourIntervalDate = new SimpleDateFormat(fmt).format(cal.getTime());
+
+        return hourIntervalDate;
+    }
 
     /**
      *
@@ -67,11 +90,16 @@ public class DateUtil {
         String dateHourStr = DateUtil.dateHourStr("1473351420000", "yyyyMMddHH");
         System.out.println(dateHourStr);
         System.out.println(millisToMins("1473351420000"));
+
+        String fmt = "yyyy-MM-dd HH:00:00";
+        String dt = DateUtil.getHourIntervalDate(-17, fmt);
         try {
-            System.out.println(dateToMillis("2016-09-09 15:00:00", "yyyy-MM-dd HH"));
+            long milis = DateUtil.dateToMillis(dt, fmt);
+            System.out.println("milis==" + milis);
         } catch (ParseException e) {
             e.printStackTrace();
         }
     }
+
 
 }

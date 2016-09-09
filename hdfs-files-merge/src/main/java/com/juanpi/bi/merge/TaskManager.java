@@ -1,7 +1,9 @@
 package com.juanpi.bi.merge;
 
 import java.io.IOException;
+import java.text.ParseException;
 
+import com.juanpi.bi.merge.util.DateUtil;
 import com.juanpi.bi.merge.util.ProcessUtil;
 
 /**
@@ -15,18 +17,20 @@ public class TaskManager {
 	private String date = null;
 	private String gu_hash = null;
 	private String baseDir = null;
-	
+
+
 	public TaskManager(String baseDir) {
 		this.baseDir = baseDir;
 		this.date = ProcessUtil.getBeforeOneHourDate();	// yyyy-mm-dd
 		this.gu_hash = "*"; // HH
 	}
+
 	
 	// 
 	// 路径正则
 	//	
 	private String getDirRegex() {
-		return baseDir + "*/date=" + date + "/gu_hash=*/*";
+		return baseDir + "mb_event_hash2/date=" + date + "/gu_hash=0/*";
 	}
 	
 	/**
