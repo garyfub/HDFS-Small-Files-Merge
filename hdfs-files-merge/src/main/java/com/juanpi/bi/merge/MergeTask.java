@@ -1,9 +1,11 @@
 package com.juanpi.bi.merge;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 import com.google.common.base.Joiner;
+import com.juanpi.bi.merge.util.DateUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -65,7 +67,7 @@ public class MergeTask {
 			HdfsUtil.delete(file);
 		}
 	}
-	
+
 	//
 	// merge目标文件路径
 	//
@@ -76,13 +78,13 @@ public class MergeTask {
 		if (!srcDirStr.equals("/")) {
 			dstFileBuf.append("/");
 		}
-        System.out.println("getDstFile======>>" + srcDir.getName());
-		if (!ProcessUtil.isNull(dstFileName)) {
-			dstFileBuf.append(dstFileName).append("-");
-		}
+        String fileName = srcDir.getName();
+        String timeMilli = fileName.split("_")[1];
+        String dateHourStr = DateUtil.dateHourStr(timeMilli, "yyyyMMddHH");
+        System.out.println("getParent=======>>" + srcDir.getParent() + ",dateHourStr="  + dateHourStr);
+        dstFileBuf.append(srcDir.getParent().toString());
+        dstFileBuf.append("/merged_" + dateHourStr);
 
-		dstFileBuf.append(UUID.randomUUID().toString());
-		
 		Path dstFile = new Path(dstFileBuf.toString());
 		return dstFile;
 	}
