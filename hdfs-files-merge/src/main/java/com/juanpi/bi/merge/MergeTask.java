@@ -3,6 +3,7 @@ package com.juanpi.bi.merge;
 import java.io.IOException;
 import java.util.UUID;
 
+import com.google.common.base.Joiner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -75,7 +76,7 @@ public class MergeTask {
 		if (!srcDirStr.equals("/")) {
 			dstFileBuf.append("/");
 		}
-		
+        System.out.println("getDstFile======>>" + srcDir.getName());
 		if (!ProcessUtil.isNull(dstFileName)) {
 			dstFileBuf.append(dstFileName).append("-");
 		}
@@ -102,12 +103,17 @@ public class MergeTask {
 		}
 		
 		for (Path matchDir : matchDirs) {
-			System.out.println(matchDir.toString());
 			Path[] files = getFile(matchDir);
-			System.out.println("=======>> matchDir:" + matchDir);
+			System.out.println("=======>> matchDir:" + Joiner.on(";").join(files));
+//			System.out.println("=======>> matchDir:" + matchDir);
+//            matchDir:hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_event_hash2/date=2016-09-09/gu_hash=0/part_1473366300000
 
 			Path dstFile = getDstFile(matchDir);
-			System.out.println("=======>> dstFile:" + dstFile);
+//			System.out.println("=======>> dstFile:" + dstFile);
+//          dstFile:hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/mb_event_hash2/date=2016-09-09/gu_hash=0/part_1473366300000/e2d6accf-ea64-439a-a2ce-2b8b73dbcb8d
+
+
+
 //			merge(matchDir, dstFile, false);
 			
 //			if (deleteSource) {

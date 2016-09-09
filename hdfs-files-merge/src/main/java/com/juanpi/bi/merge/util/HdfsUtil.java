@@ -52,9 +52,9 @@ public class HdfsUtil extends FileUtil {
 	 */
 	public static Path[] getHdfsFiles(String hdfsDirRegex, String regex, boolean isInclude) throws IOException {
 		FileSystem fs = FileSystem.get(configuration);
-		System.out.println("hdfsDirRegex is:" + hdfsDirRegex);
+//		System.out.println("hdfsDirRegex is:" + hdfsDirRegex);
 		FileStatus[] files = fs.globStatus(new Path(hdfsDirRegex), new RegexPathFilter(regex, isInclude));
-		System.out.println("getHdfsFiles are:" + Joiner.on(";").join(files));
+//		System.out.println("getHdfsFiles are:" + Joiner.on(";").join(files));
 		return FileUtil.stat2Paths(files);
 	}
 	
