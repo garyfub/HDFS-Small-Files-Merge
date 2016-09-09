@@ -4,3 +4,4 @@ realtime-sourcedata/target/*
 realtime-sourcedata/realtime-souredata.iml
 pathlist/target/
 pathlist.iml
+/hdfs-files-merge/target
