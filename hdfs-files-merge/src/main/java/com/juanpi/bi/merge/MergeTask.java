@@ -132,7 +132,7 @@ public class MergeTask {
             if(millis <= oneHourAgoMillis)
             {
                 Path dstFile = getDstFile(matchDir);
-//			    merge(matchDir, dstFile, false);
+			    merge(matchDir, dstFile, false);
 
     //			if (deleteSource) {
     //				delete(files);
