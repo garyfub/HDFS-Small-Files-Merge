@@ -51,7 +51,8 @@ public class TaskManager {
 		try {
 			manager.start();
 		} catch (Exception e) {
-			e.printStackTrace();
+            System.out.println(e.getStackTrace());
+            e.printStackTrace();
 			System.exit(-1);
 		}
 	}
