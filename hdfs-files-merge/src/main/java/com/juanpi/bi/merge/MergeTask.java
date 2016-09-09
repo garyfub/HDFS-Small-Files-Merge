@@ -45,7 +45,7 @@ public class MergeTask {
 	// 获取匹配HDFS路径
 	//
 	private Path[] getMatchDir() throws IOException {
-		Path[] matchPaths = HdfsUtil.getHdfsFiles(srcDirRegex, "*", true);
+		Path[] matchPaths = HdfsUtil.getHdfsFiles(srcDirRegex, ".*", true);
 		return matchPaths;
 	}
 	
