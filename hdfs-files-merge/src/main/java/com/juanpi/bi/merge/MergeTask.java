@@ -99,8 +99,6 @@ public class MergeTask {
 
         dstFileBuf.append(srcDir.getParent().toString());
         dstFileBuf.append("/merged_" + dateHourStr);
-        System.out.println("dstFileBuf=======>>" + dstFileBuf.toString());
-
 		Path dstFile = new Path(dstFileBuf.toString());
 
 		return dstFile;
@@ -132,7 +130,9 @@ public class MergeTask {
             if(millis <= oneHourAgoMillis)
             {
                 Path dstFile = getDstFile(matchDir);
-			    merge(matchDir, dstFile, false);
+                System.out.println("dstFileBuf=======>>" + dstFile.toString());
+
+                merge(matchDir, dstFile, false);
 
     //			if (deleteSource) {
     //				delete(files);
