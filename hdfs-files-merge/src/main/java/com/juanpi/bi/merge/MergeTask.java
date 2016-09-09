@@ -108,8 +108,9 @@ public class MergeTask {
 	// merge小文件
 	//
 	private void merge(Path srcDir, Path dstFile, boolean deleteSource) throws IOException {
-		HdfsUtil.copyMerge(fs, srcDir, fs, dstFile, deleteSource, configuration, null);
-	}
+		boolean res = HdfsUtil.copyMerge(fs, srcDir, fs, dstFile, deleteSource, configuration, null);
+        System.out.println("merge res=" + res);
+    }
 	
 	public void doMerge() throws IOException {
 
@@ -130,7 +131,7 @@ public class MergeTask {
             if(millis <= oneHourAgoMillis)
             {
                 Path dstFile = getDstFile(matchDir);
-                System.out.println("dstFileBuf=======>>" + dstFile.toString());
+                System.out.println("dstFile=======>>" + dstFile.toString());
 
                 merge(matchDir, dstFile, false);
 
