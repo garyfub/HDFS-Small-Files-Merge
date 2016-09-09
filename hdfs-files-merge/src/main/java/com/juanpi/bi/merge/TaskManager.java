@@ -26,7 +26,7 @@ public class TaskManager {
 	// 路径正则
 	//	
 	private String getDirRegex() {
-		return baseDir + "/date=" + date + "/gu_hash=0/*";
+		return baseDir + "mb_event_hash2/date=" + date + "/gu_hash=0/*";
 	}
 	
 	/**
@@ -41,7 +41,7 @@ public class TaskManager {
 	}
 	
 	public static void main(String[] args) {
-        String dir = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list";
+        String dir = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list/";
         System.out.println("======>>main_dir:" + dir);
 //		TaskManager manager = new TaskManager(args[0]);
 		TaskManager manager = new TaskManager(dir);
