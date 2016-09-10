@@ -30,7 +30,7 @@ public class TaskManager {
 	// 路径正则
 	//	
 	private String getDirRegex() {
-		return baseDir + "mb_event_hash2/date=" + "2016-09-09" + "/gu_hash=0/*";
+		return baseDir + "mb_event_hash2/date=" + "2016-09-09" + "/gu_hash={a}/";
 	}
 	
 	/**
