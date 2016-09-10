@@ -65,7 +65,7 @@ public class MergeTask {
 	// 获取匹配HDFS路径
 	private Path[] getMatchDir() throws IOException {
         // PathFilter是过滤布符合指定表达式的路径，ture：匹配part开头的数记录
-		Path[] matchPaths = HdfsUtil.getHdfsFiles(this.srcDirRegex, "part_*", true);
+		Path[] matchPaths = HdfsUtil.getHdfsFiles(this.srcDirRegex, "part_*", false);
 		return matchPaths;
 	}
 	
