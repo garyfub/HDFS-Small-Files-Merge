@@ -62,12 +62,10 @@ public class MergeTask {
 		this.fs = FileSystem.get(configuration);
 	}
 	
-	//
 	// 获取匹配HDFS路径
-	//
 	private Path[] getMatchDir() throws IOException {
-        // PathFilter是过滤布符合置顶表达式的路径，下列就是把以data结尾的过滤掉
-		Path[] matchPaths = HdfsUtil.getHdfsFiles(srcDirRegex, ".*", true);
+        // PathFilter是过滤布符合指定表达式的路径，下列就是把以part_开始的过滤掉
+		Path[] matchPaths = HdfsUtil.getHdfsFiles(srcDirRegex, "part_*", true);
 		return matchPaths;
 	}
 	
@@ -105,9 +103,7 @@ public class MergeTask {
 		return dstFile;
 	}
 	
-	//
 	// merge小文件
-	//
 	private void merge(Path srcDir, Path dstFile, boolean deleteSource) throws IOException {
 
         if(!fs.getFileStatus(srcDir).isDirectory()) {
@@ -141,9 +137,9 @@ public class MergeTask {
 
                 merge(matchDir, dstFile, false);
 
-    //			if (deleteSource) {
-    //				delete(files);
-    //			}
+    			if (deleteSource) {
+    				delete(files);
+    			}
             }
 
 		}
