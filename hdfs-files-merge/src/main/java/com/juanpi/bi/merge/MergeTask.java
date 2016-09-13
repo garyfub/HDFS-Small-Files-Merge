@@ -3,7 +3,9 @@ package com.juanpi.bi.merge;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.UUID;
 
 import com.google.common.base.Joiner;
@@ -121,24 +123,35 @@ public class MergeTask {
 		
 		for (Path matchDir : matchDirs) {
 			Path[] files = getFile(matchDir);
-			System.out.println("files" + Joiner.on(",").join(files));
+//			System.out.println("files" + Joiner.on(",").join(files));
 
+			List<Path> mergingfiles = new ArrayList<>();
+			for(Path logfile : files)
+			{
+				// 文件名格式：part_1473411900000
+				String fileName = logfile.getName();
+				String timeMillis = fileName.split("_")[1];
+				long millis = Long.parseLong(timeMillis);
+				if(millis <= oneHourAgoMillis)
+				{
+					Path dstFile = getDstFile(matchDir);
+					System.out.println("dstFile=======>>" + dstFile.toString());
 
-            // 文件名格式：part_1473411900000
-            String fileName = matchDir.getName();
-            String timeMillis = fileName.split("_")[1];
-            long millis = Long.parseLong(timeMillis);
-            if(millis <= oneHourAgoMillis)
-            {
-                Path dstFile = getDstFile(matchDir);
-                System.out.println("dstFile=======>>" + dstFile.toString());
+					merge(matchDir, dstFile, false);
+					mergingfiles.add(logfile);
 
-                merge(matchDir, dstFile, false);
+				}
 
-    			if (deleteSource) {
-    				delete(files);
-    			}
-            }
+//				if (deleteSource) {
+//					if(mergingfiles.size() > 0)
+//					{
+//						// 强制类型转换
+//						Path[] delFiles = (Path[]) mergingfiles.toArray();
+//						delete(delFiles);
+//					}
+//				}
+			}
+
 		}
 	}
 }
