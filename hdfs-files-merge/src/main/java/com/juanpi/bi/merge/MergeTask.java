@@ -152,20 +152,20 @@ public class MergeTask {
                 Path dstPath = new Path(dstFileBuf.toString());
 
                 OutputStream out = srcFS.create(dstPath, false);
-
-                // 遍历小文件
-                for(Path logfile : mergingFiles)
+                try
                 {
-                    try {
+                    // 遍历小文件
+                    for (Path logfile : mergingFiles) {
                         InputStream in = srcFS.open(logfile);
                         try {
                             IOUtils.copyBytes(in, out, conf, false);
                         } finally {
                             in.close();
                         }
-                    } finally {
-                        out.close();
                     }
+                } finally
+                {
+                    out.close();
                 }
 
 //                if (deleteSource) {
