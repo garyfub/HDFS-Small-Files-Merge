@@ -134,7 +134,7 @@ public class MergeTask {
 				long millis = Long.parseLong(timeMillis);
 				if(millis <= oneHourAgoMillis)
 				{
-					Path dstFile = getDstFile(matchDir);
+					Path dstFile = getDstFile(logfile);
 					System.out.println("dstFile=======>>" + dstFile.toString());
 
 					merge(matchDir, dstFile, false);
