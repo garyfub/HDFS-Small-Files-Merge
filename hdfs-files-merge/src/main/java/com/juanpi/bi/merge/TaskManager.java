@@ -8,7 +8,8 @@ import com.juanpi.bi.merge.util.ProcessUtil;
 
 /**
  * 
- * @author yunduan  
+ * @author yunduan
+ * updated by gongzi
  * @date 2016年6月25日 下午1:20:38    
  * 任务管理
  */
@@ -26,9 +27,7 @@ public class TaskManager {
 	}
 
 	
-	// 
-	// 路径正则
-	//	
+	// 路径正则 TODO 测试 2016-09-09 号数据
 	private String getDirRegex() {
 		return baseDir + "mb_event_hash2/date=" + "2016-09-09" + "/gu_hash={a}/";
 	}

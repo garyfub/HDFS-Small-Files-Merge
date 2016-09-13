@@ -70,25 +70,19 @@ public class MergeTask {
         return matchPaths;
 	}
 	
-	//
 	// 获取目录下所有文件
-	//
 	private Path[] getFile(Path dir) throws IOException {
 		return HdfsUtil.getHdfsFiles(dir);
 	}
 	
-	//
 	// 删除指定文件
-	//
 	private void delete(Path[] files) throws IOException {
 		for (Path file : files) {
 			HdfsUtil.delete(file);
 		}
 	}
 
-	//
 	// merge目标文件路径
-	//
 	private Path getDstFile(Path srcDir) {
 		StringBuilder dstFileBuf = new StringBuilder();
 
@@ -142,7 +136,6 @@ public class MergeTask {
     				delete(files);
     			}
             }
-
 		}
 	}
 }

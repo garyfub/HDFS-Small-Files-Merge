@@ -114,7 +114,7 @@ group_id:
 bi_gongzi_mb_event_real_direct_by_dw
 bi_gongzi_mb_pageinfo_real_direct_by_dw
 
-java -jar ./hdfs-files-merge-jar-with-dependencies.jar com.juanpi.bi.merge.TaskManager
+ hadoop jar ./hdfs-file-merge.jar com.juanpi.bi.merge.TaskManager
 
 alter table dw_path_list_new partition (date="2016-09-02", gu_hash="0") set location 'hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list_jobs/date=2016-09-02/gu_hash=0';
 
