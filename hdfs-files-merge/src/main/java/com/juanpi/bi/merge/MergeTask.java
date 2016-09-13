@@ -1,21 +1,18 @@
 package com.juanpi.bi.merge;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import com.google.common.base.Joiner;
 import com.juanpi.bi.merge.util.DateUtil;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.*;
 
 import com.juanpi.bi.merge.util.HdfsUtil;
-import com.juanpi.bi.merge.util.ProcessUtil;
+import org.apache.hadoop.io.IOUtils;
 
 /**
  * 
@@ -71,21 +68,22 @@ public class MergeTask {
         System.out.println("getMatchDir==" + Joiner.on(",").join(matchPaths));
         return matchPaths;
 	}
-	
-	// 获取目录下所有文件
-	private Path[] getFile(Path dir) throws IOException {
-		return HdfsUtil.getHdfsFiles(dir);
-	}
-	
+
+//
+//	// 获取目录下所有文件
+//	private Path[] getFile(Path dir) throws IOException {
+//		return HdfsUtil.getHdfsFiles(dir);
+//	}
+//
 	// 删除指定文件
-	private void delete(Path[] files) throws IOException {
+	private static void delete(Path[] files) throws IOException {
 		for (Path file : files) {
 			HdfsUtil.delete(file);
 		}
 	}
 
 	// merge目标文件路径
-	private Path getDstFile(Path srcDir) {
+	private static Path getDstFile(Path srcDir) {
 		StringBuilder dstFileBuf = new StringBuilder();
 
         String fileName = srcDir.getName();
@@ -99,59 +97,78 @@ public class MergeTask {
 
 		return dstFile;
 	}
+
+    /**
+     *
+     * @param srcFS hdfs 文件系统
+     * @param srcDir 文件目录
+     * @param deleteSource 是否删除
+     * @param conf hadoop配置文件
+     * @throws IOException
+     */
+	public static void copyLogMerge(FileSystem srcFS, Path srcDir, boolean deleteSource, Configuration conf) throws IOException {
+
+		FileStatus[] fileStatus = srcFS.listStatus(srcDir);
+        List<Path> mergingFiles = new ArrayList<>();
+
+        for (FileStatus fileStat : fileStatus) {
+			Path logfile = fileStat.getPath();
+
+			// 文件名格式：part_1473411900000
+			String fileName = logfile.getName();
+			String timeMillis = fileName.split("_")[1];
+			long millis = Long.parseLong(timeMillis);
+
+			if (millis <= oneHourAgoMillis) {
+                mergingFiles.add(logfile);
+				Path dstPath = getDstFile(logfile);
+				OutputStream out = srcFS.create(dstPath);
+				try {
+					InputStream in = srcFS.open(logfile);
+					try {
+						IOUtils.copyBytes(in, out, conf, false);
+					} finally {
+						in.close();
+					}
+				} finally {
+					out.close();
+				}
+			}
+		}
+
+//        if (deleteSource) {
+//            if(mergingFiles.size() > 0)
+//            {
+//                // 强制类型转换
+//                Path[] delFiles = (Path[]) mergingFiles.toArray();
+//                delete(delFiles);
+//            }
+//        }
+	}
 	
 	// merge小文件
-	private void merge(Path srcDir, Path dstFile, boolean deleteSource) throws IOException {
+	private void merge(Path srcDir, boolean deleteSource) throws IOException {
 
         if(!fs.getFileStatus(srcDir).isDirectory()) {
             System.out.println("srcDir is not directory");
         }
 
-		boolean res = HdfsUtil.copyMerge(fs, srcDir, fs, dstFile, deleteSource, configuration, null);
-        System.out.println("merge res=" + res);
+		copyLogMerge(fs, srcDir, deleteSource, configuration);
     }
 	
 	public void doMerge() throws IOException {
 
         System.out.println("doMerge start======>>....");
         Path[] matchDirs = getMatchDir();
-		System.out.println("matchDirs" + Joiner.on(",").join(matchDirs));
+
 		if (matchDirs == null || matchDirs.length < 1) {
             System.out.println("matchDirs is null....");
             return;
 		}
 		
 		for (Path matchDir : matchDirs) {
-			Path[] files = getFile(matchDir);
-//			System.out.println("files" + Joiner.on(",").join(files));
-
-			List<Path> mergingfiles = new ArrayList<>();
-			for(Path logfile : files)
-			{
-				// 文件名格式：part_1473411900000
-				String fileName = logfile.getName();
-				String timeMillis = fileName.split("_")[1];
-				long millis = Long.parseLong(timeMillis);
-				if(millis <= oneHourAgoMillis)
-				{
-					Path dstFile = getDstFile(logfile);
-					System.out.println("dstFile=======>>" + dstFile.toString());
-
-					merge(matchDir, dstFile, false);
-					mergingfiles.add(logfile);
-
-				}
-
-//				if (deleteSource) {
-//					if(mergingfiles.size() > 0)
-//					{
-//						// 强制类型转换
-//						Path[] delFiles = (Path[]) mergingfiles.toArray();
-//						delete(delFiles);
-//					}
-//				}
-			}
-
+//			Path dstFile = getDstFile(matchDir);
+			merge(matchDir, false);
 		}
 	}
 }
