@@ -48,7 +48,14 @@ public class TaskManager {
         String dateStr = "";
         String dir = "";
 
-		if(args.length > 1)
+        System.out.println("args 参数个数：" + args.length);
+
+		if(args.length == 1)
+        {
+            dateStr = args[0];
+        }
+
+        if(args.length == 2)
         {
             dateStr = args[0];
             dir = args[1];
