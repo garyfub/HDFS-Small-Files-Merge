@@ -121,10 +121,11 @@ public class MergeTask {
                 String dateHourStr = DateUtil.dateHourStr(timeMillis, "yyyyMMddHH");
 
                 // 如果key对应的ArrayList不存在，就创建ArrayList
-                if(filesMap.get(dateHourStr).isEmpty())
+                if(null == filesMap.get(dateHourStr) || filesMap.get(dateHourStr).isEmpty())
                 {
                     List<Path> mergingFiles = new ArrayList<>();
                     mergingFiles.add(logfile);
+                    filesMap.put(dateHourStr, mergingFiles);
                 }
                 else
                 {

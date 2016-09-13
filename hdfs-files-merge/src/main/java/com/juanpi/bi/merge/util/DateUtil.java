@@ -1,9 +1,13 @@
 package com.juanpi.bi.merge.util;
 
+import org.apache.hadoop.fs.Path;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -98,6 +102,14 @@ public class DateUtil {
             System.out.println("milis==" + milis);
         } catch (ParseException e) {
             e.printStackTrace();
+        }
+
+
+        HashMap<String, List<Path>> filesMap = new HashMap<>();
+
+        if(null == filesMap.get("a") || filesMap.get("a").isEmpty())
+        {
+            System.out.println("filesMap.isEmpty");
         }
     }
 
