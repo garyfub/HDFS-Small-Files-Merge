@@ -151,7 +151,7 @@ public class MergeTask {
                 dstFileBuf.append("/merged_" + dateHourStr);
                 Path dstPath = new Path(dstFileBuf.toString());
 
-                OutputStream out = srcFS.create(dstPath, false);
+                OutputStream out = srcFS.create(dstPath);
                 try
                 {
                     // 遍历小文件
