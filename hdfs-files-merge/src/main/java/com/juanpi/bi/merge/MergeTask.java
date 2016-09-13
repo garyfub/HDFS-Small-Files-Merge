@@ -113,6 +113,7 @@ public class MergeTask {
 
         System.out.println("doMerge start======>>....");
         Path[] matchDirs = getMatchDir();
+		System.out.println("matchDirs" + Joiner.on(",").join(matchDirs));
 		if (matchDirs == null || matchDirs.length < 1) {
             System.out.println("matchDirs is null....");
             return;
@@ -120,6 +121,8 @@ public class MergeTask {
 		
 		for (Path matchDir : matchDirs) {
 			Path[] files = getFile(matchDir);
+			System.out.println("files" + Joiner.on(",").join(files));
+
 
             // 文件名格式：part_1473411900000
             String fileName = matchDir.getName();
