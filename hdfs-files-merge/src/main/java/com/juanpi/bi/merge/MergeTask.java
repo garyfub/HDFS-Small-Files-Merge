@@ -13,7 +13,6 @@ import org.apache.hadoop.fs.*;
 
 import com.juanpi.bi.merge.util.HdfsUtil;
 import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.util.hash.Hash;
 
 /**
  * 

@@ -26,7 +26,7 @@ public class TaskManager {
 	
 	// 路径正则 TODO 测试 2016-09-09 号数据
 	private String getDirRegex(String dateStr) {
-		return baseDir + "mb_event_hash2/date=" + dateStr + "/gu_hash={a}/";
+		return baseDir + "mb_event_hash2/date=" + dateStr + "/gu_hash=*/";
 	}
 	
 	/**
