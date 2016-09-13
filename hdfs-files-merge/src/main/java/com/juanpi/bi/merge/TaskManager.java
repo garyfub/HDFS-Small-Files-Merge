@@ -81,5 +81,7 @@ public class TaskManager {
             e.printStackTrace();
 			System.exit(-1);
 		}
-	}
+
+        System.out.println("Small Files Merge Complete...");
+    }
 }
