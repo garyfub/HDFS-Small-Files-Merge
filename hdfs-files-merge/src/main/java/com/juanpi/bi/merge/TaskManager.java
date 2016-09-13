@@ -50,8 +50,8 @@ public class TaskManager {
 
 		if(args.length > 1)
         {
-            dateStr = args[0];
-            dir = args[1];
+            dateStr = args[1];
+            dir = args[2];
         }
 
         if(null == dateStr || dateStr.isEmpty())

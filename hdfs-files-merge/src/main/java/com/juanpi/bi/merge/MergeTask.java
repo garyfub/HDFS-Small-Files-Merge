@@ -13,6 +13,7 @@ import org.apache.hadoop.fs.*;
 
 import com.juanpi.bi.merge.util.HdfsUtil;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.util.hash.Hash;
 
 /**
  * 
@@ -70,20 +71,20 @@ public class MergeTask {
 	}
 
 	// merge目标文件路径
-	private static Path getDstFile(Path srcDir) {
-		StringBuilder dstFileBuf = new StringBuilder();
-
-        String fileName = srcDir.getName();
-        // 文件名格式：part_1473411900000
-        String timeMillis = fileName.split("_")[1];
-        String dateHourStr = DateUtil.dateHourStr(timeMillis, "yyyyMMddHH");
-
-        dstFileBuf.append(srcDir.getParent().toString());
-        dstFileBuf.append("/merged_" + dateHourStr);
-		Path dstFile = new Path(dstFileBuf.toString());
-
-		return dstFile;
-	}
+//	private static Path getDstFile(Path srcDir) {
+//		StringBuilder dstFileBuf = new StringBuilder();
+//
+//        String fileName = srcDir.getName();
+//        // 文件名格式：part_1473411900000
+//        String timeMillis = fileName.split("_")[1];
+//        String dateHourStr = DateUtil.dateHourStr(timeMillis, "yyyyMMddHH");
+//
+//        dstFileBuf.append(srcDir.getParent().toString());
+//        dstFileBuf.append("/merged_" + dateHourStr);
+//		Path dstFile = new Path(dstFileBuf.toString());
+//
+//		return dstFile;
+//	}
 
     // 删除指定文件
     private static void delete(Path[] files) throws IOException {
@@ -103,41 +104,77 @@ public class MergeTask {
 	public static void copyLogMerge(FileSystem srcFS, Path srcDir, boolean deleteSource, Configuration conf) throws IOException {
 
 		FileStatus[] fileStatus = srcFS.listStatus(srcDir);
-        List<Path> mergingFiles = new ArrayList<>();
+
+        HashMap<String, List<Path>> filesMap = new HashMap<>();
 
         for (FileStatus fileStat : fileStatus) {
-			Path logfile = fileStat.getPath();
+            Path logfile = fileStat.getPath();
 
-			// 文件名格式：part_1473411900000
-			String fileName = logfile.getName();
-			String timeMillis = fileName.split("_")[1];
-			long millis = Long.parseLong(timeMillis);
+            // 文件名格式：part_1473411900000
+            String fileName = logfile.getName();
+            String timeMillis = fileName.split("_")[1];
 
-			if (millis <= oneHourAgoMillis) {
-                mergingFiles.add(logfile);
-				Path dstPath = getDstFile(logfile);
+            long millis = Long.parseLong(timeMillis);
 
-                // true：overwrite
-                OutputStream out = srcFS.create(dstPath, false);
-				try {
-					InputStream in = srcFS.open(logfile);
-					try {
-						IOUtils.copyBytes(in, out, conf, false);
-					} finally {
-						in.close();
-					}
-				} finally {
-					out.close();
-				}
-			}
-		}
+            if (millis <= oneHourAgoMillis) {
 
-        if (deleteSource) {
+                String dateHourStr = DateUtil.dateHourStr(timeMillis, "yyyyMMddHH");
+
+                // 如果key对应的ArrayList不存在，就创建ArrayList
+                if(filesMap.get(dateHourStr).isEmpty())
+                {
+                    List<Path> mergingFiles = new ArrayList<>();
+                    mergingFiles.add(logfile);
+                }
+                else
+                {
+                    // 如果key对应的ArrayList存在就，直接追加
+                    filesMap.get(dateHourStr).add(logfile);
+                }
+            }
+        }
+
+        Iterator iter = filesMap.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry entry = (Map.Entry) iter.next();
+            String dateHourStr = (String) entry.getKey();
+            List<Path> mergingFiles = (List<Path>) entry.getValue();
+
+            // 如果存在需要合并的小文件
             if(mergingFiles.size() > 0)
             {
-                // 强制类型转换
-                Path[] delFiles = (Path[]) mergingFiles.toArray();
-                delete(delFiles);
+                StringBuilder dstFileBuf = new StringBuilder();
+
+                // 创建目标文件
+                dstFileBuf.append(mergingFiles.get(0).getParent().toString());
+                dstFileBuf.append("/merged_" + dateHourStr);
+                Path dstPath = new Path(dstFileBuf.toString());
+
+                OutputStream out = srcFS.create(dstPath, false);
+
+                // 遍历小文件
+                for(Path logfile : mergingFiles)
+                {
+                    try {
+                        InputStream in = srcFS.open(logfile);
+                        try {
+                            IOUtils.copyBytes(in, out, conf, false);
+                        } finally {
+                            in.close();
+                        }
+                    } finally {
+                        out.close();
+                    }
+                }
+
+//                if (deleteSource) {
+//                    if(mergingFiles.size() > 0)
+//                    {
+//                        // 强制类型转换
+//                        Path[] delFiles = (Path[]) mergingFiles.toArray();
+//                        delete(delFiles);
+//                    }
+//                }
             }
         }
 	}
