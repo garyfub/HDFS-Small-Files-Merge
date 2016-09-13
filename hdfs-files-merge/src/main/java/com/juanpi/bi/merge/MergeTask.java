@@ -37,7 +37,7 @@ public class MergeTask {
         Calendar cal = Calendar.getInstance();
         long milis = cal.getTimeInMillis();
         String fmt = "yyyy-MM-dd HH:00:00";
-        String dt = DateUtil.getHourIntervalDate(-18, fmt);
+        String dt = DateUtil.getHourIntervalDate(0, fmt);
         try {
             milis = DateUtil.dateToMillis(dt, fmt);
         } catch (ParseException e) {
@@ -69,19 +69,6 @@ public class MergeTask {
         return matchPaths;
 	}
 
-//
-//	// 获取目录下所有文件
-//	private Path[] getFile(Path dir) throws IOException {
-//		return HdfsUtil.getHdfsFiles(dir);
-//	}
-//
-	// 删除指定文件
-	private static void delete(Path[] files) throws IOException {
-		for (Path file : files) {
-			HdfsUtil.delete(file);
-		}
-	}
-
 	// merge目标文件路径
 	private static Path getDstFile(Path srcDir) {
 		StringBuilder dstFileBuf = new StringBuilder();
@@ -97,6 +84,13 @@ public class MergeTask {
 
 		return dstFile;
 	}
+
+    // 删除指定文件
+    private static void delete(Path[] files) throws IOException {
+        for (Path file : files) {
+            HdfsUtil.delete(file);
+        }
+    }
 
     /**
      *
@@ -122,7 +116,9 @@ public class MergeTask {
 			if (millis <= oneHourAgoMillis) {
                 mergingFiles.add(logfile);
 				Path dstPath = getDstFile(logfile);
-				OutputStream out = srcFS.create(dstPath);
+
+                // true：overwrite
+                OutputStream out = srcFS.create(dstPath, false);
 				try {
 					InputStream in = srcFS.open(logfile);
 					try {
@@ -136,14 +132,14 @@ public class MergeTask {
 			}
 		}
 
-//        if (deleteSource) {
-//            if(mergingFiles.size() > 0)
-//            {
-//                // 强制类型转换
-//                Path[] delFiles = (Path[]) mergingFiles.toArray();
-//                delete(delFiles);
-//            }
-//        }
+        if (deleteSource) {
+            if(mergingFiles.size() > 0)
+            {
+                // 强制类型转换
+                Path[] delFiles = (Path[]) mergingFiles.toArray();
+                delete(delFiles);
+            }
+        }
 	}
 	
 	// merge小文件
@@ -167,7 +163,6 @@ public class MergeTask {
 		}
 		
 		for (Path matchDir : matchDirs) {
-//			Path dstFile = getDstFile(matchDir);
 			merge(matchDir, false);
 		}
 	}

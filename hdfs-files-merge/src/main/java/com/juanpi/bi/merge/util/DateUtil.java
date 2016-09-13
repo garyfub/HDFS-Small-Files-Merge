@@ -92,7 +92,7 @@ public class DateUtil {
         System.out.println(millisToMins("1473351420000"));
 
         String fmt = "yyyy-MM-dd HH:00:00";
-        String dt = DateUtil.getHourIntervalDate(-17, fmt);
+        String dt = DateUtil.getHourIntervalDate(0, fmt);
         try {
             long milis = DateUtil.dateToMillis(dt, fmt);
             System.out.println("milis==" + milis);
