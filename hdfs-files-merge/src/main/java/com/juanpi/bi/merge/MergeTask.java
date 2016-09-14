@@ -127,30 +127,35 @@ public class MergeTask {
             // 如果存在需要合并的小文件
             if(mergingFiles.size() > 0)
             {
-                StringBuilder dstFileBuf = new StringBuilder();
+
+                for (Path logfile : mergingFiles) {
+                    System.out.println("======>> mergingFiles is:" + logfile.toString());
+                }
+
+//                StringBuilder dstFileBuf = new StringBuilder();
 
                 // 创建目标文件
-                dstFileBuf.append(mergingFiles.get(0).getParent().toString());
-                dstFileBuf.append("/merged_" + dateHourStr);
-                Path dstPath = new Path(dstFileBuf.toString());
+//                dstFileBuf.append(mergingFiles.get(0).getParent().toString());
+//                dstFileBuf.append("/merged_" + dateHourStr);
+//                Path dstPath = new Path(dstFileBuf.toString());
 
-                OutputStream out = srcFS.create(dstPath);
-                try
-                {
-                    // 遍历小文件
-                    for (Path logfile : mergingFiles) {
-                        InputStream in = srcFS.open(logfile);
-                        try {
-                            IOUtils.copyBytes(in, out, conf, false);
-                        } finally {
-                            in.close();
-                        }
-                    }
-                }
-                finally
-                {
-                    out.close();
-                }
+//                OutputStream out = srcFS.create(dstPath);
+//                try
+//                {
+//                    // 遍历小文件
+//                    for (Path logfile : mergingFiles) {
+//                        InputStream in = srcFS.open(logfile);
+//                        try {
+//                            IOUtils.copyBytes(in, out, conf, false);
+//                        } finally {
+//                            in.close();
+//                        }
+//                    }
+//                }
+//                finally
+//                {
+//                    out.close();
+//                }
 
 //                if (deleteSource) {
 //                    if(mergingFiles.size() > 0)
