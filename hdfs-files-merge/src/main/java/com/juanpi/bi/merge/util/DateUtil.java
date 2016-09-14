@@ -1,13 +1,9 @@
 package com.juanpi.bi.merge.util;
 
-import org.apache.hadoop.fs.Path;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 
 
 /**
@@ -29,6 +25,12 @@ public class DateUtil {
         return hourIntervalDate;
     }
 
+    /**
+     * 系统当前时间间隔的x小时的时间戳
+     * @param hourInterval
+     * @param fmt
+     * @return
+     */
     public static String getHourIntervalMillis(int hourInterval, String fmt) {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.HOUR, hourInterval);
@@ -104,13 +106,12 @@ public class DateUtil {
             e.printStackTrace();
         }
 
-
-        HashMap<String, List<Path>> filesMap = new HashMap<>();
-
-        if(null == filesMap.get("a") || filesMap.get("a").isEmpty())
-        {
-            System.out.println("filesMap.isEmpty");
-        }
+//        HashMap<String, List<Path>> filesMap = new HashMap<>();
+//
+//        if(null == filesMap.get("a") || filesMap.get("a").isEmpty())
+//        {
+//            System.out.println("filesMap.isEmpty");
+//        }
     }
 
 

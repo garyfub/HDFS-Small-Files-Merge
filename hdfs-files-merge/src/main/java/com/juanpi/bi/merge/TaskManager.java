@@ -1,9 +1,6 @@
 package com.juanpi.bi.merge;
 
 import java.io.IOException;
-import java.text.ParseException;
-
-import com.juanpi.bi.merge.util.DateUtil;
 import com.juanpi.bi.merge.util.ProcessUtil;
 
 /**
@@ -14,19 +11,16 @@ import com.juanpi.bi.merge.util.ProcessUtil;
  * 任务管理
  */
 public class TaskManager {
-	
 
 	private String baseDir = null;
-
 
 	public TaskManager(String baseDir) {
 		this.baseDir = baseDir;
 	}
 
-	
 	// 路径正则 TODO 测试 2016-09-09 号数据
 	private String getDirRegex(String dateStr) {
-		return baseDir + "mb_event_hash2/date=" + dateStr + "/gu_hash=*/";
+		return baseDir + "*/date=" + dateStr + "/gu_hash=*/";
 	}
 	
 	/**

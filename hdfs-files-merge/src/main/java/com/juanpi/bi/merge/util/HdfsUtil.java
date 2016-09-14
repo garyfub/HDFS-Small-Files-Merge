@@ -56,9 +56,8 @@ public class HdfsUtil extends FileUtil {
 		Path pa = new Path(hdfsDirRegex);
 		// , new RegexPathFilter(regex, isInclude)
 		FileStatus[] files = fs.globStatus(pa);
-		System.out.println("pa.toString=" + pa.toString() + ", pa.getParent=" + pa.getParent());
+//		System.out.println("pa.toString=" + pa.toString() + ", pa.getParent=" + pa.getParent());
 		Path[] pths = FileUtil.stat2Paths(files);
-		System.out.println("getHdfsFiles are:" + Joiner.on(";").join(pths));
 		return pths;
 	}
 	

@@ -69,22 +69,6 @@ public class MergeTask {
         return matchPaths;
 	}
 
-	// merge目标文件路径
-//	private static Path getDstFile(Path srcDir) {
-//		StringBuilder dstFileBuf = new StringBuilder();
-//
-//        String fileName = srcDir.getName();
-//        // 文件名格式：part_1473411900000
-//        String timeMillis = fileName.split("_")[1];
-//        String dateHourStr = DateUtil.dateHourStr(timeMillis, "yyyyMMddHH");
-//
-//        dstFileBuf.append(srcDir.getParent().toString());
-//        dstFileBuf.append("/merged_" + dateHourStr);
-//		Path dstFile = new Path(dstFileBuf.toString());
-//
-//		return dstFile;
-//	}
-
     // 删除指定文件
     private static void delete(Path[] files) throws IOException {
         for (Path file : files) {
@@ -162,7 +146,8 @@ public class MergeTask {
                             in.close();
                         }
                     }
-                } finally
+                }
+                finally
                 {
                     out.close();
                 }
@@ -200,7 +185,8 @@ public class MergeTask {
 		}
 		
 		for (Path matchDir : matchDirs) {
-			merge(matchDir, false);
+            System.out.println("matchDir is:" + matchDir);
+            merge(matchDir, false);
 		}
 	}
 }
