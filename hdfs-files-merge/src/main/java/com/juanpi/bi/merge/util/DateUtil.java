@@ -93,7 +93,7 @@ public class DateUtil {
     }
 
     public static void main(String[] args){
-        String dateHourStr = DateUtil.dateHourStr("1473351420000", "yyyyMMddHH");
+        String dateHourStr = DateUtil.dateHourStr("1473491100000", "yyyyMMddHH");
         System.out.println(dateHourStr);
         System.out.println(millisToMins("1473351420000"));
 

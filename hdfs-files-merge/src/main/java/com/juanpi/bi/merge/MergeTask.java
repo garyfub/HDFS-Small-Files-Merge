@@ -69,7 +69,7 @@ public class MergeTask {
 	}
 
     // 删除指定文件
-    private static void delete(Path[] files) throws IOException {
+    private static void delete(List<Path> files) throws IOException {
         for (Path file : files) {
             HdfsUtil.delete(file);
         }
@@ -158,8 +158,8 @@ public class MergeTask {
                     if(mergingFiles.size() > 0)
                     {
                         // 强制类型转换
-                        Path[] delFiles = (Path[]) mergingFiles.toArray();
-                        delete(delFiles);
+                        System.out.println("删除小文件：" + dateHourStr + ",目录：" + mergingFiles.get(0).getParent());
+                        delete(mergingFiles);
                     }
                 }
             }
