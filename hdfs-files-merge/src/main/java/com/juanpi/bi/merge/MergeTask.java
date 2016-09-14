@@ -128,7 +128,8 @@ public class MergeTask {
             if(mergingFiles.size() > 0)
             {
 //                for (Path logfile : mergingFiles) {
-//                    System.out.println("======>> mergingFiles is:" + logfile.toString());
+//                    System.out.println("======>> mergingFiles key:" + logfile.toString());
+//                    System.out.println("======>> mergingFiles is:" + dateHourStr);
 //                }
 
                 StringBuilder dstFileBuf = new StringBuilder();
@@ -141,12 +142,14 @@ public class MergeTask {
                 OutputStream out = srcFS.create(dstPath);
                 try
                 {
-                    // 遍历小文件
+                    // 遍历小文件, 复制
                     for (Path logfile : mergingFiles) {
                         InputStream in = srcFS.open(logfile);
                         try {
                             IOUtils.copyBytes(in, out, conf, false);
-                        } finally {
+                        } finally
+                        {
+                            System.out.println("key:" + dateHourStr + "======>> mergingFiles key:" + logfile.toString());
                             in.close();
                         }
                     }
@@ -175,6 +178,8 @@ public class MergeTask {
         if(!fs.getFileStatus(srcDir).isDirectory()) {
             System.out.println("srcDir is not directory");
         }
+
+//        HdfsUtil.copyMerge(fs, srcDir, fs, dstFile, deleteSource, configuration, null);
 
 		copyLogMerge(fs, srcDir, deleteSource, configuration);
     }
