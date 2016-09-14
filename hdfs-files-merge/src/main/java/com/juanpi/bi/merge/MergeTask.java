@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.text.ParseException;
 import java.util.*;
 
-import com.google.common.base.Joiner;
 import com.juanpi.bi.merge.util.DateUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
@@ -65,7 +64,7 @@ public class MergeTask {
 	private Path[] getMatchDir() throws IOException {
         // PathFilter是过滤布符合指定表达式的路径，ture：匹配part开头的数记录
 		Path[] matchPaths = HdfsUtil.getHdfsFiles(this.srcDirRegex, "part.*", false);
-        System.out.println("getMatchDir==" + Joiner.on(",").join(matchPaths));
+//        System.out.println("getMatchDir==" + Joiner.on(",").join(matchPaths));
         return matchPaths;
 	}
 
@@ -127,11 +126,6 @@ public class MergeTask {
             // 如果存在需要合并的小文件
             if(mergingFiles.size() > 0)
             {
-//                for (Path logfile : mergingFiles) {
-//                    System.out.println("======>> mergingFiles key:" + logfile.toString());
-//                    System.out.println("======>> mergingFiles is:" + dateHourStr);
-//                }
-
                 StringBuilder dstFileBuf = new StringBuilder();
 
                 // 创建目标文件
@@ -149,7 +143,7 @@ public class MergeTask {
                             IOUtils.copyBytes(in, out, conf, false);
                         } finally
                         {
-                            System.out.println("key:" + dateHourStr + "======>> mergingFiles key:" + logfile.toString());
+                            System.out.println("key:" + dateHourStr + "==>> mergingFiles:" + logfile.toString());
                             in.close();
                         }
                     }
@@ -193,10 +187,12 @@ public class MergeTask {
             System.out.println("matchDirs is null....");
             return;
 		}
+
+        Arrays.sort(matchDirs);
 		
 		for (Path matchDir : matchDirs) {
             System.out.println("matchDir is:" + matchDir);
-            merge(matchDir, false);
+            merge(matchDir, true);
 		}
 	}
 }
