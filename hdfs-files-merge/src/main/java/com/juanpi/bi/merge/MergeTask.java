@@ -1,8 +1,6 @@
 package com.juanpi.bi.merge;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.ParseException;
 import java.util.*;
 
@@ -12,7 +10,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 
 import com.juanpi.bi.merge.util.HdfsUtil;
-import org.apache.hadoop.io.IOUtils;
 
 /**
  * 
@@ -99,7 +96,7 @@ public class MergeTask {
 
             long millis = Long.parseLong(timeMillis);
 
-            if (millis <= oneHourAgoMillis) {
+            if (fileName.startsWith("part_") && millis <= oneHourAgoMillis) {
 
                 String dateHourStr = DateUtil.dateHourStr(timeMillis, "yyyyMMddHH");
 
