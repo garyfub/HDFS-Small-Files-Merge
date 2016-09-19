@@ -129,8 +129,9 @@ public class MergeTask {
                 StringBuilder dstFileBuf = new StringBuilder();
 
                 // 创建目标文件
-                dstFileBuf.append(mergingFiles.get(0).getParent().toString());
-                dstFileBuf.append("/merged_" + dateHourStr);
+                Path fileParnt = mergingFiles.get(0).getParent();
+                dstFileBuf.append(fileParnt.toString());
+                dstFileBuf.append("/merged/merged_" + dateHourStr);
                 Path dstPath = new Path(dstFileBuf.toString());
 
                 OutputStream out = srcFS.create(dstPath);
