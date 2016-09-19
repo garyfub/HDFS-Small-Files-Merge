@@ -31,10 +31,10 @@ class KafkaManager(val kafkaParams: Map[String, String],
   def getOffset(topics: Set[String], groupId: String, selectTime: String, ssc: StreamingContext) = {
     val topic = topics.head
     val configReadPath = "/" + topic + "_" + groupId  + "/" + selectTime
-    //val configOffset = zkUtils.get(zc, configReadPath)
+
     val zc = new ZooKeeper(zkQum, 30000, this)
     if (zc.exists(configReadPath, false) == null) {
-      println("ERROR,can't find " + configReadPath + "in zookeeper!")
+      println("ERROR, can't find " + configReadPath + "in zookeeper!")
       zc.close()
       ssc.stop()
       System.exit(1)

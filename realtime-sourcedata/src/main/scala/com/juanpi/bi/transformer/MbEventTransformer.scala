@@ -86,7 +86,7 @@ class MbEventTransformer extends ITransformer {
     val starttime = (row \ "starttime").asOpt[String].getOrElse("")
     val endtime = (row \ "endtime").asOpt[String].getOrElse("")
     val result = (row \ "result").asOpt[String].getOrElse("")
-    val uid = (row \ "uid").asOpt[String].getOrElse("")
+    val uid = (row \ "uid").asOpt[String].getOrElse("0")
     val extend_params = (row \ "extend_params").asOpt[String].getOrElse("")
     // utm 的值还会改变，故定义成var
     val utm = (row \ "utm").asOpt[String].getOrElse("")

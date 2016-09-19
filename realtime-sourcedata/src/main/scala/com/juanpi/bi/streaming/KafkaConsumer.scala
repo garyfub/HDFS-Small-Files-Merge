@@ -211,19 +211,6 @@ object HBaseHandler {
 
 object KafkaConsumer{
 
-  private val timeMinutesPartition = (timestamp: Long) => {
-    val sdf = new SimpleDateFormat("yyyyMMddHHmm")
-    val dayDate: String = try {
-      sdf.format(timestamp)
-    } catch {
-      case _: Throwable => {
-        "197201010105"
-      }
-    }
-
-    dayDate
-  }
-
   class RDDMultipleTextOutputFormat extends MultipleTextOutputFormat[Any, Any] {
     override def generateActualKey(key: Any, value: Any): Any = {
       NullWritable.get()
@@ -234,10 +221,7 @@ object KafkaConsumer{
       val keyAndTime = key.asInstanceOf[(String, Long)]
       val realKey = keyAndTime._1
       val timestamp = keyAndTime._2
-//      val timeStr = timeMinutesPartition(timestamp)
-//      重楼
-//      realKey + "/" + timePartition(timestamp) + "/" + realKey + "_" + timePartition(timestamp) + "_binlog.txt"
-      realKey + "/part_" + timestamp
+      realKey + "/logs/part_" + timestamp
     }
   }
 
