@@ -98,7 +98,7 @@ public class MergeTask {
 
             long millis = Long.parseLong(timeMillis);
 
-            if (fileName.startsWith("part_") && millis <= oneHourAgoMillis) {
+            if (fileName.startsWith("part_") && millis < oneHourAgoMillis) {
 
                 String dateHourStr = DateUtil.dateHourStr(timeMillis, "yyyyMMddHH");
 
@@ -130,7 +130,7 @@ public class MergeTask {
 
                 // 创建目标文件
                 Path fileParnt = mergingFiles.get(0).getParent();
-                dstFileBuf.append(fileParnt.toString());
+                dstFileBuf.append(fileParnt.getParent().toString());
                 dstFileBuf.append("/merged/merged_" + dateHourStr);
                 Path dstPath = new Path(dstFileBuf.toString());
 
