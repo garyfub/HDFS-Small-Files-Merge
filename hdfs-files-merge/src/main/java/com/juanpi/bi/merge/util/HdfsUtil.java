@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import com.google.common.base.Joiner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;

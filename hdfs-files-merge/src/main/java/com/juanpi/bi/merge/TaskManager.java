@@ -62,7 +62,7 @@ public class TaskManager {
 
         if(null == dir || dir.isEmpty())
         {
-            dir = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list";
+            dir = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
         }
 
         System.out.println("======>>main_date:" + dateStr);
