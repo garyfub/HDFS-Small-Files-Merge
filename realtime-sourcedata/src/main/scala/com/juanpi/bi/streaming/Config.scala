@@ -8,7 +8,7 @@ object Config {
 
   val interval = System.getProperty("spark.mystreaming.batch.interval", "60").toInt
 
-  val dirPrefix = "/user/hadoop/gongzi/"
+  val dirPrefix = "/user/hadoop/dw_realtime/"
 
   val checkpoindDir= dirPrefix + "sparkstreaming/checkpoint"
 

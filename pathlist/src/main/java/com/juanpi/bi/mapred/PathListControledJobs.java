@@ -32,9 +32,9 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
  */
 public class PathListControledJobs {
 
-    static String base = "hdfs://nameservice1/user/hadoop/gongzi";
+    static String base = "hdfs://nameservice1/user/hadoop/dw_realtime";
 
-    static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list";
+    static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
 
     static final String PATH_JOBS = "dw_real_path_list_jobs";
 
@@ -84,7 +84,7 @@ public class PathListControledJobs {
         for(int i=0x0; i<=0x0; i++) {
             String gu = String.format("%x", i);
 
-            String str = "{0}/{1}/date={2}/gu_hash={3}/";
+            String str = "{0}/{1}/date={2}/gu_hash={3}/logs/";
             String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, gu);
             String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, gu);
             // 文件输入路径
