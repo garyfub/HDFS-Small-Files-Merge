@@ -114,7 +114,7 @@ group_id:
 bi_gongzi_mb_event_real_direct_by_dw
 bi_gongzi_mb_pageinfo_real_direct_by_dw
 
- hadoop jar ./hdfs-file-merge.jar com.juanpi.bi.merge.TaskManager
+ hadoop jar ./hdfs-files-merge.jar com.juanpi.bi.merge.TaskManager
 
 alter table dw_path_list_new partition (date="2016-09-02", gu_hash="0") set location 'hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list_jobs/date=2016-09-02/gu_hash=0';
 
@@ -127,3 +127,10 @@ limit 20;
 
 select * from dw_path_list_new where date = "2016-09-02" and gu_hash="0" limit 20;
 
+
+
+### 新目录
+hadoop fs -du -h hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_path_list/date=2016-09-19
+
+hadoop fs -du -h hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list/mb_event_hash2/date=2016-09-19
+hadoop fs -du -h hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-09-19
