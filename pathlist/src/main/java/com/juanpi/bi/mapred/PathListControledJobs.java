@@ -84,7 +84,7 @@ public class PathListControledJobs {
         for(int i=start; i<=end; i++) {
             String gu = String.format("%x", i);
 
-            String str = "{0}/{1}/date={2}/gu_hash={3}/logs/";
+            String str = "{0}/{1}/date={2}/gu_hash={3}/merged/";
             String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, gu);
             String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, gu);
             // 文件输入路径
