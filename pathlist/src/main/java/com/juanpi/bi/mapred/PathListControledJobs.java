@@ -69,7 +69,7 @@ public class PathListControledJobs {
         return format.format(c1.getTime());
     }
 
-    public static void JobsControl(String dateStr){
+    public static void JobsControl(String dateStr, int start, int end, String jobControlName){
 
         if(dateStr== null || dateStr.isEmpty()){
             dateStr = getDateStr();
@@ -78,10 +78,10 @@ public class PathListControledJobs {
         Configuration conf = new Configuration();
 
         //新建作业控制器
-        JobControl jc = new JobControl("PathListControledJobs");
+        JobControl jc = new JobControl(jobControlName);
 
         // 遍历16个分区
-        for(int i=0x0; i<=0x0; i++) {
+        for(int i=start; i<=end; i++) {
             String gu = String.format("%x", i);
 
             String str = "{0}/{1}/date={2}/gu_hash={3}/logs/";
@@ -117,7 +117,7 @@ public class PathListControledJobs {
 
         while(true){
             if(jc.allFinished()){
-                System.out.println("16个目录的数据处理完毕！");
+                System.out.println("8个目录的数据处理完毕！");
                 System.out.println(jc.getSuccessfulJobList());
                 jc.stop();
                 // 如果不加 break 或者 return，程序会一直循环
@@ -393,13 +393,19 @@ public class PathListControledJobs {
         }
     }
 
+    /**
+     * 分两组并行计算
+     * @param args
+     */
     public static void main(String[] args){
         String dateStr = args[0];
         if(dateStr== null || dateStr.isEmpty()){
-            JobsControl("");
+            JobsControl("", 0x0, 0x8, "PathListControledJobs08");
+            JobsControl("", 0x9, 0xf, "PathListControledJobs0f");
         } else
         {
-            JobsControl(dateStr);
+            JobsControl(dateStr, 0x0, 0x8, "PathListControledJobs08");
+            JobsControl(dateStr, 0x9, 0xf, "PathListControledJobs0f");
         }
 
     }
