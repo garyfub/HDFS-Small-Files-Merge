@@ -93,9 +93,9 @@ public class PathListControledJobs {
             // PathList文件落地路径
             String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, PATH_JOBS, dateStr, gu);
 
-            System.out.println(base);
-            System.out.println(inputPath);
-            System.out.println(outputPath);
+//            System.out.println(base);
+//            System.out.println(inputPath);
+//            System.out.println(outputPath);
 
             getFileSystem(base, outputPath);
 
@@ -280,7 +280,6 @@ public class PathListControledJobs {
                 Text value2 = new Text(v2.toStrings()[2]);
                 context.write(key2, value2);
             }
-
         }
     }
 
