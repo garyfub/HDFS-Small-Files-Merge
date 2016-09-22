@@ -93,10 +93,6 @@ public class PathListControledJobs {
             // PathList文件落地路径
             String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, PATH_JOBS, dateStr, gu);
 
-//            System.out.println(base);
-//            System.out.println(inputPath);
-//            System.out.println(outputPath);
-
             getFileSystem(base, outputPath);
 
             // 将受控作业添加到控制器中
@@ -201,14 +197,14 @@ public class PathListControledJobs {
 
                     //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
                     // page_level_id  对应的路径 line
-                    // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 35: event_value; 36: event_lvl2_value; 22: starttime
+                    // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 40: event_value; 36: event_lvl2_value; 22: starttime
                     String page_level_id = (splited[21] == null)? "\\N":splited[21];
                     String page_id = (splited[15] == null) ? "\\N":splited[15];
                     String page_value = (splited[16] == null) ? "\\N":splited[16];
                     String page_lvl2_value = (splited[25] == null) ? "\\N":splited[25];
                     String event_id = (splited[40] == null) ? "\\N":splited[40];
-                    String event_value = (splited[35] == null) ? "\\N":splited[35];
-                    String event_lvl2_value = (splited[41] == null) ? "\\N":splited[41];
+                    String event_value = (splited[41] == null) ? "\\N":splited[41];
+                    String event_lvl2_value = (splited[42] == null) ? "\\N":splited[42];
                     String startTime = (splited[22] == null) ? "\\N":splited[22];
                     String loadTime = (splited[46] == null) ? "\\N":splited[46];
                     String str[] = {page_level_id,
