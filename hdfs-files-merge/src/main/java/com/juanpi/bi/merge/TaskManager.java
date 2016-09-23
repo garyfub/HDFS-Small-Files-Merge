@@ -1,6 +1,10 @@
 package com.juanpi.bi.merge;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.Calendar;
+
+import com.juanpi.bi.merge.util.DateUtil;
 import com.juanpi.bi.merge.util.ProcessUtil;
 
 /**
@@ -18,7 +22,9 @@ public class TaskManager {
 		this.baseDir = baseDir;
 	}
 
-	// 路径正则 TODO 测试 2016-09-09 号数据
+    public static long oneHourAgoMillis = DateUtil.getHoursAgoMillis();
+
+    // 路径正则 TODO 测试 2016-09-09 号数据
 	private String getDirRegex(String dateStr) {
 		return baseDir + "/{mb_event_hash2,mb_pageinfo_hash2}/date=" + dateStr + "/gu_hash=*/logs/";
 	}
@@ -54,11 +60,6 @@ public class TaskManager {
             dateStr = args[0];
             dir = args[1];
         }
-
-        if(null == dateStr || dateStr.isEmpty())
-		{
-            dateStr = ProcessUtil.getBeforeOneHourDate();
-		}
 
         if(null == dir || dir.isEmpty())
         {

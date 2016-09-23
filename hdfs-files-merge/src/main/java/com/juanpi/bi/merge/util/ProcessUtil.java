@@ -1,7 +1,5 @@
 package com.juanpi.bi.merge.util;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.List;
 /**
  * 
@@ -65,38 +63,6 @@ public class ProcessUtil {
 		}
 
 		return traceMessage;
-	}
-
-	public static String getYesterday() {
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.DATE, -1);
-		String yesterday = new SimpleDateFormat("yyyy-MM-dd ").format(cal.getTime());
-		
-		return yesterday;
-	}
-	
-	/**
-	 * 一小时前日期; 格式:yyyy-MM-dd HH
-	 * @return
-	 */
-	public static String getBeforeOneHourDate() {
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.HOUR, -1);
-		String beforeOneHourDate = new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime());
-		
-		return beforeOneHourDate;
-	}
-	
-	/**
-	 * 获取上一小时时间
-	 * @return
-	 */
-	public static String getBeforeOneHour() {
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.HOUR, -1);
-		String beforeOneHour = new SimpleDateFormat("HH").format(cal.getTime());
-		
-		return beforeOneHour;
 	}
 	
 }

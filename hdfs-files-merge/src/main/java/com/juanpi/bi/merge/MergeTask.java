@@ -13,6 +13,8 @@ import org.apache.hadoop.fs.*;
 import com.juanpi.bi.merge.util.HdfsUtil;
 import org.apache.hadoop.io.IOUtils;
 
+import static com.juanpi.bi.merge.TaskManager.oneHourAgoMillis;
+
 /**
  * 
  * @author yunduan  
@@ -28,22 +30,6 @@ public class MergeTask {
 	private boolean deleteSource = false;
 	
 	private FileSystem fs = null;
-
-    public static long oneHourAgoMillis = getHoursAgoMillis();
-
-    private static long getHoursAgoMillis()
-    {
-        Calendar cal = Calendar.getInstance();
-        long milis = cal.getTimeInMillis();
-        String fmt = "yyyy-MM-dd HH:00:00";
-        String dt = DateUtil.getHourIntervalDate(0, fmt);
-        try {
-            milis = DateUtil.dateToMillis(dt, fmt);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return milis;
-    }
 
     /**
 	 * 
