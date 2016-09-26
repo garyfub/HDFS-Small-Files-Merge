@@ -121,6 +121,8 @@ hadoop fs -du -h hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_li
 hadoop fs -du -h hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-09-20/gu_hash=0/logs
 hadoop fs -du -h hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-09-20/gu_hash=0/
 
+hadoop fs -tail hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-09-21/gu_hash=0/merged/merged_2016092117 | grep 123.246.
+
 ### dw_real_path_list
 hadoop fs -du -h hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_path_list_jobs/date=2016-09-20
 hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_path_list_jobs/date=2016-09-20/gu_hash=0
