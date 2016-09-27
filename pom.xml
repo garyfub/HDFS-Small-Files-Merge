@@ -13,6 +13,7 @@
         <module>realtime-sourcedata</module>
         <module>pathlist</module>
         <module>hdfs-files-merge</module>
+        <!--<module>hive-udf</module>-->
     </modules>
 
     <properties>
@@ -21,6 +22,7 @@
         <scala.binary.version>2.10.6</scala.binary.version>
         <spark.version>1.6.1</spark.version>
         <hadoop.version>2.5.0-cdh5.2.0</hadoop.version>
+        <encoding>UTF-8</encoding>
     </properties>
 
 
@@ -49,6 +51,19 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-common</artifactId>
             <version>${hadoop.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <classifier>jdk15</classifier>
+            <version>2.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.1.41</version>
         </dependency>
 
         <dependency>
