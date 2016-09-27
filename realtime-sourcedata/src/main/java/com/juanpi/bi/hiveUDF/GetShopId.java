@@ -25,16 +25,11 @@ public class GetShopId // extends UDF
 	public static void main(String[] argc){
 		GetShopId gh=new GetShopId();
 		List<String> urls = Arrays.asList
-				(
-						"http://m.juanpi.com/shop/skcdeal/7158611?skc=2",
-						"http://m.juanpi.com/shop/skcdeal/7058668?skc=8",
-						"http://m.juanpi.com/shop/skcdeal/7058668?skc=9",
-						"http://m.juanpi.com/shop/skcdeal/7058668??????skc=10",
-						"http://m.juanpi.com/brand/appbrand/1751592?shop_id=1949563",
+		(
+			"http://m.juanpi.com/brand/appbrand/1751592?shop_id=1949563",
+			"http://m.juanpi.com/shop/7158611"
+		);
 
-
-						"http://m.juanpi.com/shop/7158611"
-				);
 		for(String url : urls)
 		{
 			String id = gh.evaluate(url);

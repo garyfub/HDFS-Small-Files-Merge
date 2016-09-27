@@ -9,9 +9,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author zhuokun
- */
+
 public class PageIDChecker {
 
     public static Log log = LogFactory.getLog(PageIDChecker.class);
@@ -64,6 +62,7 @@ public class PageIDChecker {
             log.info("Start to loading new page pattern ....");
             //InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("com/juanpi/bi/props/PageID.properties");
             InputStream stream = PageIDChecker.class.getClassLoader().getResourceAsStream("PageID.properties");
+
             BufferedReader reader;
             reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
             String text = null;
@@ -81,7 +80,6 @@ public class PageIDChecker {
                     String temp = arr[i].trim();
                     if (temp.length() > 0 && !"null".equals(temp)) {
                         pattern.regex_pattern.add(temp.toLowerCase());
-                        //	System.out.println(temp);
                     }
                 }
                 patterns.add(pattern);
@@ -94,9 +92,16 @@ public class PageIDChecker {
     }
 
     public static void main(String[] argc) {
+
+        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+        InputStream is = classloader.getResourceAsStream("PageID.properties");
+        System.out.println("is==" + is);
+
+        InputStream inputStream =
+                PageIDChecker.class.getClassLoader().getResourceAsStream("PageID.properties");
+        System.out.println("inputStream===" + inputStream);
+
         System.out.println(PageIDChecker.patterns.get(0).regex_pattern.get(1));
 
     }
-
-
 }

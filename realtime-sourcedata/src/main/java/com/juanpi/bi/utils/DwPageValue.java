@@ -19,7 +19,10 @@ public class DwPageValue
   public static DwPageValue getInstance(String paramString)
   {
     if (pagevalueChecker == null)
+    {
+
       pagevalueChecker = new DwPageValue(paramString);
+    }
     return pagevalueChecker;
   }
 
@@ -68,8 +71,9 @@ public class DwPageValue
   {
     try
     {
-      log.info("Start to loading new page pattern ....");
-      InputStream localInputStream = ClassLoader.getSystemClassLoader().getResourceAsStream(paramString);
+      log.info("Start to loading new page pattern ...." + paramString);
+      InputStream localInputStream = DwPageValue.class.getClassLoader().getResourceAsStream(paramString);
+//      System.out.println("localInputStream=====" + localInputStream);
       BufferedReader localBufferedReader = new BufferedReader(new InputStreamReader(localInputStream, "UTF-8"));
       String str1 = null;
       while ((str1 = localBufferedReader.readLine()) != null)
@@ -90,11 +94,11 @@ public class DwPageValue
         }
         patterns.add(localPage_Pattern);
       }
-      log.info("The new version page pattern has been load successfully.");
+      log.info("The new version page pattern has been load successfully.paramString = " + paramString);
     }
     catch (Exception localException)
     {
-      log.info("Failed to load the new page pattern: ", localException);
+      log.info("Failed to load the new page pattern: " + paramString + ", Exception", localException);
       return null;
     }
     return patterns;
@@ -104,8 +108,8 @@ public class DwPageValue
   {
     try
     {
-      log.info("Start to loading new page pattern ....");
-      InputStream localInputStream = ClassLoader.getSystemClassLoader().getResourceAsStream(paramString);
+      log.info("Start to loading new page pattern ...." + paramString);
+      InputStream localInputStream = DwPageValue.class.getClassLoader().getResourceAsStream(paramString);
       BufferedReader localBufferedReader = new BufferedReader(new InputStreamReader(localInputStream, "UTF-8"));
       String str1 = null;
       while ((str1 = localBufferedReader.readLine()) != null)
@@ -176,5 +180,9 @@ public class DwPageValue
       }
       return false;
     }
+  }
+
+  public static void main(String[] args) {
+    getInstance("PcPageValue.properties");
   }
 }

@@ -5,6 +5,7 @@ import com.juanpi.bi.utils.DwPageValue;
 import com.juanpi.bi.utils.DwPageValue.Page_Pattern;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,8 @@ public class GetDwPcPageValue // extends UDF
 		}
 
 		DwPageValue.getInstance("PcPageValue.properties");
+//		InputStream localInputStream = GetDwPcPageValue.class.getClassLoader().getResourceAsStream("PcPageValue.properties");
+//		System.out.println("localInputStream==" + localInputStream);
 		Map<String, Page_Pattern> patternsMap = DwPageValue.patternsMap;
 		if (patternsMap == null || patternsMap.isEmpty())
 			return null;
@@ -212,9 +215,7 @@ public class GetDwPcPageValue // extends UDF
 		url = "http://m.juanpi.com/brand/appbrand/1751592?shop_id=1949563";
 //		url = "http://m.juanpi.com/act/skcbrand";
 		url = "http://wx.juanpi.com/brand/1534422?shop_id=1610668&from=groupmessage&isappinstalled=1";
-		url = "http://wx.juanpi.com/brand/1708451?shop_id=1200642&from=singlemessage&isappinstalled=1";
+//		url = "http://wx.juanpi.com/brand/1708451?shop_id=1200642&from=singlemessage&isappinstalled=1";
 		System.out.println(gh.evaluate(url));
-
-//        System.out.println(gh.evaluate("http://m.juanpi.com/deal/1751592"));
 	}
 }

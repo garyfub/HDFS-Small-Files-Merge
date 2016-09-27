@@ -22,7 +22,7 @@ public class IDSChecker {
      * 3.静态内部类可以单独初始化
      * 参考：http://www.cnblogs.com/Alex--Yang/p/3386863.html
      */
-    public static class Page_Pattern{
+    public static class Page_Pattern {
         public int id;
         public String pageName;
         public List<String> regex_pattern;
@@ -68,9 +68,6 @@ public class IDSChecker {
         }
     }
 
-
-
-
     public static IDSChecker getInstance(String s){
         if(IDSChecker == null){
             IDSChecker = new IDSChecker(s);
@@ -88,15 +85,13 @@ public class IDSChecker {
 		loadPageID();
 	}*/
 
-
-
     /**
      *
      */
     private static List<Page_Pattern> loadPageID(String pathstr) {
         try {
             log.info("Start to loading new page pattern ....");
-            InputStream stream =ClassLoader.getSystemClassLoader().getResourceAsStream(pathstr);
+            InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream(pathstr);
             BufferedReader reader;
             reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
             String text = null;
@@ -127,12 +122,8 @@ public class IDSChecker {
     }
 
     public static void main(String[] argc){
-//		System.out.println(IDSChecker.patterns.get(0).regex_pattern.get(1));
+		System.out.println(IDSChecker.patterns.get(0).regex_pattern.get(1));
 
     }
-
-
-
-
 
 }

@@ -31,9 +31,7 @@ public class GetSkcId // extends UDF
                 "http://m.juanpi.com/shop/skcdeal/7058668?skc=8",
                 "http://m.juanpi.com/shop/skcdeal/7058668?skc=9",
                 "http://m.juanpi.com/shop/skcdeal/7058668??????skc=10",
-                "http://m.juanpi.com/brand/appbrand/1751592?shop_id=1949563",
-                "http://m.juanpi.com/shop/skcdeal/2254335?skc=3&qminkview=1&qmshareview=1",
-                "http://m.juanpi.com/shop/7158611"
+                "http://m.juanpi.com/shop/skcdeal/2254335?skc=3&qminkview=1&qmshareview=1"
         );
         for(String url : urls)
         {
