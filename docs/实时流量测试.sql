@@ -45,22 +45,22 @@ before_goods_loadtime
 
 -- 删除测试分区的数据
 use test;
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="0");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="1");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="2");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="3");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="4");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="5");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="6");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="7");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="8");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="9");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="a");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="b");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="c");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="d");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="e");
-alter table dw_path_list_new drop partition(date="2016-09-27", gu_hash="f");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="0");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="1");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="2");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="3");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="4");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="5");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="6");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="7");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="8");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="9");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="a");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="b");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="c");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="d");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="e");
+alter table dw_path_list_new drop partition(date="2016-09-28", gu_hash="f");
 
 
 select entrance_page_id,entrance_page_value, page_id, page_value, table_source from dw_path_list_new where
