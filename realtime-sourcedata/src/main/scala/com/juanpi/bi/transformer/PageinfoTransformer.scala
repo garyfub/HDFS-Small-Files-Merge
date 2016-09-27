@@ -147,8 +147,8 @@ class PageinfoTransformer extends ITransformer {
           (partitionStr, "page", res)
         } catch{
           //使用模式匹配来处理异常
-          case ex:Exception => {println(ex.getStackTraceString, "\n======>>异常数据:" + row)}
-            println("=======>> Page: parse Exception!!")
+          case ex:Exception => { println(ex.getStackTraceString)}
+            println("=======>> Page: parse Exception!!" + "\n======>>异常数据:" + row)
             ("", "", None)
         }
       } else {

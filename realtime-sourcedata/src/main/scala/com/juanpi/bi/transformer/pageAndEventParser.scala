@@ -88,7 +88,8 @@ object pageAndEventParser {
       } catch {
         //使用模式匹配来处理异常
         case ex: JsonParseException => {
-          println(ex.getStackTraceString, "\n======>>异常的json数据: " + jsonStr)
+          println(ex.getStackTraceString)
+          println("\n======>>异常的json数据: " + jsonStr)
         }
           JsNull
       }
@@ -349,7 +350,7 @@ object pageAndEventParser {
 
     val extend_params = ""
 
-    println(getGsortPit(s))
+    println("fsdfsd == " + getGsortPit(s))
 
     println(getJsonValueByKey(s, "item"))
 
