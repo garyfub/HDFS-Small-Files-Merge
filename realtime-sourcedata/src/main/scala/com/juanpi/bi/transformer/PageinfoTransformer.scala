@@ -138,7 +138,7 @@ class PageinfoTransformer extends ITransformer {
         case ex:Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
       }
 
-      println("=======>> ticks=" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceId + "#, os=" + os + "#, gu_id=" + gu_id + "#, endtime=" + endTime)
+//      println("=======>> ticks=" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceId + "#, os=" + os + "#, gu_id=" + gu_id + "#, endtime=" + endTime)
 
       val ret = if(gu_id.nonEmpty) {
         try {

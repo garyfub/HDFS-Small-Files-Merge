@@ -51,7 +51,7 @@ class MbEventTransformer extends ITransformer {
 
           // 如果loadTime非空，就需要判断是否是当天的数据，如果不是，需要过滤掉,因此不需要处理
           if(loadTime.nonEmpty &&
-            DateUtils.dateStr(endtime.toLong) != DateUtils.dateStr(loadTime.toLong)) {
+            DateUtils.dateStr(endtime.toLong) != DateUtils.dateStr(loadTime.toLong * 1000)) {
             ("", "", None)
           } else {
             val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = parse(row, dimpage, dimevent)
@@ -62,11 +62,6 @@ class MbEventTransformer extends ITransformer {
             val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
             (partitionStr, "event", res_str)
           }
-//        } catch {
-//          //使用模式匹配来处理异常
-//          case ex:Exception => {println(ex.getMessage() + "==>>combine======>>异常数据:" + row)}
-//          ("", "", None)
-//        }
       } else {
         ("", "", None)
       }
