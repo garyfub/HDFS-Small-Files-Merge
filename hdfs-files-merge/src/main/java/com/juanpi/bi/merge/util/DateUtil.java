@@ -124,6 +124,7 @@ public class DateUtil {
 
     /**
      * 返回一个小时前的日期的毫秒值
+     * 如果是零点的日期，依然处理上一个小时的数据
      * @return
      */
     public static long getHoursAgoMillis()
