@@ -34,7 +34,13 @@ public class GetPageID // extends UDF
                     "http://m.juanpi.com/act/sub_nsyg418?mobile=1&qminkview=1&qmshareview=1?qmshareview=1&from=singlemessage&isappinstalled=1",
                     "http://m.juanpi.com/act/skcbrand?mobile=1&qminkview=1",
 					"http://m.juanpi.com/brand/appbrand/1751592?shop_id=1949563&amp;mobile=1&qminkview=1",
-                    "http://m.juanpi.com/brand/appbrand/1751592?shop_id=1949563&mobile=1&qminkview=1"
+					"http://m.juanpi.com/zhuanti/qqshg",
+					"http://m.juanpi.com/zhuanti/qqjzjj",
+					"http://m.juanpi.com/zhuanti/qqcfcy",
+					"http://m.juanpi.com/zhuanti/qqrybh",
+					"http://m.juanpi.com/zhuanti/qqjfby",
+
+					"http://m.juanpi.com/brand/appbrand/1751592?shop_id=1949563&mobile=1&qminkview=1"
                     );
             int pingtuan_id = 0;
 			for(String url : urls)
