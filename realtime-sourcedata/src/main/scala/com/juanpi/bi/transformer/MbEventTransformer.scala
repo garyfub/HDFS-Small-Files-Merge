@@ -233,8 +233,15 @@ class MbEventTransformer extends ITransformer {
     val ref_page_id = pageAndEventParser.getPageId(d_pre_page_id, f_pre_extend_params)
     val ref_page_value = pageAndEventParser.getPageValue(d_pre_page_id, f_pre_extend_params, d_pre_page_type_id, d_pre_page_value)
 
+    // val page_id = pageAndEventParser.getPageId(d_page_id, extendParams1)
+    // val page_value = pageAndEventParser.getPageValue(d_page_id, extendParams1, page_type_id, d_page_value)
+
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimpage.get(for_pageid).getOrElse(0, 0, "", 0)
     val page_id = pageAndEventParser.getPageId(d_page_id, f_page_extend_params)
+    if("-1" == page_id){
+        println("page_id=-1, 原始数据为：" + row)
+    }
+
     val page_value = pageAndEventParser.getPageValue(d_page_id, f_page_extend_params, page_type_id, d_page_value)
 
     val shop_id = pageAndEventParser.getShopId(d_page_id, f_page_extend_params)

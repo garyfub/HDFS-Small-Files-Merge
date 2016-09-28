@@ -168,7 +168,7 @@ object pageAndEventParser {
   }
 
   /**
-    * 二级页面值(品牌页：引流款ID等)
+    * 二级页面值(品牌页：引流款ID；商品skc等)
     *
     * @param x_page_id
     * @param x_extend_params
@@ -182,6 +182,7 @@ object pageAndEventParser {
         && x_extend_params.contains("_")
         && x_extend_params.split("_").length > 2)
       {
+        // 解析品牌页的引流款商品
         new GetGoodsId().evaluate(x_extend_params.split("_")(2))
       }
       else if(x_page_id == 154 || x_page_id == 289) {
@@ -371,6 +372,9 @@ object pageAndEventParser {
     }
 
       println("gu_id:" + getGuid("0", "0", ""))
+
+    println("1_2_3".split("_").length)
+    println("1_2_3".split("_").length)
   }
 
 
