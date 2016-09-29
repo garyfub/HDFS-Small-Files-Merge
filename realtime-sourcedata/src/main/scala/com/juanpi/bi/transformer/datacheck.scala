@@ -52,6 +52,5 @@ object datacheck {
     println(activityname, t_extend_params, cube_position)
     val f_extend_params = eventParser.getForExtendParams(activityname, t_extend_params, cube_position, server_jsonstr)
     println(f_extend_params)
-
   }
 }

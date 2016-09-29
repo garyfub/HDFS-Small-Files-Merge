@@ -51,6 +51,7 @@ object eventParser {
         }
       }
       else if ("click_cube_block".equals(activityname) && !"{}".equals(server_jsonstr)) {
+        // 有部分 click_cube_block 的数据格式错误，cube_position 与 server_jsonstr 的值传递反了
         server_jsonstr
       }
       else if (server_jsonstr.contains("pit_info")) {
