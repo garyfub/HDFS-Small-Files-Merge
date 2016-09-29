@@ -4,7 +4,7 @@ import java.util.regex.Pattern
 
 import com.fasterxml.jackson.core.JsonParseException
 import com.juanpi.bi.hiveUDF.{GetShopId, _}
-import play.api.libs.json.{JsNull, JsValue, Json}
+import play.api.libs.json._
 
 import scala.collection.mutable
 
@@ -40,7 +40,7 @@ object pageAndEventParser {
   }
 
   /**
-    * 2016-02-16 加逻辑：IOS直接使用设备号作为gu_id
+    * 2016-02-16 加逻辑：IOS直接使用 deviceid 作为gu_id
     * @param jpid
     * @param deviceid
     * @param os
@@ -62,15 +62,21 @@ object pageAndEventParser {
   }
 
   /**
-    *
+    * 由于原始数据同一个字段传值的类型不完全一样，比如cid，有时候传的是整形，有时候又是字符串。
+    *  强化 getJsonValueByKey 函数，根据Json中解析到的类型进行判断，然后再转为String，
     * @param jsonStr
     * @param key
     * @return
     */
   def getJsonValueByKey(jsonStr: String, key: String): String = {
-    if(jsonStr.contains(key)) {
+    if (jsonStr.contains(key)) {
       val js = Json.parse(jsonStr)
-      (js \ key).toString()
+      val v = (js \ key)
+      v match {
+        case a if v.isInstanceOf[JsString] => v.asOpt[String].getOrElse("")
+        case b if v.isInstanceOf[JsNumber] => v.toString()
+        case _ => ""
+      }
     } else {
       ""
     }
@@ -140,8 +146,14 @@ object pageAndEventParser {
   def forPageId(pagename: String, extend_params: String, server_jsonstr: String): String = {
     val strValue = getParsedJson(server_jsonstr)
     val for_pageid = pagename.toLowerCase() match {
-      case a if pagename.toLowerCase() == "page_tab" && isInteger(extend_params) && (extend_params.toLong > 0 && extend_params.toLong < 9999999) => "page_tab"
-      case c if pagename.toLowerCase() == "page_tab" && !strValue.equals(JsNull) && (strValue \ "cid").asOpt[Int].getOrElse(0) < 0 => (pagename+(strValue \ "cid").asOpt[String]).toLowerCase()
+      case a if pagename.toLowerCase() == "page_tab"
+        && isInteger(extend_params)
+        && (extend_params.toLong > 0
+        && extend_params.toLong < 9999999) => "page_tab"
+      case c if pagename.toLowerCase() == "page_tab"
+        && !strValue.equals(JsNull)
+        && (strValue \ "cid").asOpt[Int].getOrElse(0) < 0
+      => (pagename+(strValue \ "cid").asOpt[String]).toLowerCase()
       case b if pagename.toLowerCase() != "page_tab" => pagename.toLowerCase()
       case _ => (pagename+extend_params).toLowerCase()
     }
