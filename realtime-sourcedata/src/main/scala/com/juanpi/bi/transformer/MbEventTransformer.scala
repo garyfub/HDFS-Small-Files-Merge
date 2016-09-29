@@ -39,13 +39,10 @@ class MbEventTransformer extends ITransformer {
       } catch {
         //使用模式匹配来处理异常
         case ex: Exception => println(ex.printStackTrace())
-        println("=======>> Page: parse Exception!!" + "\n======>>异常数据:" + row)
+        println("=======>> Event: parse Exception!!" + "\n======>>异常数据:" + row)
       }
 
-//      println("=======>> ticks=" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceId + "#, os=" + os + "#, gu_id=" + gu_id + "#, endtime=" + endTime)
-
       val ret = if(gu_id.nonEmpty) {
-//        try {
           val endtime = (row \ "endtime").asOpt[String].getOrElse("")
           val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
           val loadTime = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_t")
@@ -55,13 +52,21 @@ class MbEventTransformer extends ITransformer {
             DateUtils.dateStr(endtime.toLong) != DateUtils.dateStr(loadTime.toLong * 1000)) {
             ("", "", None)
           } else {
-            val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = parse(row, dimpage, dimevent)
-            val res_str =  pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x=> x match {
-              case y if y == null || y.toString.isEmpty => "\\N"
-              case _ => x
-            }).mkString("\001")
-            val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
-            (partitionStr, "event", res_str)
+            try{
+                val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = parse(row, dimpage, dimevent)
+                val res_str =  pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x=> x match {
+                  case y if y == null || y.toString.isEmpty => "\\N"
+                  case _ => x
+                }).mkString("\001")
+                val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
+                (partitionStr, "event", res_str)
+              }
+            catch {
+              //使用模式匹配来处理异常
+              case ex: Exception => println(ex.printStackTrace())
+                println("=======>> Event: parse Exception!!" + "\n======>>异常数据:" + row)
+                ("", "", None)
+            }
           }
       } else {
         println("=======>> Page: GU_ID IS NULL!!")

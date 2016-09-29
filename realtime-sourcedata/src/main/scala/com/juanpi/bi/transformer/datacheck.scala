@@ -42,6 +42,10 @@ object datacheck {
 
     val cid = pageAndEventParser.getJsonValueByKey(server_jsonstr, "cid")
     println("cid:", cid)
+    if(!cid.isEmpty)
+      {
+        println(cid.toInt)
+      }
 
     val for_pageid = eventParser.getForPageId(cid, f_page_extend_params, pagename)
     println("for_pageid" ,for_pageid)
