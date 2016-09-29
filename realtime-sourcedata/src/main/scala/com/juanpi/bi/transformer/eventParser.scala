@@ -48,11 +48,15 @@ object eventParser {
           "banner" + "::" + t_extend_params + "::" + cube_position
         }
       }
+      else if (server_jsonstr.contains("pit_info")) {
+        pageAndEventParser.getJsonValueByKey(server_jsonstr, "pit_info")
+      } else if (t_extend_params.contains("pit_info")) {
+        pageAndEventParser.getJsonValueByKey(t_extend_params, "pit_info")
+      }
       else if ("click_cube_block".equals(activityname) && !"{}".equals(server_jsonstr)) {
         // 有部分 click_cube_block 的数据格式错误，cube_position 与 server_jsonstr 的值传递反了
         server_jsonstr
-      }
-      else if (server_jsonstr.contains("pit_info")) {
+      } else if (server_jsonstr.contains("pit_info")) {
         pageAndEventParser.getJsonValueByKey(server_jsonstr, "pit_info")
       } else if (t_extend_params.contains("pit_info")) {
         pageAndEventParser.getJsonValueByKey(t_extend_params, "pit_info")
