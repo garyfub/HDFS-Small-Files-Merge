@@ -67,5 +67,7 @@ object datacheck {
 
     val forPageId = pageAndEventParser.forPageId(pagename, extend_params, server_jsonstr)
     println("forPageId:",forPageId)
+
+//    val event_value = eventParser.getEventValue(event_type_id, activityname, f_extend_params, server_jsonstr)
   }
 }

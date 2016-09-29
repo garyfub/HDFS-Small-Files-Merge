@@ -91,6 +91,23 @@ object eventParser {
     eid
   }
 
+  def getEventValue(event_type_id: Int, activityname: String, extend_params: String, server_jsonstr: String): String =
+  {
+    val operTime = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_t")
+
+    if (event_type_id == 10) {
+      if (activityname.contains("click_cube")) {
+        extend_params
+      } else if (!server_jsonstr.contains("_t") || operTime.isEmpty) {
+        ""
+      } else {
+        extend_params
+      }
+    } else {
+      extend_params
+    }
+  }
+
   def getVersionNum(app_version: String): Int = {
     // TODO
     val resInt = if (app_version.nonEmpty) {

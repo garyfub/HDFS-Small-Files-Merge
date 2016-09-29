@@ -181,7 +181,7 @@ class MbEventTransformer extends ITransformer {
     // --------------------------------------------------------------------> event_reg ------------------------------------------------------------------
     val (d_event_id: Int, event_type_id: Int) = dimevent.get(for_eventid).getOrElse(0, 0)
     val event_id = eventParser.getEventId(d_event_id, app_version) + ""
-    val event_value = getEventValue(event_type_id, activityname, f_extend_params, server_jsonstr)
+    val event_value = eventParser.getEventValue(event_type_id, activityname, f_extend_params, server_jsonstr)
 
     val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimpage.get(for_pre_pageid).getOrElse(0, 0, "", 0)
     val ref_page_id = pageAndEventParser.getPageId(d_pre_page_id, f_pre_extend_params)
@@ -229,28 +229,20 @@ class MbEventTransformer extends ITransformer {
 
     // TODO 测试代码，测试后需要删掉
     if(-1 == page_id){
-      println("for_pageid::" + for_pageid, " ,page_type_id" + page_type_id, " ,page_level_id:" + page_level_id , " ,page_value:" + page_value , " ,f_page_extend_params::" + f_page_extend_params, " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value, " ,event_id:" + event_id + " ,event_value" + event_value)
+      println("for_pageid:" + for_pageid, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id ,
+        " ,page_value:" + page_value , " ,f_page_extend_params::" + f_page_extend_params,
+        " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value, ", event_type_id:" + event_type_id + " ,event_id:" + event_id + " ,event_value:" + event_value)
       println("page_id=-1, 原始数据为：" + row)
     }
 
+    if(event_value.nonEmpty && event_value.contains("pit_info")) {
+      println("===>> for_pageid:" + for_pageid, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id ,
+        " ,page_value:" + page_value , " ,f_page_extend_params::" + f_page_extend_params,
+        " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value, ", event_type_id:" + event_type_id + " ,event_id:" + event_id + " ,event_value:" + event_value)
+      println("event_value 解析错误，原始数据为：" + row)
+    }
+
     (user, pe, page, event)
-  }
-
-  def getEventValue(event_type_id: Int, activityname: String, extend_params: String, server_jsonstr: String): String =
-  {
-      val operTime = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_t")
-
-      if (event_type_id == 10) {
-        if (activityname.contains("click_cube")) {
-          extend_params
-        } else if (!server_jsonstr.contains("_t") || operTime.isEmpty) {
-          ""
-        } else {
-          extend_params
-        }
-      } else {
-        extend_params
-      }
   }
 
   def getAbinfo(extend_params: String, arg: String): String = {
