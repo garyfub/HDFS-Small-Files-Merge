@@ -1,7 +1,6 @@
 package com.juanpi.bi.transformer
 
 import com.juanpi.bi.hiveUDF.{GetGoodsId, GetPageID}
-import play.api.libs.json.Json
 
 /**
   * Created by gongzi on 2016/9/28.
@@ -43,8 +42,7 @@ object eventParser {
     val f_extend_params =
       if ("click_cube_banner".equals(activityname)) {
         if (t_extend_params.contains("ads_id")) {
-          val js_t_extend_params = Json.parse(t_extend_params)
-          val ads_id = (js_t_extend_params \ "ads_id").toString()
+          val ads_id = pageAndEventParser.getJsonValueByKey(t_extend_params, "ads_id")
           "banner" + "::" + ads_id + cube_position
         } else {
           "banner" + "::" + t_extend_params + "::" + cube_position
@@ -55,11 +53,9 @@ object eventParser {
         server_jsonstr
       }
       else if (server_jsonstr.contains("pit_info")) {
-        val js_server_jsonstr = Json.parse(server_jsonstr)
-        (js_server_jsonstr \ "pit_info").toString()
+        pageAndEventParser.getJsonValueByKey(server_jsonstr, "pit_info")
       } else if (t_extend_params.contains("pit_info")) {
-        val js_t_extend_params = Json.parse(t_extend_params)
-        (js_t_extend_params \ "pit_info").toString()
+        pageAndEventParser.getJsonValueByKey(t_extend_params, "pit_info")
       } else {
         t_extend_params
       }
