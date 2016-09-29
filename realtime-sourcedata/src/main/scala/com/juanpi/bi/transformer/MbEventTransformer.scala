@@ -230,16 +230,20 @@ class MbEventTransformer extends ITransformer {
     // TODO 测试代码，测试后需要删掉
     if(-1 == page_id){
       println("for_pageid:" + for_pageid, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id ,
-        " ,page_value:" + page_value , " ,f_page_extend_params::" + f_page_extend_params,
-        " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value, ", event_type_id:" + event_type_id + " ,event_id:" + event_id + " ,event_value:" + event_value)
+        " ,page_value:" + page_value , " ,f_page_extend_params:" + f_page_extend_params,
+        " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value,
+        " ,for_eventid:" + for_eventid,
+        " ,d_event_id:" + d_event_id , " ,event_type_id" + event_type_id, " ,event_id:" + event_id, " ,event_value:" + event_value)
       println("page_id=-1, 原始数据为：" + row)
     }
 
     if(event_value.nonEmpty && event_value.contains("pit_info")) {
-      println("===>> for_pageid:" + for_pageid, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id ,
-        " ,page_value:" + page_value , " ,f_page_extend_params::" + f_page_extend_params,
-        " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value, ", event_type_id:" + event_type_id + " ,event_id:" + event_id + " ,event_value:" + event_value)
-      println("event_value 解析错误，原始数据为：" + row)
+      println("for_pageid:" + for_pageid, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id ,
+        " ,page_value:" + page_value , " ,f_page_extend_params:" + f_page_extend_params,
+        " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value,
+        " ,for_eventid:" + for_eventid,
+        " ,d_event_id:" + d_event_id , " ,event_type_id" + event_type_id, " ,event_id:" + event_id, " ,event_value:" + event_value)
+      println("page_id=-1, 原始数据为：" + row)
     }
 
     (user, pe, page, event)
