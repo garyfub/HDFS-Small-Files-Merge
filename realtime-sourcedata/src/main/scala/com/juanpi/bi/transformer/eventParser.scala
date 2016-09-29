@@ -43,7 +43,7 @@ object eventParser {
       if ("click_cube_banner".equals(activityname)) {
         if (t_extend_params.contains("ads_id")) {
           val ads_id = pageAndEventParser.getJsonValueByKey(t_extend_params, "ads_id")
-          "banner" + "::" + ads_id + cube_position
+          "banner" + "::" + ads_id + "::" + cube_position
         } else {
           "banner" + "::" + t_extend_params + "::" + cube_position
         }
