@@ -53,14 +53,23 @@ class MbEventTransformer extends ITransformer {
             ("", "", None)
           } else {
             try{
-                val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = parse(row, dimpage, dimevent)
+              val res = parse(row, dimpage, dimevent)
+              // 过滤异常的数据，具体见解析函数 eventParser.filterOutlierPageId
+              if(res == null) {
+                ("", "", None)
+              }
+              else {
+                val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = res
+
                 val res_str =  pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x=> x match {
                   case y if y == null || y.toString.isEmpty => "\\N"
                   case _ => x
                 }).mkString("\001")
+
                 val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
                 (partitionStr, "event", res_str)
               }
+            }
             catch {
               //使用模式匹配来处理异常
               case ex: Exception => println(ex.printStackTrace())
@@ -69,12 +78,12 @@ class MbEventTransformer extends ITransformer {
             }
           }
       } else {
-        println("=======>> Page: GU_ID IS NULL!!")
+        println("=======>> Page: GU_ID IS NULL!!" + "\n======>>异常数据:" + row)
         ("", "", None)
       }
       ret
     } else {
-      println("=======>> Page: ROW IS NULL!!")
+      println("=======>> Page: ROW IS NULL!!" + "\n======>>异常数据:" + row)
       ("", "", None)
     }
   }
@@ -140,6 +149,10 @@ class MbEventTransformer extends ITransformer {
     val cid = pageAndEventParser.getJsonValueByKey(server_jsonstr, "cid")
 
     val flag = eventParser.filterOutlierPageId(pagename, cid, f_page_extend_params)
+    if (flag) {
+      // 如果需要过滤，本条数据解析致此结束
+      return null
+    }
 
     val for_pageid = eventParser.getForPageId(cid, f_page_extend_params, pagename)
 
@@ -203,15 +216,6 @@ class MbEventTransformer extends ITransformer {
 
     // TODO 测试代码，测试后需要删掉
     if(-1 == page_id){
-      println("for_pageid:" + for_pageid, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id ,
-        " ,page_value:" + page_value , " ,f_page_extend_params:" + f_page_extend_params,
-        " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value,
-        " ,for_eventid:" + for_eventid,
-        " ,d_event_id:" + d_event_id , " ,event_type_id:" + event_type_id, " ,event_id:" + event_id, " ,event_value:" + event_value)
-      println("page_id=-1, 原始数据为：" + row)
-    }
-
-    if(event_value.nonEmpty && event_value.contains("pit_info")) {
       println("for_pageid:" + for_pageid, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id ,
         " ,page_value:" + page_value , " ,f_page_extend_params:" + f_page_extend_params,
         " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value,
