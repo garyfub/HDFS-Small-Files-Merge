@@ -37,6 +37,63 @@ object eventParser {
     for_pageid
   }
 
+  // outlierData 离群数据过滤
+  /**
+    * 如果 page_name="page_tab",并且 cid 为空，且f_page_extend_params不在("all", "past_zhe", "crazy_zhe", "jiu", "yugao")之中，就过滤掉
+    * 如果 pageName = "page_h5" 且 pid = -1
+    * @param pageName
+    * @param cid
+    * @param fctPageExtendParams
+    * @return
+    */
+  def filterOutlierPageId(pageName: String, cid: String, fctPageExtendParams: String): Boolean = {
+    val flag = if("page_tab".equals(pageName)
+      && cid.isEmpty
+      && !List("all", "past_zhe", "crazy_zhe", "jiu", "yugao").contains(fctPageExtendParams)) {
+      true
+    } else if("page_h5".equals(pageName)) {
+      val pid = new GetPageID().evaluate(fctPageExtendParams).toInt
+      pid match {
+        case -1 => true
+        case _ => false
+      }
+    } else false
+    flag
+  }
+
+  def getForPrePageId(pagename: String, f_pre_extend_params: String, pre_page: String):String = {
+    val forPrePageId =
+      if ("page_h5".equals(pagename)) {
+        val pid = new GetPageID().evaluate(f_pre_extend_params).toInt
+        pid match {
+          case 34 | 65 | 10069 => "page_active"
+          case _ => (pagename + f_pre_extend_params).toLowerCase()
+        }
+      } else if (!"page_tab".equals(pre_page)) {
+        pre_page.toLowerCase()
+      }
+      else {
+        (pre_page + f_pre_extend_params).toLowerCase()
+      }
+    forPrePageId
+  }
+
+  def getForEventId(cid: String, activityname: String, t_extend_params: String): String = {
+    val forEventId = if("-6".equals(cid)) {
+      "click_yugao_recommendation"
+    } else if("-100".equals(cid)) {
+      "click_shoppingbag_recommendation"
+    } else if("-101".equals(cid)) {
+      "click_orderdetails_recommendation"
+    } else if ("-102".equals(cid)) {
+      "click_detail_recommendation"
+    } else if (!"click_navigation".equalsIgnoreCase(activityname)) {
+      activityname
+    } else {
+      (activityname + t_extend_params).toLowerCase()
+    }
+    forEventId
+  }
 
   def getForExtendParams(activityname: String, t_extend_params: String, cube_position: String, server_jsonstr: String): String = {
     val f_extend_params =
@@ -66,6 +123,13 @@ object eventParser {
     f_extend_params
   }
 
+  /**
+    * 从base层解析 extendparams
+    * @param activityname
+    * @param extend_params
+    * @param app_version
+    * @return
+    */
   def getExtendParamsFromBase(activityname: String, extend_params: String, app_version: String): String = {
     // 老版本 3.2.3
     val app_version323 = 323

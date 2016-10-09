@@ -66,8 +66,8 @@ class PageinfoTransformer extends ITransformer {
     val preExtendParams1 = pageAndEventParser.getExtendParams(pagename, pre_extend_params)
 
     // for_pageid 判断
-    val for_pageid = pageAndEventParser.forPageId(pagename, extendParams1, server_jsonstr)
-    val for_pre_pageid = pageAndEventParser.forPageId(pre_page, preExtendParams1, server_jsonstr)
+    val for_pageid = pageParser.forPageId(pagename, extendParams1, server_jsonstr)
+    val for_pre_pageid = pageParser.forPageId(pre_page, preExtendParams1, server_jsonstr)
 
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimpage.get(for_pageid).getOrElse(0, 0, "", 0)
     val page_id = pageAndEventParser.getPageId(d_page_id, extendParams1)
