@@ -239,36 +239,41 @@ public class PathListControledJobs {
             //long min = Long.MAX_VALUE;
 //            String initstr = "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N";
 
-            String[] initstrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
-            String initstr = Joiner.on("\t").join(initstrArray);
+            String[] initStrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
+            String initStr = Joiner.on("\t").join(initStrArray);
 
-            String level1 = initstr;
-            String level2 = initstr;
-            String level3 = initstr;
-            String level4 = initstr;
-            String level5 = initstr;
+            String level1 = initStr;
+            String level2 = initStr;
+            String level3 = initStr;
+            String level4 = initStr;
+            String level5 = initStr;
 
             for (TextArrayWritable v2 : v2s) {
-                if(Integer.parseInt(v2.toStrings()[0]) == 1){
-                    level1=v2.toStrings()[1];
-                    level2 = initstr;
-                    level3 = initstr;
-                    level4 = initstr;
-                    level5 = initstr;
-                } else if(Integer.parseInt(v2.toStrings()[0]) == 2){
-                    level2=v2.toStrings()[1];
-                    level3 = initstr;
-                    level4 = initstr;
-                    level5 = initstr;
-                } else if(Integer.parseInt(v2.toStrings()[0]) == 3){
-                    level3 = v2.toStrings()[1];
-                    level4 = initstr;
-                    level5 = initstr;
-                } else if(Integer.parseInt(v2.toStrings()[0]) == 4){
-                    level4 = v2.toStrings()[1];
-                    level5 = initstr;
-                } else if(Integer.parseInt(v2.toStrings()[0]) == 5){
-                    level5 = v2.toStrings()[1];
+
+                String pageLvlIdStr = v2.toStrings()[0];
+                String pageLvl = v2.toStrings()[1];
+                int pageLvlId = Integer.parseInt(pageLvlIdStr);
+
+                if(pageLvlId == 1){
+                    level1= pageLvl;
+                    level2 = initStr;
+                    level3 = initStr;
+                    level4 = initStr;
+                    level5 = initStr;
+                } else if(pageLvlId == 2){
+                    level2= pageLvl;
+                    level3 = initStr;
+                    level4 = initStr;
+                    level5 = initStr;
+                } else if(pageLvlId == 3){
+                    level3 = pageLvl;
+                    level4 = initStr;
+                    level5 = initStr;
+                } else if(pageLvlId == 4){
+                    level4 = pageLvl;
+                    level5 = initStr;
+                } else if(pageLvlId == 5){
+                    level5 = pageLvl;
                 }
 
                 // 5 个级别
