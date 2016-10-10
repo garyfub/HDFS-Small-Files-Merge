@@ -18,8 +18,6 @@
 
     <properties>
         <java.version>1.7</java.version>
-        <scala.version>2.10.6</scala.version>
-        <scala.binary.version>2.10.6</scala.binary.version>
         <spark.version>1.6.1</spark.version>
         <hadoop.version>2.5.0-cdh5.2.0</hadoop.version>
         <encoding>UTF-8</encoding>
