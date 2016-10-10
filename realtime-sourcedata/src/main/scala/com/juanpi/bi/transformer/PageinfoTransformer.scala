@@ -11,6 +11,56 @@ import scala.collection.mutable
   */
 class PageinfoTransformer extends ITransformer {
 
+  // 返回解析的结果
+  def logParser(line: String,
+                dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
+                dimEvent: mutable.HashMap[String, (Int, Int)],
+                fCate: mutable.HashMap[Int, Int]): (String, String, Any) = {
+
+    //play
+    val row = Json.parse(line.replaceAll("null", """\\"\\""""))
+
+    if (row != null) {
+      // 解析逻辑
+      var gu_id = ""
+      val ticks = (row \ "ticks").asOpt[String].getOrElse("")
+      val jpid = (row \ "jpid").asOpt[String].getOrElse("")
+      val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
+      val os = (row \ "os").asOpt[String].getOrElse("")
+      val endTime = (row \ "endtime").as[String].toLong
+
+      try
+      {
+        gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
+      } catch{
+        //使用模式匹配来处理异常
+        case ex:Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
+        case _ => println("======>>异常数据:" + row)
+          println("=======>> Event: getGuid Exception!!" + "\n======>>异常数据:" + row)
+      }
+
+      val ret = if(gu_id.nonEmpty) {
+        try {
+          val res = parse(row, dimPage, fCate)
+          val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
+          (partitionStr, "page", res)
+        } catch{
+          //使用模式匹配来处理异常
+          case ex:Exception => { println(ex.getStackTraceString)}
+            println("=======>> Page: parse Exception!!" + "\n======>>异常数据:" + row)
+            ("", "", None)
+        }
+      } else {
+        println("=======>> Page: GU_ID IS NULL!!")
+        ("", "", None)
+      }
+      ret
+    } else {
+      println("=======>> Page: ROW IS NULL!!")
+      ("", "", None)
+    }
+  }
+
   private def parse(row: JsValue, dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
                     fCate: mutable.HashMap[Int, Int]): (User, PageAndEvent, Page, Event) = {
     // mb_pageinfo
@@ -115,57 +165,6 @@ class PageinfoTransformer extends ITransformer {
     val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
     (user, pe, page, event)
   }
-
-  // 返回解析的结果
-  def logParser(line: String,
-                dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
-                dimEvent: mutable.HashMap[String, (Int, Int)],
-                fCate: mutable.HashMap[Int, Int]): (String, String, Any) = {
-
-    //play
-    val row = Json.parse(line.replaceAll("null", """\\"\\""""))
-
-    if (row != null) {
-      // 解析逻辑
-      var gu_id = ""
-      val ticks = (row \ "ticks").asOpt[String].getOrElse("")
-      val jpid = (row \ "jpid").asOpt[String].getOrElse("")
-      val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
-      val os = (row \ "os").asOpt[String].getOrElse("")
-      val endTime = (row \ "endtime").as[String].toLong
-
-      try
-      {
-        gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
-      } catch{
-        //使用模式匹配来处理异常
-        case ex:Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
-      }
-
-//      println("=======>> ticks=" + ticks + "#, jpid=" + jpid + "#, deviceid=" + deviceId + "#, os=" + os + "#, gu_id=" + gu_id + "#, endtime=" + endTime)
-
-      val ret = if(gu_id.nonEmpty) {
-        try {
-          val res = parse(row, dimPage, fCate)
-          val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
-          (partitionStr, "page", res)
-        } catch{
-          //使用模式匹配来处理异常
-          case ex:Exception => { println(ex.getStackTraceString)}
-            println("=======>> Page: parse Exception!!" + "\n======>>异常数据:" + row)
-            ("", "", None)
-        }
-      } else {
-        println("=======>> Page: GU_ID IS NULL!!")
-        ("", "", None)
-      }
-      ret
-    } else {
-      println("=======>> Page: ROW IS NULL!!")
-      ("", "", None)
-    }
-  }
-
 }
 
 // for test

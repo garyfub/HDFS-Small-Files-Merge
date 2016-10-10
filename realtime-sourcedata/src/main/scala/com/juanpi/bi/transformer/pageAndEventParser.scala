@@ -199,7 +199,7 @@ object pageAndEventParser {
     */
   def getPageLevelId(page_id: Int, extend_params: String, page_level_id: Int, forLevelId: Int): Int = {
     if(page_id == 254 && forLevelId == 2){
-      2
+      forLevelId
     } else if(page_id != 154 || page_id != 289) {
         page_level_id
     } else {

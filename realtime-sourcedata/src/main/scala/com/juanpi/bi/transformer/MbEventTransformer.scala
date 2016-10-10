@@ -40,7 +40,7 @@ class MbEventTransformer extends ITransformer {
       } catch {
         //使用模式匹配来处理异常
         case ex: Exception => println(ex.printStackTrace())
-        println("=======>> Event: parse Exception!!" + "\n======>>异常数据:" + row)
+        println("=======>> Event: getGuid Exception!!" + "\n======>>异常数据:" + row)
       }
 
       val ret = if(gu_id.nonEmpty) {
