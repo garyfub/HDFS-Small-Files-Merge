@@ -40,44 +40,48 @@ class MbEventTransformer extends ITransformer {
       } catch {
         //使用模式匹配来处理异常
         case ex: Exception => println(ex.printStackTrace())
-        println("=======>> Event: getGuid Exception!!" + "\n======>>异常数据:" + row)
+          println("=======>> Event: getGuid Exception!!" + "\n======>>异常数据:" + row)
       }
 
-      val ret = if(gu_id.nonEmpty) {
-          val endtime = (row \ "endtime").asOpt[String].getOrElse("")
-          val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
-          val loadTime = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_t")
+      val ret = if (gu_id.nonEmpty) {
+        val endtime = (row \ "endtime").asOpt[String].getOrElse("")
+        val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
+        val loadTime = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_t")
 
-          // 如果loadTime非空，就需要判断是否是当天的数据，如果不是，需要过滤掉,因此不需要处理
-          if(loadTime.nonEmpty &&
-            DateUtils.dateStr(endtime.toLong) != DateUtils.dateStr(loadTime.toLong * 1000)) {
-            ("", "", None)
-          } else {
-            try{
-              val res = parse(row, dimpage, dimevent, fCate)
-              // 过滤异常的数据，具体见解析函数 eventParser.filterOutlierPageId
-              if(res == null) {
-                ("", "", None)
-              }
-              else {
-                val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = res
-
-                val res_str =  pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x=> x match {
-                  case y if y == null || y.toString.isEmpty => "\\N"
-                  case _ => x
-                }).mkString("\001")
-
-                val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
-                (partitionStr, "event", res_str)
-              }
+        // 如果loadTime非空，就需要判断是否是当天的数据，如果不是，需要过滤掉,因此不需要处理
+        if (loadTime.nonEmpty &&
+          DateUtils.dateStr(endtime.toLong) != DateUtils.dateStr(loadTime.toLong * 1000)) {
+          ("", "", None)
+        } else {
+          try {
+            val res = parse(row, dimpage, dimevent, fCate)
+            // 过滤异常的数据，具体见解析函数 eventParser.filterOutlierPageId
+            if (res == null) {
+              ("", "", None)
             }
-            catch {
-              //使用模式匹配来处理异常
-              case ex: Exception => ex.printStackTrace()
-                println("=======>> Event: parse Exception!!" + "\n======>>异常数据:" + row)
-                ("", "", None)
+            else {
+              val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = res
+
+              val res_str = pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x => x match {
+                case y if y == null || y.toString.isEmpty => "\\N"
+                case _ => x
+              }).mkString("\001")
+
+              val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
+              (partitionStr, "event", res_str)
             }
           }
+          catch {
+            //使用模式匹配来处理异常
+            case ex: Exception => {
+              ex.getStackTrace.mkString("\n")
+              println ("=========>>test:" + ex.getStackTrace + "\n======>>异常数据:" + row)
+            }
+
+            println("=======>> Event: parse Exception!!" + "\n======>>异常数据:" + row)
+            ("", "", None)
+          }
+        }
       } else {
         println("=======>> Page: GU_ID IS NULL!!" + "\n======>>异常数据:" + row)
         ("", "", None)
@@ -127,7 +131,7 @@ class MbEventTransformer extends ITransformer {
 
     // 用户画像中定义的
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
-    val (gid, ugroup) = if(c_server.nonEmpty) {
+    val (gid, ugroup) = if (c_server.nonEmpty) {
       val js_c_server = Json.parse(c_server)
       val gid = (js_c_server \ "gid").asOpt[String].getOrElse("0")
       val ugroup = (js_c_server \ "ugroup").asOpt[String].getOrElse("0")
@@ -182,7 +186,9 @@ class MbEventTransformer extends ITransformer {
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimpage.get(for_pageid).getOrElse(0, 0, "", 0)
     val page_id = pageAndEventParser.getPageId(d_page_id, f_page_extend_params)
 
-    val forLevelId = if(d_page_id == 254 && f_page_extend_params.nonEmpty){fCate.get(f_page_extend_params.toInt).getOrElse(0)} else 0
+    val forLevelId = if (d_page_id == 254 && f_page_extend_params.nonEmpty) {
+      fCate.get(f_page_extend_params.toInt).getOrElse(0)
+    } else 0
 
     val page_value = pageAndEventParser.getPageValue(d_page_id, f_page_extend_params, page_type_id, d_page_value)
 
@@ -191,11 +197,12 @@ class MbEventTransformer extends ITransformer {
 
     val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, f_extend_params, d_page_level_id, forLevelId)
 
-    val hot_goods_id = if(d_page_id == 250 && !f_page_extend_params.isEmpty && f_page_extend_params.contains("_") && f_page_extend_params.split("_").length > 2)
-    {
+    val hot_goods_id = if (d_page_id == 250 && !f_page_extend_params.isEmpty && f_page_extend_params.contains("_") && f_page_extend_params.split("_").length > 2) {
       new GetGoodsId().evaluate(f_page_extend_params.split("_")(2))
     }
-    else {""}
+    else {
+      ""
+    }
 
     val page_lvl2_value = pageAndEventParser.getPageLvl2Value(d_page_id, f_page_extend_params, server_jsonstr)
 
@@ -204,7 +211,7 @@ class MbEventTransformer extends ITransformer {
     // 品宣页点击存储质检类型
     val event_lvl2_value = event_id match {
       case "360" => pageAndEventParser.getJsonValueByKey(server_jsonstr, "item")
-      case "482"|"481"|"480"|"479" => pageAndEventParser.getJsonValueByKey(server_jsonstr, "_rmd")
+      case "482" | "481" | "480" | "479" => pageAndEventParser.getJsonValueByKey(server_jsonstr, "_rmd")
       case _ => ""
     }
 
@@ -219,12 +226,12 @@ class MbEventTransformer extends ITransformer {
     val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
 
     // TODO 测试代码，测试后需要删掉
-    if(-1 == page_id || 10084 == page_id){
-      println("for_pageid:" + for_pageid, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id ,
-        " ,page_value:" + page_value , " ,f_page_extend_params:" + f_page_extend_params,
+    if (-1 == page_id || 10084 == page_id) {
+      println("for_pageid:" + for_pageid, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id,
+        " ,page_value:" + page_value, " ,f_page_extend_params:" + f_page_extend_params,
         " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value,
         " ,for_eventid:" + for_eventid,
-        " ,d_event_id:" + d_event_id , " ,event_type_id:" + event_type_id, " ,event_id:" + event_id, " ,event_value:" + event_value)
+        " ,d_event_id:" + d_event_id, " ,event_type_id:" + event_type_id, " ,event_id:" + event_id, " ,event_value:" + event_value)
       println("page_id异常>>原始数据为：" + row)
     }
 
@@ -239,15 +246,15 @@ class MbEventTransformer extends ITransformer {
     else ""
   }
 
-    /**
-      *
-      * @param activityname
-      * @return
-      */
-    def getActivityid(activityname: String): Int = {
-      new GetMbActionId().evaluate(activityname.toLowerCase())
-    }
+  /**
+    *
+    * @param activityname
+    * @return
+    */
+  def getActivityid(activityname: String): Int = {
+    new GetMbActionId().evaluate(activityname.toLowerCase())
   }
+}
 
 // for test
 object MbEventTransformer {
@@ -263,13 +270,13 @@ object MbEventTransformer {
       cid = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
       cid2 = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
     }
-    if(!cid.isEmpty) println(cid.toInt)
+    if (!cid.isEmpty) println(cid.toInt)
     val tu = (t, cid, cid2, 0, null)
     val tu1 = (t, cid)
-    val res = pageAndEventParser.combineTuple(tu, tu1).map(x=> x match {
+    val res = pageAndEventParser.combineTuple(tu, tu1).map(x => x match {
       case null => "\\N"
-//      case z if z == null => "\\N"
-      case y if y.toString.isEmpty => "\\N"
+      //      case z if z == null => "\\N"
+      case y if y == "" | y.toString.isEmpty => "\\N"
       case _ => x
     }).mkString("\001")
     println(res)
