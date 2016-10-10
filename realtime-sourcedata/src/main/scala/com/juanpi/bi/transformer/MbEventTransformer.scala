@@ -73,7 +73,7 @@ class MbEventTransformer extends ITransformer {
             }
             catch {
               //使用模式匹配来处理异常
-              case ex: Exception => println(ex.printStackTrace())
+              case ex: Exception => ex.printStackTrace()
                 println("=======>> Event: parse Exception!!" + "\n======>>异常数据:" + row)
                 ("", "", None)
             }

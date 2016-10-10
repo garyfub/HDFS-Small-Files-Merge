@@ -50,12 +50,12 @@ class PageinfoTransformer extends ITransformer {
             ("", "", None)
         }
       } else {
-        println("=======>> Page: GU_ID IS NULL!!")
+        println("=======>> Page: GU_ID IS NULL!!" + "\n======>>异常数据:" + row)
         ("", "", None)
       }
       ret
     } else {
-      println("=======>> Page: ROW IS NULL!!")
+      println("=======>> Page: ROW IS NULL!!" + "\n======>>异常数据:" + row)
       ("", "", None)
     }
   }
