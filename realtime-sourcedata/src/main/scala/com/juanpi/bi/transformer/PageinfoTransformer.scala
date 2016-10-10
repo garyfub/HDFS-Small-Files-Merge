@@ -11,7 +11,8 @@ import scala.collection.mutable
   */
 class PageinfoTransformer extends ITransformer {
 
-  private def parse(row: JsValue, dimpage: mutable.HashMap[String, (Int, Int, String, Int)]): (User, PageAndEvent, Page, Event) = {
+  private def parse(row: JsValue, dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
+                    fCate: mutable.HashMap[Int, Int]): (User, PageAndEvent, Page, Event) = {
     // mb_pageinfo
 //    val ticks = (row \ "ticks").asOpt[String].getOrElse("")
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
@@ -82,7 +83,9 @@ class PageinfoTransformer extends ITransformer {
     val shop_id = pageAndEventParser.getShopId(d_page_id, extendParams1)
     val ref_shop_id = pageAndEventParser.getShopId(d_pre_page_id, preExtendParams1)
 
-    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, extendParams1, d_page_level_id)
+    val forLevelId = if(d_page_id == 254 && extendParams1.nonEmpty){fCate.get(extendParams1.toInt).getOrElse(0)} else 0
+
+    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, extendParams1, d_page_level_id, forLevelId)
 
     // WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extendParams1,'_')[2],''))
     val hot_goods_id = if(d_page_id == 250 && extendParams1.nonEmpty && extendParams1.contains("_") && extendParams1.split("_").length > 2)
@@ -116,7 +119,8 @@ class PageinfoTransformer extends ITransformer {
   // 返回解析的结果
   def logParser(line: String,
                 dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
-                dimEvent: mutable.HashMap[String, (Int, Int)]): (String, String, Any) = {
+                dimEvent: mutable.HashMap[String, (Int, Int)],
+                fCate: mutable.HashMap[Int, Int]): (String, String, Any) = {
 
     //play
     val row = Json.parse(line.replaceAll("null", """\\"\\""""))
@@ -142,7 +146,7 @@ class PageinfoTransformer extends ITransformer {
 
       val ret = if(gu_id.nonEmpty) {
         try {
-          val res = parse(row, dimPage)
+          val res = parse(row, dimPage, fCate)
           val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
           (partitionStr, "page", res)
         } catch{

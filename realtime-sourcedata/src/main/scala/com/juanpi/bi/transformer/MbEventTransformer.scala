@@ -1,7 +1,7 @@
 package com.juanpi.bi.transformer
 
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
-import com.juanpi.bi.hiveUDF.{GetGoodsId, GetMbActionId, GetPageID}
+import com.juanpi.bi.hiveUDF.{GetGoodsId, GetMbActionId}
 import com.juanpi.bi.sc_utils.DateUtils
 import play.api.libs.json.{JsValue, Json}
 
@@ -21,7 +21,8 @@ class MbEventTransformer extends ITransformer {
     */
   def logParser(line: String,
                 dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
-                dimevent: mutable.HashMap[String, (Int, Int)]): (String, String, Any) = {
+                dimevent: mutable.HashMap[String, (Int, Int)],
+                fCate: mutable.HashMap[Int, Int]): (String, String, Any) = {
 
     val row = Json.parse(line)
     val ticks = (row \ "ticks").asOpt[String].getOrElse("")
@@ -53,7 +54,7 @@ class MbEventTransformer extends ITransformer {
             ("", "", None)
           } else {
             try{
-              val res = parse(row, dimpage, dimevent)
+              val res = parse(row, dimpage, dimevent, fCate)
               // 过滤异常的数据，具体见解析函数 eventParser.filterOutlierPageId
               if(res == null) {
                 ("", "", None)
@@ -90,7 +91,8 @@ class MbEventTransformer extends ITransformer {
 
   def parse(row: JsValue,
             dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
-            dimevent: mutable.HashMap[String, (Int, Int)]): (User, PageAndEvent, Page, Event) = {
+            dimevent: mutable.HashMap[String, (Int, Int)],
+            fCate: mutable.HashMap[Int, Int]): (User, PageAndEvent, Page, Event) = {
 
     // ---------------------------------------------------------------- mb_event ----------------------------------------------------------------
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
@@ -180,12 +182,14 @@ class MbEventTransformer extends ITransformer {
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimpage.get(for_pageid).getOrElse(0, 0, "", 0)
     val page_id = pageAndEventParser.getPageId(d_page_id, f_page_extend_params)
 
+    val forLevelId = if(d_page_id == 254 && f_extend_params.nonEmpty){fCate.get(f_extend_params.toInt).getOrElse(0)} else 0
+
     val page_value = pageAndEventParser.getPageValue(d_page_id, f_page_extend_params, page_type_id, d_page_value)
 
     val shop_id = pageAndEventParser.getShopId(d_page_id, f_page_extend_params)
     val ref_shop_id = pageAndEventParser.getShopId(ref_page_id, f_pre_extend_params)
 
-    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, f_extend_params, d_page_level_id)
+    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, f_extend_params, d_page_level_id, forLevelId)
 
     val hot_goods_id = if(d_page_id == 250 && !f_page_extend_params.isEmpty && f_page_extend_params.contains("_") && f_page_extend_params.split("_").length > 2)
     {
@@ -215,13 +219,13 @@ class MbEventTransformer extends ITransformer {
     val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
 
     // TODO 测试代码，测试后需要删掉
-    if(-1 == page_id){
+    if(-1 == page_id || 10084 == page_id){
       println("for_pageid:" + for_pageid, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id ,
         " ,page_value:" + page_value , " ,f_page_extend_params:" + f_page_extend_params,
         " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value,
         " ,for_eventid:" + for_eventid,
         " ,d_event_id:" + d_event_id , " ,event_type_id:" + event_type_id, " ,event_id:" + event_id, " ,event_value:" + event_value)
-      println("page_id=-1, 原始数据为：" + row)
+      println("page_id异常>>原始数据为：" + row)
     }
 
     (user, pe, page, event)
