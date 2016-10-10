@@ -211,11 +211,6 @@ object pageAndEventParser {
       }
     }
   }
-//  CASE WHEN p1.page_id = 254 and f.level_id = 2 then 2
-//  WHEN P1.page_id not in (154,289) THEN p1.page_level_id
-//  WHEN getpageid(a.extend_params) in (34,65) then 3
-//  when getpageid(a.extend_params) = 10069 then 4
-//  else 0 end page_level_id,
 
   /**
     *

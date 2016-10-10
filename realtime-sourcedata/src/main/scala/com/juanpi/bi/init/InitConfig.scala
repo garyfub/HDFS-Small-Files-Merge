@@ -20,21 +20,30 @@ class InitConfig() {
   @BeanProperty var ssc: StreamingContext = _
   @BeanProperty var duration: Duration = _
 
-  def initDimPageEvent(): (mutable.HashMap[String, (Int, Int, String, Int)],
-                          mutable.HashMap[String, (Int, Int)]) = {
+  def initDimTables(): (mutable.HashMap[String, (Int, Int, String, Int)],
+    mutable.HashMap[String, (Int, Int)],
+    mutable.HashMap[Int, Int]) = {
+
     // 查询 hive 中的 dim_page 和 dim_event
     val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
     val dp: mutable.HashMap[String, (Int, Int, String, Int)] = initDimPage(sqlContext)
     val de: mutable.HashMap[String, (Int, Int)] = initDimEvent(sqlContext)
-    (dp, de)
+    val fCate: mutable.HashMap[Int, Int] = initDimFrontCate(sqlContext)
+    (dp, de, fCate)
   }
 
-  // 得到初始化的 StreamingContext
+  /**
+    * 得到初始化的 StreamingContext
+    */
    private def setStreamingContext() = {
     this.setSsc(new StreamingContext(this.getSpconf(), this.getDuration()))
   }
 
-  // 初始化 SparkConf 公共参数
+  /**
+    * 初始化 SparkConf 公共参数
+    * @param appName
+    * @param maxRecords
+    */
   private def initSparkConfig(appName:String, maxRecords: String): Unit = {
     val conf = new SparkConf().setAppName(appName)
       .set("spark.akka.frameSize", "256")
@@ -55,6 +64,11 @@ class InitConfig() {
     this.setSpconf(conf)
   }
 
+  /**
+    * 初始化 dw.dim_page
+    * @param sqlContext
+    * @return
+    */
   def initDimPage(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int, String, Int)] =
   {
     var dimPages = new mutable.HashMap[String, (Int, Int, String, Int)]
@@ -91,6 +105,11 @@ class InitConfig() {
     dimPages
   }
 
+  /**
+    * 初始化 dw.dim_event
+    * @param sqlContext
+    * @return
+    */
   def initDimEvent(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int)] =
   {
     var dimEvents = new mutable.HashMap[String, (Int, Int)]
@@ -123,6 +142,38 @@ class InitConfig() {
     dimData.unpersist(true)
     dimEvents
   }
+
+  /**
+    * 初始化 dw.dim_front_cate 数据
+    * @param sqlContext
+    * @return
+    */
+  def initDimFrontCate(sqlContext: HiveContext): mutable.HashMap[Int, Int] =
+  {
+    var dimValues = new mutable.HashMap[Int, Int]
+    val sql = s"""select front_cate_id, level_id
+                          | from dw.dim_front_cate
+                          | order by front_cate_id""".stripMargin
+
+    val dimData = sqlContext.sql(sql).persist(StorageLevel.MEMORY_AND_DISK)
+
+    dimData.map(line => {
+      val front_cate_id = line.getAs[Int]("front_cate_id")
+      val level_id = line.getAs[Int]("level_id")
+
+      val key = front_cate_id
+      (key, level_id)
+    })
+      .collect()
+      .foreach( items => {
+        val value = items._2
+        val key = items._1
+        dimValues += (key -> value)
+      })
+
+    dimData.unpersist(true)
+    dimValues
+  }
 }
 
 object InitConfig {
@@ -131,6 +182,7 @@ object InitConfig {
   val ic = new InitConfig()
   var DIMPAGE = new mutable.HashMap[String, (Int, Int, String, Int)]
   var DIMENT = new mutable.HashMap[String, (Int, Int)]
+  var FCATE = new mutable.HashMap[Int, Int]
 
   def initParam(appName: String, interval: Int, maxRecords: String) = {
     // 初始化 apark 超时时间, spark.mystreaming.batch.interval
@@ -142,8 +194,11 @@ object InitConfig {
     ic.setStreamingContext()
 
     // 初始化 page and event
-    DIMPAGE = ic.initDimPageEvent()._1
-    DIMENT = ic.initDimPageEvent()._2
+    val initDimTables = ic.initDimTables()
+
+    DIMPAGE = initDimTables._1
+    DIMENT  = initDimTables._2
+    FCATE   = initDimTables._3
   }
 
   def getStreamingContext(): StreamingContext = {

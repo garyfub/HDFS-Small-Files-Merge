@@ -23,7 +23,9 @@ import scala.collection.mutable
 
 class KafkaConsumer(topic: String,
                     dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
-                    dimEvent: mutable.HashMap[String, (Int, Int)], zkQuorum: String)
+                    dimEvent: mutable.HashMap[String, (Int, Int)],
+                    fCate: mutable.HashMap[Int, Int],
+                    zkQuorum: String)
   extends Logging with Serializable {
   import KafkaConsumer._
 
@@ -74,9 +76,6 @@ class KafkaConsumer(topic: String,
   def pageProcess(dataDStream: DStream[((Long, Long), String)],
                   ssc: StreamingContext,
                   km: KafkaManager) = {
-    // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
-    // 数据块中的每一条记录需要处理
-//    val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
 
     val data = dataDStream.map(_._2.replace("\0",""))
         .map(msg => parseMessage(msg))
@@ -89,19 +88,6 @@ class KafkaConsumer(topic: String,
         val newRdd = rdd.map(record => {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._3
 
-//          val gu_id = user.gu_id
-//
-//          val app_name = user.site_id match {
-//            case 1 => "jiu"
-//            case 2 => "zhe"
-//            case _ => ""
-//          }
-
-//          val (utm, gu_create_time) = HBaseHandler.getGuIdUtmInitDate(zkQuorum, gu_id + app_name)
-//          user.utm = utm
-//          user.gu_create_time = gu_create_time
-          // record._2 就是 page
-          // date=2016-08-26/gu_hash=f
           val res_str =  pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x=> x match {
             case z if z == null => "\\N"
             case y if y.toString.isEmpty => "\\N"
@@ -135,7 +121,7 @@ class KafkaConsumer(topic: String,
   }
 
   def parseMessage(message:String):(String, String, Any) = {
-    getTransformer().logParser(message, dimPage, dimEvent)
+    getTransformer().logParser(message, dimPage, dimEvent, fCate)
   }
 
   def transMessage(rdd:RDD[String]):RDD[(String, String, Any)] = {
@@ -301,7 +287,7 @@ object KafkaConsumer{
     }
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
-    val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, zkQuorum)
+    val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, ic.FCATE, zkQuorum)
     // page 和 event 分开解析
     if(topic.contains("page")) {
       consumer.pageProcess(message, ssc, km)
