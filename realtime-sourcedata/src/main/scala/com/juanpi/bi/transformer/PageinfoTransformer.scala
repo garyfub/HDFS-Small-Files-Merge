@@ -32,10 +32,9 @@ class PageinfoTransformer extends ITransformer {
       try
       {
         gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
-      } catch{
+      } catch {
         //使用模式匹配来处理异常
         case ex:Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + row)
-        case _ => println("======>>异常数据:" + row)
           println("=======>> Event: getGuid Exception!!" + "\n======>>异常数据:" + row)
       }
 
