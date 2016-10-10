@@ -127,8 +127,33 @@ page_id
 ,page_value
 ,entrance_page_id
 ,entrance_page_value
+,table_source
 from test.dw_path_list_new
 where date = '2016-09-28'
 and entrance_page_id = 254
 and entrance_page_value = 61
+and page_value = 61
+limit 200
+;
+
+
+select
+table_source
+,page_id
+,page_value
+,entrance_page_id
+,entrance_page_value
+from test.dw_path_list_new
+where date = '2016-09-28'
+and table_source = "mb_event"
+limit 200
+;
+
+
+select
+event_value
+from test.dw_path_list_new
+where date = '2016-09-29'
+and event_value like "%pit_info%"
+limit 200
 ;
