@@ -154,7 +154,7 @@ class MbEventTransformer extends ITransformer {
 
     val cid = pageAndEventParser.getJsonValueByKey(server_jsonstr, "cid")
 
-    val flag = eventParser.filterOutlierPageId(pagename, cid, f_page_extend_params)
+    val flag = eventParser.filterOutlierPageId(activityname, pagename, cid, f_page_extend_params)
     if (flag) {
       // 如果需要过滤，本条数据解析致此结束
       return null

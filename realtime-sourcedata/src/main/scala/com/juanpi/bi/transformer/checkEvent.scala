@@ -71,7 +71,7 @@ object checkEvent {
     val os = (row \ "os").asOpt[String].getOrElse("")
     val guId = pageAndEventParser.getGuid(jpid, deviceid, os)
 
-    val flag = eventParser.filterOutlierPageId(pagename, cid, f_page_extend_params)
+    val flag = eventParser.filterOutlierPageId(activityname, pagename, cid, f_page_extend_params)
 
     println(guId, deviceid, flag)
 
