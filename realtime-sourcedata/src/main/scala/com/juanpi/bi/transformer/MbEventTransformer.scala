@@ -176,7 +176,7 @@ class MbEventTransformer extends ITransformer {
 
     // --------------------------------------------------------------------> event_reg ------------------------------------------------------------------
     val (d_event_id: Int, event_type_id: Int) = dimevent.get(for_eventid).getOrElse(0, 0)
-    val event_id = eventParser.getEventId(d_event_id, app_version) + ""
+    val event_id = eventParser.getEventId(d_event_id, app_version)
     val event_value = eventParser.getEventValue(event_type_id, activityname, f_extend_params, server_jsonstr)
 
     val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimpage.get(for_pre_pageid).getOrElse(0, 0, "", 0)
@@ -209,7 +209,7 @@ class MbEventTransformer extends ITransformer {
     val ref_page_lvl2_value = pageAndEventParser.getPageLvl2Value(d_pre_page_id, f_pre_extend_params, server_jsonstr)
 
     // 品宣页点击存储质检类型
-    val event_lvl2_value = event_id match {
+    val event_lvl2_value = event_id.toString match {
       case "360" => pageAndEventParser.getJsonValueByKey(server_jsonstr, "item")
       case "482" | "481" | "480" | "479" => pageAndEventParser.getJsonValueByKey(server_jsonstr, "_rmd")
       case _ => ""
@@ -223,7 +223,7 @@ class MbEventTransformer extends ITransformer {
     val user = User.apply(gu_id, uid, utm, "", session_id, terminal_id, app_version, site_id, ref_site_id, ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, starttime, endtime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceid, to_switch)
-    val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
+    val event = Event.apply(event_id.toString, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
 
     // TODO 测试代码，测试后需要删掉
     if (-1 == page_id || 10084 == page_id) {
