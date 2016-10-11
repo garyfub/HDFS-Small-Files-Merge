@@ -226,13 +226,22 @@ class MbEventTransformer extends ITransformer {
     val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
 
     // TODO 测试代码，测试后需要删掉
-    if (-1 == page_id || 10084 == page_id) {
+    if (-1 == page_id || 10084 == page_id || -1 == event_id) {
       println("for_pageid:" + for_pageid, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id,
         " ,page_value:" + page_value, " ,f_page_extend_params:" + f_page_extend_params,
         " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value,
         " ,for_eventid:" + for_eventid,
         " ,d_event_id:" + d_event_id, " ,event_type_id:" + event_type_id, " ,event_id:" + event_id, " ,event_value:" + event_value)
       println("page_id异常>>原始数据为：" + row)
+    }
+
+    if (-1 == event_id) {
+      println("for_pageid:" + for_pageid, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id,
+        " ,page_value:" + page_value, " ,f_page_extend_params:" + f_page_extend_params,
+        " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value,
+        " ,for_eventid:" + for_eventid,
+        " ,d_event_id:" + d_event_id, " ,event_type_id:" + event_type_id, " ,event_id:" + event_id, " ,event_value:" + event_value)
+      println("event_id=-1>>原始数据为：" + row)
     }
 
     (user, pe, page, event)
