@@ -46,10 +46,16 @@ object eventParser {
     * @param fctPageExtendParams
     * @return
     */
-  def filterOutlierPageId(pageName: String, cid: String, fctPageExtendParams: String): Boolean = {
-    val flag = if(pageName.isEmpty) {
+  def filterOutlierPageId(activityName: String, pageName: String, cid: String, fctPageExtendParams: String): Boolean = {
+    val flag = if(pageName.isEmpty || activityName.isEmpty) {
       true
-    } else if("page_tab".equals(pageName)
+    }
+    else if(activityName.contains("exposure_") || activityName.contains("_performance")){
+      // 过滤event中的曝光数据：exposure_ad_popup, exposure_ad_inscreen
+      // 和性能采集数据collect_data_performance, collect_page_performance
+      true
+    }
+    else if("page_tab".equals(pageName)
       && cid.isEmpty
       && !List("all", "past_zhe", "crazy_zhe", "jiu", "yugao").contains(fctPageExtendParams)) {
       true
