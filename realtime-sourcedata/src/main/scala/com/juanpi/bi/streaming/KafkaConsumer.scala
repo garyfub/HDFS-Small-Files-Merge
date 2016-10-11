@@ -90,7 +90,7 @@ class KafkaConsumer(topic: String,
 
           val res_str =  pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x=> x match {
             case z if z == null => "\\N"
-            case y if y.toString.isEmpty => "\\N"
+            case y if y == "" || y.toString.isEmpty => "\\N"
             case _ => x
           }).mkString("\001")
           ((record._1, time.milliseconds), res_str)

@@ -47,7 +47,9 @@ object eventParser {
     * @return
     */
   def filterOutlierPageId(pageName: String, cid: String, fctPageExtendParams: String): Boolean = {
-    val flag = if("page_tab".equals(pageName)
+    val flag = if(pageName.isEmpty) {
+      true
+    } else if("page_tab".equals(pageName)
       && cid.isEmpty
       && !List("all", "past_zhe", "crazy_zhe", "jiu", "yugao").contains(fctPageExtendParams)) {
       true
