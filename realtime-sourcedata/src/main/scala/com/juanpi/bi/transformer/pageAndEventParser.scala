@@ -156,41 +156,6 @@ object pageAndEventParser {
   }
 
   /**
-    * 二级页面值(品牌页：引流款ID；商品skc等)
-    *
-    * @param x_page_id
-    * @param x_extend_params
-    * @param server_jsonstr
-    * @return
-    */
-  def getPageLvl2Value(x_page_id: Int, x_extend_params: String, server_jsonstr: String): String = {
-    val strValue = getParsedJson(server_jsonstr)
-    val page_lel2_value =
-      if(x_page_id == 250 && x_extend_params.nonEmpty
-        && x_extend_params.contains("_")
-        && x_extend_params.split("_").length > 2)
-      {
-        // 解析品牌页的引流款商品
-        new GetGoodsId().evaluate(x_extend_params.split("_")(2))
-      }
-      else if(x_page_id == 154 || x_page_id == 289) {
-        val pid = new GetPageID().evaluate(x_extend_params)
-        if(pid == 10104) {
-          new GetSkcId().evaluate(x_extend_params)
-        }
-        else if(pid == 10102) {
-          new GetShopId().evaluate(x_extend_params)
-        } else ""
-      }
-      else if(x_page_id == 169 && !strValue.equals(JsNull) && server_jsonstr.contains("order_status")) {
-        (strValue \ "order_status").toString()
-      }
-      else ""
-    page_lel2_value
-  }
-
-
-  /**
     *
     * @param page_id
     * @param extend_params

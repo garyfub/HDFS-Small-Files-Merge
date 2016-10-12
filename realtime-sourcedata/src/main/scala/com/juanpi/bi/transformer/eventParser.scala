@@ -1,6 +1,7 @@
 package com.juanpi.bi.transformer
 
-import com.juanpi.bi.hiveUDF.{GetGoodsId, GetPageID}
+import com.juanpi.bi.hiveUDF.{GetGoodsId, GetPageID, GetShopId, GetSkcId}
+import play.api.libs.json.JsNull
 
 /**
   * Created by gongzi on 2016/9/28.
@@ -35,6 +36,25 @@ object eventParser {
       (pagename + f_page_extend_params).toLowerCase()
     }
     for_pageid
+  }
+
+  /**
+    *
+    * @param x_page_id
+    * @param x_extends_param
+    * @return
+    */
+  def getPageLvl2Value(x_page_id: Int, x_extends_param: String): String = {
+    val page_lel2_value =
+      if(x_page_id == 250 && x_extends_param.nonEmpty
+        && x_extends_param.contains("_")
+        && x_extends_param.split("_").length > 2)
+      {
+        // 解析品牌页的引流款商品
+        new GetGoodsId().evaluate(x_extends_param.split("_")(2))
+      }
+     else {""}
+    page_lel2_value
   }
 
   // outlierData 离群数据过滤

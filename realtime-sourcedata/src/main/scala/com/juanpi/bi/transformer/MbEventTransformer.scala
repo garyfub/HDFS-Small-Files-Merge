@@ -149,6 +149,7 @@ class MbEventTransformer extends ITransformer {
     // ------------------------------------------------------------- mb_event -> mb_event_log --------------------------------------------------------------
     val f_page_extend_params = pageAndEventParser.getExtendParams(pagename, page_extends_param)
     val f_pre_extend_params = pageAndEventParser.getExtendParams(pagename, pre_extends_param)
+
     val t_extend_params = eventParser.getExtendParamsFromBase(activityname, extend_params, app_version)
     val f_extend_params = eventParser.getForExtendParams(activityname, t_extend_params, cube_position, server_jsonstr)
 
@@ -204,9 +205,9 @@ class MbEventTransformer extends ITransformer {
       ""
     }
 
-    val page_lvl2_value = pageAndEventParser.getPageLvl2Value(d_page_id, f_page_extend_params, server_jsonstr)
+    val page_lvl2_value = eventParser.getPageLvl2Value(d_page_id, f_page_extend_params)
 
-    val ref_page_lvl2_value = pageAndEventParser.getPageLvl2Value(d_pre_page_id, f_pre_extend_params, server_jsonstr)
+    val ref_page_lvl2_value = eventParser.getPageLvl2Value(d_pre_page_id, f_pre_extend_params)
 
     // 品宣页点击存储质检类型
     val event_lvl2_value = event_id.toString match {

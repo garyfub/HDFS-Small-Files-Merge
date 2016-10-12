@@ -112,40 +112,40 @@ class PageinfoTransformer extends ITransformer {
     }
 
     // mb_pageinfo -> mb_pageinfo_log
-    val extendParams1 = pageAndEventParser.getExtendParams(pagename, extend_params)
-    val preExtendParams1 = pageAndEventParser.getExtendParams(pagename, pre_extend_params)
+    val fct_extendParams = pageAndEventParser.getExtendParams(pagename, extend_params)
+    val fct_preExtendParams = pageAndEventParser.getExtendParams(pagename, pre_extend_params)
 
     // for_pageid 判断
-    val for_pageid = pageParser.forPageId(pagename, extendParams1, server_jsonstr)
-    val for_pre_pageid = pageParser.forPageId(pre_page, preExtendParams1, server_jsonstr)
+    val for_pageid = pageParser.forPageId(pagename, fct_extendParams, server_jsonstr)
+    val for_pre_pageid = pageParser.forPageId(pre_page, fct_preExtendParams, server_jsonstr)
 
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimpage.get(for_pageid).getOrElse(0, 0, "", 0)
-    val page_id = pageAndEventParser.getPageId(d_page_id, extendParams1)
-    val page_value = pageAndEventParser.getPageValue(d_page_id, extendParams1, page_type_id, d_page_value)
+    val page_id = pageAndEventParser.getPageId(d_page_id, fct_extendParams)
+    val page_value = pageAndEventParser.getPageValue(d_page_id, fct_extendParams, page_type_id, d_page_value)
 
     // ref_page_id
     val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimpage.get(for_pre_pageid).getOrElse(0, 0, "", 0)
-    val ref_page_id = pageAndEventParser.getPageId(d_pre_page_id, preExtendParams1)
-    val ref_page_value = pageAndEventParser.getPageValue(d_pre_page_id, preExtendParams1, d_pre_page_type_id, d_pre_page_value)
+    val ref_page_id = pageAndEventParser.getPageId(d_pre_page_id, fct_preExtendParams)
+    val ref_page_value = pageAndEventParser.getPageValue(d_pre_page_id, fct_preExtendParams, d_pre_page_type_id, d_pre_page_value)
 
     val parsed_source = pageAndEventParser.getSource(source)
-    val shop_id = pageAndEventParser.getShopId(d_page_id, extendParams1)
-    val ref_shop_id = pageAndEventParser.getShopId(d_pre_page_id, preExtendParams1)
+    val shop_id = pageAndEventParser.getShopId(d_page_id, fct_extendParams)
+    val ref_shop_id = pageAndEventParser.getShopId(d_pre_page_id, fct_preExtendParams)
 
-    val forLevelId = if(d_page_id == 254 && extendParams1.nonEmpty){fCate.get(extendParams1.toInt).getOrElse(0)} else 0
+    val forLevelId = if(d_page_id == 254 && fct_extendParams.nonEmpty){fCate.get(fct_extendParams.toInt).getOrElse(0)} else 0
 
-    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, extendParams1, d_page_level_id, forLevelId)
+    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, fct_extendParams, d_page_level_id, forLevelId)
 
     // WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extendParams1,'_')[2],''))
-    val hot_goods_id = if(d_page_id == 250 && extendParams1.nonEmpty && extendParams1.contains("_") && extendParams1.split("_").length > 2)
+    val hot_goods_id = if(d_page_id == 250 && fct_extendParams.nonEmpty && fct_extendParams.contains("_") && fct_extendParams.split("_").length > 2)
     {
-      new GetGoodsId().evaluate(extendParams1.split("_")(2))
+      new GetGoodsId().evaluate(fct_extendParams.split("_")(2))
     }
     else {""}
 
-    val page_lvl2_value = pageAndEventParser.getPageLvl2Value(d_page_id, extendParams1, server_jsonstr)
+    val page_lvl2_value = pageParser.getPageLvl2Value(d_page_id, fct_extendParams, server_jsonstr, url)
 
-    val ref_page_lvl2_value = pageAndEventParser.getPageLvl2Value(d_pre_page_id, preExtendParams1, server_jsonstr)
+    val ref_page_lvl2_value = pageParser.getPageLvl2Value(d_pre_page_id, fct_preExtendParams, server_jsonstr, urlref)
 
     val (pit_type, gsort_key) = pageAndEventParser.getGsortPit(server_jsonstr)
 
