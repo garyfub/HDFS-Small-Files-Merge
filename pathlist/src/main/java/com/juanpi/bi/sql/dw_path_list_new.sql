@@ -1,6 +1,6 @@
-use test;
-drop table dw_path_list_new;
-create external table dw_path_list_new (
+use dw;
+drop table path_list_real;
+create external table path_list_real (
     -- 入口页
     entrance_page_id int,
     entrance_page_value string,

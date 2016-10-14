@@ -10,8 +10,8 @@ import com.juanpi.bi.merge.util.ProcessUtil;
 /**
  * 
  * @author yunduan
- * updated by gongzi
- * @date 2016年6月25日 下午1:20:38    
+ * rewrite by gongzi
+ * @date 2016年7月25日 下午1:20:38
  * 任务管理
  */
 public class TaskManager {
@@ -24,7 +24,7 @@ public class TaskManager {
 
     public static long oneHourAgoMillis = DateUtil.getHoursAgoMillis();
 
-    // 路径正则 TODO 测试 2016-09-09 号数据
+    // 路径正则
 	private String getDirRegex(String dateStr) {
 		return baseDir + "/{mb_event_hash2,mb_pageinfo_hash2}/date=" + dateStr + "/gu_hash=*/logs/";
 	}

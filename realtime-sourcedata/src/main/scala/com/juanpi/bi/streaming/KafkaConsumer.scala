@@ -52,8 +52,9 @@ class KafkaConsumer(topic: String,
 
     data.foreachRDD((rdd, time) =>
     {
+      val mills = time.milliseconds
       // 保存数据至hdfs
-      rdd.map(v => ((v._1, time.milliseconds), v._3))
+      rdd.map(v => ((v._1, mills), v._3))
         .repartition(1)
         .saveAsHadoopFile(Config.baseDir + "/" + topic,
           classOf[String],
@@ -81,9 +82,9 @@ class KafkaConsumer(topic: String,
         .map(msg => parseMessage(msg))
         .filter(_._1.nonEmpty)
 
-     data.foreachRDD((rdd, time) =>
-      {
+     data.foreachRDD((rdd, time) => {
 
+       val mills = time.milliseconds
         //  需要从 hbase 查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
         val newRdd = rdd.map(record => {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._3
@@ -93,7 +94,7 @@ class KafkaConsumer(topic: String,
             case y if y == "" || y.toString.isEmpty => "\\N"
             case _ => x
           }).mkString("\001")
-          ((record._1, time.milliseconds), res_str)
+          ((record._1, mills), res_str)
         })
 //
 
@@ -110,14 +111,6 @@ class KafkaConsumer(topic: String,
     dataDStream.foreachRDD { rdd =>
       km.updateOffsets(rdd)
     }
-  }
-
-  //
-  // 添加时间戳
-  //
-  def addTime[C, T](rdd: RDD[(C, T)], time: Time) = {
-    val timestamp = time.milliseconds
-    rdd.map(t => ((t._1, timestamp), t._2))
   }
 
   def parseMessage(message:String):(String, String, Any) = {

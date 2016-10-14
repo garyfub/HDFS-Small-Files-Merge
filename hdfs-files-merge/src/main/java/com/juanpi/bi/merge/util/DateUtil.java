@@ -177,25 +177,25 @@ public class DateUtil {
     }
 
     public static void main(String[] args){
-        String dateHourStr = DateUtil.dateHourStr("1473491100000", "yyyyMMddHH");
-        System.out.println(dateHourStr);
-        System.out.println(millisToMins("1473351420000"));
+//        String dateHourStr = DateUtil.dateHourStr("1473491100000", "yyyyMMddHH");
+//        System.out.println(dateHourStr);
+//        System.out.println(millisToMins("1473351420000"));
+//
+//        String fmt = "yyyy-MM-dd HH:00:00";
+//        String dt = DateUtil.getHourIntervalDate(0, fmt);
+//        try {
+//            long milis = DateUtil.dateToMillis(dt, fmt);
+//            System.out.println("milis==" + milis);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//
+//        System.out.println(getOneDateAgoDate());
+//        System.out.println(getOneHourAgoDate());
+//        System.out.println(getHourIntervalMillis(-1));
 
-        String fmt = "yyyy-MM-dd HH:00:00";
-        String dt = DateUtil.getHourIntervalDate(0, fmt);
-        try {
-            long milis = DateUtil.dateToMillis(dt, fmt);
-            System.out.println("milis==" + milis);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println(getOneDateAgoDate());
-        System.out.println(getOneHourAgoDate());
-        System.out.println(getHourIntervalMillis(-1));
-
-
-        System.out.println("ddddd==" + dddddd());
+        long mm = getHoursAgoMillis();
+        System.out.println("ddddd==" + mm);
 
 //        String tdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal.getTime());
 //        System.out.println("dateIntervalDate= =: " + tdt);
