@@ -237,7 +237,7 @@ class MbEventTransformer extends ITransformer {
     }
 
     if (-1 == event_id) {
-      println("for_pageid:" + for_pageid, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id,
+      println("for_pageid:" + for_pageid, "page_id:" + page_id, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id,
         " ,page_value:" + page_value, " ,f_page_extend_params:" + f_page_extend_params,
         " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value,
         " ,for_eventid:" + for_eventid,

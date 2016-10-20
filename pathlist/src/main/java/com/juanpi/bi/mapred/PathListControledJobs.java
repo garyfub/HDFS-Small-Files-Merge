@@ -193,6 +193,8 @@ public class PathListControledJobs {
                 String gu_id = splited[0];
                 if(!gu_id.isEmpty() && !gu_id.equals("0"))
                 {
+//                    SELECT case when event_id in (481,10041) and page_id in (158,167,   250,   26) then 1 else page_level_id end page_level_id,
+
                     final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
 
                     //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
@@ -207,6 +209,14 @@ public class PathListControledJobs {
                     String event_lvl2_value = (splited[42] == null) ? "\\N":splited[42];
                     String startTime = (splited[22] == null) ? "\\N":splited[22];
                     String loadTime = (splited[46] == null) ? "\\N":splited[46];
+
+                    // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
+                    if("481".equals(event_id) || "10041".equals(event_id)){
+                        if("158".equals(page_id) || "167".equals(page_id) || "250".equals(page_id) || "26".equals(page_id)) {
+                            page_level_id = "1";
+                        }
+                    }
+
                     String str[] = {page_level_id,
                             page_id + "\t" + page_value + "\t" + page_lvl2_value + "\t" + event_id + "\t" + event_value + "\t" + event_lvl2_value + "\t" + startTime + "\t" + loadTime,
                             value.toString().replace("\001", "\t")};
