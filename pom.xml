@@ -13,7 +13,6 @@
         <module>realtime-sourcedata</module>
         <module>pathlist</module>
         <module>hdfs-files-merge</module>
-        <!--<module>hive-udf</module>-->
     </modules>
 
     <properties>
@@ -69,6 +68,12 @@
             <artifactId>junit</artifactId>
             <version>3.8.1</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.juanpi.bi</groupId>
+            <artifactId>hive-udf</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 
