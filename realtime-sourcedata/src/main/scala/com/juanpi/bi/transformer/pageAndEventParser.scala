@@ -3,7 +3,7 @@ package com.juanpi.bi.transformer
 import java.util.regex.Pattern
 
 import com.fasterxml.jackson.core.JsonParseException
-import com.juanpi.bi.hiveUDF.{GetShopId, _}
+import com.juanpi.hive.udf.{GetDwMbPageValue, GetDwPcPageValue, GetGoodsId, GetPageID}
 import play.api.libs.json._
 
 import scala.collection.mutable
@@ -162,13 +162,13 @@ object pageAndEventParser {
     * @param page_level_id
     * @return
     */
-  def getPageLevelId(page_id: Int, extend_params: String, page_level_id: Int, forLevelId: Int): Int = {
+  def getPageLevelId(page_id: Int, x_extend_params: String, page_level_id: Int, forLevelId: Int): Int = {
     if(page_id == 254 && forLevelId == 2){
       forLevelId
     } else if(page_id != 154 || page_id != 289) {
         page_level_id
     } else {
-      val pid = new GetPageID().evaluate(extend_params)
+      val pid = new GetPageID().evaluate(x_extend_params)
       pid.toInt match {
         case 34|65 => 3
         case 10069 => 4

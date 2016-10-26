@@ -1,8 +1,8 @@
 package com.juanpi.bi.transformer
 
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
-import com.juanpi.bi.hiveUDF._
 import com.juanpi.bi.sc_utils.DateUtils
+import com.juanpi.hive.udf.GetGoodsId
 import play.api.libs.json.{JsValue, Json}
 
 import scala.collection.mutable

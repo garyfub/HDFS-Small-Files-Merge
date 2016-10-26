@@ -1,8 +1,8 @@
 package com.juanpi.bi.transformer
 
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
-import com.juanpi.bi.hiveUDF.{GetGoodsId, GetMbActionId}
 import com.juanpi.bi.sc_utils.DateUtils
+import com.juanpi.hive.udf.{GetGoodsId, GetMbActionId}
 import play.api.libs.json.{JsValue, Json}
 
 import scala.collection.mutable
@@ -196,7 +196,7 @@ class MbEventTransformer extends ITransformer {
     val shop_id = pageAndEventParser.getShopId(d_page_id, f_page_extend_params)
     val ref_shop_id = pageAndEventParser.getShopId(ref_page_id, f_pre_extend_params)
 
-    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, f_extend_params, d_page_level_id, forLevelId)
+    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, f_page_extend_params, d_page_level_id, forLevelId)
 
     val hot_goods_id = if (d_page_id == 250 && !f_page_extend_params.isEmpty && f_page_extend_params.contains("_") && f_page_extend_params.split("_").length > 2) {
       new GetGoodsId().evaluate(f_page_extend_params.split("_")(2))
@@ -257,7 +257,6 @@ class MbEventTransformer extends ITransformer {
   }
 
   /**
-    *
     * @param activityname
     * @return
     */

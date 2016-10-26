@@ -1,7 +1,6 @@
 package com.juanpi.bi.transformer
 
-import com.juanpi.bi.hiveUDF.{GetGoodsId, GetPageID, GetShopId, GetSkcId}
-import play.api.libs.json.JsNull
+import com.juanpi.hive.udf.{GetGoodsId, GetPageID}
 
 /**
   * Created by gongzi on 2016/9/28.
