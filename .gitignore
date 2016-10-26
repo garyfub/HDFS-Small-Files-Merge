@@ -6,3 +6,5 @@ pathlist/target/
 pathlist.iml
 /hdfs-files-merge/target
 .idea
+/dw-realtime.iml
+/hdfs-files-merge/hdfs-files-merge.iml

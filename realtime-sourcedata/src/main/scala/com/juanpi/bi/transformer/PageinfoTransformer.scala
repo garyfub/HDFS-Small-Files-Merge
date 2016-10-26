@@ -43,7 +43,7 @@ class PageinfoTransformer extends ITransformer {
           val res = parse(row, dimPage, fCate)
           val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
           (partitionStr, "page", res)
-        } catch{
+        } catch {
           //使用模式匹配来处理异常
           case ex:Exception => { println(ex.getStackTraceString)}
             println("=======>> Page: parse Exception!!" + "\n======>>异常数据:" + row)
