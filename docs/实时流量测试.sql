@@ -144,16 +144,29 @@ table_source
 ,entrance_page_id
 ,entrance_page_value
 from test.dw_path_list_new
-where date = '2016-09-28'
+where date = '2016-09-30'
 and table_source = "mb_event"
+and page_id = -1
 limit 200
+;
+
+select
+date,count(1)
+from test.dw_path_list_new
+where date between '2016-09-29' and '2016-09-30'
+and table_source = "mb_event"
+and page_id = -1
+group by date
 ;
 
 
 select
 event_value
+,app_version
 from test.dw_path_list_new
 where date = '2016-09-29'
 and event_value like "%pit_info%"
 limit 200
 ;
+
+

@@ -165,7 +165,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.juanpi.bi</groupId>
+            <groupId>com.juanpi</groupId>
             <artifactId>hive-udf</artifactId>
             <version>1.0.0</version>
         </dependency>
