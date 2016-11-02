@@ -1,6 +1,6 @@
 package com.juanpi.bi.transformer
 
-import com.juanpi.hive.udf.{GetDwPcPageValue, GetPageID}
+import com.juanpi.hive.udf.{GetDwPcPageValue, GetGoodsId, GetPageID}
 import play.api.libs.json.Json
 
 /**
@@ -84,11 +84,24 @@ object checkEvent {
 //    println("event_value:" + event_value)
 
     val pp = new GetDwPcPageValue()
-    val url = "http://m.juanpi.com/zhuanti/lstop?mobile=1&qminkview=1&qmshareview=1"
+    val url = "https://m.juanpi.com/zhuanti/lstop?mobile=1&qminkview=1&qmshareview=1"
     val value = pp.evaluate(url)
     println(value)
     // 失败
     val pid = new GetPageID().evaluate("http://m.juanpi.com/shop/28334714").toInt
     println(pid)
+
+    val page_id = new GetGoodsId().evaluate("28334714")
+    println(page_id)
+
+    val (sortdate, sorthour, lplid, ptplid) = eventParser.getGsortKey("GSORT2_SERVICE_POSTION_SORT_161_20161027_20_169_204_1615811fab82b2ef")
+    println(sortdate, sorthour, lplid, ptplid)
+
+//    val (test_id,select_id) = eventParser.getAbinfo("{\"pit_info\":\"goods::37296487::1_1\",\"ab_info\":\"B72\",\"cid\":-1,\"_t\":1477560627,\"_gsort_key\":\"DEFAULT_SORT_85_20161027_16_105_8558119705838c5\",\"_pit_type\":3}")
+
+    val abInfo = """{"pit_info":"goods::21695951::4_12","ab_info":"A89","cid":-4,"_t":1478078104,"_gsort_key":"GSORT2_SERVICE_POSTION_SORT_41_20161102_16_45_110_415819ab52b6877","_pit_type":3}"""
+    val (test_id,select_id) = eventParser.getAbinfo(abInfo)
+
+    println(test_id,select_id)
   }
 }

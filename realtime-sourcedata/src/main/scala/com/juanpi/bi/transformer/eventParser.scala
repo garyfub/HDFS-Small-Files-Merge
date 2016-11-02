@@ -1,6 +1,9 @@
 package com.juanpi.bi.transformer
 
+import java.util.regex.{Matcher, Pattern}
+
 import com.juanpi.hive.udf.{GetGoodsId, GetPageID}
+import play.api.libs.json.JsNull
 
 /**
   * Created by gongzi on 2016/9/28.
@@ -200,6 +203,68 @@ object eventParser {
       }
     } else {
       extend_params
+    }
+  }
+
+  /**
+    * ab测试，选择A还是B
+    * @param server_jsonstr
+    * @return
+    */
+  def getAbinfo(server_jsonstr: String): (String, String) = {
+    var selectId:String = ""
+    var testId:String = ""
+    if (server_jsonstr.contains("ab_info")) {
+      val ab_info = pageAndEventParser.getJsonValueByKey(server_jsonstr, "ab_info")
+      val pat = Pattern.compile("([A-Z])([0-9]\\d*)")
+      val mch = pat.matcher(ab_info)
+      if(mch.find()){
+        selectId = mch.group(1)
+        testId = mch.group(2)
+      } else {
+        selectId = pageAndEventParser.getJsonValueByKey(ab_info, "select")
+        testId = pageAndEventParser.getJsonValueByKey(ab_info, "test_id")
+      }
+      (selectId, testId)
+    } else ("", "")
+  }
+
+  /**
+    *
+    * @param gsort_key
+    * @return
+    */
+  def getGsortKey(gsort_key: String): (String, String, String, String) = {
+    val defaultPat = Pattern.compile("_SORT_(-?[0-9]\\d*)_(-?[0-9]\\d*)_(-?[0-9]\\d*)_(-?[0-9]\\d*)")
+    val positionPat = Pattern.compile("POSTION_SORT_(-?[0-9]\\d*)_(-?[0-9]\\d*)_(-?[0-9]\\d*)_(-?[0-9]\\d*)_(-?[0-9]\\d*)")
+    val mch: Matcher = defaultPat.matcher(gsort_key)
+    if(mch.find()) {
+      val sortdate = mch.group(2)
+      val sorthour = mch.group(3)
+      val lplid = mch.group(4)
+      val pMch: Matcher = positionPat.matcher(gsort_key)
+      val ptplid: String = if(pMch.find()) {
+        pMch.group(3)
+      }
+      else ""
+      (sortdate, sorthour, lplid, ptplid)
+    }
+    else ("", "", "", "")
+  }
+
+  /**
+    *
+    * @param server_jsonstr
+    * @return
+    */
+  def getGsortPit(server_jsonstr: String): (Int, String) = {
+    val js_server_jsonstr = pageAndEventParser.getParsedJson(server_jsonstr)
+    if (!js_server_jsonstr.equals(JsNull) && !server_jsonstr.equals("{}")) {
+      val pit_type = (js_server_jsonstr \ "_pit_type").asOpt[Int].getOrElse(0)
+      val gsort_key = (js_server_jsonstr \ "_gsort_key").asOpt[String].getOrElse("")
+      (pit_type, gsort_key)
+    } else {
+      (0, "")
     }
   }
 

@@ -147,9 +147,8 @@ class PageinfoTransformer extends ITransformer {
 
     val ref_page_lvl2_value = pageParser.getPageLvl2Value(d_pre_page_id, fct_preExtendParams, server_jsonstr, urlref)
 
-    val (pit_type, gsort_key) = pageAndEventParser.getGsortPit(server_jsonstr)
-
-    val (sortdate, sorthour, lplid, ptplid) = pageAndEventParser.getGsortKey(gsort_key)
+    val pit_type = 0
+    val (sortdate, sorthour, lplid, ptplid) = ("", "", "", "")
 
     val jpk = 0
     val table_source = "mb_page"
