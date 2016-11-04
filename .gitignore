@@ -10,3 +10,6 @@ pathlist.iml
 /hdfs-files-merge/hdfs-files-merge.iml
 /dataRecovery/dataRecovery.iml
 /target
+/hdfs-files-merge/dependency-reduced-pom.xml
+/realtime-sourcedata/dependency-reduced-pom.xml
+/pathlist/dependency-reduced-pom.xml
