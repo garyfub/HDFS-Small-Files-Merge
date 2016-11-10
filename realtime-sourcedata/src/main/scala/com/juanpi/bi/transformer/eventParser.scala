@@ -2,7 +2,7 @@ package com.juanpi.bi.transformer
 
 import java.util.regex.{Matcher, Pattern}
 
-import com.juanpi.hive.udf.{GetGoodsId, GetPageID}
+import com.juanpi.hive.udf.{GetDwMbPageValue, GetDwPcPageValue, GetGoodsId, GetPageID}
 import play.api.libs.json.JsNull
 
 /**
@@ -187,6 +187,43 @@ object eventParser {
       case _ => -999
     }
     eid
+  }
+
+  /**
+    *
+    * @param x_page_id
+    * @param x_extend_params
+    * @param page_type_id
+    * @param x_page_value
+    * @return
+    */
+  def getPageValue(x_page_id:Int, x_extend_params: String, cid: String, page_type_id: Int, x_page_value: String): String = {
+    // 解析 page_value
+    val page_value: String =
+    if (x_page_id == 289 || x_page_id == 154) {
+      val res = new GetDwPcPageValue().evaluate(x_extend_params)
+      res
+    } else {
+      val param = if(x_page_id == 254)
+      {
+        if("10045".equals(x_extend_params) || "100105".equals(x_extend_params)) {
+          x_extend_params
+        } else {
+          cid
+        }
+      } else if(page_type_id == 1 || page_type_id == 4 || page_type_id == 10) {
+        x_page_value
+      } else if(x_page_id == 250) {
+        // app端品牌页面id = 250, page_extends_param 格式：加密brandid_shopid_引流款id,或者 加密brandid_shopid
+        val goodsId = new GetGoodsId().evaluate(x_extend_params.split("_")(0))
+        goodsId
+      } else {
+        x_extend_params
+      }
+      val res = new GetDwMbPageValue().evaluate(param, page_type_id.toString)
+      res
+    }
+    page_value
   }
 
   def getEventValue(event_type_id: Int, activityname: String, extend_params: String, server_jsonstr: String): String =

@@ -161,11 +161,11 @@ class MbEventTransformer extends ITransformer {
       return null
     }
 
-    val for_pageid = eventParser.getForPageId(cid, f_page_extend_params, pagename)
+    val forPageId = eventParser.getForPageId(cid, f_page_extend_params, pagename)
 
-    val for_pre_pageid = eventParser.getForPrePageId(pagename, f_pre_extend_params, pre_page)
+    val forPrePageid = eventParser.getForPrePageId(pagename, f_pre_extend_params, pre_page)
 
-    val for_eventid = eventParser.getForEventId(cid, activityname, t_extend_params)
+    val forEventId = eventParser.getForEventId(cid, activityname, t_extend_params)
 
     val rule_id = ""
     val (test_id,select_id) = eventParser.getAbinfo(server_jsonstr)
@@ -175,22 +175,22 @@ class MbEventTransformer extends ITransformer {
     val (sortdate, sorthour, lplid, ptplid) = eventParser.getGsortKey(gsort_key)
 
     // --------------------------------------------------------------------> event_reg ------------------------------------------------------------------
-    val (d_event_id: Int, event_type_id: Int) = dimevent.get(for_eventid).getOrElse(0, 0)
+    val (d_event_id: Int, event_type_id: Int) = dimevent.get(forEventId).getOrElse(0, 0)
     val event_id = eventParser.getEventId(d_event_id, app_version)
     val event_value = eventParser.getEventValue(event_type_id, activityname, f_extend_params, server_jsonstr)
 
-    val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimpage.get(for_pre_pageid).getOrElse(0, 0, "", 0)
+    val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimpage.get(forPrePageid).getOrElse(0, 0, "", 0)
     val ref_page_id = pageAndEventParser.getPageId(d_pre_page_id, f_pre_extend_params)
-    val ref_page_value = pageAndEventParser.getPageValue(d_pre_page_id, f_pre_extend_params, d_pre_page_type_id, d_pre_page_value)
+    val ref_page_value = eventParser.getPageValue(d_pre_page_id, f_pre_extend_params, cid, d_pre_page_type_id, d_pre_page_value)
 
-    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimpage.get(for_pageid).getOrElse(0, 0, "", 0)
+    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimpage.get(forPageId).getOrElse(0, 0, "", 0)
     val page_id = pageAndEventParser.getPageId(d_page_id, f_page_extend_params)
 
     val forLevelId = if (d_page_id == 254 && f_page_extend_params.nonEmpty) {
       fCate.get(f_page_extend_params.toInt).getOrElse(0)
     } else 0
 
-    val page_value = pageAndEventParser.getPageValue(d_page_id, f_page_extend_params, page_type_id, d_page_value)
+    val page_value = eventParser.getPageValue(d_page_id, f_page_extend_params, cid, page_type_id, d_page_value)
 
     val shop_id = pageAndEventParser.getShopId(d_page_id, f_page_extend_params)
     val ref_shop_id = pageAndEventParser.getShopId(ref_page_id, f_pre_extend_params)
@@ -226,21 +226,45 @@ class MbEventTransformer extends ITransformer {
     val event = Event.apply(event_id.toString, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
 
     // TODO 测试代码，测试后需要删掉
-    if (-1 == page_id || 10084 == page_id) {
-      println("for_pageid:" + for_pageid, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id,
-        " ,page_value:" + page_value, " ,f_page_extend_params:" + f_page_extend_params,
-        " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value,
-        " ,for_eventid:" + for_eventid,
-        " ,d_event_id:" + d_event_id, " ,event_type_id:" + event_type_id, " ,event_id:" + event_id, " ,event_value:" + event_value)
+    if (-1 == page_id || 10069 == page_id) {
+      println("for_pageid:" + forPageId,
+        " ,page_type_id:" + page_type_id,
+        " ,page_level_id:" + page_level_id,
+        " ,cid" + cid,
+        " ,f_page_extend_params:" + f_page_extend_params,
+        " ,pagename:" + pagename,
+        " ,page_value:" + page_value,
+        " ,f_page_extend_params:" + f_page_extend_params,
+        " ,d_page_id:" + d_page_id,
+        " ,d_page_value:" + d_page_value,
+        " ,for_eventid:" + forEventId,
+        " ,event_id:" + event_id,
+        " ,d_event_id:" + d_event_id,
+        " ,event_type_id:" + event_type_id,
+        " ,cid:" + cid,
+        " ,activityname:" + activityname,
+        " ,t_extend_params:" + t_extend_params,
+        " ,event_value:" + event_value)
       println("page_id异常>>原始数据为：" + row)
     }
 
     if (-1 == event_id) {
-      println("for_pageid:" + for_pageid, "page_id:" + page_id, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id,
-        " ,page_value:" + page_value, " ,f_page_extend_params:" + f_page_extend_params,
-        " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value,
-        " ,for_eventid:" + for_eventid,
-        " ,d_event_id:" + d_event_id, " ,event_type_id:" + event_type_id, " ,event_id:" + event_id, " ,event_value:" + event_value)
+      println("for_pageid:" + forPageId,
+        "page_id:" + page_id,
+        " ,page_type_id:" + page_type_id,
+        " ,page_level_id:" + page_level_id,
+        " ,page_value:" + page_value,
+        " ,f_page_extend_params:" + f_page_extend_params,
+        " ,d_page_id:" + d_page_id,
+        " ,d_page_value:" + d_page_value,
+        " ,for_eventid:" + forEventId,
+        " ,event_id:" + event_id,
+        " ,d_event_id:" + d_event_id,
+        " ,event_type_id:" + event_type_id,
+        " ,cid:" + cid,
+        " ,activityname:" + activityname,
+        " ,t_extend_params:" + t_extend_params,
+        " ,event_value:" + event_value)
       println("event_id=-1>>原始数据为：" + row)
     }
 
