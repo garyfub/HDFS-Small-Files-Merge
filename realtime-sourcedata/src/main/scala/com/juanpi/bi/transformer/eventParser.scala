@@ -72,7 +72,7 @@ object eventParser {
     val flag = if(pageName.isEmpty || activityName.isEmpty) {
       true
     }
-    else if(activityName.contains("exposure_") || activityName.contains("_performance")){
+    else if(activityName.contains("exposure_") || activityName.contains("_performance") || "collect_page_h5".equals(activityName)){
       // 过滤event中的曝光数据：exposure_ad_popup, exposure_ad_inscreen
       // 和性能采集数据collect_data_performance, collect_page_performance
       true
@@ -122,7 +122,7 @@ object eventParser {
     } else if (!"click_navigation".equalsIgnoreCase(activityname)) {
       activityname
     } else {
-      (activityname + t_extend_params).toLowerCase()
+      (activityname + t_extend_params).toLowerCase
     }
     forEventId
   }
@@ -176,7 +176,7 @@ object eventParser {
       case "click_goods_cancel" => new GetGoodsId().evaluate(extend_params)
       case "click_goods_collection" => new GetGoodsId().evaluate(extend_params)
       case "click_goods_share" => new GetGoodsId().evaluate(extend_params)
-      case a if "click_temai_inpage_joinbag".equals(activityname.toLowerCase()) && getVersionNum(app_version) < app_version323 => new GetGoodsId().evaluate(extend_params)
+      case a if "click_temai_inpage_joinbag".equals(activityname) && getVersionNum(app_version) < app_version323 => new GetGoodsId().evaluate(extend_params)
       case _ => extend_params.toLowerCase()
     }
   }

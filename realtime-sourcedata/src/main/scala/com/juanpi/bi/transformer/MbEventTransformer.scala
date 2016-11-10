@@ -272,7 +272,7 @@ class MbEventTransformer extends ITransformer {
     * @return
     */
   def getActivityid(activityname: String): Int = {
-    new GetMbActionId().evaluate(activityname.toLowerCase())
+    new GetMbActionId().evaluate(activityname)
   }
 }
 
