@@ -94,11 +94,13 @@ object eventParser {
   def getForPrePageId(pagename: String, f_pre_extend_params: String, pre_page: String):String = {
     val forPrePageId =
       if ("page_h5".equals(pagename)) {
-        val pid = new GetPageID().evaluate(f_pre_extend_params).toInt
-        pid match {
-          case 34 | 65 | 10069 => "page_active"
-          case _ => (pagename + f_pre_extend_params).toLowerCase()
-        }
+        val pid = new GetPageID().evaluate(f_pre_extend_params)
+        if(pid != null) {
+          pid.toInt match {
+            case 34 | 65 | 10069 => "page_active"
+            case _ => (pagename + f_pre_extend_params).toLowerCase()
+          }
+        } else {""}
       } else if (!"page_tab".equals(pre_page)) {
         pre_page.toLowerCase()
       }
