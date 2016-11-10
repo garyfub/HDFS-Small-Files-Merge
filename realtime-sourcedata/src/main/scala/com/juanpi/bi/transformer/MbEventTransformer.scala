@@ -39,8 +39,10 @@ class MbEventTransformer extends ITransformer {
         gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
       } catch {
         //使用模式匹配来处理异常
-        case ex: Exception => println(ex.printStackTrace())
-          println("=======>> Event: getGuid Exception!!" + "\n======>>异常数据:" + row)
+        case ex: Exception => {
+          case ex:Exception => { println(ex.getStackTraceString)}
+            println("=======>> Event: getGuid Exception!!" + "======>>异常数据:" + row)
+        }
       }
 
       val ret = if (gu_id.nonEmpty) {
@@ -73,22 +75,18 @@ class MbEventTransformer extends ITransformer {
           }
           catch {
             //使用模式匹配来处理异常
-            case ex: Exception => {
-              ex.getStackTrace.mkString("\n")
-              println("=========>>test:" + ex.getStackTrace + "\n======>>异常数据:" + row)
-            }
-
-            println("=======>> Event: parse Exception!!" + "\n======>>异常数据:" + row)
+            case ex:Exception => { println(ex.getStackTraceString) }
+              println("=======>> Event: parse Exception!!" + "======>>异常数据:" + row)
             ("", "", None)
           }
         }
       } else {
-        println("=======>> Page: GU_ID IS NULL!!" + "\n======>>异常数据:" + row)
+        println("=======>> Event: GU_ID IS NULL!!" + "\n======>>异常数据:" + row)
         ("", "", None)
       }
       ret
     } else {
-      println("=======>> Page: ROW IS NULL!!" + "\n======>>异常数据:" + row)
+      println("=======>> Event: ROW IS NULL!!" + "\n======>>异常数据:" + row)
       ("", "", None)
     }
   }
