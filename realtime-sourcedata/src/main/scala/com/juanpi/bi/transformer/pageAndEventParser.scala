@@ -117,7 +117,8 @@ object pageAndEventParser {
   def getExtendParams(pagename: String, extend_params: String): String = {
     val extend_params_1 = pagename.toLowerCase() match {
       case "page_goods" | "page_temai_goods" | "page_temai_imagetxtgoods" | "page_temai_goods_logistics" | "page_peerpay_apply" => {
-        new GetGoodsId().evaluate(extend_params)
+        val goodsId = new GetGoodsId().evaluate(extend_params)
+        goodsId
       }
       case _ => {
         extend_params.toLowerCase()
@@ -181,8 +182,11 @@ object pageAndEventParser {
     if(x_page_id == 0) {
       -1
     } else if (x_page_id == 289 || x_page_id == 154) {
+      // 如果 x_extend_params 为空，pid的计算结果为null
       val pid = new GetPageID().evaluate(x_extend_params)
-      if(pid > 0) {
+      if(pid == null){
+        -1
+      } else if(pid > 0) {
         pid
       } else {
         x_page_id
