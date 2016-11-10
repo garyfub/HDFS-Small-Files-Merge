@@ -1,6 +1,6 @@
 package com.juanpi.bi.transformer
 
-import com.juanpi.hive.udf.{GetGoodsId, GetPageID, GetShopId, GetSkcId}
+import com.juanpi.hive.udf._
 import play.api.libs.json.JsNull
 
 /**
@@ -52,28 +52,61 @@ object pageParser {
     page_lel2_value
   }
 
+  /**
+    *
+    * @param x_page_id
+    * @param x_extend_params
+    * @param page_type_id
+    * @param x_page_value
+    * @return
+    */
+  def getPageValue(x_page_id:Int, x_extend_params: String, url: String, page_type_id: Int, x_page_value: String): String = {
+    // 解析 page_value
+    val page_value: String =
+    if (x_page_id == 289 || x_page_id == 154) {
+      val res = new GetDwPcPageValue().evaluate(url)
+      res
+    } else {
+      val param = if(x_page_id == 254)
+      {
+        x_extend_params
+      } else if(page_type_id == 1 || page_type_id == 4 || page_type_id == 10) {
+        x_page_value
+      } else if(x_page_id == 250) {
+        // app端品牌页面id = 250, page_extends_param 格式：加密brandid_shopid_引流款id,或者 加密brandid_shopid
+        val goodsId = new GetGoodsId().evaluate(x_extend_params.split("_")(0))
+        goodsId
+      } else {
+        x_extend_params
+      }
+      val res = new GetDwMbPageValue().evaluate(param, page_type_id.toString)
+      res
+    }
+    page_value
+  }
+
 
   /**
     *
-    * @param pagename
-    * @param extend_params
-    * @param server_jsonstr
+    * @param pageName
+    * @param extendParams
+    * @param serverJsonStr
     * @return
     */
-  def forPageId(pagename: String, extend_params: String, server_jsonstr: String): String = {
-    val strValue = pageAndEventParser.getParsedJson(server_jsonstr)
-    val for_pageid = pagename.toLowerCase() match {
-      case a if pagename.toLowerCase() == "page_tab"
-        && pageAndEventParser.isInteger(extend_params)
-        && (extend_params.toLong > 0
-        && extend_params.toLong < 9999999) => "page_tab"
-      case c if pagename.toLowerCase() == "page_tab"
+  def forPageId(pageName: String, extendParams: String, serverJsonStr: String): String = {
+    val strValue = pageAndEventParser.getParsedJson(serverJsonStr)
+    val forPageId = pageName.toLowerCase() match {
+      case a if pageName.toLowerCase() == "page_tab"
+        && pageAndEventParser.isInteger(extendParams)
+        && (extendParams.toLong > 0
+        && extendParams.toLong < 9999999) => "page_tab"
+      case c if pageName.toLowerCase() == "page_tab"
         && !strValue.equals(JsNull)
         && (strValue \ "cid").asOpt[Int].getOrElse(0) < 0
-      => (pagename+(strValue \ "cid").asOpt[String]).toLowerCase()
-      case b if pagename.toLowerCase() != "page_tab" => pagename.toLowerCase()
-      case _ => (pagename+extend_params).toLowerCase()
+      => (pageName+(strValue \ "cid").asOpt[String]).toLowerCase()
+      case b if pageName.toLowerCase() != "page_tab" => pageName.toLowerCase()
+      case _ => (pageName+extendParams).toLowerCase()
     }
-    for_pageid
+    forPageId
   }
 }

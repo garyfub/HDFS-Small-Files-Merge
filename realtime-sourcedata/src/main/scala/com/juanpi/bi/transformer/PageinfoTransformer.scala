@@ -46,16 +46,16 @@ class PageinfoTransformer extends ITransformer {
         } catch {
           //使用模式匹配来处理异常
           case ex:Exception => { println(ex.getStackTraceString)}
-            println("=======>> Page: parse Exception!!" + "\n======>>异常数据:" + row)
+            println("=======>> Page: parse Exception!!" + "======>>异常数据:" + row)
             ("", "", None)
         }
       } else {
-        println("=======>> Page: GU_ID IS NULL!!" + "\n======>>异常数据:" + row)
+        println("=======>> Page: GU_ID IS NULL!!" + "======>>异常数据:" + row)
         ("", "", None)
       }
       ret
     } else {
-      println("=======>> Page: ROW IS NULL!!" + "\n======>>异常数据:" + row)
+      println("=======>> Page: ROW IS NULL!!" + "======>>异常数据:" + row)
       ("", "", None)
     }
   }
@@ -65,14 +65,14 @@ class PageinfoTransformer extends ITransformer {
     // mb_pageinfo
 //    val ticks = (row \ "ticks").asOpt[String].getOrElse("")
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
-    val pagename = (row \ "pagename").asOpt[String].getOrElse("").toLowerCase()
-    val starttime = (row \ "starttime").asOpt[String].getOrElse("0")
-    val endtime = (row \ "endtime").asOpt[String].getOrElse("0")
-    val pre_page = (row \ "pre_page").asOpt[String].getOrElse("")
+    val pageName = (row \ "pagename").asOpt[String].getOrElse("").toLowerCase()
+    val startTime = (row \ "starttime").asOpt[String].getOrElse("0")
+    val endTime = (row \ "endtime").asOpt[String].getOrElse("0")
+    val prePage = (row \ "pre_page").asOpt[String].getOrElse("")
     val uid = (row \ "uid").asOpt[String].getOrElse("0")
-    val extend_params = (row \ "extend_params").asOpt[String].getOrElse("")
-    val app_name = (row \ "app_name").asOpt[String].getOrElse("")
-    val app_version = (row \ "app_version").asOpt[String].getOrElse("")
+    val extendParams = (row \ "extend_params").asOpt[String].getOrElse("")
+    val appName = (row \ "app_name").asOpt[String].getOrElse("")
+    val appVersion = (row \ "app_version").asOpt[String].getOrElse("")
 //    val os_version = (row \ "os_version").asOpt[String].getOrElse("")
     val os = (row \ "os").asOpt[String].getOrElse("")
     val utm = (row \ "utm").asOpt[String].getOrElse("0")
@@ -91,7 +91,7 @@ class PageinfoTransformer extends ITransformer {
     val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
 
     // =========================================== base to base log ===========================================  //
-    val site_id = pageAndEventParser.getSiteId(app_name)
+    val site_id = pageAndEventParser.getSiteId(appName)
     val ref_site_id = site_id
     val gu_id = pageAndEventParser.getGuid(jpid, deviceid, os)
     val terminal_id = pageAndEventParser.getTerminalId(os)
@@ -101,32 +101,32 @@ class PageinfoTransformer extends ITransformer {
     // =========================================== base to dw ===========================================  //
     // 用户画像中定义的
     var gid = ""
-    var ugroup = ""
+    var uGroup = ""
 
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
     if(c_server.nonEmpty)
     {
       val js_c_server = Json.parse(c_server)
       gid = (js_c_server \ "gid").asOpt[String].getOrElse("0")
-      ugroup = (js_c_server \ "ugroup").asOpt[String].getOrElse("0")
+      uGroup = (js_c_server \ "ugroup").asOpt[String].getOrElse("0")
     }
 
     // mb_pageinfo -> mb_pageinfo_log
-    val fct_extendParams = pageAndEventParser.getExtendParams(pagename, extend_params)
-    val fct_preExtendParams = pageAndEventParser.getExtendParams(pagename, pre_extend_params)
+    val fct_extendParams = pageAndEventParser.getExtendParams(pageName, extendParams)
+    val fct_preExtendParams = pageAndEventParser.getExtendParams(pageName, pre_extend_params)
 
     // for_pageid 判断
-    val for_pageid = pageParser.forPageId(pagename, fct_extendParams, server_jsonstr)
-    val for_pre_pageid = pageParser.forPageId(pre_page, fct_preExtendParams, server_jsonstr)
+    val forPageId = pageParser.forPageId(pageName, fct_extendParams, server_jsonstr)
+    val forPrePageid = pageParser.forPageId(prePage, fct_preExtendParams, server_jsonstr)
 
-    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimpage.get(for_pageid).getOrElse(0, 0, "", 0)
-    val page_id = pageAndEventParser.getPageId(d_page_id, fct_extendParams)
-    val page_value = pageAndEventParser.getPageValue(d_page_id, fct_extendParams, page_type_id, d_page_value)
+    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimpage.get(forPageId).getOrElse(0, 0, "", 0)
+    val page_id = pageAndEventParser.getPageId(d_page_id, url)
+    val page_value = pageParser.getPageValue(d_page_id, url, fct_extendParams, page_type_id, d_page_value)
 
     // ref_page_id
-    val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimpage.get(for_pre_pageid).getOrElse(0, 0, "", 0)
-    val ref_page_id = pageAndEventParser.getPageId(d_pre_page_id, fct_preExtendParams)
-    val ref_page_value = pageAndEventParser.getPageValue(d_pre_page_id, fct_preExtendParams, d_pre_page_type_id, d_pre_page_value)
+    val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimpage.get(forPrePageid).getOrElse(0, 0, "", 0)
+    val ref_page_id = pageAndEventParser.getPageId(d_pre_page_id, urlref)
+    val ref_page_value = pageParser.getPageValue(d_pre_page_id, fct_preExtendParams, urlref, d_pre_page_type_id, d_pre_page_value)
 
     val parsed_source = pageAndEventParser.getSource(source)
     val shop_id = pageAndEventParser.getShopId(d_page_id, fct_extendParams)
@@ -141,7 +141,9 @@ class PageinfoTransformer extends ITransformer {
     {
       new GetGoodsId().evaluate(fct_extendParams.split("_")(2))
     }
-    else {""}
+    else {
+      ""
+    }
 
     val page_lvl2_value = pageParser.getPageLvl2Value(d_page_id, fct_extendParams, server_jsonstr, url)
 
@@ -155,12 +157,21 @@ class PageinfoTransformer extends ITransformer {
     // 最终返回值
     val event_id, event_value, rule_id, test_id, select_id, event_lvl2_value, loadTime = ""
 
-    val (date, hour) = DateUtils.dateHourStr(endtime.toLong)
+    val (date, hour) = DateUtils.dateHourStr(endTime.toLong)
 
-    val user = User.apply(gu_id, uid, utm, gu_create_time, session_id, terminal_id, app_version, site_id, ref_site_id, ctag, location, jpk, ugroup, date, hour)
-    val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, starttime, endtime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
+    val user = User.apply(gu_id, uid, utm, gu_create_time, session_id, terminal_id, appVersion, site_id, ref_site_id, ctag, location, jpk, uGroup, date, hour)
+    val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, startTime, endTime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(parsed_source, ip, url, urlref, deviceid, to_switch)
     val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
+
+    if (-1 == page_id || 10069 == page_id) {
+      println("for_pageid:" + forPageId, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id,
+        " ,pageName:" + pageName, " ,fct_extendParams:" + fct_extendParams,
+        " ,page_value:" + page_value, " ,fct_extendParams:" + fct_extendParams,
+        " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value)
+      println("page_id异常>>原始数据为：" + row)
+    }
+
     (user, pe, page, event)
   }
 }
