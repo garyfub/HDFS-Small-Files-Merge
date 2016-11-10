@@ -39,10 +39,8 @@ class MbEventTransformer extends ITransformer {
         gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
       } catch {
         //使用模式匹配来处理异常
-        case ex: Exception => {
-          case ex:Exception => { println(ex.getStackTraceString)}
-            println("=======>> Event: getGuid Exception!!" + "======>>异常数据:" + row)
-        }
+        case ex: Exception => { println(ex.getStackTraceString) }
+        println("=======>> Event: getGuid Exception!!" + "======>>异常数据:" + row)
       }
 
       val ret = if (gu_id.nonEmpty) {
