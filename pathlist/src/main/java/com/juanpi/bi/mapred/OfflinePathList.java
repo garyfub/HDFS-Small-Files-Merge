@@ -86,11 +86,7 @@ public class OfflinePathList {
         return inputPath;
     }
 
-    public static void JobsControl(String dateStr, int start, int end, String jobControlName){
-
-        if(dateStr== null || dateStr.isEmpty()){
-            dateStr = getDateStr();
-        }
+    public static void JobsControl(int start, int end, String jobControlName){
 
         Configuration conf = new Configuration();
 
@@ -436,17 +432,10 @@ public class OfflinePathList {
 
     /**
      * run this
-     * @param dateStr
      */
-    private static void run(String dateStr) {
-        if(dateStr== null || dateStr.isEmpty()){
-            JobsControl("", 0x0, 0x8, "PathListControledJobs08");
-            JobsControl("", 0x9, 0xf, "PathListControledJobs0f");
-        } else
-        {
-            JobsControl(dateStr, 0x0, 0x8, "PathListControledJobs08");
-            JobsControl(dateStr, 0x9, 0xf, "PathListControledJobs0f");
-        }
+    private static void run() {
+        JobsControl(0x0, 0x8, "PathListControledJobs08");
+        JobsControl(0x9, 0xf, "PathListControledJobs0f");
     }
 
     /**
@@ -454,12 +443,11 @@ public class OfflinePathList {
      * @param args
      */
     public static void main(String[] args){
-//        String dateStr = args[0];
-//        run(dateStr);
+        run();
 
-        {
-            System.out.println(getInputPath("a"));
-            System.out.println(getOutputPath("a"));
-        }
+//        {
+//            System.out.println(getInputPath("a"));
+//            System.out.println(getOutputPath("a"));
+//        }
     }
 }
