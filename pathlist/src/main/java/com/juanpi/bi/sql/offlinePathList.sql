@@ -5,7 +5,24 @@ set hive.exec.dynamic.partition.mode=nonstrict;
 set hive.exec.max.dynamic.partitions.pernode=2000;
 
 use temp;
-truncate tmp_gongzi_pe_reg_mr;
+
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="0");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="1");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="2");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="3");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="4");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="5");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="6");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="7");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="8");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="9");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="a");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="b");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="c");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="d");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="e");
+alter table tmp_gongzi_pe_reg_mr DROP if exists partition (gu_hash="f");
+
 insert overwrite table tmp_gongzi_pe_reg_mr partition (gu_hash)
 select
   x.page_level_id,
