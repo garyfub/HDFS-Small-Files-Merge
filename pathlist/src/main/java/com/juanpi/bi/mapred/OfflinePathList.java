@@ -308,6 +308,8 @@ public class OfflinePathList {
                 // 5 个级别
                 Text key2 = new Text(level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5);
                 Text value2 = new Text(v2.toStrings()[2]);
+                System.out.println(key2);
+                System.exit(11111);
                 context.write(key2, value2);
             }
         }
@@ -426,8 +428,8 @@ public class OfflinePathList {
      * run this
      */
     private static void run() {
-        JobsControl(0x0, 0x8, "OfflinePathList08");
-        JobsControl(0x9, 0xf, "OfflinePathList0f");
+        JobsControl(0x0, 0x0, "OfflinePathList08");
+//        JobsControl(0x9, 0xf, "OfflinePathList0f");
     }
 
     /**
