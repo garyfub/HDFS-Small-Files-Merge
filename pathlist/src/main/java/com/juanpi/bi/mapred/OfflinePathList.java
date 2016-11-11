@@ -159,23 +159,23 @@ public class OfflinePathList {
         job.setInputFormatClass(TextInputFormat.class);//指定哪个类用来格式化输入文件
 
         //1.2指定自定义的Mapper类
-        job.setMapperClass(PathListControledJobs.MyMapper.class);
+        job.setMapperClass(OfflinePathList.MyMapper.class);
 
         //指定输出<k2,v2>的类型
-        job.setMapOutputKeyClass(PathListControledJobs.NewK2.class);
+        job.setMapOutputKeyClass(OfflinePathList.NewK2.class);
 
-        job.setMapOutputValueClass(PathListControledJobs.TextArrayWritable.class);
+        job.setMapOutputValueClass(OfflinePathList.TextArrayWritable.class);
 
         //1.3 指定分区类
         job.setPartitionerClass(HashPartitioner.class);
         job.setNumReduceTasks(1);
 
         //1.4 TODO 排序、分区
-        job.setGroupingComparatorClass(PathListControledJobs.MyGroupingComparator.class);
+        job.setGroupingComparatorClass(OfflinePathList.MyGroupingComparator.class);
         //1.5  TODO （可选）合并
 
         //2.2 指定自定义的reduce类
-        job.setReducerClass(PathListControledJobs.MyReducer.class);
+        job.setReducerClass(OfflinePathList.MyReducer.class);
 
         //指定输出<k3,v3>的类型
         job.setOutputKeyClass(Text.class);
@@ -194,7 +194,7 @@ public class OfflinePathList {
     /**
      * 计算层级
      */
-    static class MyMapper extends Mapper<LongWritable, Text, PathListControledJobs.NewK2, PathListControledJobs.TextArrayWritable> {
+    static class MyMapper extends Mapper<LongWritable, Text, OfflinePathList.NewK2, OfflinePathList.TextArrayWritable> {
         int xx = 0;
 
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException, ArrayIndexOutOfBoundsException, NumberFormatException {
@@ -206,7 +206,7 @@ public class OfflinePathList {
                 String gu_id = splited[0];
                 if(!gu_id.isEmpty() && !gu_id.equals("0"))
                 {
-                    final PathListControledJobs.NewK2 k2 = new PathListControledJobs.NewK2(splited[0], Long.parseLong(splited[22]));
+                    final OfflinePathList.NewK2 k2 = new OfflinePathList.NewK2(splited[0], Long.parseLong(splited[22]));
 
                     String page_level_id = (splited[1] == null) ? "\\N":splited[1];
                     String page_id = (splited[2] == null) ? "\\N":splited[2];
@@ -251,7 +251,7 @@ public class OfflinePathList {
                             value.toString().replace("\001", "\t")
                     };
 
-                    final PathListControledJobs.TextArrayWritable v2 = new PathListControledJobs.TextArrayWritable(str);
+                    final OfflinePathList.TextArrayWritable v2 = new OfflinePathList.TextArrayWritable(str);
 
                     xx++;
 
@@ -274,8 +274,8 @@ public class OfflinePathList {
     }
 
     //static class NewValue
-    static class MyReducer extends Reducer<PathListControledJobs.NewK2, PathListControledJobs.TextArrayWritable, Text, Text> {
-        protected void reduce(PathListControledJobs.NewK2 k2, Iterable<PathListControledJobs.TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
+    static class MyReducer extends Reducer<OfflinePathList.NewK2, OfflinePathList.TextArrayWritable, Text, Text> {
+        protected void reduce(OfflinePathList.NewK2 k2, Iterable<OfflinePathList.TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
             String[] initStrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N","\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
             String initStr = Joiner.on("\t").join(initStrArray);
 
@@ -285,7 +285,7 @@ public class OfflinePathList {
             String level4 = initStr;
             String level5 = initStr;
 
-            for (PathListControledJobs.TextArrayWritable v2 : v2s) {
+            for (OfflinePathList.TextArrayWritable v2 : v2s) {
 
                 String pageLvlIdStr = v2.toStrings()[0];
                 String pageLvl = v2.toStrings()[1];
@@ -325,7 +325,7 @@ public class OfflinePathList {
      原来的v2不能参与排序，把原来的k2和v2封装到一个类中，作为新的k2
      *
      */
-    static class  NewK2 implements WritableComparable<PathListControledJobs.NewK2> {
+    static class  NewK2 implements WritableComparable<OfflinePathList.NewK2> {
         String first;
         Long second;
 
@@ -354,7 +354,7 @@ public class OfflinePathList {
          * 当第一列不同时，升序；当第一列相同时，第二列升序
          */
         @Override
-        public int compareTo(PathListControledJobs.NewK2 o) {
+        public int compareTo(OfflinePathList.NewK2 o) {
             final long minus = this.first.compareTo(o.first);
             if(minus !=0){
                 return (int)minus;
@@ -369,18 +369,18 @@ public class OfflinePathList {
 
         @Override
         public boolean equals(Object obj) {
-            if(!(obj instanceof PathListControledJobs.NewK2)){
+            if(!(obj instanceof OfflinePathList.NewK2)){
                 return false;
             }
-            PathListControledJobs.NewK2 oK2 = (PathListControledJobs.NewK2)obj;
+            OfflinePathList.NewK2 oK2 = (OfflinePathList.NewK2)obj;
             return (this.first.equals(oK2.first))&&(this.second == oK2.second);
         }
     }
 
-    static class MyGroupingComparator implements RawComparator<PathListControledJobs.NewK2> {
+    static class MyGroupingComparator implements RawComparator<OfflinePathList.NewK2> {
 
         @Override
-        public int compare(PathListControledJobs.NewK2 o1, PathListControledJobs.NewK2 o2) {
+        public int compare(OfflinePathList.NewK2 o1, OfflinePathList.NewK2 o2) {
             return (int)(o1.first.compareTo(o2.first));
         }
 
@@ -434,8 +434,8 @@ public class OfflinePathList {
      * run this
      */
     private static void run() {
-        JobsControl(0x0, 0x8, "PathListControledJobs08");
-        JobsControl(0x9, 0xf, "PathListControledJobs0f");
+        JobsControl(0x0, 0x8, "OfflinePathList08");
+        JobsControl(0x9, 0xf, "OfflinePathList0f");
     }
 
     /**

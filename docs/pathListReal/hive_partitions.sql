@@ -1,9 +1,7 @@
 -- @Author: gongzi
 -- @DateTime: 2016-09-26 17:18:54
 -- @Description: 实时分区脚本
-
 use ${dbName};
-
 alter table path_list_real add partition (date="${date}", gu_hash="0");
 alter table path_list_real add partition (date="${date}", gu_hash="1");
 alter table path_list_real add partition (date="${date}", gu_hash="2");
