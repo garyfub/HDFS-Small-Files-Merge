@@ -20,8 +20,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 import static org.apache.hadoop.io.WritableComparator.readVLong;
 
@@ -29,8 +27,10 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
  * Created by gongzi on 2016/11/11.
  */
 public class OfflinePathList {
+    // hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr
     static String base = "hdfs://nameservice1/user/hive";
-    static final String TARGET_DIR = "tmp_gongzi_pe_reg_mr";
+    static final String SOURCE_DIR = "fct_path_list_mapr";
+    static final String TARGET_DIR = "fct_path_list_offline";
     static Configuration conf = new Configuration();
 
     static FileSystem fs;
@@ -58,8 +58,9 @@ public class OfflinePathList {
      */
     private static String getInputPath(String guStr)
     {
+        // warehouse/dw.db/fct_path_list_mapr
         String patternStr = "{0}/warehouse/{1}/{2}/gu_hash={3}/";
-        String inputPath = MessageFormat.format(patternStr, base, "temp.db", TARGET_DIR, guStr);
+        String inputPath = MessageFormat.format(patternStr, base, "dw.db", SOURCE_DIR, guStr);
         return inputPath;
     }
 
@@ -434,11 +435,11 @@ public class OfflinePathList {
      * @param args
      */
     public static void main(String[] args){
-//        run();
+        run();
 
-        {
-            System.out.println(getInputPath("a"));
-            System.out.println(getOutputPath("a"));
-        }
+//        {
+//            System.out.println(getInputPath("a"));
+//            System.out.println(getOutputPath("a"));
+//        }
     }
 }
