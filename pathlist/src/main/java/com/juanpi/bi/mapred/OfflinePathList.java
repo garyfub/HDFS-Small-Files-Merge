@@ -5,17 +5,16 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.*;
-import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
+import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
-
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -27,11 +26,9 @@ import java.util.Calendar;
 import static org.apache.hadoop.io.WritableComparator.readVLong;
 
 /**
- * 烈烈
- * Created by kaenr && gongzi on 2016/7/13.
+ * Created by gongzi on 2016/11/11.
  */
-public class PathListControledJobs {
-
+public class OfflinePathList {
     static String base = "hdfs://nameservice1/user/hadoop/dw_realtime";
 
     static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
@@ -138,34 +135,34 @@ public class PathListControledJobs {
     public static Job jobConstructor(String inputPath, String outputPath) throws Exception {
 
         //
-        Job job = Job.getInstance(conf, "path_list_real");
+        Job job = Job.getInstance(conf, "OfflinePathList");
 
         // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
 //        job.setJar("pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar");
-        job.setJarByClass(PathListControledJobs.class);
+        job.setJarByClass(OfflinePathList.class);
 
         //1.1 指定输入文件路径
         FileInputFormat.setInputPaths(job, inputPath);
         job.setInputFormatClass(TextInputFormat.class);//指定哪个类用来格式化输入文件
 
         //1.2指定自定义的Mapper类
-        job.setMapperClass(MyMapper.class);
+        job.setMapperClass(PathListControledJobs.MyMapper.class);
 
         //指定输出<k2,v2>的类型
-        job.setMapOutputKeyClass(NewK2.class);
+        job.setMapOutputKeyClass(PathListControledJobs.NewK2.class);
 
-        job.setMapOutputValueClass(TextArrayWritable.class);
+        job.setMapOutputValueClass(PathListControledJobs.TextArrayWritable.class);
 
         //1.3 指定分区类
         job.setPartitionerClass(HashPartitioner.class);
         job.setNumReduceTasks(1);
 
         //1.4 TODO 排序、分区
-        job.setGroupingComparatorClass(MyGroupingComparator.class);
+        job.setGroupingComparatorClass(PathListControledJobs.MyGroupingComparator.class);
         //1.5  TODO （可选）合并
 
         //2.2 指定自定义的reduce类
-        job.setReducerClass(MyReducer.class);
+        job.setReducerClass(PathListControledJobs.MyReducer.class);
 
         //指定输出<k3,v3>的类型
         job.setOutputKeyClass(Text.class);
@@ -181,7 +178,7 @@ public class PathListControledJobs {
 
     }
 
-    static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
+    static class MyMapper extends Mapper<LongWritable, Text, PathListControledJobs.NewK2, PathListControledJobs.TextArrayWritable> {
         int xx = 0;
 
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException, ArrayIndexOutOfBoundsException, NumberFormatException {
@@ -193,7 +190,7 @@ public class PathListControledJobs {
                 String gu_id = splited[0];
                 if(!gu_id.isEmpty() && !gu_id.equals("0"))
                 {
-                    final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
+                    final PathListControledJobs.NewK2 k2 = new PathListControledJobs.NewK2(splited[0], Long.parseLong(splited[22]));
 
                     //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
                     // page_level_id  对应的路径 line
@@ -219,7 +216,7 @@ public class PathListControledJobs {
                             page_id + "\t" + page_value + "\t" + page_lvl2_value + "\t" + event_id + "\t" + event_value + "\t" + event_lvl2_value + "\t" + startTime + "\t" + loadTime,
                             value.toString().replace("\001", "\t")};
 
-                    final TextArrayWritable v2 = new TextArrayWritable(str);
+                    final PathListControledJobs.TextArrayWritable v2 = new PathListControledJobs.TextArrayWritable(str);
 
                     xx++;
 
@@ -242,11 +239,8 @@ public class PathListControledJobs {
     }
 
     //static class NewValue
-    static class MyReducer extends Reducer<NewK2, TextArrayWritable, Text, Text> {
-        protected void reduce(NewK2 k2, Iterable<TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
-            //long min = Long.MAX_VALUE;
-//            String initstr = "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N" + "\t" + "\\N";
-
+    static class MyReducer extends Reducer<PathListControledJobs.NewK2, PathListControledJobs.TextArrayWritable, Text, Text> {
+        protected void reduce(PathListControledJobs.NewK2 k2, Iterable<PathListControledJobs.TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
             String[] initStrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
             String initStr = Joiner.on("\t").join(initStrArray);
 
@@ -256,7 +250,7 @@ public class PathListControledJobs {
             String level4 = initStr;
             String level5 = initStr;
 
-            for (TextArrayWritable v2 : v2s) {
+            for (PathListControledJobs.TextArrayWritable v2 : v2s) {
 
                 String pageLvlIdStr = v2.toStrings()[0];
                 String pageLvl = v2.toStrings()[1];
@@ -296,7 +290,7 @@ public class PathListControledJobs {
      原来的v2不能参与排序，把原来的k2和v2封装到一个类中，作为新的k2
      *
      */
-    static class  NewK2 implements WritableComparable<NewK2> {
+    static class  NewK2 implements WritableComparable<PathListControledJobs.NewK2> {
         String first;
         Long second;
 
@@ -325,7 +319,7 @@ public class PathListControledJobs {
          * 当第一列不同时，升序；当第一列相同时，第二列升序
          */
         @Override
-        public int compareTo(NewK2 o) {
+        public int compareTo(PathListControledJobs.NewK2 o) {
             final long minus = this.first.compareTo(o.first);
             if(minus !=0){
                 return (int)minus;
@@ -340,18 +334,18 @@ public class PathListControledJobs {
 
         @Override
         public boolean equals(Object obj) {
-            if(!(obj instanceof NewK2)){
+            if(!(obj instanceof PathListControledJobs.NewK2)){
                 return false;
             }
-            NewK2 oK2 = (NewK2)obj;
+            PathListControledJobs.NewK2 oK2 = (PathListControledJobs.NewK2)obj;
             return (this.first.equals(oK2.first))&&(this.second == oK2.second);
         }
     }
 
-    static class MyGroupingComparator implements RawComparator<NewK2> {
+    static class MyGroupingComparator implements RawComparator<PathListControledJobs.NewK2> {
 
         @Override
-        public int compare(NewK2 o1, NewK2 o2) {
+        public int compare(PathListControledJobs.NewK2 o1, PathListControledJobs.NewK2 o2) {
             return (int)(o1.first.compareTo(o2.first));
         }
 
