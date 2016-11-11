@@ -5,7 +5,8 @@ set hive.exec.dynamic.partition.mode=nonstrict;
 set hive.exec.max.dynamic.partitions.pernode=2000;
 
 use temp;
-insert overwrite table tmp_gongzi_event_reg_mr partition (gu_hash)
+truncate tmp_gongzi_pe_reg_mr;
+insert overwrite table tmp_gongzi_pe_reg_mr partition (gu_hash)
 select
   x.page_level_id,
   x.gu_id,

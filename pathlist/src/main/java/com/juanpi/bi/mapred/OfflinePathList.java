@@ -29,12 +29,8 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
  * Created by gongzi on 2016/11/11.
  */
 public class OfflinePathList {
-    static String base = "hdfs://nameservice1/user/hadoop/dw_realtime";
-
-    static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
-
-    static final String PATH_JOBS = "dw_real_path_list_jobs";
-
+    static String base = "hdfs://nameservice1/user/hive";
+    static final String TARGET_DIR = "tmp_gongzi_pe_reg_mr";
     static Configuration conf = new Configuration();
 
     static FileSystem fs;
@@ -66,6 +62,30 @@ public class OfflinePathList {
         return format.format(c1.getTime());
     }
 
+    /**
+     * eg. hdfs://nameservice1/user/hive/warehouse/temp.db/tmp_gongzi_pe_reg_mr/gu_hash=a/
+     * @param guStr
+     * @return
+     */
+    private static String getInputPath(String guStr)
+    {
+        String patternStr = "{0}/warehouse/{1}/{2}/gu_hash={3}/";
+        String inputPath = MessageFormat.format(patternStr, base, "temp.db", TARGET_DIR, guStr);
+        return inputPath;
+    }
+
+    /**
+     * eg. hdfs://nameservice1/user/hadoop/dw_realtime/tmp_gongzi_pe_reg_mr/gu_hash=a/
+     * @param guStr
+     * @return
+     */
+    private static String getOutputPath(String guStr)
+    {
+        String patternStr = "{0}/{1}/gu_hash={2}/";
+        String inputPath = MessageFormat.format(patternStr, "hdfs://nameservice1/user/hadoop/dw_realtime", TARGET_DIR, guStr);
+        return inputPath;
+    }
+
     public static void JobsControl(String dateStr, int start, int end, String jobControlName){
 
         if(dateStr== null || dateStr.isEmpty()){
@@ -79,23 +99,20 @@ public class OfflinePathList {
 
         // 遍历16个分区
         for(int i=start; i<=end; i++) {
-            String gu = String.format("%x", i);
+            String guStr = String.format("%x", i);
 
-            String str = "{0}/{1}/date={2}/gu_hash={3}/merged/";
-            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, gu);
-            String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, gu);
             // 文件输入路径
-            String inputPath = strEvent + "," + strPage;
+            String inputPath = getInputPath(guStr);
 
             // PathList文件落地路径
-            String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, PATH_JOBS, dateStr, gu);
+            String outputPath = getOutputPath(guStr);
 
             getFileSystem(base, outputPath);
 
             // 将受控作业添加到控制器中
             // 添加控制job
             try {
-                Job job = jobConstructor(inputPath, outputPath);
+                Job job = jobConstructor(inputPath, outputPath, guStr);
                 ControlledJob cj = new ControlledJob(conf);
                 cj.setJob(job);
 
@@ -132,10 +149,10 @@ public class OfflinePathList {
      * @param outputPath
      * @throws Exception
      */
-    public static Job jobConstructor(String inputPath, String outputPath) throws Exception {
+    public static Job jobConstructor(String inputPath, String outputPath, String guStr) throws Exception {
 
         //
-        Job job = Job.getInstance(conf, "OfflinePathList");
+        Job job = Job.getInstance(conf, "OfflinePathList_Partition_" + guStr);
 
         // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
 //        job.setJar("pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar");
@@ -178,6 +195,9 @@ public class OfflinePathList {
 
     }
 
+    /**
+     * 计算层级
+     */
     static class MyMapper extends Mapper<LongWritable, Text, PathListControledJobs.NewK2, PathListControledJobs.TextArrayWritable> {
         int xx = 0;
 
@@ -192,18 +212,22 @@ public class OfflinePathList {
                 {
                     final PathListControledJobs.NewK2 k2 = new PathListControledJobs.NewK2(splited[0], Long.parseLong(splited[22]));
 
-                    //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
-                    // page_level_id  对应的路径 line
-                    // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 40: event_value; 36: event_lvl2_value; 22: starttime
-                    String page_level_id = (splited[21] == null)? "\\N":splited[21];
-                    String page_id = (splited[15] == null) ? "\\N":splited[15];
-                    String page_value = (splited[16] == null) ? "\\N":splited[16];
-                    String page_lvl2_value = (splited[25] == null) ? "\\N":splited[25];
-                    String event_id = (splited[40] == null) ? "\\N":splited[40];
-                    String event_value = (splited[41] == null) ? "\\N":splited[41];
-                    String event_lvl2_value = (splited[42] == null) ? "\\N":splited[42];
-                    String startTime = (splited[22] == null) ? "\\N":splited[22];
-                    String loadTime = (splited[46] == null) ? "\\N":splited[46];
+                    String page_level_id = (splited[1] == null) ? "\\N":splited[1];
+                    String page_id = (splited[2] == null) ? "\\N":splited[2];
+                    String page_value = (splited[3] == null) ? "\\N":splited[3];
+                    String page_lvl2_value = (splited[4] == null) ? "\\N":splited[4];
+                    String event_id = (splited[5] == null) ? "\\N":splited[5];
+                    String event_value = (splited[6] == null) ? "\\N":splited[6];
+                    String event_lvl2_value = (splited[7] == null) ? "\\N":splited[7];
+                    String rule_id = (splited[8] == null) ? "\\N":splited[8];
+                    String test_id = (splited[9] == null) ? "\\N":splited[9];
+                    String select_id = (splited[10] == null) ? "\\N":splited[10];
+                    String starttime = (splited[11] == null) ? "\\N":splited[11];
+                    String pit_type = (splited[12] == null) ? "\\N":splited[12];
+                    String sortdate = (splited[13] == null) ? "\\N":splited[13];
+                    String sorthour = (splited[14] == null) ? "\\N":splited[14];
+                    String lplid = (splited[15] == null) ? "\\N":splited[15];
+                    String ptplid = (splited[16] == null) ? "\\N":splited[16];
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
                     if("481".equals(event_id) || "10041".equals(event_id)){
@@ -212,9 +236,24 @@ public class OfflinePathList {
                         }
                     }
 
-                    String str[] = {page_level_id,
-                            page_id + "\t" + page_value + "\t" + page_lvl2_value + "\t" + event_id + "\t" + event_value + "\t" + event_lvl2_value + "\t" + startTime + "\t" + loadTime,
-                            value.toString().replace("\001", "\t")};
+                    String str[] = {
+                            page_level_id,
+                            page_id
+                                    + "\t" + page_value
+                                    + "\t" + page_lvl2_value
+                                    + "\t" + event_id
+                                    + "\t" + event_value
+                                    + "\t" + event_lvl2_value
+                                    + "\t" + starttime
+                                    + "\t" + pit_type
+                                    + "\t" + sortdate
+                                    + "\t" + sorthour
+                                    + "\t" + lplid
+                                    + "\t" + ptplid
+                                    + "\t" + select_id
+                                    + "\t" + test_id,
+                            value.toString().replace("\001", "\t")
+                    };
 
                     final PathListControledJobs.TextArrayWritable v2 = new PathListControledJobs.TextArrayWritable(str);
 
@@ -241,7 +280,7 @@ public class OfflinePathList {
     //static class NewValue
     static class MyReducer extends Reducer<PathListControledJobs.NewK2, PathListControledJobs.TextArrayWritable, Text, Text> {
         protected void reduce(PathListControledJobs.NewK2 k2, Iterable<PathListControledJobs.TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
-            String[] initStrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
+            String[] initStrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N","\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
             String initStr = Joiner.on("\t").join(initStrArray);
 
             String level1 = initStr;
@@ -396,11 +435,10 @@ public class OfflinePathList {
     }
 
     /**
-     * 分两组并行计算
-     * @param args
+     * run this
+     * @param dateStr
      */
-    public static void main(String[] args){
-        String dateStr = args[0];
+    private static void run(String dateStr) {
         if(dateStr== null || dateStr.isEmpty()){
             JobsControl("", 0x0, 0x8, "PathListControledJobs08");
             JobsControl("", 0x9, 0xf, "PathListControledJobs0f");
@@ -409,6 +447,19 @@ public class OfflinePathList {
             JobsControl(dateStr, 0x0, 0x8, "PathListControledJobs08");
             JobsControl(dateStr, 0x9, 0xf, "PathListControledJobs0f");
         }
+    }
 
+    /**
+     * 分两组并行计算
+     * @param args
+     */
+    public static void main(String[] args){
+//        String dateStr = args[0];
+//        run(dateStr);
+
+        {
+            System.out.println(getInputPath("a"));
+            System.out.println(getOutputPath("a"));
+        }
     }
 }

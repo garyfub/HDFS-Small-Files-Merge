@@ -1,6 +1,6 @@
 use temp;
-drop table tmp_gongzi_event_reg_mr;
-CREATE TABLE `tmp_gongzi_event_reg_mr`(
+drop table if EXISTS  tmp_gongzi_pe_reg_mr;
+CREATE TABLE `tmp_gongzi_pe_reg_mr`(
 `page_level_id` string,
 `gu_id` string,
 `page_id` string,
