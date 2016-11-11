@@ -250,17 +250,14 @@ public class OfflinePathList {
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
-                System.out.println("======>>ArrayIndexOutOfBoundsException: " + splited);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ArrayIndexOutOfBoundsException | NumberFormatException | StringIndexOutOfBoundsException e) {
                 e.printStackTrace();
                 System.out.println("======>>ArrayIndexOutOfBoundsException: " + Joiner.on("#").join(value.toString().split("\001")));
-                System.out.println("======>>ArrayIndexOutOfBoundsException: " + splited);
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
-                System.out.println("======>>ArrayIndexOutOfBoundsException: " + splited);
             }
         }
     }
@@ -277,38 +274,44 @@ public class OfflinePathList {
             String level4 = initStr;
             String level5 = initStr;
 
+
             for (OfflinePathList.TextArrayWritable v2 : v2s) {
 
-                String pageLvlIdStr = v2.toStrings()[0];
-                String pageLvl = v2.toStrings()[1];
-                int pageLvlId = Integer.parseInt(pageLvlIdStr);
+                try {
+                    String pageLvlIdStr = v2.toStrings()[0];
+                    String pageLvl = v2.toStrings()[1];
+                    int pageLvlId = Integer.parseInt(pageLvlIdStr);
 
-                if(pageLvlId == 1){
-                    level1= pageLvl;
-                    level2 = initStr;
-                    level3 = initStr;
-                    level4 = initStr;
-                    level5 = initStr;
-                } else if(pageLvlId == 2){
-                    level2= pageLvl;
-                    level3 = initStr;
-                    level4 = initStr;
-                    level5 = initStr;
-                } else if(pageLvlId == 3){
-                    level3 = pageLvl;
-                    level4 = initStr;
-                    level5 = initStr;
-                } else if(pageLvlId == 4){
-                    level4 = pageLvl;
-                    level5 = initStr;
-                } else if(pageLvlId == 5){
-                    level5 = pageLvl;
+                    if(pageLvlId == 1){
+                        level1= pageLvl;
+                        level2 = initStr;
+                        level3 = initStr;
+                        level4 = initStr;
+                        level5 = initStr;
+                    } else if(pageLvlId == 2){
+                        level2= pageLvl;
+                        level3 = initStr;
+                        level4 = initStr;
+                        level5 = initStr;
+                    } else if(pageLvlId == 3){
+                        level3 = pageLvl;
+                        level4 = initStr;
+                        level5 = initStr;
+                    } else if(pageLvlId == 4){
+                        level4 = pageLvl;
+                        level5 = initStr;
+                    } else if(pageLvlId == 5){
+                        level5 = pageLvl;
+                    }
+
+                    // 5 个级别
+                    Text key2 = new Text(level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5);
+                    Text value2 = new Text(v2.toStrings()[2]);
+                    context.write(key2, value2);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("======>>Exception, data: " +  Joiner.on("#").join(v2.toStrings()));
                 }
-
-                // 5 个级别
-                Text key2 = new Text(level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5);
-                Text value2 = new Text(v2.toStrings()[2]);
-                context.write(key2, value2);
             }
         }
     }
