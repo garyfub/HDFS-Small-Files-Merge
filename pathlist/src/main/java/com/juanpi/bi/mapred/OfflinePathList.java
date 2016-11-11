@@ -52,17 +52,6 @@ public class OfflinePathList {
     }
 
     /**
-     * 参考 http://bijian1013.iteye.com/blog/2306763
-     * @return
-     */
-    public static String getDateStr()
-    {
-        Calendar c1 = Calendar.getInstance();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        return format.format(c1.getTime());
-    }
-
-    /**
      * eg. hdfs://nameservice1/user/hive/warehouse/temp.db/tmp_gongzi_pe_reg_mr/gu_hash=a/
      * @param guStr
      * @return
@@ -82,8 +71,8 @@ public class OfflinePathList {
     private static String getOutputPath(String guStr)
     {
         String patternStr = "{0}/{1}/gu_hash={2}/";
-        String inputPath = MessageFormat.format(patternStr, "hdfs://nameservice1/user/hadoop/dw_realtime", TARGET_DIR, guStr);
-        return inputPath;
+        String outPutPath = MessageFormat.format(patternStr, "hdfs://nameservice1/user/hadoop/dw_realtime", TARGET_DIR, guStr);
+        return outPutPath;
     }
 
     public static void JobsControl(int start, int end, String jobControlName){
@@ -259,6 +248,8 @@ public class OfflinePathList {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
+                System.out.println("======>>ArrayIndexOutOfBoundsException: " + splited);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ArrayIndexOutOfBoundsException | NumberFormatException | StringIndexOutOfBoundsException e) {
@@ -443,11 +434,11 @@ public class OfflinePathList {
      * @param args
      */
     public static void main(String[] args){
-        run();
+//        run();
 
-//        {
-//            System.out.println(getInputPath("a"));
-//            System.out.println(getOutputPath("a"));
-//        }
+        {
+            System.out.println(getInputPath("a"));
+            System.out.println(getOutputPath("a"));
+        }
     }
 }
