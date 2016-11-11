@@ -1,6 +1,6 @@
-use temp;
-drop table if EXISTS  tmp_gongzi_pe_reg_mr;
-CREATE TABLE `tmp_gongzi_pe_reg_mr`(
+use dw;
+drop table if EXISTS  fct_path_list_mapr;
+CREATE TABLE `fct_path_list_mapr`(
 `page_level_id` string,
 `gu_id` string,
 `page_id` string,
@@ -19,7 +19,7 @@ CREATE TABLE `tmp_gongzi_pe_reg_mr`(
 `lplid` string,
 `ptplid` string
   )
-PARTITIONED BY (`gu_hash` string)
+PARTITIONED BY (`gu_hash` string);
 -- LOCATION 'hdfs://nameservice1/user/hadoop/offline_reg_mr/'
 ;
 
