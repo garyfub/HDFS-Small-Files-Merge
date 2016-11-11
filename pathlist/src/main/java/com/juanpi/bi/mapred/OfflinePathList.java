@@ -192,12 +192,12 @@ public class OfflinePathList {
 
             try {
                 // gu_id 和starttime 作为联合主键
-                String gu_id = splited[0];
+                String gu_id = splited[1];
                 if(!gu_id.isEmpty() && !gu_id.equals("0"))
                 {
-                    final OfflinePathList.NewK2 k2 = new OfflinePathList.NewK2(splited[0], Long.parseLong(splited[11]));
+                    final OfflinePathList.NewK2 k2 = new OfflinePathList.NewK2(splited[1], Long.parseLong(splited[11]));
 
-                    String page_level_id = (splited[1] == null) ? "\\N":splited[1];
+                    String page_level_id = (splited[0] == null) ? "\\N":splited[0];
                     String page_id = (splited[2] == null) ? "\\N":splited[2];
                     String page_value = (splited[3] == null) ? "\\N":splited[3];
                     String page_lvl2_value = (splited[4] == null) ? "\\N":splited[4];
@@ -426,7 +426,7 @@ public class OfflinePathList {
      * run this
      */
     private static void run() {
-        JobsControl(0x0, 0x0, "OfflinePathList08");
+        JobsControl(0x0, 0x8, "OfflinePathList08");
         JobsControl(0x9, 0xf, "OfflinePathList0f");
     }
 
