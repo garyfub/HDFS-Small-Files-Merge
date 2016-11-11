@@ -191,6 +191,8 @@ public class OfflinePathList {
 
             final String[] splited = value.toString().split("\001");
 
+            System.out.println("===============>>" + value.toString());
+
             try {
                 // gu_id 和starttime 作为联合主键
                 String gu_id = splited[0];
@@ -240,6 +242,9 @@ public class OfflinePathList {
                                     + "\t" + test_id,
                             value.toString().replace("\001", "\t")
                     };
+                    System.out.println("===========>>22:" + str);
+                    System.exit(11111);
+
 
                     final OfflinePathList.TextArrayWritable v2 = new OfflinePathList.TextArrayWritable(str);
 
@@ -308,8 +313,6 @@ public class OfflinePathList {
                 // 5 个级别
                 Text key2 = new Text(level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5);
                 Text value2 = new Text(v2.toStrings()[2]);
-                System.out.println(key2);
-                System.exit(11111);
                 context.write(key2, value2);
             }
         }
