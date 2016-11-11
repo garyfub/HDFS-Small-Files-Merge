@@ -137,7 +137,6 @@ public class OfflinePathList {
      */
     public static Job jobConstructor(String inputPath, String outputPath, String guStr) throws Exception {
 
-        //
         Job job = Job.getInstance(conf, "OfflinePathList_Partition_" + guStr);
 
         // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
@@ -191,14 +190,12 @@ public class OfflinePathList {
 
             final String[] splited = value.toString().split("\001");
 
-            System.out.println("===============>>" + value.toString());
-
             try {
                 // gu_id 和starttime 作为联合主键
                 String gu_id = splited[0];
                 if(!gu_id.isEmpty() && !gu_id.equals("0"))
                 {
-                    final OfflinePathList.NewK2 k2 = new OfflinePathList.NewK2(splited[0], Long.parseLong(splited[22]));
+                    final OfflinePathList.NewK2 k2 = new OfflinePathList.NewK2(splited[0], Long.parseLong(splited[11]));
 
                     String page_level_id = (splited[1] == null) ? "\\N":splited[1];
                     String page_id = (splited[2] == null) ? "\\N":splited[2];
@@ -242,9 +239,6 @@ public class OfflinePathList {
                                     + "\t" + test_id,
                             value.toString().replace("\001", "\t")
                     };
-                    System.out.println("===========>>22:" + str);
-                    System.exit(11111);
-
 
                     final OfflinePathList.TextArrayWritable v2 = new OfflinePathList.TextArrayWritable(str);
 
@@ -432,7 +426,7 @@ public class OfflinePathList {
      */
     private static void run() {
         JobsControl(0x0, 0x0, "OfflinePathList08");
-//        JobsControl(0x9, 0xf, "OfflinePathList0f");
+        JobsControl(0x9, 0xf, "OfflinePathList0f");
     }
 
     /**
