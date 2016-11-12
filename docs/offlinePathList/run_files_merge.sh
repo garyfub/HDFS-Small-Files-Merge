@@ -30,14 +30,14 @@ exit 11
 fi
 
 pt_tend=$(date +%s)
-echo "当前时间: $curdt, 处理 PathListNew 完成，处理日期为：$today, total耗时: $(($pt_tend-$pt_tbegin)) 秒!!!"
+echo "当前时间: $curdt, 处理 OfflinePathList 完成，处理日期为：$today, total耗时: $(($pt_tend-$pt_tbegin)) 秒!!!"
 
 echo "-------------------------------------------------------------------------------------------------------"
 
 hive  -d dbName=$DB -d tableName=$TABLE -f ./load_to_hive.sql >> ./out_load_to_hive_$today.log 2>&1
 
 all_tend=$(date +%s)
-echo "当前时间: $curdt, 处理 PathListNew 全部完成，处理日期为：$today, all_total耗时: $(($all_tend-$pt_tbegin)) 秒!!!"
+echo "当前时间: $curdt, 处理 OfflinePathList 全部完成，处理日期为：$today, all_total耗时: $(($all_tend-$pt_tbegin)) 秒!!!"
 
 if test $? -ne 0
 then
