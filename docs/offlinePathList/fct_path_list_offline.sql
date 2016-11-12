@@ -1,7 +1,7 @@
--- hive dw.fct_path_list_offline
+-- hive dw.fct_for_path_list
 use dw;
-drop table fct_path_list_offline;
-create external table fct_path_list_offline (
+drop table fct_for_path_list;
+create external table fct_for_path_list (
     -- 入口页
     entrance_page_id int,
     entrance_page_value string,
@@ -55,7 +55,6 @@ create external table fct_path_list_offline (
     guide2_event_value string,
     guide2_event_lvl2_value string,
     guide2_starttime string,
-    guide2_loadtime string,
     guide2_pit_type string,
     guide2_sortdate string,
     guide2_sorthour string,
@@ -71,7 +70,6 @@ create external table fct_path_list_offline (
     before_goods_event_value string,
     before_goods_event_lvl2_value string,
     before_goods_starttime string,
-    before_goods_loadtime string,
     before_goods_pit_type string,
     before_goods_sortdate string,
     before_goods_sorthour string,
@@ -79,6 +77,7 @@ create external table fct_path_list_offline (
     before_goods_ptplid string,
     before_goods_select_id string,
     before_goods_test_id string,
+    page_level_id int,
     gu_id string,
     page_id string,
     page_value string,
@@ -94,8 +93,25 @@ create external table fct_path_list_offline (
     sortdate string,
     sorthour string,
     lplid string,
-    ptplid string,
+    ptplid string
 )
 PARTITIONED BY (`gu_hash` string)
 row format delimited fields terminated by '\t'
 lines terminated by '\n';
+
+alter table fct_for_path_list add partition (gu_hash="0");
+alter table fct_for_path_list add partition (gu_hash="1");
+alter table fct_for_path_list add partition (gu_hash="2");
+alter table fct_for_path_list add partition (gu_hash="3");
+alter table fct_for_path_list add partition (gu_hash="4");
+alter table fct_for_path_list add partition (gu_hash="5");
+alter table fct_for_path_list add partition (gu_hash="6");
+alter table fct_for_path_list add partition (gu_hash="7");
+alter table fct_for_path_list add partition (gu_hash="8");
+alter table fct_for_path_list add partition (gu_hash="9");
+alter table fct_for_path_list add partition (gu_hash="a");
+alter table fct_for_path_list add partition (gu_hash="b");
+alter table fct_for_path_list add partition (gu_hash="c");
+alter table fct_for_path_list add partition (gu_hash="d");
+alter table fct_for_path_list add partition (gu_hash="e");
+alter table fct_for_path_list add partition (gu_hash="f");

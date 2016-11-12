@@ -12,7 +12,7 @@ else
 fi
 
 DB="dw"
-TABLE="fct_path_list_offline"
+TABLE="fct_for_path_list"
 
 echo "处理数据开始，日期为：$today"
 
