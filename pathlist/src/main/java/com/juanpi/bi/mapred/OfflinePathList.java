@@ -30,7 +30,7 @@ public class OfflinePathList {
     // hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr
     static String base = "hdfs://nameservice1/user/hive";
     static final String SOURCE_DIR = "fct_path_list_mapr";
-    static final String TARGET_DIR = "fct_path_list_offline";
+    static final String TARGET_DIR = "fct_for_path_list_offline";
     static Configuration conf = new Configuration();
 
     static FileSystem fs;
@@ -52,31 +52,31 @@ public class OfflinePathList {
     }
 
     /**
-     * eg. hdfs://nameservice1/user/hive/warehouse/temp.db/tmp_gongzi_pe_reg_mr/gu_hash=a/
+     * eg.hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr/date=2016-11-12/gu_hash=a/
      * @param guStr
      * @return
      */
-    private static String getInputPath(String guStr)
+    private static String getInputPath(String dateStr, String guStr)
     {
         // warehouse/dw.db/fct_path_list_mapr
-        String patternStr = "{0}/warehouse/{1}/{2}/gu_hash={3}/";
-        String inputPath = MessageFormat.format(patternStr, base, "dw.db", SOURCE_DIR, guStr);
+        String patternStr = "{0}/warehouse/{1}/{2}/date={3}/gu_hash={4}/";
+        String inputPath = MessageFormat.format(patternStr, base, "dw.db", SOURCE_DIR, dateStr, guStr);
         return inputPath;
     }
 
     /**
-     * eg. hdfs://nameservice1/user/hadoop/dw_realtime/tmp_gongzi_pe_reg_mr/gu_hash=a/
+     * eg. hdfs://nameservice1/user/hadoop/dw_realtime/fct_for_path_list_offline/date=2016-11-12/gu_hash=a/
      * @param guStr
      * @return
      */
-    private static String getOutputPath(String guStr)
+    private static String getOutputPath(String dateStr, String guStr)
     {
-        String patternStr = "{0}/{1}/gu_hash={2}/";
-        String outPutPath = MessageFormat.format(patternStr, "hdfs://nameservice1/user/hadoop/dw_realtime", TARGET_DIR, guStr);
+        String patternStr = "{0}/{1}/date={2}/gu_hash={3}/";
+        String outPutPath = MessageFormat.format(patternStr, "hdfs://nameservice1/user/hadoop/dw_realtime", TARGET_DIR, dateStr, guStr);
         return outPutPath;
     }
 
-    public static void JobsControl(int start, int end, String jobControlName){
+    public static void JobsControl(String dateStr, int start, int end, String jobControlName){
 
         Configuration conf = new Configuration();
 
@@ -88,10 +88,10 @@ public class OfflinePathList {
             String guStr = String.format("%x", i);
 
             // 文件输入路径
-            String inputPath = getInputPath(guStr);
+            String inputPath = getInputPath(dateStr, guStr);
 
             // PathList文件落地路径
-            String outputPath = getOutputPath(guStr);
+            String outputPath = getOutputPath(dateStr, guStr);
 
             getFileSystem(base, outputPath);
 
@@ -310,7 +310,7 @@ public class OfflinePathList {
                     context.write(key2, value2);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("======>>Exception, data: " +  Joiner.on("#").join(v2.toStrings()));
+                    System.out.println("======>>Exception: " +  Joiner.on("#").join(v2.toStrings()));
                 }
             }
         }
@@ -428,9 +428,9 @@ public class OfflinePathList {
     /**
      * run this
      */
-    private static void run() {
-        JobsControl(0x0, 0x8, "OfflinePathList08");
-        JobsControl(0x9, 0xf, "OfflinePathList0f");
+    private static void run(String dateStr) {
+        JobsControl(dateStr, 0x0, 0x8, "OfflinePathList08");
+        JobsControl(dateStr, 0x9, 0xf, "OfflinePathList0f");
     }
 
     /**
@@ -438,11 +438,13 @@ public class OfflinePathList {
      * @param args
      */
     public static void main(String[] args){
-        run();
+        String dateStr = args[0];
+        run(dateStr);
 
 //        {
-//            System.out.println(getInputPath("a"));
-//            System.out.println(getOutputPath("a"));
+//            String dateStr = "2016-11-12";
+//            System.out.println(getInputPath(dateStr, "a"));
+//            System.out.println(getOutputPath(dateStr, "a"));
 //        }
     }
 }
