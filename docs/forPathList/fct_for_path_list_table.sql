@@ -95,23 +95,23 @@ create external table fct_for_path_list (
     lplid string,
     ptplid string
 )
-PARTITIONED BY (`gu_hash` string)
+PARTITIONED BY (`date` string, `gu_hash` string)
 row format delimited fields terminated by '\t'
 lines terminated by '\n';
 
-alter table fct_for_path_list add partition (gu_hash="0");
-alter table fct_for_path_list add partition (gu_hash="1");
-alter table fct_for_path_list add partition (gu_hash="2");
-alter table fct_for_path_list add partition (gu_hash="3");
-alter table fct_for_path_list add partition (gu_hash="4");
-alter table fct_for_path_list add partition (gu_hash="5");
-alter table fct_for_path_list add partition (gu_hash="6");
-alter table fct_for_path_list add partition (gu_hash="7");
-alter table fct_for_path_list add partition (gu_hash="8");
-alter table fct_for_path_list add partition (gu_hash="9");
-alter table fct_for_path_list add partition (gu_hash="a");
-alter table fct_for_path_list add partition (gu_hash="b");
-alter table fct_for_path_list add partition (gu_hash="c");
-alter table fct_for_path_list add partition (gu_hash="d");
-alter table fct_for_path_list add partition (gu_hash="e");
-alter table fct_for_path_list add partition (gu_hash="f");
+-- alter table fct_for_path_list add partition (gu_hash="0");
+-- alter table fct_for_path_list add partition (gu_hash="1");
+-- alter table fct_for_path_list add partition (gu_hash="2");
+-- alter table fct_for_path_list add partition (gu_hash="3");
+-- alter table fct_for_path_list add partition (gu_hash="4");
+-- alter table fct_for_path_list add partition (gu_hash="5");
+-- alter table fct_for_path_list add partition (gu_hash="6");
+-- alter table fct_for_path_list add partition (gu_hash="7");
+-- alter table fct_for_path_list add partition (gu_hash="8");
+-- alter table fct_for_path_list add partition (gu_hash="9");
+-- alter table fct_for_path_list add partition (gu_hash="a");
+-- alter table fct_for_path_list add partition (gu_hash="b");
+-- alter table fct_for_path_list add partition (gu_hash="c");
+-- alter table fct_for_path_list add partition (gu_hash="d");
+-- alter table fct_for_path_list add partition (gu_hash="e");
+-- alter table fct_for_path_list add partition (gu_hash="f");
