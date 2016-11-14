@@ -19,4 +19,4 @@ CREATE TABLE `fct_path_list_mapr`(
 `lplid` string,
 `ptplid` string
   )
-PARTITIONED BY (`date` string, `gu_hash` string);
+PARTITIONED BY (`gu_hash` string);
