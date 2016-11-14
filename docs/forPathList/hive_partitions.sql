@@ -2,6 +2,8 @@
 -- @DateTime: 2016-09-26 17:18:54
 -- @Description: 分区脚本
 use ${dbName};
+alter table fct_for_path_list DROP if exists partition (date="{$date}");
+
 alter table fct_for_path_list add partition (date="${date}", gu_hash="0");
 alter table fct_for_path_list add partition (date="${date}", gu_hash="1");
 alter table fct_for_path_list add partition (date="${date}", gu_hash="2");

@@ -2,25 +2,42 @@
 
 . /etc/profile
 
+function get_date_daysbefore()
+{
+    sec=`date -d $1 +%s`
+    sec_30daysbefore=$((sec - 86400*1))
+    days_before=`date -d @$sec_30daysbefore +%F`
+    echo $days_before
+}
+
 if [ $# == 1 ]; then
    dt=$1
+   beforeDate=`get_date_daysbefore $1`
 else
    dt=`date -d -1days '+%Y-%m-%d'`
+   beforeDate=`date -d -2days '+%Y-%m-%d'`
 fi
 
 curdt=`date '+%Y-%m-%d %H:%M'`
-
-
 DB="dw"
 TABLE="fct_for_path_list"
+
+mergeBegin=$(date +%s)
+echo "合并 dw.fct_page_ref_reg + dw.fct_event_event 两张表date=$dt 的数据......"
+hiveF ./script/fct_path_list_mapr.sql -date $date
+if test $? -ne 0
+then
+exit 11
+fi
+mergeEnd=$(date +%s)
+
+echo "合并 dw.fct_page_ref_reg + dw.fct_event_event 两张表date=$dt 的数据完成。Merge 耗时: $(($mergeEnd-$mergeBegin)) 秒"
 
 echo "处理数据开始，日期为：$dt"
 
 THIS="$0"
 THIS_DIR=`dirname "$THIS"`
 cd ${THIS_DIR}
-
-pt_tbegin=$(date +%s)
 
 yarn jar ./pathlist.jar com.juanpi.bi.mapred.OfflinePathList >> /home/hadoop/users/gongzi/jars/out_pathlist_2016-11-10.log 2>&1
 
@@ -29,8 +46,8 @@ then
 exit 11
 fi
 
-pt_tend=$(date +%s)
-echo "当前时间: $curdt, 处理 OfflinePathList 完成，处理日期为：$dt, total耗时: $(($pt_tend-$pt_tbegin)) 秒!!!"
+mapREnd=$(date +%s)
+echo "当前时间: $curdt, 处理 OfflinePathList 完成，处理日期为：$dt, MapReduce 耗时: $(($mapREnd-$mergeEnd)) 秒!!!"
 
 echo "-------------------------------------------------------------------------------------------------------"
 
