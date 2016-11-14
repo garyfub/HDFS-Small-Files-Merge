@@ -25,6 +25,11 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
 
 /**
  * Created by gongzi on 2016/11/11.
+ * 用以更新hive 上dw.fct_path_list 的计算
+ * 1、将page_ref_reg 和 event_reg的数据写到一张新的表A
+ * 2、通过pathList MAPR读取HDFS上A表数据，计算访问路径，文件落在HDFS路径B
+ * 3、B路径下的文件关联到Hive外表C
+ * 4、将C表数据insert into 至dw.fct_path_list表中
  */
 public class OfflinePathList {
     // hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr
