@@ -4,7 +4,7 @@ set hive.groupby.skewindata =true;
 set mapreduce.input.fileinputformat.split.maxsize=16000000;
 set mapreduce.job.reduces=100;
 
-use dw;
+use temp;
 
 ---------------------------------------------------------------------------------------------------
 -- 计算path_list数据，并创建临时表
