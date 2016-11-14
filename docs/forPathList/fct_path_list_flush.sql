@@ -55,4 +55,4 @@ case when cast(entrance2_page_id as int) > 0 then entrance2_sorthour else entran
 case when cast(entrance2_page_id as int) > 0 then entrance2_lplid else entrance_lplid end last_entrance_lplid,
 case when cast(entrance2_page_id as int) > 0 then entrance2_ptplid else entrance_ptplid end last_entrance_ptplid
 from dw.fct_for_path_list
-and date = '{$date}';
+;
