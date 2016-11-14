@@ -57,31 +57,31 @@ public class OfflinePathList {
     }
 
     /**
-     * eg.hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr/date=2016-11-12/gu_hash=a/
+     * eg. hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr/gu_hash=a/
      * @param guStr
      * @return
      */
-    private static String getInputPath(String dateStr, String guStr)
+    private static String getInputPath(String guStr)
     {
         // warehouse/dw.db/fct_path_list_mapr
-        String patternStr = "{0}/warehouse/{1}/{2}/date={3}/gu_hash={4}/";
-        String inputPath = MessageFormat.format(patternStr, base, "dw.db", SOURCE_DIR, dateStr, guStr);
+        String patternStr = "{0}/warehouse/{1}/{2}/gu_hash={3}/";
+        String inputPath = MessageFormat.format(patternStr, base, "dw.db", SOURCE_DIR, guStr);
         return inputPath;
     }
 
     /**
-     * eg. hdfs://nameservice1/user/hadoop/dw_realtime/fct_for_path_list_offline/date=2016-11-12/gu_hash=a/
+     * eg.hdfs://nameservice1/user/hadoop/dw_realtime/fct_for_path_list_offline/gu_hash=a/
      * @param guStr
      * @return
      */
-    private static String getOutputPath(String dateStr, String guStr)
+    private static String getOutputPath(String guStr)
     {
-        String patternStr = "{0}/{1}/date={2}/gu_hash={3}/";
-        String outPutPath = MessageFormat.format(patternStr, "hdfs://nameservice1/user/hadoop/dw_realtime", TARGET_DIR, dateStr, guStr);
+        String patternStr = "{0}/{1}/gu_hash={2}/";
+        String outPutPath = MessageFormat.format(patternStr, "hdfs://nameservice1/user/hadoop/dw_realtime", TARGET_DIR, guStr);
         return outPutPath;
     }
 
-    public static void JobsControl(String dateStr, int start, int end, String jobControlName){
+    public static void JobsControl(int start, int end, String jobControlName){
 
         Configuration conf = new Configuration();
 
@@ -93,10 +93,10 @@ public class OfflinePathList {
             String guStr = String.format("%x", i);
 
             // 文件输入路径
-            String inputPath = getInputPath(dateStr, guStr);
+            String inputPath = getInputPath(guStr);
 
             // PathList文件落地路径
-            String outputPath = getOutputPath(dateStr, guStr);
+            String outputPath = getOutputPath(guStr);
 
             getFileSystem(base, outputPath);
 
@@ -434,8 +434,8 @@ public class OfflinePathList {
      * run this
      */
     private static void run(String dateStr) {
-        JobsControl(dateStr, 0x0, 0x8, "OfflinePathList08");
-        JobsControl(dateStr, 0x9, 0xf, "OfflinePathList0f");
+        JobsControl(0x0, 0x8, "OfflinePathList08");
+        JobsControl(0x9, 0xf, "OfflinePathList0f");
     }
 
     /**
@@ -443,13 +443,11 @@ public class OfflinePathList {
      * @param args
      */
     public static void main(String[] args){
-        String dateStr = args[0];
-        run(dateStr);
+        run("");
 
 //        {
-//            String dateStr = "2016-11-12";
-//            System.out.println(getInputPath(dateStr, "a"));
-//            System.out.println(getOutputPath(dateStr, "a"));
+//            System.out.println(getInputPath("a"));
+//            System.out.println(getOutputPath("a"));
 //        }
     }
 }
