@@ -20,6 +20,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.List;
 
 import static org.apache.hadoop.io.WritableComparator.readVLong;
 
@@ -70,7 +71,7 @@ public class OfflinePathList {
     }
 
     /**
-     * eg.hdfs://nameservice1/user/hadoop/dw_realtime/fct_for_path_list_offline/gu_hash=a/
+     * eg. hdfs://nameservice1/user/hadoop/dw_realtime/fct_for_path_list_offline/gu_hash=a/
      * @param guStr
      * @return
      */
@@ -121,13 +122,21 @@ public class OfflinePathList {
                 System.out.println("8个目录的数据处理完毕！");
                 System.out.println(jc.getSuccessfulJobList());
                 jc.stop();
+
                 // 如果不加 break 或者 return，程序会一直循环
                 break;
             }
 
             if(jc.getFailedJobList().size() > 0){
-                System.out.println(jc.getFailedJobList());
+                List<ControlledJob> failedJobList = jc.getFailedJobList();
+
+                for(ControlledJob fJob : failedJobList)
+                {
+                    System.out.println("失败的job：" + fJob.getJobName());
+                    System.out.println("失败信息：" + fJob.getMessage());
+                }
                 jc.stop();
+
                 // 如果不加 break 或者 return，程序会一直循环
                 break;
             }
@@ -182,7 +191,6 @@ public class OfflinePathList {
         job.setOutputFormatClass(TextOutputFormat.class);
 
         return job;
-
     }
 
     /**
