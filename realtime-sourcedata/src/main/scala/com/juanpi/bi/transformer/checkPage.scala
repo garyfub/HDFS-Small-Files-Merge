@@ -52,12 +52,20 @@ object checkPage {
 //    val terminal_id = pageAndEventParser.getTerminalId(os)
 
 //    val pid = new GetPageID().evaluate("https://m.juanpi.com/act/sub_coudanguanyr11")
-    val pid = 10069
-    val res = pid.toInt match {
-      case 34|65 => 3
-      case 10069 => 4
-      case _ => 0
-    }
-    println(res)
+
+    val extendParams = "https://m.juanpi.com/act/sub_jujiadanpin11?&mobile=1&qmshareview=1"
+    val pageName = "page_active"
+    val fct_extendParams = pageAndEventParser.getExtendParams(pageName, extendParams)
+    val forPageId = pageParser.forPageId(pageName, fct_extendParams, "{}")
+    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = (0,0,"", 0)
+//    val forLevelId = if(d_page_id == 254 && fct_extendParams.nonEmpty){fCate.get(fct_extendParams.toInt).getOrElse(0)} else 0
+//    val page_level_id = pageAndEventParser.getPageLevelId(0, fct_extendParams, d_page_level_id, forLevelId)
+
+    println(extendParams)
+    println(pageName)
+    println(fct_extendParams)
+    println(forPageId)
+
+
   }
 }
