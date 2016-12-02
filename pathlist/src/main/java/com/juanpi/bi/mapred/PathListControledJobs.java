@@ -82,23 +82,23 @@ public class PathListControledJobs {
 
         // 遍历16个分区
         for(int i=start; i<=end; i++) {
-            String gu = String.format("%x", i);
+            String guHash = String.format("%x", i);
 
             String str = "{0}/{1}/date={2}/gu_hash={3}/merged/";
-            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, gu);
-            String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, gu);
+            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, guHash);
+            String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, guHash);
             // 文件输入路径
             String inputPath = strEvent + "," + strPage;
 
             // PathList文件落地路径
-            String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, PATH_JOBS, dateStr, gu);
+            String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, PATH_JOBS, dateStr, guHash);
 
             getFileSystem(base, outputPath);
 
             // 将受控作业添加到控制器中
             // 添加控制job
             try {
-                Job job = jobConstructor(inputPath, outputPath);
+                Job job = jobConstructor(inputPath, outputPath, guHash);
                 ControlledJob cj = new ControlledJob(conf);
                 cj.setJob(job);
 
@@ -135,10 +135,9 @@ public class PathListControledJobs {
      * @param outputPath
      * @throws Exception
      */
-    public static Job jobConstructor(String inputPath, String outputPath) throws Exception {
+    public static Job jobConstructor(String inputPath, String outputPath, String guHash) throws Exception {
 
-        //
-        Job job = Job.getInstance(conf, "path_list_real");
+        Job job = Job.getInstance(conf, "PathListReal_" + guHash);
 
         // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
 //        job.setJar("pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar");
@@ -232,11 +231,9 @@ public class PathListControledJobs {
             } catch (ArrayIndexOutOfBoundsException | NumberFormatException | StringIndexOutOfBoundsException e) {
                 e.printStackTrace();
                 System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
-                System.out.println("======>>ArrayIndexOutOfBoundsException: " + splited);
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
-                System.out.println("======>>ArrayIndexOutOfBoundsException: " + splited);
             }
         }
     }
