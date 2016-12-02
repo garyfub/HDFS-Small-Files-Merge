@@ -233,6 +233,10 @@ public class OfflinePathList {
                         if("158".equals(page_id) || "167".equals(page_id) || "250".equals(page_id) || "26".equals(page_id)) {
                             page_level_id = "1";
                         }
+                    } else if("10043".equals(event_id)){
+                        if("10084".equals(page_id) || "10085".equals(page_id)){
+                            page_level_id = "5";
+                        }
                     }
 
                     String str[] = {
