@@ -132,7 +132,7 @@ class H5EventTransformer {
 
     val baseTerminalId = getTerminalIdFromBase(qm_device_id, baseUrl)
     if (qm_device_id.length > 6 && baseTerminalId == 2) {
-      // m.域名且带有设备号的为APP  H5页面
+      // m.域名且带有设备号的为APP H5页面
       parseAppH5()
     } else {
       // 非M.域名或者设备ID长度小于7的为PC/WAP/WX
@@ -173,7 +173,6 @@ class H5EventTransformer {
     val baseUrlPageValue = getPageValue(javaToScalaInt(baseUrlPageId), baseUrl)
     val baseRefPageValue = getPageValue(javaToScalaInt(baseRefPageId), basebaseUrlRef)
 
-    val baseDecodeSuid = new Decoding().evaluate("")
     // h5 的数据没有app版本号
     val appVersion = ""
 

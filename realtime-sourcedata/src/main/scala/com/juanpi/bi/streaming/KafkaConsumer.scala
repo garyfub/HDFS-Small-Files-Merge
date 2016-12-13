@@ -124,14 +124,16 @@ class KafkaConsumer(topic: String,
     */
   def h5EventProcess(dataDStream: DStream[((Long, Long), String)],
                    ssc: StreamingContext, km: KafkaManager) = {
-    // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
-    // 数据块中的每一条记录需要处理
+
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
+
+    // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     val data = sourceLog.map(_._2.replace("\0",""))
       .filter(line => !line.contains("collect_api_responsetime"))
       .map(msg => parseH5Message(msg))
       .filter(_._1.nonEmpty)
 
+    // 解析后的数据写HDFS
     data.foreachRDD((rdd, time) =>
     {
       val mills = time.milliseconds
@@ -254,6 +256,7 @@ object KafkaConsumer{
 
     println("======>> com.juanpi.bi.streaming.KafkaConsumer 开始运行，参数个数：" + args.length)
 
+    // 判断传入的参数
     if (args.length < 3) {
       System.err.println(s"""
                             |Usage: KafkaConsumerOffset <zkQuorum> <brokers> <topic> <groupId> <consumerType> <consumerTime>
@@ -270,12 +273,13 @@ object KafkaConsumer{
       System.exit(1)
     }
 
+    // 初始化必要的参数
     var (zkQuorum, brokerList, topic, groupId, consumerType, consumerTime, maxRecords) = ("", "", "", "", "1", "60", "100")
 
+    // 解析传入的参数
     println("com.juanpi.bi.streaming.KafkaConsumer 开始运行。。。。。。传入参数如下：")
     args.foreach(
       arg => {
-        println(arg)
         val k = arg.split("=")(0)
         val v = arg.split("=")(1)
         k match {
@@ -321,6 +325,7 @@ object KafkaConsumer{
     }
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
+
     // page 和 event 分开解析
     if(topic.contains("page")) {
       val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, ic.FCATE, null, zkQuorum)
@@ -329,7 +334,6 @@ object KafkaConsumer{
       val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, ic.FCATE, null, zkQuorum)
       consumer.eventProcess(message, ssc, km)
     } else if(topic.contains("h5_event")) {
-
       val DimH5Page = InitConfig.initH5Dim()._1
       val DimH5Event = InitConfig.initH5Dim()._2
       val consumer = new KafkaConsumer(topic, DimH5Page, null, null, DimH5Event, zkQuorum)
