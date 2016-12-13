@@ -1,6 +1,8 @@
 package com.juanpi.bi.init
 
 import org.apache.spark.SparkConf
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
@@ -9,16 +11,17 @@ import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
   * 参见 ：https://wizardforcel.gitbooks.io/w3school-scala/content/17.html
    */
 import scala.collection.mutable
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 
 /**
   * Created by gongzi on 2016/7/8.
   */
 class InitConfig() {
-
   @BeanProperty var spconf: SparkConf = _
   @BeanProperty var ssc: StreamingContext = _
   @BeanProperty var duration: Duration = _
+
+  val Delimiter = "_dw_"
 
   def initDimTables(): (mutable.HashMap[String, (Int, Int, String, Int)],
     mutable.HashMap[String, (Int, Int)],
@@ -29,7 +32,23 @@ class InitConfig() {
     val dp: mutable.HashMap[String, (Int, Int, String, Int)] = initDimPage(sqlContext)
     val de: mutable.HashMap[String, (Int, Int)] = initDimEvent(sqlContext)
     val fCate: mutable.HashMap[Int, Int] = initDimFrontCate(sqlContext)
+
     (dp, de, fCate)
+  }
+
+  /**
+    * 解析h5需用到的 dim_page 和 dim_event
+    * @return
+    */
+  def initDimH5Tables(): (mutable.HashMap[String, (Int, Int, String, Int)],
+    mutable.HashMap[String, (Int, Int)]) = {
+
+    // 查询 hive 中的 dim_page 和 dim_event
+    val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
+    val dp: mutable.HashMap[String, (Int, Int, String, Int)] = initDimH5Page(sqlContext)
+    val dH5 = initDimH5Event(sqlContext)
+
+    (dp, dH5)
   }
 
   /**
@@ -144,6 +163,76 @@ class InitConfig() {
   }
 
   /**
+    * 初始化 dw.dim_page
+    * @param sqlContext
+    * @return
+    */
+  def initDimH5Page(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int, String, Int)] =
+  {
+    var dimPages = new mutable.HashMap[String, (Int, Int, String, Int)]
+    val dimPageSql = s"""select page_id, page_type_id, page_value, page_level_id
+                         | from dw.dim_page
+                         | where page_id > 0
+                         | and del_flag = 0
+                         | order by page_id""".stripMargin
+
+    val dimPageData = sqlContext.sql(dimPageSql).persist(StorageLevel.MEMORY_AND_DISK)
+
+    dimPageData.map(line => {
+      val page_id: Int = line.getAs[Int]("page_id")
+      val page_value = line.getAs[String]("page_value")
+      val page_type_id = line.getAs[Int]("page_type_id")
+      val page_level_id = line.getAs[Int]("page_level_id")
+      (page_id, page_type_id, page_value, page_level_id)
+    })
+      .collect()
+      .foreach( items => {
+        val pageId: Int = items._1
+        val pageTypeId = items._2
+        val pageValue = items._3
+        val pageLevelId = items._4
+        dimPages += (pageId.toString -> (pageId, pageTypeId, pageValue, pageLevelId))
+      })
+    dimPageData.unpersist(true)
+    dimPages
+  }
+
+  /**
+    * 初始化 dw.dim_event
+    * @param sqlContext
+    * @return
+    */
+  def initDimH5Event(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int)] =
+  {
+    var dimEvents = new mutable.HashMap[String, (Int, Int)]
+    val dimEventSql = s"""select event_id, event_exp1, event_exp2, event_type_id, event_type_name
+                          | from dw.dim_event
+                          | where event_id > 0
+                          | and terminal_lvl1_id = 1
+                          | and del_flag = 0
+                          | order by event_id""".stripMargin
+
+    val dimData = sqlContext.sql(dimEventSql).persist(StorageLevel.MEMORY_AND_DISK)
+
+    dimData.map(line => {
+      val eventId = line.getAs[Int]("event_id")
+      val eventTypeId = line.getAs[Int]("event_type_id")
+      val eventExp1 = line.getAs[String]("event_exp1")
+      val eventTypeName = line.getAs[Int]("event_type_name")
+
+      val key = eventExp1 + Delimiter + eventTypeName
+      (key, eventId, eventTypeId)
+    })
+      .collect()
+      .foreach( items => {
+        dimEvents += ( items._1 -> (items._2, items._3))
+      })
+
+    dimData.unpersist(true)
+    dimEvents
+  }
+
+  /**
     * 初始化 dw.dim_front_cate 数据
     * @param sqlContext
     * @return
@@ -183,6 +272,12 @@ object InitConfig {
   var DIMPAGE = new mutable.HashMap[String, (Int, Int, String, Int)]
   var DIMENT = new mutable.HashMap[String, (Int, Int)]
   var FCATE = new mutable.HashMap[Int, Int]
+
+  def initH5Dim() = {
+    val dp = ic.initDimH5Tables()._1
+    val de = ic.initDimH5Tables()._2
+    (dp, de)
+  }
 
   def initParam(appName: String, interval: Int, maxRecords: String) = {
     // 初始化 apark 超时时间, spark.mystreaming.batch.interval
