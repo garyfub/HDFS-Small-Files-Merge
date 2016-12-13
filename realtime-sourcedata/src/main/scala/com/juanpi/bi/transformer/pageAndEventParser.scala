@@ -42,7 +42,7 @@ object pageAndEventParser {
   /**
     *
     * @param jpid
-    * @param deviceid
+    * @param deviceid (ios)
     * @param os
     * @return
     */

@@ -97,8 +97,12 @@ class MbEventTransformer extends ITransformer {
     // ---------------------------------------------------------------- mb_event ----------------------------------------------------------------
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
     val activityname = (row \ "activityname").asOpt[String].getOrElse("").toLowerCase()
-    val starttime = (row \ "starttime").asOpt[String].getOrElse("")
-    val endtime = (row \ "endtime").asOpt[String].getOrElse("")
+//    val starttime = (row \ "starttime").asOpt[String].getOrElse("")
+//    val endtime = (row \ "endtime").asOpt[String].getOrElse("")
+//    修正过的时间
+    val startTime = (row \ "starttime_origin").asOpt[String].getOrElse("")
+    val endTime = (row \ "endtime_origin").asOpt[String].getOrElse("")
+
     val result = (row \ "result").asOpt[String].getOrElse("")
     val uid = (row \ "uid").asOpt[String].getOrElse("0")
     val extend_params = (row \ "extend_params").asOpt[String].getOrElse("")
@@ -213,11 +217,11 @@ class MbEventTransformer extends ITransformer {
 
     val jpk = 0
 
-    val (date, hour) = DateUtils.dateHourStr(endtime.toLong)
+    val (date, hour) = DateUtils.dateHourStr(endTime.toLong)
     val table_source = "mb_event"
 
     val user = User.apply(gu_id, uid, utm, "", session_id, terminal_id, app_version, site_id, ref_site_id, ctag, location, jpk, ugroup, date, hour)
-    val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, starttime, endtime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
+    val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, startTime, endTime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceid, to_switch)
     val event = Event.apply(event_id.toString, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
 
