@@ -141,7 +141,7 @@ class H5EventTransformer {
     val click_url = (row \ "click_url").asOpt[String].getOrElse("")
     val qm_ticks = (row \ "qm_ticks").asOpt[String].getOrElse("")
     val qm_device_id = (row \ "qm_device_id").asOpt[String].getOrElse("")
-    val qm_system_ver = (row \ "qm_system_ver").asOpt[String].getOrElse("")
+//    val qm_system_ver = (row \ "qm_system_ver").asOpt[String].getOrElse("")
     val qm_app_ver = (row \ "qm_app_ver").asOpt[String].getOrElse("")
     val share_result = (row \ "share_result").asOpt[String].getOrElse("")
     val action_type = (row \ "action_type").asOpt[String].getOrElse("")
