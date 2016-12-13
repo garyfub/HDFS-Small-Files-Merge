@@ -94,69 +94,27 @@ class H5EventTransformer {
 
     // ---------------------------------------------------------------- mb_event ----------------------------------------------------------------
     val act_name = (row \ "act_name").asOpt[String].getOrElse("")
-    val r = (row \ "r").asOpt[Int].getOrElse("0")
-    val h = (row \ "h").asOpt[Int].getOrElse("0")
-    val m = (row \ "m").asOpt[Int].getOrElse("0")
-    val s = (row \ "s").asOpt[Int].getOrElse("0")
-    val url = (row \ "url").asOpt[String].getOrElse("")
-    val utmid = (row \ "utmid").asOpt[String].getOrElse("")
-    val dUtmid = (row \ "dutmid").asOpt[String].getOrElse("")
+    val utmId = (row \ "utmid").asOpt[String].getOrElse("")
     val goodid = (row \ "goodid").asOpt[String].getOrElse("")
     val dGoodid = (row \ "dgoodid").asOpt[String].getOrElse("")
-    val baseUrlRef = (row \ "baseUrlRef").asOpt[String].getOrElse("")
-    val searchEngine = (row \ "searchengine").asOpt[String].getOrElse("")
-    val keyword = (row \ "keyword").asOpt[String].getOrElse("")
+    val url = (row \ "url").asOpt[String].getOrElse("")
+    val urlref = (row \ "urlref").asOpt[String].getOrElse("")
     val ul_id = (row \ "ul_id").asOpt[String].getOrElse("")
     val ul_idts = (row \ "ul_idts").asOpt[Int].getOrElse(0)
-    val ul_idvc = (row \ "ul_idvc").asOpt[Int].getOrElse(0)
     val ul_ref = (row \ "ul_ref").asOpt[String].getOrElse("")
-    val ul_refts = (row \ "ul_refts").asOpt[String].getOrElse("")
-    val ul_viewts = (row \ "ul_viewts").asOpt[String].getOrElse("")
-    val res = (row \ "res").asOpt[String].getOrElse("")
-    val gt_ms = (row \ "gt_ms").asOpt[String].getOrElse("")
-    val http_user_agent = (row \ "http_user_agent").asOpt[String].getOrElse("")
-    val renderingEngine = (row \ "renderingengine").asOpt[String].getOrElse("")
-    val browser = (row \ "browser").asOpt[String].getOrElse("")
-    val browserType = (row \ "browsertype").asOpt[String].getOrElse("")
-    val isMobileDevice = (row \ "ismobiledevice").asOpt[String].getOrElse("")
-    val operatingSystem = (row \ "operatingsystem").asOpt[String].getOrElse("")
-//    val spider = (row \ "spider").asOpt[String].getOrElse("")
-//    val bot = (row \ "bot").asOpt[String].getOrElse("")
-//    val isSpider = (row \ "isspider").asOpt[String].getOrElse("")
     val ul_Qt = (row \ "ul_qt").asOpt[String].getOrElse("")
     val s_uid = (row \ "s_uid").asOpt[String].getOrElse("")
-//    val s_name = (row \ "s_name").asOpt[String].getOrElse("")
-//    val s_pic = (row \ "s_pic").asOpt[String].getOrElse("")
-//    val s_sign = (row \ "s_sign").asOpt[String].getOrElse("")
-    val s_exp = (row \ "s_exp").asOpt[String].getOrElse("")
-    val sid = (row \ "sid").asOpt[String].getOrElse("")
-    val newPerson = (row \ "newperson").asOpt[String].getOrElse("")
     val utm = (row \ "utm").asOpt[String].getOrElse("")
-    val dUtm = (row \ "dutm").asOpt[String].getOrElse("")
     val timeStamp = (row \ "timestamp").asOpt[String].getOrElse("")
-    val dateStr = (row \ "datestr").asOpt[String].getOrElse("")
-    val isJump = (row \ "isjump").asOpt[String].getOrElse("")
     val sessionid = (row \ "sessionid").asOpt[String].getOrElse("")
     val click_action_name = (row \ "click_action_name").asOpt[String].getOrElse("")
     val click_url = (row \ "click_url").asOpt[String].getOrElse("")
-    val qm_ticks = (row \ "qm_ticks").asOpt[String].getOrElse("")
     val qm_device_id = (row \ "qm_device_id").asOpt[String].getOrElse("")
-//    val qm_system_ver = (row \ "qm_system_ver").asOpt[String].getOrElse("")
-    val qm_app_ver = (row \ "qm_app_ver").asOpt[String].getOrElse("")
-    val share_result = (row \ "share_result").asOpt[String].getOrElse("")
     val action_type = (row \ "action_type").asOpt[String].getOrElse("")
     val action_name = (row \ "action_name").asOpt[String].getOrElse("")
     val e_n = (row \ "e_n").asOpt[String].getOrElse("")
     val e_v = (row \ "e_v").asOpt[String].getOrElse("")
-//    val key_url_list = (row \ "key_url_list").asOpt[String].getOrElse("")
     val ip = (row \ "ip").asOpt[String].getOrElse("")
-    val jp_sid = (row \ "jp_sid").asOpt[String].getOrElse("")
-//    val jp_sid2 = (row \ "jp_sid2").asOpt[String].getOrElse("")
-//    val jp_sid3 = (row \ "jp_sid3").asOpt[String].getOrElse("")
-//    val jp_sid4 = (row \ "jp_sid4").asOpt[String].getOrElse("")
-//    val jp_sid5 = (row \ "jp_sid5").asOpt[String].getOrElse("")
-//    val jp_sid6 = (row \ "jp_sid6").asOpt[String].getOrElse("")
-//    val jp_sid7 = (row \ "jp_sid7").asOpt[String].getOrElse("")
     val qm_session_id = (row \ "qm_session_id").asOpt[String].getOrElse("")
     val qm_jpid = (row \ "qm_jpid").asOpt[String].getOrElse("")
 
@@ -167,7 +125,7 @@ class H5EventTransformer {
     }
 
     val basebaseUrlRef = if ("".equals(click_url)) {
-      baseUrlRef
+      urlref
     } else {
       url
     }
@@ -175,10 +133,11 @@ class H5EventTransformer {
     val baseTerminalId = getTerminalIdFromBase(qm_device_id, baseUrl)
     if (qm_device_id.length > 6 && baseTerminalId == 2) {
       // m.域名且带有设备号的为APP  H5页面
+      parseAppH5()
     } else {
       // 非M.域名或者设备ID长度小于7的为PC/WAP/WX
       // (length(qm_device_id) <= 6 or terminal_id <> 2)) a
-      pasePcWapWx()
+      parsePcWapWx()
     }
 
     val eventJionKey = action_name + "-dw-" + action_type
@@ -426,7 +385,7 @@ class H5EventTransformer {
   }
 
     // 解析pc wap wx 端数据
-  def pasePcWapWx(dimEvent: mutable.HashMap[String, (Int, Int)],
+  def parsePcWapWx(dimEvent: mutable.HashMap[String, (Int, Int)],
                     dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                     baseUrlRef: String, baseUrl: String, qm_device_id: String, qm_session_id: String, qm_jpid: String,
                     ul_id: String, actionName: String, eventJionKey: String, e_v: String, sid: String): Unit = {
