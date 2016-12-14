@@ -5,7 +5,8 @@ import java.text.SimpleDateFormat
 
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.InitConfig
-import com.juanpi.bi.transformer.{H5EventTransformer, ITransformer, pageAndEventParser}
+import com.juanpi.bi.transformer.{ITransformer, pageAndEventParser}
+//import com.juanpi.bi.transformer.{H5EventTransformer}
 import kafka.serializer.StringDecoder
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, _}
 import org.apache.hadoop.hbase.util.Bytes
@@ -153,8 +154,9 @@ class KafkaConsumer(topic: String,
   }
 
   def parseH5Message(message:String):(String, String, Any) = {
-    val h5LogTransformer = new H5EventTransformer()
-    h5LogTransformer.logParser(message, dimPage, dimH5EVENT)
+//    val h5LogTransformer = new H5EventTransformer()
+//    h5LogTransformer.logParser(message, dimPage, dimH5EVENT)
+     null
   }
 
   def parseMessage(message:String):(String, String, Any) = {
