@@ -20,6 +20,7 @@ import scala.collection.JavaConversions._
 class KafkaManager(val kafkaParams: Map[String, String],
                    val zkQum:String) extends  Watcher {
 
+
   private val kc = new KafkaCluster(kafkaParams)
   private var lastRunTime = System.currentTimeMillis()
   private var useTopics =  Set[String]()
