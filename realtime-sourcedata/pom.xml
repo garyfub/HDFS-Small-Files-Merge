@@ -178,6 +178,7 @@
             <version>${hive-udf.version}</version>
         </dependency>
 
+
     </dependencies>
 
     <build>
