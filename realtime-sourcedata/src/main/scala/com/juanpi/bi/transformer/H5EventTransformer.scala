@@ -42,63 +42,47 @@ class H5EventTransformer {
                ): (String, String, Any) = {
 
     val row = Json.parse(line)
-    val ticks = (row \ "ticks").asOpt[String].getOrElse("")
-    val jpid = (row \ "jpid").asOpt[String].getOrElse("")
-    val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
-    val os = (row \ "os").asOpt[String].getOrElse("")
-    val endTime = (row \ "endtime").as[String].toLong
 
-    // TODO 逻辑待优化
-    if (ticks.length() >= 13) {
-      // 解析逻辑
-      var gu_id = ""
+    // web 端 gu_id 从ul_id来，H5页面的gu_id通过cookie中捕获APP的gu_id获取
+    val qm_jpid = (row \ "qm_jpid").asOpt[String].getOrElse("")
+    val ul_id = (row \ "ul_id").asOpt[String].getOrElse("")
+    val timeStamp = (row \ "timestamp").as[String].toLong
+
+    val gu_id = if(ul_id.isEmpty()) qm_jpid else ul_id
+
+    val ret = if (gu_id.nonEmpty) {
+      val endtime = (row \ "endtime").asOpt[String].getOrElse("")
+      val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
+
       try {
-        gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
-      } catch {
-        // 使用模式匹配来处理异常
+        val res = parse(row, dimPage, dimEvent)
+        // 过滤异常的数据，具体见解析函数 eventParser.filterOutlierPageId
+        if (res == null) {
+          ("", "", None)
+        }
+        else {
+          val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = res
+          val res_str = pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x => x match {
+            case y if y == null || y.toString.isEmpty => "\\N"
+            case _ => x
+          }).mkString("\001")
+          val partitionStr = DateUtils.dateGuidPartitions(timeStamp, gu_id)
+          (partitionStr, "h5_event", res_str)
+        }
+      }
+      catch {
+        //使用模式匹配来处理异常
         case ex: Exception => {
           println(ex.getStackTraceString)
         }
-          println("=======>> PcEvent: getGuid Exception!!" + "======>>异常数据:" + row)
+          println("=======>> h5_event: getGuid Exception!!" + "======>>异常数据:" + row)
+          ("", "", None)
       }
-
-      val ret = if (gu_id.nonEmpty) {
-        val endtime = (row \ "endtime").asOpt[String].getOrElse("")
-        val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
-
-        try {
-          val res = parse(row, dimPage, dimEvent)
-          // 过滤异常的数据，具体见解析函数 eventParser.filterOutlierPageId
-          if (res == null) {
-            ("", "", None)
-          }
-          else {
-            val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = res
-            val res_str = pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x => x match {
-              case y if y == null || y.toString.isEmpty => "\\N"
-              case _ => x
-            }).mkString("\001")
-            val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
-            (partitionStr, "PCevent", res_str)
-          }
-        }
-        catch {
-          //使用模式匹配来处理异常
-          case ex: Exception => {
-            println(ex.getStackTraceString)
-          }
-            println("=======>> PcEvent: getGuid Exception!!" + "======>>异常数据:" + row)
-            ("", "", None)
-        }
-      } else {
-        println("=======>> PcEvent: getGuid Exception!!" + "======>>异常数据:" + row)
-        ("", "", None)
-      }
-      ret
     } else {
       println("=======>> PcEvent: getGuid Exception!!" + "======>>异常数据:" + row)
       ("", "", None)
     }
+    ret
   }
 
   def parse(row: JsValue,
@@ -160,7 +144,7 @@ class H5EventTransformer {
 
     val log = BaseLog(actName, utmId, goodid, baseUrl, baseUrlRef, ul_id, ul_idts, ul_ref, s_uid, timeStamp, sessionid, click_action_name, click_url, qm_device_id, actionType, actionName, e_n, eV, ip, qm_session_id, qm_jpid)
 
-    if (qm_device_id.length > 6 && baseTerminalId == 2) {
+    val res = if (qm_device_id.length > 6 && baseTerminalId == 2) {
       // m.域名且带有设备号的为APP H5页面
       parseAppH5(dimEvent, dimPage, log, eventJoinKey)
     } else {
@@ -170,13 +154,7 @@ class H5EventTransformer {
       parsePcWapWx(dimEvent, dimPage, log, eventJoinKey, sid)
     }
 
-//    val baseUrlPageId = new GetPageID().evaluate(baseUrl)
-//    val baseRefPageId = new GetPageID().evaluate(baseUrlRef)
-
-//    val baseUrlPageValue = getPageValue(javaToScalaInt(baseUrlPageId), baseUrl)
-//    val baseRefPageValue = getPageValue(javaToScalaInt(baseRefPageId), baseUrlRef)
-
-    null
+    res
   }
 
   def getDwSiteId(baseUrl: String): Int = {
