@@ -1,4 +1,4 @@
-package com.juanpi.bi.streaming
+package com.juanpi.bi.training
 
 import java.io.Serializable
 import java.text.SimpleDateFormat
@@ -22,7 +22,7 @@ import org.apache.spark.streaming.kafka.KafkaManager
 
 import scala.collection.mutable
 
-class KafkaConsumer(topic: String,
+class TestConsumer(topic: String,
                     dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                     dimEvent: mutable.HashMap[String, (Int, Int)],
                     fCate: mutable.HashMap[Int, Int],
@@ -33,86 +33,6 @@ class KafkaConsumer(topic: String,
 
   var logTransformer:ITransformer = null
 
-  /**
-    * 解析 event
-    * event 过滤 collect_api_responsetime
-    * page 和 event 都需要过滤 gu_id 为空的数据，需要过滤 site_id 不为（2, 3）的数据
-    *
-    * @param dataDStream
-    * @param ssc
-    * @param km
-    */
-  def eventProcess(dataDStream: DStream[((Long, Long), String)],
-                   ssc: StreamingContext, km: KafkaManager) = {
-    // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
-    // 数据块中的每一条记录需要处理
-    val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
-    val data = sourceLog.map(_._2.replace("\0",""))
-      .filter(line => !line.contains("collect_api_responsetime"))
-      .map(msg => parseMessage(msg))
-      .filter(_._1.nonEmpty)
-
-    data.foreachRDD((rdd, time) =>
-    {
-      val mills = time.milliseconds
-      // 保存数据至hdfs
-      rdd.map(v => ((v._1, mills), v._3))
-        .repartition(1)
-        .saveAsHadoopFile(Config.baseDir + "/" + topic,
-          classOf[String],
-          classOf[String],
-          classOf[RDDMultipleTextOutputFormat])
-    })
-
-    // 更新kafka offset
-    sourceLog.foreachRDD { rdd =>
-      km.updateOffsets(rdd)
-    }
-  }
-
-  /**
-    * 解析 pageinfo
-    * @param dataDStream
-    * @param ssc
-    * @param km
-    */
-  def pageProcess(dataDStream: DStream[((Long, Long), String)],
-                  ssc: StreamingContext,
-                  km: KafkaManager) = {
-
-    val data = dataDStream.map(_._2.replace("\0",""))
-        .map(msg => parseMessage(msg))
-        .filter(_._1.nonEmpty)
-
-     data.foreachRDD((rdd, time) => {
-
-       val mills = time.milliseconds
-        //  需要从 hbase 查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
-        val newRdd = rdd.map(record => {
-          val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._3
-
-          val res_str =  pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x=> x match {
-            case z if z == null => "\\N"
-            case y if y == "" || y.toString.isEmpty => "\\N"
-            case _ => x
-          }).mkString("\001")
-          ((record._1, mills), res_str)
-        })
-
-        // 保存数据至hdfs: /user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/
-        // /user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-28/gu_hash=0
-        newRdd.repartition(1)
-          .saveAsHadoopFile(Config.baseDir + "/" + topic,
-            classOf[String],
-            classOf[String],
-            classOf[RDDMultipleTextOutputFormat])
-      })
-
-    // 更新kafka offset
-    dataDStream.foreachRDD { rdd =>
-      km.updateOffsets(rdd)
-    }
-  }
 
   /**
     * 解析 event
@@ -124,7 +44,7 @@ class KafkaConsumer(topic: String,
     * @param km
     */
   def h5EventProcess(dataDStream: DStream[((Long, Long), String)],
-                   ssc: StreamingContext, km: KafkaManager) = {
+                     ssc: StreamingContext, km: KafkaManager) = {
 
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
 
@@ -320,7 +240,7 @@ object KafkaConsumer{
     /**
       * consumerType = "2", 用于当解析数据出错后，手动刷数据之用，需要手动指定offset
       * ！运行之前需要跟架构沟通
-     */
+      */
     if (consumerType.equals("2")) {
       km.setConfigOffset(Set(topic), groupId, consumerTime, ssc)
     }
@@ -328,16 +248,10 @@ object KafkaConsumer{
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
 
     // page 和 event 分开解析
-    if(topic.contains("page")) {
-      val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, ic.FCATE, null, zkQuorum)
-      consumer.pageProcess(message, ssc, km)
-    } else if(topic.contains("event")) {
-      val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, ic.FCATE, null, zkQuorum)
-      consumer.eventProcess(message, ssc, km)
-    } else if(topic.contains("h5_event")) {
+      if(topic.contains("h5_event")) {
       val DimH5Page = InitConfig.initH5Dim()._1
       val DimH5Event = InitConfig.initH5Dim()._2
-      val consumer = new KafkaConsumer(topic, DimH5Page, null, null, DimH5Event, zkQuorum)
+      val consumer = new TestConsumer(topic, DimH5Page, null, null, DimH5Event, zkQuorum)
       consumer.h5EventProcess(message, ssc, km)
     } else {
       println("请指定需要解析的kafka Topic！！")
