@@ -43,7 +43,8 @@ class KafkaConsumer(topic: String,
     * @param km
     */
   def eventProcess(dataDStream: DStream[((Long, Long), String)],
-                   ssc: StreamingContext, km: KafkaManager) = {
+                   ssc: StreamingContext,
+                   km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 数据块中的每一条记录需要处理
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
@@ -124,10 +125,10 @@ class KafkaConsumer(topic: String,
     * @param km
     */
   def h5EventProcess(dataDStream: DStream[((Long, Long), String)],
-                   ssc: StreamingContext, km: KafkaManager) = {
+                     ssc: StreamingContext,
+                     km: KafkaManager) = {
 
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
-
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     val data = sourceLog.map(_._2.replace("\0",""))
       .filter(line => !line.contains("collect_api_responsetime"))
@@ -328,13 +329,14 @@ object KafkaConsumer{
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
 
     // page 和 event 分开解析
-    if(topic.contains("page")) {
+    if(topic.equals("mb_pageinfo_hash2")) {
       val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, ic.FCATE, null, zkQuorum)
       consumer.pageProcess(message, ssc, km)
-    } else if(topic.contains("event")) {
+    } else if(topic.equals("mb_event_hash2")) {
       val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, ic.FCATE, null, zkQuorum)
       consumer.eventProcess(message, ssc, km)
-    } else if(topic.contains("h5_event")) {
+    } else if(topic.equals("pc_events_hash3")) {
+      // kafka topic: pc_events_hash3
       val DimH5Page = InitConfig.initH5Dim()._1
       val DimH5Event = InitConfig.initH5Dim()._2
       val consumer = new KafkaConsumer(topic, DimH5Page, null, null, DimH5Event, zkQuorum)
