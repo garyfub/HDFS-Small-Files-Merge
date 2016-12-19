@@ -1,5 +1,6 @@
 package com.juanpi.bi.mapred;
 
+import com.google.common.base.Joiner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -27,13 +28,15 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
 
 /**
  * 烈烈
- * Created by kaenr on 2016/7/13.
+ * Created by kaenr && gongzi on 2016/7/13.
  */
 public class PathListControledJobs {
 
-    static String base = "hdfs://nameservice1/user/hadoop/gongzi";
+    static String base = "hdfs://nameservice1/user/hadoop/dw_realtime";
 
-    static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/gongzi/dw_real_for_path_list";
+    static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
+
+    static final String PATH_JOBS = "dw_real_path_list_jobs";
 
     static Configuration conf = new Configuration();
 
@@ -66,7 +69,7 @@ public class PathListControledJobs {
         return format.format(c1.getTime());
     }
 
-    public static void JobsControl(String dateStr){
+    public static void JobsControl(String dateStr, int start, int end, String jobControlName){
 
         if(dateStr== null || dateStr.isEmpty()){
             dateStr = getDateStr();
@@ -75,33 +78,30 @@ public class PathListControledJobs {
         Configuration conf = new Configuration();
 
         //新建作业控制器
-        JobControl jc = new JobControl("PathListControledJobs");
+        JobControl jc = new JobControl(jobControlName);
 
         // 遍历16个分区
-        for(int i=0x0; i<=0x1; i++) {
-            String gu = String.format("%x", i);
+        for(int i=start; i<=end; i++) {
+            String guHash = String.format("%x", i);
 
-            String str = "{0}/{1}/date={2}/gu_hash={3}/";
-            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, gu);
-            String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, gu);
+            String str = "{0}/{1}/date={2}/gu_hash={3}/merged/";
+            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, guHash);
+            String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, guHash);
             // 文件输入路径
             String inputPath = strEvent + "," + strPage;
 
             // PathList文件落地路径
-            String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, "dw_real_path_list", dateStr, gu);
-
-            System.out.println(base);
-            System.out.println(inputPath);
-            System.out.println(outputPath);
+            String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, PATH_JOBS, dateStr, guHash);
 
             getFileSystem(base, outputPath);
 
             // 将受控作业添加到控制器中
             // 添加控制job
             try {
-                Job job = jobConstructor(inputPath, outputPath);
+                Job job = jobConstructor(inputPath, outputPath, guHash);
                 ControlledJob cj = new ControlledJob(conf);
                 cj.setJob(job);
+
                 jc.addJob(cj);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -113,14 +113,18 @@ public class PathListControledJobs {
 
         while(true){
             if(jc.allFinished()){
-                System.out.println("16个目录的数据处理完毕！");
+                System.out.println("8个目录的数据处理完毕！");
                 System.out.println(jc.getSuccessfulJobList());
                 jc.stop();
+                // 如果不加 break 或者 return，程序会一直循环
+                break;
             }
 
             if(jc.getFailedJobList().size() > 0){
                 System.out.println(jc.getFailedJobList());
                 jc.stop();
+                // 如果不加 break 或者 return，程序会一直循环
+                break;
             }
         }
     }
@@ -131,14 +135,13 @@ public class PathListControledJobs {
      * @param outputPath
      * @throws Exception
      */
-    public static Job jobConstructor(String inputPath, String outputPath) throws Exception {
+    public static Job jobConstructor(String inputPath, String outputPath, String guHash) throws Exception {
 
-        Job job = Job.getInstance(conf, "split");
+        Job job = Job.getInstance(conf, "PathListReal_" + guHash);
 
         // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
 //        job.setJar("pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar");
         job.setJarByClass(PathListControledJobs.class);
-
 
         //1.1 指定输入文件路径
         FileInputFormat.setInputPaths(job, inputPath);
@@ -179,63 +182,107 @@ public class PathListControledJobs {
 
     static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
         int xx = 0;
-        protected void map(LongWritable key, Text value, Context context) throws IOException ,InterruptedException, ArrayIndexOutOfBoundsException, NumberFormatException {
+
+        protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException, ArrayIndexOutOfBoundsException, NumberFormatException {
 
             final String[] splited = value.toString().split("\001");
 
-            // gu_id 和starttime 作为联合主键
-            final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
+            try {
+                // gu_id 和starttime 作为联合主键
+                String gu_id = splited[0];
+                if(!gu_id.isEmpty() && !gu_id.equals("0"))
+                {
+                    final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
 
-            //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
-            // page_level_id  对应的路径 line
-            // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 35: event_value; 36: event_lvl2_value; 22: starttime
-            String loadTime = splited[46];
-            String str[] = {splited[21],
-                    splited[15]+"\t"+splited[16]+"\t"+splited[25]+"\t"+splited[34]+"\t"+splited[35]+"\t"+splited[36]+"\t"+splited[22] + "\t" + loadTime,
-                    value.toString().replace("\001","\t")};
+                    //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
+                    // page_level_id  对应的路径 line
+                    // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 40: event_value; 36: event_lvl2_value; 22: starttime
+                    String page_level_id = (splited[21] == null)? "\\N":splited[21];
+                    String page_id = (splited[15] == null) ? "\\N":splited[15];
+                    String page_value = (splited[16] == null) ? "\\N":splited[16];
+                    String page_lvl2_value = (splited[25] == null) ? "\\N":splited[25];
+                    String event_id = (splited[40] == null) ? "\\N":splited[40];
+                    String event_value = (splited[41] == null) ? "\\N":splited[41];
+                    String event_lvl2_value = (splited[42] == null) ? "\\N":splited[42];
+                    String startTime = (splited[22] == null) ? "\\N":splited[22];
+                    String loadTime = (splited[46] == null) ? "\\N":splited[46];
 
-            final TextArrayWritable v2 = new TextArrayWritable(str);
+                    // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
+                    if("481".equals(event_id) || "10041".equals(event_id)){
+                        if("158".equals(page_id) || "167".equals(page_id) || "250".equals(page_id) || "26".equals(page_id)) {
+                            page_level_id = "1";
+                        }
+                    }
 
-            xx ++;
+                    String str[] = {page_level_id,
+                            page_id + "\t" + page_value + "\t" + page_lvl2_value + "\t" + event_id + "\t" + event_value + "\t" + event_lvl2_value + "\t" + startTime + "\t" + loadTime,
+                            value.toString().replace("\001", "\t")};
 
-            context.write(k2, v2);
+                    final TextArrayWritable v2 = new TextArrayWritable(str);
+
+                    xx++;
+
+                    context.write(k2, v2);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ArrayIndexOutOfBoundsException | NumberFormatException | StringIndexOutOfBoundsException e) {
+                e.printStackTrace();
+                System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
+            }
         }
     }
 
     //static class NewValue
-
     static class MyReducer extends Reducer<NewK2, TextArrayWritable, Text, Text> {
         protected void reduce(NewK2 k2, Iterable<TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
-            //long min = Long.MAX_VALUE;
-            String initstr = ""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+"";
+            String[] initStrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
+            String initStr = Joiner.on("\t").join(initStrArray);
+
+            String level1 = initStr;
+            String level2 = initStr;
+            String level3 = initStr;
+            String level4 = initStr;
+            String level5 = initStr;
 
             for (TextArrayWritable v2 : v2s) {
-                String level1 = initstr;
-                String level2 = initstr;
-                String level3 = initstr;
-                String level4 = initstr;
-                if(Integer.parseInt(v2.toStrings()[0]) == 1){
-                    level1=v2.toStrings()[1];
-                    level2 = initstr;
-                    level3 = initstr;
-                    level4 = initstr;
-                } else if(Integer.parseInt(v2.toStrings()[0]) == 2){
-                    level2=v2.toStrings()[1];
-                    level3 = initstr;
-                    level4 = initstr;
-                } else if(Integer.parseInt(v2.toStrings()[0]) == 3){
-                    level3 = v2.toStrings()[1];
-                    level4 = initstr;
-                } else if(Integer.parseInt(v2.toStrings()[0]) == 4){
-                    level4 = v2.toStrings()[1];
+
+                String pageLvlIdStr = v2.toStrings()[0];
+                String pageLvl = v2.toStrings()[1];
+                int pageLvlId = Integer.parseInt(pageLvlIdStr);
+
+                if(pageLvlId == 1){
+                    level1= pageLvl;
+                    level2 = initStr;
+                    level3 = initStr;
+                    level4 = initStr;
+                    level5 = initStr;
+                } else if(pageLvlId == 2){
+                    level2= pageLvl;
+                    level3 = initStr;
+                    level4 = initStr;
+                    level5 = initStr;
+                } else if(pageLvlId == 3){
+                    level3 = pageLvl;
+                    level4 = initStr;
+                    level5 = initStr;
+                } else if(pageLvlId == 4){
+                    level4 = pageLvl;
+                    level5 = initStr;
+                } else if(pageLvlId == 5){
+                    level5 = pageLvl;
                 }
 
-                // 4 个级别
-                Text key2 = new Text(level1+"\t"+ level2+"\t"+level3+"\t"+level4);
+                // 5 个级别
+                Text key2 = new Text(level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5);
                 Text value2 = new Text(v2.toStrings()[2]);
                 context.write(key2, value2);
             }
-
         }
     }
 
@@ -291,7 +338,7 @@ public class PathListControledJobs {
                 return false;
             }
             NewK2 oK2 = (NewK2)obj;
-            return (this.first.equals(oK2.first))&&(this.second==oK2.second);
+            return (this.first.equals(oK2.first))&&(this.second == oK2.second);
         }
     }
 
@@ -347,13 +394,21 @@ public class PathListControledJobs {
             set(texts);
         }
     }
+
+    /**
+     * 分两组并行计算
+     * @param args
+     */
     public static void main(String[] args){
         String dateStr = args[0];
         if(dateStr== null || dateStr.isEmpty()){
-            JobsControl("");
+            JobsControl("", 0x0, 0x8, "PathListControledJobs08");
+            JobsControl("", 0x9, 0xf, "PathListControledJobs0f");
         } else
         {
-            JobsControl(dateStr);
+            JobsControl(dateStr, 0x0, 0x8, "PathListControledJobs08");
+            JobsControl(dateStr, 0x9, 0xf, "PathListControledJobs0f");
         }
+
     }
 }

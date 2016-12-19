@@ -14,6 +14,7 @@ object DateUtils {
 
   /**
     * 返回日期加上gu_id最后一位，作为log文件的保存目录
+    *
     * @param milliseconds
     * @param gu_id
     * @return
@@ -26,7 +27,19 @@ object DateUtils {
   }
 
   /**
+    * 返回 yyyy-MM-dd 格式的日期
+    *
+    * @param milliseconds
+    * @return
+    */
+  def dateStr(milliseconds: Long): String = {
+    val dateTime = new DateTime(milliseconds)
+    dateTime.toString("yyyy-MM-dd")
+  }
+
+  /**
     * 接受一个时间戳的参数，返回日期和小时
+    *
     * @param milliseconds
     * @return
     */
@@ -44,5 +57,14 @@ object DateUtils {
     println((gu_id.last).toLower)
 
     println(dateGuidPartitions("1468929132822".toLong, "13a69d96f245ab71b"))
+
+    val (date, hour) = dateHourStr("1473233633320".toLong)
+    println(date)
+    println(hour)
+
+    println(dateStr("1474972779928".toLong))
+    println(dateStr("1474973422".toLong * 1000))
+
+
   }
 }

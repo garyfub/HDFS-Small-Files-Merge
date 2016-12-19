@@ -1,6 +1,6 @@
-use test;
-drop table dw_path_list_new;
-create external table dw_path_list_new (
+use dw;
+drop table path_list_real;
+create external table path_list_real (
     -- 入口页
     entrance_page_id int,
     entrance_page_value string,
@@ -121,5 +121,9 @@ alter table dw_path_list_new add partition (date="2016-08-18", gu_hash="c") loca
 alter table dw_path_list_new add partition (date="2016-08-18", gu_hash="d") location '/user/hadoop/gongzi/dw_real_path_list/date=2016-08-18/gu_hash=d/';
 alter table dw_path_list_new add partition (date="2016-08-18", gu_hash="e") location '/user/hadoop/gongzi/dw_real_path_list/date=2016-08-18/gu_hash=e/';
 alter table dw_path_list_new add partition (date="2016-08-18", gu_hash="f") location '/user/hadoop/gongzi/dw_real_path_list/date=2016-08-18/gu_hash=f/';
+-- 或者
+use test;
+alter table dw_path_list_new_jobs add partition (date="2016-08-31", gu_hash="0");
+alter table dw_path_list_new_jobs partition(date="2016-08-31", gu_hash="0") set location 'hdfs://nameservice1/user/hadoop/gongzi/dw_real_path_list_jobs/date=2016-08-31/gu_hash=0/';
 -- 看看效果
  > show partitions test.dw_path_list_new;

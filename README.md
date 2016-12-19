@@ -1,4 +1,13 @@
+##### install hive-udf
+```
+mvn install:install-file -Dfile=E:\dev_git\hiveUDF\hive-udf\target\hive-udf-1.0.0-2016101903.jar -DgroupId=com.juanpi.bi -DartifactId=hive-udf -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
 
+<dependency>
+    <groupId>com.juanpi.bi</groupId>
+    <artifactId>hive-udf</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
 ##### jar包上传
 ```
 ### on ops001.jp

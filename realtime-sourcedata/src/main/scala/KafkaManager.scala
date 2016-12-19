@@ -20,6 +20,7 @@ import scala.collection.JavaConversions._
 class KafkaManager(val kafkaParams: Map[String, String],
                    val zkQum:String) extends  Watcher {
 
+
   private val kc = new KafkaCluster(kafkaParams)
   private var lastRunTime = System.currentTimeMillis()
   private var useTopics =  Set[String]()
@@ -31,10 +32,10 @@ class KafkaManager(val kafkaParams: Map[String, String],
   def getOffset(topics: Set[String], groupId: String, selectTime: String, ssc: StreamingContext) = {
     val topic = topics.head
     val configReadPath = "/" + topic + "_" + groupId  + "/" + selectTime
-    //val configOffset = zkUtils.get(zc, configReadPath)
+
     val zc = new ZooKeeper(zkQum, 30000, this)
     if (zc.exists(configReadPath, false) == null) {
-      println("ERROR,can't find " + configReadPath + "in zookeeper!")
+      println("ERROR, can't find " + configReadPath + "in zookeeper!")
       zc.close()
       ssc.stop()
       System.exit(1)
@@ -139,11 +140,6 @@ class KafkaManager(val kafkaParams: Map[String, String],
     if (consumerOffsetsE.isLeft)
       throw new SparkException(s"get kafka consumer offsets failed: ${consumerOffsetsE.left.get}")
     val consumerOffsets = consumerOffsetsE.right.get
-
-//    println(consumerOffsets.keys)
-//    println(consumerOffsets.values)
-//
-//    System.exit(1)
 
     val messages = KafkaUtils.createDirectStream[K, V, KD, VD, ((Long, Long), V)](
       ssc, kafkaParams, consumerOffsets, (mmd: MessageAndMetadata[K, V]) => ((mmd.partition.toLong, mmd.offset), mmd.message))
