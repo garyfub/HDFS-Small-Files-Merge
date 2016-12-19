@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 #params=("$@")
-# real_time_by_gongzi_pc_events_hash3
 
 echo "gongzi com.juanpi.bi.streaming.KafkaConsumer pc_events_hash3 start..."
 
