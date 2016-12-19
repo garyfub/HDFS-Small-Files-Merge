@@ -13,7 +13,6 @@
         <module>realtime-sourcedata</module>
         <module>pathlist</module>
         <module>hdfs-files-merge</module>
-        <module>eventtranform</module>
     </modules>
 
     <properties>
