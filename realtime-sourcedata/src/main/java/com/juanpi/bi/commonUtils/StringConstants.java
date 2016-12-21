@@ -170,5 +170,4 @@ public final class StringConstants {
     
 	//\001
 	public static final String hiveFieldSeparator = "\001";
-
 }

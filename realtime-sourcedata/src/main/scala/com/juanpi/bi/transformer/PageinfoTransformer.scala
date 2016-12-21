@@ -66,8 +66,8 @@ class PageinfoTransformer extends ITransformer {
 //    val ticks = (row \ "ticks").asOpt[String].getOrElse("")
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
     val pageName = (row \ "pagename").asOpt[String].getOrElse("").toLowerCase()
-    val startTime = (row \ "starttime").asOpt[String].getOrElse("0")
-    val endTime = (row \ "endtime").asOpt[String].getOrElse("0")
+//    val startTime = (row \ "starttime").asOpt[String].getOrElse("0")
+//    val endTime = (row \ "endtime").asOpt[String].getOrElse("0")
     val prePage = (row \ "pre_page").asOpt[String].getOrElse("")
     val uid = (row \ "uid").asOpt[String].getOrElse("0")
     val extendParams = (row \ "extend_params").asOpt[String].getOrElse("")
@@ -77,8 +77,10 @@ class PageinfoTransformer extends ITransformer {
     val os = (row \ "os").asOpt[String].getOrElse("")
     val utm = (row \ "utm").asOpt[String].getOrElse("0")
     val source = (row \ "source").asOpt[String].getOrElse("")
-//    val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
-//    val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
+//    修正过的时间
+    val startTime = (row \ "starttime_origin").asOpt[String].getOrElse("")
+    val endTime = (row \ "endtime_origin").asOpt[String].getOrElse("")
+
     val pre_extend_params = (row \ "pre_extend_params").asOpt[String].getOrElse("")
     val url = (row \ "wap_url").asOpt[String].getOrElse("")
     val urlref = (row \ "wap_pre_url").asOpt[String].getOrElse("")

@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat
 
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.InitConfig
-import com.juanpi.bi.transformer.{ITransformer, pageAndEventParser}
+import com.juanpi.bi.transformer.{H5EventTransformer, ITransformer, pageAndEventParser}
 import kafka.serializer.StringDecoder
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, _}
 import org.apache.hadoop.hbase.util.Bytes
@@ -15,7 +15,7 @@ import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat
 import org.apache.spark.Logging
 import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
-import org.apache.spark.streaming.{StreamingContext, Time}
+import org.apache.spark.streaming.{StreamingContext}
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
 
@@ -25,6 +25,7 @@ class KafkaConsumer(topic: String,
                     dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                     dimEvent: mutable.HashMap[String, (Int, Int)],
                     fCate: mutable.HashMap[Int, Int],
+                    dimH5EVENT: mutable.HashMap[String, (Int, Int)],
                     zkQuorum: String)
   extends Logging with Serializable {
   import KafkaConsumer._
@@ -41,7 +42,8 @@ class KafkaConsumer(topic: String,
     * @param km
     */
   def eventProcess(dataDStream: DStream[((Long, Long), String)],
-                   ssc: StreamingContext, km: KafkaManager) = {
+                   ssc: StreamingContext,
+                   km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 数据块中的每一条记录需要处理
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
@@ -96,7 +98,6 @@ class KafkaConsumer(topic: String,
           }).mkString("\001")
           ((record._1, mills), res_str)
         })
-//
 
         // 保存数据至hdfs: /user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/
         // /user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-28/gu_hash=0
@@ -113,6 +114,50 @@ class KafkaConsumer(topic: String,
     }
   }
 
+  /**
+    * 解析 event
+    * event 过滤 collect_api_responsetime
+    * page 和 event 都需要过滤 gu_id 为空的数据，需要过滤 site_id 不为（2, 3）的数据
+    *
+    * @param dataDStream
+    * @param ssc
+    * @param km
+    */
+  def h5EventProcess(dataDStream: DStream[((Long, Long), String)],
+                     ssc: StreamingContext,
+                     km: KafkaManager) = {
+
+    val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
+    val data = sourceLog.map(_._2.replace("\0",""))
+      .filter(line => !line.contains("collect_api_responsetime"))
+      .map(msg => parseH5Message(msg))
+      .filter(_._1.nonEmpty)
+
+    // 解析后的数据写HDFS
+    data.foreachRDD((rdd, time) =>
+    {
+      val mills = time.milliseconds
+      // 保存数据至hdfs
+      rdd.map(v => ((v._1, mills), v._3))
+        .repartition(1)
+        .saveAsHadoopFile(Config.baseDir + "/" + topic,
+          classOf[String],
+          classOf[String],
+          classOf[RDDMultipleTextOutputFormat])
+    })
+
+    // 更新kafka offset
+    sourceLog.foreachRDD { rdd =>
+      km.updateOffsets(rdd)
+    }
+  }
+
+  def parseH5Message(message:String):(String, String, Any) = {
+    val h5LogTransformer = new H5EventTransformer()
+    h5LogTransformer.logParser(message, dimPage, dimH5EVENT)
+  }
+
   def parseMessage(message:String):(String, String, Any) = {
     getTransformer().logParser(message, dimPage, dimEvent, fCate)
   }
@@ -127,7 +172,6 @@ class KafkaConsumer(topic: String,
     }
     logTransformer
   }
-
 }
 
 object HBaseHandler {
@@ -213,6 +257,7 @@ object KafkaConsumer{
 
     println("======>> com.juanpi.bi.streaming.KafkaConsumer 开始运行，参数个数：" + args.length)
 
+    // 判断传入的参数
     if (args.length < 3) {
       System.err.println(s"""
                             |Usage: KafkaConsumerOffset <zkQuorum> <brokers> <topic> <groupId> <consumerType> <consumerTime>
@@ -229,12 +274,13 @@ object KafkaConsumer{
       System.exit(1)
     }
 
+    // 初始化必要的参数
     var (zkQuorum, brokerList, topic, groupId, consumerType, consumerTime, maxRecords) = ("", "", "", "", "1", "60", "100")
 
+    // 解析传入的参数
     println("com.juanpi.bi.streaming.KafkaConsumer 开始运行。。。。。。传入参数如下：")
     args.foreach(
       arg => {
-        println(arg)
         val k = arg.split("=")(0)
         val v = arg.split("=")(1)
         k match {
@@ -280,12 +326,20 @@ object KafkaConsumer{
     }
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
-    val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, ic.FCATE, zkQuorum)
+
     // page 和 event 分开解析
-    if(topic.contains("page")) {
+    if(topic.equals("mb_pageinfo_hash2")) {
+      val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, ic.FCATE, null, zkQuorum)
       consumer.pageProcess(message, ssc, km)
-    } else if(topic.contains("event")) {
+    } else if(topic.equals("mb_event_hash2")) {
+      val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, ic.FCATE, null, zkQuorum)
       consumer.eventProcess(message, ssc, km)
+    } else if(topic.equals("pc_events_hash3")) {
+      // kafka topic: pc_events_hash3
+      val DimH5Page = InitConfig.initH5Dim()._1
+      val DimH5Event = InitConfig.initH5Dim()._2
+      val consumer = new KafkaConsumer(topic, DimH5Page, null, null, DimH5Event, zkQuorum)
+      consumer.h5EventProcess(message, ssc, km)
     } else {
       println("请指定需要解析的kafka Topic！！")
       System.exit(1)

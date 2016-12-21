@@ -3,7 +3,7 @@
     <parent>
         <artifactId>dw-realtime</artifactId>
         <groupId>com.juanpi.bi</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -20,6 +20,7 @@
         <scala.binary.version>2.10</scala.binary.version>
         <spark.version>1.6.1</spark.version>
         <hbase.version>1.2.0-cdh5.7.1</hbase.version>
+        <hive-udf.version>1.0.2</hive-udf.version>
         <encoding>UTF-8</encoding>
         <path.to.root>..</path.to.root>
     </properties>
@@ -174,12 +175,13 @@
         <dependency>
             <groupId>com.juanpi</groupId>
             <artifactId>hive-udf</artifactId>
-            <version>1.0.2</version>
+            <version>${hive-udf.version}</version>
         </dependency>
 
     </dependencies>
 
     <build>
+        <finalName>${pom.artifactId}-${pom.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
