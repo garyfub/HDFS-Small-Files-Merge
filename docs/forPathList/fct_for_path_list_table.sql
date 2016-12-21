@@ -99,7 +99,7 @@ create external table fct_for_path_list (
     sorthour string,
     lplid string,
     ptplid string,
-    ug_id
+    ug_id string
 )
 PARTITIONED BY (`gu_hash` string)
 row format delimited fields terminated by '\t'
