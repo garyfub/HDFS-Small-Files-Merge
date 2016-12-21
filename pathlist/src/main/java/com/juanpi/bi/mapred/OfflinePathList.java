@@ -255,8 +255,8 @@ public class OfflinePathList {
                                     + "\t" + lplid
                                     + "\t" + ptplid
                                     + "\t" + select_id
-                                    + "\t" + test_id,
-                                    + "\t" + ug_id
+                                    + "\t" + test_id
+                                    + "\t" + ug_id,
                             value.toString().replace("\001", "\t")
                     };
 
