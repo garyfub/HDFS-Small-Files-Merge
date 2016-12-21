@@ -42,6 +42,7 @@ select
   x.sorthour,
   x.lplid,
   x.ptplid,
+  x.ug_id,
   x.gu_hash
 from (
     SELECT
@@ -63,9 +64,10 @@ from (
         case when length(lplid) > 0 then lplid else NUll end lplid,
         case when length(ptplid) > 0 then ptplid else NUll end ptplid,
         -- 以gu_id 最后一个字母作为分区字段
-        lower(substring(gu_id, -1)) as gu_hash
+        lower(substring(gu_id, -1)) as gu_hash,
+        case when length(ug_id) > 0 then ug_id else NUll end ug_id
     FROM  dw.fct_event_reg
-    where date = '{$date}'
+    where date = '${date}'
         and gu_id is not null
         and length(gu_id) > 0
         and substring(gu_id, -1) rlike '[A-Za-z0-9]'
@@ -91,9 +93,10 @@ from (
       NUll lplid,
       NUll ptplid,
       -- 以gu_id 最后一个字母作为分区字段
-      lower(substring(gu_id, -1)) as gu_hash
+      lower(substring(gu_id, -1)) as gu_hash,
+      NULL ug_id
     FROM  dw.fct_page_ref_reg
-    where date = '{$date}'
+    where date = '${date}'
       and gu_id is not null
       and length(gu_id) > 0
       and substring(gu_id, -1) rlike '[A-Za-z0-9]'
