@@ -227,6 +227,7 @@ public class OfflinePathList {
                     String sorthour = (splited[14] == null) ? "\\N":splited[14];
                     String lplid = (splited[15] == null) ? "\\N":splited[15];
                     String ptplid = (splited[16] == null) ? "\\N":splited[16];
+                    String ptplid = (splited[17] == null) ? "\\N":splited[17];
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
                     if("481".equals(event_id) || "10041".equals(event_id)){
@@ -255,6 +256,7 @@ public class OfflinePathList {
                                     + "\t" + ptplid
                                     + "\t" + select_id
                                     + "\t" + test_id,
+                                    + "\t" + ug_id
                             value.toString().replace("\001", "\t")
                     };
 
@@ -282,7 +284,7 @@ public class OfflinePathList {
     //static class NewValue
     static class MyReducer extends Reducer<OfflinePathList.NewK2, OfflinePathList.TextArrayWritable, Text, Text> {
         protected void reduce(OfflinePathList.NewK2 k2, Iterable<OfflinePathList.TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
-            String[] initStrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N","\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
+            String[] initStrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N","\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
             String initStr = Joiner.on("\t").join(initStrArray);
 
             String level1 = initStr;
