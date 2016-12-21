@@ -17,6 +17,7 @@ create external table fct_for_path_list (
     entrance_ptplid string,
     entrance_select_id string,
     entrance_test_id string,
+    entrance_ug_id string,
     -- 二级入口页
     entrance2_page_id int,
     entrance2_page_value string,
@@ -32,6 +33,7 @@ create external table fct_for_path_list (
     entrance2_ptplid string,
     entrance2_select_id string,
     entrance2_test_id string,
+    entrance2_ug_id string,
     -- 导航页
     guide_page_id int,
     guide_page_value string,
@@ -47,6 +49,7 @@ create external table fct_for_path_list (
     guide_ptplid string,
     guide_select_id string,
     guide_test_id string,
+    guide_ug_id string,
     -- 二级导航
     guide2_page_id int,
     guide2_page_value string,
@@ -62,6 +65,7 @@ create external table fct_for_path_list (
     guide2_ptplid string,
     guide2_select_id string,
     guide2_test_id string,
+    guide2_ug_id string,
     -- 前站
     before_goods_page_id int,
     before_goods_page_value string,
@@ -77,6 +81,7 @@ create external table fct_for_path_list (
     before_goods_ptplid string,
     before_goods_select_id string,
     before_goods_test_id string,
+    before_goods_ug_id string,
     page_level_id int,
     gu_id string,
     page_id string,
@@ -93,7 +98,8 @@ create external table fct_for_path_list (
     sortdate string,
     sorthour string,
     lplid string,
-    ptplid string
+    ptplid string,
+    ug_id
 )
 PARTITIONED BY (`gu_hash` string)
 row format delimited fields terminated by '\t'
