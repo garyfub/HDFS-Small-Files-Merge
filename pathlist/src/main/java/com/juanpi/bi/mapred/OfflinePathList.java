@@ -227,7 +227,7 @@ public class OfflinePathList {
                     String sorthour = (splited[14] == null) ? "\\N":splited[14];
                     String lplid = (splited[15] == null) ? "\\N":splited[15];
                     String ptplid = (splited[16] == null) ? "\\N":splited[16];
-                    String ptplid = (splited[17] == null) ? "\\N":splited[17];
+                    String ug_id  = (splited[17] == null) ? "\\N":splited[17];
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
                     if("481".equals(event_id) || "10041".equals(event_id)){
