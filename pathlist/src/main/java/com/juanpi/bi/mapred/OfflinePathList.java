@@ -221,7 +221,6 @@ public class OfflinePathList {
                     String test_id = (splited[9] == null) ? "\\N":splited[9];
                     String select_id = (splited[10] == null) ? "\\N":splited[10];
                     String starttime = (splited[11] == null) ? "\\N":splited[11];
-
                     String pit_type = (splited[12] == null) ? "\\N":splited[12];
                     String sortdate = (splited[13] == null) ? "\\N":splited[13];
                     String sorthour = (splited[14] == null) ? "\\N":splited[14];
