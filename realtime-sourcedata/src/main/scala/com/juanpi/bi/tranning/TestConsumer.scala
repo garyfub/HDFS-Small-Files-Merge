@@ -1,10 +1,11 @@
-package com.juanpi.bi.training
+package com.juanpi.bi.streaming
 
 import java.io.Serializable
 import java.text.SimpleDateFormat
 
-import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
+import com.juanpi.bi.bean.{Event, Page, PageAndEvent, _}
 import com.juanpi.bi.init.InitConfig
+import com.juanpi.bi.streaming.Config
 import com.juanpi.bi.transformer.{H5EventTransformer, ITransformer, pageAndEventParser}
 //import com.juanpi.bi.transformer.{H5EventTransformer}
 import kafka.serializer.StringDecoder
@@ -33,7 +34,6 @@ class TestConsumer(topic: String,
 
   var logTransformer:ITransformer = null
 
-
   /**
     * 解析 event
     * event 过滤 collect_api_responsetime
@@ -44,10 +44,10 @@ class TestConsumer(topic: String,
     * @param km
     */
   def h5EventProcess(dataDStream: DStream[((Long, Long), String)],
-                     ssc: StreamingContext, km: KafkaManager) = {
+                     ssc: StreamingContext,
+                     km: KafkaManager) = {
 
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
-
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     val data = sourceLog.map(_._2.replace("\0",""))
       .filter(line => !line.contains("collect_api_responsetime"))
@@ -152,7 +152,7 @@ object HBaseHandler {
   }
 }
 
-object KafkaConsumer{
+object TestConsumer{
 
   class RDDMultipleTextOutputFormat extends MultipleTextOutputFormat[Any, Any] {
     override def generateActualKey(key: Any, value: Any): Any = {
@@ -248,7 +248,8 @@ object KafkaConsumer{
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
 
     // page 和 event 分开解析
-      if(topic.contains("h5_event")) {
+    if(topic.equals("pc_events_hash3")) {
+      // kafka topic: pc_events_hash3
       val DimH5Page = InitConfig.initH5Dim()._1
       val DimH5Event = InitConfig.initH5Dim()._2
       val consumer = new TestConsumer(topic, DimH5Page, null, null, DimH5Event, zkQuorum)

@@ -1,9 +1,9 @@
-package com.juanpi.bi.training
+package com.juanpi.bi.tranning
 
 /**
-  * Created by gongzi on 2016/7/9.
+ * Created by gongzi on 2016/7/9.
   * email:
-  */
+ */
 object Config {
 
   val interval = System.getProperty("spark.mystreaming.batch.interval", "60").toInt
@@ -17,10 +17,10 @@ object Config {
 
   private val transformerPackage="com.juanpi.bi.transformer"
   val kafkaTopicMap:Map[String, Seq[String]] = Map(
-    "mb_event_hash2" -> List(s"${transformerPackage}.MbEventTransformer"),
-    "mb_pageinfo_hash2" -> List(s"${transformerPackage}.PageinfoTransformer"),
-    " pc_events_hash3" -> List(s"${transformerPackage}.H5EventTransformer")
-  )
+                          "mb_event_hash2" -> List(s"${transformerPackage}.MbEventTransformer"),
+                          "mb_pageinfo_hash2" -> List(s"${transformerPackage}.PageinfoTransformer"),
+                          "pc_events_hash3" -> List(s"${transformerPackage}.H5EventTransformer")
+                          )
 
   def getTopicTransformerClass(topic: String): String ={
     kafkaTopicMap.get(topic).get(0)
