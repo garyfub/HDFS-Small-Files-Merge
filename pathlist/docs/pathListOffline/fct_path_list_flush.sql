@@ -4,14 +4,14 @@ set hive.groupby.skewindata =true;
 set mapreduce.input.fileinputformat.split.maxsize=16000000;
 set mapreduce.job.reduces=100;
 
-use temp;
+use dw;
 
 ---------------------------------------------------------------------------------------------------
 -- 计算path_list数据，并创建临时表
 ---------------------------------------------------------------------------------------------------
-ALTER TABLE fct_path_list DROP IF EXISTS PARTITION (date='{$date}');
+ALTER TABLE fct_path_list DROP IF EXISTS PARTITION (date='${date}');
 
-INSERT overwrite table fct_path_list partition(date='{$date}')
+INSERT overwrite table fct_path_list partition(date='${date}')
 SELECT
 gu_id,
 starttime,

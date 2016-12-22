@@ -17,6 +17,7 @@ CREATE TABLE `fct_path_list_mapr`(
 `sortdate` string,
 `sorthour` string,
 `lplid` string,
-`ptplid` string
+`ptplid` string,
+`ug_id` string
   )
 PARTITIONED BY (`gu_hash` string);

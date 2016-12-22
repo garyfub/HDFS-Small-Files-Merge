@@ -8,7 +8,7 @@ object ScalaConstants {
   val siteJiuKuaiYou: Int = 2
   val siteAll: Int = -99
   val siteUnknow: Int = -999
-  val Delimiter: String = "_dw_"
+  val JoinDelimiter: String = "_dw_"
 
   val T_PC = 1
   val T_Android = 2
