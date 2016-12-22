@@ -1,7 +1,7 @@
 package com.juanpi.bi.transformer
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.ScalaConstants
-import com.juanpi.bi.sc_utils.DateUtils
+import com.juanpi.bi.sc_utils.{DateUtils, TimeUtils}
 import com.juanpi.hive.udf._
 import play.api.libs.json.{JsValue, Json}
 
@@ -105,7 +105,7 @@ class H5EventTransformer {
     val click_url = (row \ "click_url").asOpt[String].getOrElse("")
     val qm_device_id = (row \ "qm_device_id").asOpt[String].getOrElse("")
     val actionType = (row \ "action_type").asOpt[String].getOrElse("")
-    val actionName = (row \ "action_name").asOpt[String].getOrElse("")
+    val action_name = (row \ "action_name").asOpt[String].getOrElse("")
     val e_n = (row \ "e_n").asOpt[String].getOrElse("")
     val e_v = (row \ "e_v").asOpt[String].getOrElse("")
     val ip = (row \ "ip").asOpt[String].getOrElse("")
@@ -126,10 +126,10 @@ class H5EventTransformer {
 
     val baseTerminalId = getTerminalIdFromBase(qm_device_id, baseUrl)
 
-    val eventJoinKey = actionName + "-dw-" + actionType
+    val eventJoinKey = action_name + ScalaConstants.JoinDelimiter + actionType
 
     val actName = if ("".equals(click_action_name)) {
-      actionName
+      action_name
     } else {
       click_action_name
     }
@@ -142,7 +142,7 @@ class H5EventTransformer {
       e_v
     }
 
-    val log = BaseLog(actName, utmId, goodid, baseUrl, baseUrlRef, ul_id, ul_idts, ul_ref, s_uid, timeStamp, sessionid, click_action_name, click_url, qm_device_id, actionType, actionName, e_n, eV, ip, qm_session_id, qm_jpid)
+    val log = BaseLog(actName, utmId, goodid, baseUrl, baseUrlRef, ul_id, ul_idts, ul_ref, s_uid, timeStamp, sessionid, click_action_name, click_url, qm_device_id, actionType, action_name, e_n, eV, ip, qm_session_id, qm_jpid)
 
     val res = if (qm_device_id.length > 6 && baseTerminalId == 2) {
       // m.域名且带有设备号的为APP H5页面
@@ -153,7 +153,6 @@ class H5EventTransformer {
       val sid = (row \ "sid").asOpt[String].getOrElse("")
       parsePcWapWx(dimEvent, dimPage, log, eventJoinKey, sid)
     }
-
     res
   }
 
@@ -190,7 +189,14 @@ class H5EventTransformer {
     pageLevel2Value
   }
 
-  // 解析app端 h5 端数据
+  /**
+    * 解析app端 h5 端数据
+    * @param dimEvent
+    * @param dimPage
+    * @param baseLog
+    * @param eventJoinKey
+    * @return
+    */
   def parseAppH5(dimEvent: mutable.HashMap[String, (Int, Int)],
                  dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                  baseLog: BaseLog,
@@ -239,8 +245,8 @@ class H5EventTransformer {
 
     val pageLevel2Value = getPageLevel2Value(pageId.toString, shopId, baseUrl)
     val refPageLevel2Value = getPageLevel2Value(pageId.toString, shopId, baseUrlRef)
-    val eventLevel2Vlue = ""
 
+    val eventLevel2Value = ""
     val location = ""
     val ctag = ""
     val rule_id = ""
@@ -260,23 +266,35 @@ class H5EventTransformer {
     val hotGoodsId = ""
     val deviceId = ""
     val to_switch = ""
-    val utm = ""
-    val date = ""
-    val hour = ""
-    val uid = ""
+    val utm = baseLog.utmId
+    val startTime = baseLog.timeStamp
+    val endTime = baseLog.timeStamp
 
+    val (date, hour) = TimeUtils.dateHourFormat(startTime)
+
+    val userId = Decoding.evaluate(baseLog.s_uid)
     val dwSiteId = getDwSiteId(baseUrl)
     val dwSessionId = getDwSessionId(baseLog.qm_session_id, baseLog.qm_jpid)
 
     val table_source = "h5_app_event"
-    val user = User.apply(guId, uid, utm, "", dwSessionId, dwTeminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
-    val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, "0", "0", hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
+    val user = User.apply(guId, userId.toString, utm, "", dwSessionId, dwTeminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
+    val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceId, to_switch)
-    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Vlue, rule_id, test_id, select_id, loadTime)
+    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Value, rule_id, test_id, select_id, loadTime)
 
     (user, pe, page, event)
   }
-    // 解析pc wap wx 端数据
+
+
+  /**
+    *  解析pc wap wx 端数据
+    * @param dimEvent
+    * @param dimPage
+    * @param baseLog
+    * @param eventJoinKey
+    * @param sid
+    * @return
+    */
   def parsePcWapWx (dimEvent: mutable.HashMap[String, (Int, Int)],
                     dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                     baseLog: BaseLog,
@@ -288,7 +306,7 @@ class H5EventTransformer {
     val qm_device_id = baseLog.qm_device_id
 
     val baseTerminalId = getTerminalIdFromBase(qm_device_id, baseUrl)
-    val dwTeminalId = getTerminalIdForPC(baseTerminalId)
+    val dwTerminalId = getTerminalIdForPC(baseTerminalId)
     val (d_event_id: Int, event_type_id: Int) = dimEvent.get(eventJoinKey).getOrElse(0, 0)
     val eventId = d_event_id match {
       case a if a > 0 => a
@@ -303,16 +321,16 @@ class H5EventTransformer {
     val refPageId = new GetPageID().evaluate(baseUrlRef)
     val refPageValue = new GetDwPcPageValue().evaluate(baseUrlRef)
     val refSiteId = new GetSiteId().evaluate(baseUrlRef)
-    // hive-udf Decoding函数
+    // hive-udf Decoding函数 Decoding.(baseLog.s_uid)
     val userId = Decoding.evaluate(baseLog.s_uid)
     val pageId = new GetPageID().evaluate(baseUrl)
     val pageValue = new GetDwPcPageValue().evaluate(baseUrl)
     val shopId = new GetShopId().evaluate(baseUrl)
     val refShopId = new GetShopId().evaluate(baseUrlRef)
-    val starttime = baseLog.timeStamp
-    val endtime = baseLog.timeStamp
+    val startTime = baseLog.timeStamp
+    val endTime = baseLog.timeStamp
 
-    val table_source = "h5_app_event"
+    val table_source = "pc_wx_event"
 
     val appVersion = ""
 
@@ -320,9 +338,9 @@ class H5EventTransformer {
     // TODO 以 page_id 为key
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPage.get(pageId.toString).getOrElse(0, 0, "", 0)
     val pageLevelId = d_page_level_id
-    val pageLevel2Value = ""
+    val pageLevel2Value = getPageLevel2Value(pageId.toString, shopId, baseUrl)
+    val refPageLevel2Value = getPageLevel2Value(pageId.toString, shopId, baseUrlRef)
 
-    val refPageLevel2Value = ""
     val eventLevel2Vlue = ""
     val jpk = 0
     val pit_type = 0
@@ -341,24 +359,29 @@ class H5EventTransformer {
     val location = ""
     val deviceId = ""
     val to_switch = ""
-    val date = ""
-    val hour = ""
+
+    val (date, hour) = TimeUtils.dateHourFormat(startTime)
 
     val rule_id = ""
     val test_id = ""
     val select_id = ""
 
     //    (dwTeminalId, appVersion, eventId, dwSiteId, dwSessionId,)
-    val user = User.apply(guId, userId.toString, baseLog.utmId, "", dwSessionId, dwTeminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
-    val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, "0", "0", hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
+    val user = User.apply(guId, userId.toString, baseLog.utmId, "", dwSessionId, dwTerminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
+    val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceId, to_switch)
     val event = Event.apply(eventId.toString(), eventValue, eventLevel2Vlue, rule_id, test_id, select_id, loadTime)
 
     (user, pe, page, event)
   }
 
+  /**
+    * -- H5页面的session_id通过cookie中捕获APP的session_id获取
+    * @param sId
+    * @param guId
+    * @return
+    */
   def getDwSessionId(sId: String, guId: String): String = {
-    //  -- H5页面的session_id通过cookie中捕获APP的session_id获取
     val dwSessionId = if (!sId.isEmpty) {
       val res = sId match {
         case "null" => guId
@@ -372,7 +395,13 @@ class H5EventTransformer {
     dwSessionId
   }
 
-
+  /**
+    *
+    * @param qm_device_id
+    * @param url
+    * @return 6:微信端；2: m站 ; 1: pc
+    *
+    **/
   def getTerminalIdFromBase(qm_device_id: String, url: String): Int = {
     import scala.util.matching._
     val reg = new Regex("""http(s?)://(tuan|wx).*""")
@@ -382,14 +411,11 @@ class H5EventTransformer {
         case _ => 1
       }
       res
-    } else {
-      val reg = new Regex("""http(s?)://(tuan|m).*""")
-      val res = url match {
-        case reg(x, y) => 2
-        case _ => 1
-      }
-      res
-    }
+    } else if(url matches("http(s)?://(wx|kan).juanpi.com.*")) {
+      6
+    } else if(url matches("http(s)?://(mact|tuan|m).juanpi.com.*")) {
+      2
+    } else 1
     terminalId
   }
 
@@ -438,23 +464,29 @@ class H5EventTransformer {
     }
     eventValue
   }
-
-
 }
 
 
 object H5EventTransformer {
 
   def main(args: Array[String]): Unit = {
-    val h5 = new H5EventTransformer()
+//    val h5 = new H5EventTransformer()
 
-    val urlPageId = 29
-    val upa = Array(12, 14, 25, 26, 28, 29)
-    val res = urlPageId match {
-      case 33 => "aaaa"
-      case x if (upa.exists({ x: Int => x == urlPageId })) => "bbbb"
-      case _ => ""
+    val url = "http://tuan.juanpi.com"
+    if(url matches("http(s)?://(wx|kan).juanpi.com.*")){
+     println(2)
     }
-    println(res)
+    if (url matches("http(s?)://(tuan|m).*")) {
+      println(6)
+    }
+
+//    val urlPageId = 29
+//    val upa = Array(12, 14, 25, 26, 28, 29)
+//    val res = urlPageId match {
+//      case 33 => "aaaa"
+//      case x if (upa.exists({ x: Int => x == urlPageId })) => "bbbb"
+//      case _ => ""
+//    }
+//    println(res)
   }
 }
