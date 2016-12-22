@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . /etc/profile
+. ~/.bash_profile
 
 if [ $# == 1 ]; then
    dt=$1
@@ -47,7 +48,7 @@ loadEnd=$(date +%s)
 echo "=====>> load_to_hive 完成，处理日期为：$dt, 耗时: $(($loadEnd-$mapREnd)) 秒!!!"
 
 echo "=====>> 将 $DB.$TABLE 数据 insert 至 dw.fct_path_list ......"
-#hive  -d date=$dt -f ./fct_path_list_flush.sql
+hive  -d date=$dt -f ./fct_path_list_flush.sql
 
 allEnd=$(date +%s)
 echo "=====>> 将 $DB.$TABLE 数据 insert 至 dw.fct_path_list 处理完成，日期为：$dt, 耗时: $(($allEnd-$loadEnd)) 秒!!!"
