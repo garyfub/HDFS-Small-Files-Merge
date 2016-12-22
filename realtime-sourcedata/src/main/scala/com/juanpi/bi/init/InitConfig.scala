@@ -21,8 +21,6 @@ class InitConfig() {
   @BeanProperty var ssc: StreamingContext = _
   @BeanProperty var duration: Duration = _
 
-  val Delimiter = "_dw_"
-
   def initDimTables(): (mutable.HashMap[String, (Int, Int, String, Int)],
     mutable.HashMap[String, (Int, Int)],
     mutable.HashMap[Int, Int]) = {
@@ -220,7 +218,7 @@ class InitConfig() {
       val eventExp1 = line.getAs[String]("event_exp1")
       val eventTypeName = line.getAs[Int]("event_type_name")
 
-      val key = eventExp1 + Delimiter + eventTypeName
+      val key = eventExp1 + ScalaConstants.JoinDelimiter + eventTypeName
       (key, eventId, eventTypeId)
     })
       .collect()
