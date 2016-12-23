@@ -216,7 +216,7 @@ class InitConfig() {
       val eventId = line.getAs[Int]("event_id")
       val eventTypeId = line.getAs[Int]("event_type_id")
       val eventExp1 = line.getAs[String]("event_exp1")
-      val eventTypeName = line.getAs[Int]("event_type_name")
+      val eventTypeName = line.getAs[String]("event_type_name")
 
       val key = eventExp1 + ScalaConstants.JoinDelimiter + eventTypeName
       (key, eventId, eventTypeId)
