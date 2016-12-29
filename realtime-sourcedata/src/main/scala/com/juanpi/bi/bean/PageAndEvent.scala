@@ -110,13 +110,6 @@ case class Page(
 /**
   * 用户访问产生的点击
   *
-  * @param event_id
-  * @param event_value
-  * @param event_lvl2_value
-  * @param rule_id
-  * @param test_id
-  * @param select_id
-  * @param loadtime
   */
 case class Event(
                   // event 独有属性
@@ -126,5 +119,6 @@ case class Event(
                   rule_id: String,
                   test_id: String,
                   select_id: String,
-                  loadtime: String
+                  loadtime: String,
+                  ug_id: String
                 )

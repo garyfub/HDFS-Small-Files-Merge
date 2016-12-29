@@ -229,22 +229,10 @@ public class OfflinePathList {
                     String ug_id  = (splited[17] == null) ? "\\N":splited[17];
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
-                    if("481".equals(event_id) || "10041".equals(event_id)){
-                        if("158".equals(page_id) || "167".equals(page_id) || "250".equals(page_id) || "26".equals(page_id)) {
-                            page_level_id = "1";
-                        }
-                    } else if("10043".equals(event_id)){
-                        if("10084".equals(page_id) || "10085".equals(page_id)){
-                            page_level_id = "5";
-                        }
-                    } else if("448".equals(event_id)){
-                        if("158".equals(page_id)){
-                            page_level_id = "5";
-                        }
-                    }
+                    String pageLvlId = CommonLogic.getPageLevelId(page_level_id, page_id, event_id);
 
                     String str[] = {
-                            page_level_id,
+                            pageLvlId,
                             page_id
                                     + "\t" + page_value
                                     + "\t" + page_lvl2_value
@@ -303,31 +291,9 @@ public class OfflinePathList {
                     String pageLvlIdStr = v2.toStrings()[0];
                     String pageLvl = v2.toStrings()[1];
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
-
-                    if(pageLvlId == 1){
-                        level1= pageLvl;
-                        level2 = initStr;
-                        level3 = initStr;
-                        level4 = initStr;
-                        level5 = initStr;
-                    } else if(pageLvlId == 2){
-                        level2= pageLvl;
-                        level3 = initStr;
-                        level4 = initStr;
-                        level5 = initStr;
-                    } else if(pageLvlId == 3){
-                        level3 = pageLvl;
-                        level4 = initStr;
-                        level5 = initStr;
-                    } else if(pageLvlId == 4){
-                        level4 = pageLvl;
-                        level5 = initStr;
-                    } else if(pageLvlId == 5){
-                        level5 = pageLvl;
-                    }
-
+                    String path = CommonLogic.getVisitPath(initStr, pageLvlId, pageLvl, level1, level2, level3, level4, level5);
                     // 5 个级别
-                    Text key2 = new Text(level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5);
+                    Text key2 = new Text(path);
                     Text value2 = new Text(v2.toStrings()[2]);
                     context.write(key2, value2);
                 } catch (Exception e) {

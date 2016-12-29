@@ -276,6 +276,7 @@ class H5EventTransformer {
     val hotGoodsId = ""
     val deviceId = ""
     val to_switch = ""
+    val ug_id = ""
     val utm = baseLog.utmId
     val startTime = baseLog.timeStamp
     val endTime = baseLog.timeStamp
@@ -290,7 +291,7 @@ class H5EventTransformer {
     val user = User.apply(guId, userId.toString, utm, "", dwSessionId, dwTeminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceId, to_switch)
-    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Value, rule_id, test_id, select_id, loadTime)
+    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Value, rule_id, test_id, select_id, loadTime, ug_id)
 
     (user, pe, page, event)
   }

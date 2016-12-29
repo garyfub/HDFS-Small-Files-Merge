@@ -177,7 +177,6 @@ public class PathListControledJobs {
         job.setOutputFormatClass(TextOutputFormat.class);
 
         return job;
-
     }
 
     static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
@@ -207,16 +206,38 @@ public class PathListControledJobs {
                     String startTime = (splited[22] == null) ? "\\N":splited[22];
                     String loadTime = (splited[46] == null) ? "\\N":splited[46];
 
-                    // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
-                    if("481".equals(event_id) || "10041".equals(event_id)){
-                        if("158".equals(page_id) || "167".equals(page_id) || "250".equals(page_id) || "26".equals(page_id)) {
-                            page_level_id = "1";
-                        }
-                    }
+                    String testId = (splited[44] == null) ? "\\N":splited[44];
+                    String selectId = (splited[45] == null) ? "\\N":splited[45];
+                    String pitType = (splited[27] == null) ? "\\N":splited[27];
+                    String sortDate = (splited[28] == null) ? "\\N":splited[28];
+                    String sortHour = (splited[29] == null) ? "\\N":splited[29];
+                    String lplid = (splited[30] == null) ? "\\N":splited[30];
+                    String ptplid = (splited[31] == null) ? "\\N":splited[31];
+                    String ug_id  = (splited[47] == null) ? "\\N":splited[47];
 
-                    String str[] = {page_level_id,
-                            page_id + "\t" + page_value + "\t" + page_lvl2_value + "\t" + event_id + "\t" + event_value + "\t" + event_lvl2_value + "\t" + startTime + "\t" + loadTime,
-                            value.toString().replace("\001", "\t")};
+                    // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
+                    String pageLvlId = CommonLogic.getPageLevelId(page_level_id, page_id, event_id);
+
+                    String str[] = {
+                            pageLvlId,
+                            page_id
+                            + "\t" + page_value
+                            + "\t" + page_lvl2_value
+                            + "\t" + event_id
+                            + "\t" + event_value
+                            + "\t" + event_lvl2_value
+                            + "\t" + startTime
+                            + "\t" + loadTime
+                            + "\t" + testId
+                            + "\t" + selectId
+                            + "\t" + pitType
+                            + "\t" + sortDate
+                            + "\t" + sortHour
+                            + "\t" + lplid
+                            + "\t" + ptplid
+                            + "\t" + ug_id,
+                            value.toString().replace("\001", "\t")
+                    };
 
                     final TextArrayWritable v2 = new TextArrayWritable(str);
 
@@ -240,8 +261,9 @@ public class PathListControledJobs {
 
     //static class NewValue
     static class MyReducer extends Reducer<NewK2, TextArrayWritable, Text, Text> {
+
         protected void reduce(NewK2 k2, Iterable<TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
-            String[] initStrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
+            String[] initStrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N","\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" };
             String initStr = Joiner.on("\t").join(initStrArray);
 
             String level1 = initStr;
@@ -251,35 +273,12 @@ public class PathListControledJobs {
             String level5 = initStr;
 
             for (TextArrayWritable v2 : v2s) {
-
                 String pageLvlIdStr = v2.toStrings()[0];
                 String pageLvl = v2.toStrings()[1];
                 int pageLvlId = Integer.parseInt(pageLvlIdStr);
-
-                if(pageLvlId == 1){
-                    level1= pageLvl;
-                    level2 = initStr;
-                    level3 = initStr;
-                    level4 = initStr;
-                    level5 = initStr;
-                } else if(pageLvlId == 2){
-                    level2= pageLvl;
-                    level3 = initStr;
-                    level4 = initStr;
-                    level5 = initStr;
-                } else if(pageLvlId == 3){
-                    level3 = pageLvl;
-                    level4 = initStr;
-                    level5 = initStr;
-                } else if(pageLvlId == 4){
-                    level4 = pageLvl;
-                    level5 = initStr;
-                } else if(pageLvlId == 5){
-                    level5 = pageLvl;
-                }
-
+                String visitPath = CommonLogic.getVisitPath(initStr, pageLvlId, pageLvl, level1, level2, level3, level4, level5);
                 // 5 个级别
-                Text key2 = new Text(level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5);
+                Text key2 = new Text(visitPath);
                 Text value2 = new Text(v2.toStrings()[2]);
                 context.write(key2, value2);
             }
@@ -402,12 +401,16 @@ public class PathListControledJobs {
     public static void main(String[] args){
         String dateStr = args[0];
         if(dateStr== null || dateStr.isEmpty()){
-            JobsControl("", 0x0, 0x8, "PathListControledJobs08");
-            JobsControl("", 0x9, 0xf, "PathListControledJobs0f");
+            JobsControl("", 0x0, 0x3, "PathListControledJobs01");
+            JobsControl("", 0x4, 0x7, "PathListControledJobs04");
+            JobsControl("", 0x8, 0xb, "PathListControledJobs08");
+            JobsControl("", 0xc, 0xf, "PathListControledJobs0c");
         } else
         {
-            JobsControl(dateStr, 0x0, 0x8, "PathListControledJobs08");
-            JobsControl(dateStr, 0x9, 0xf, "PathListControledJobs0f");
+            JobsControl("", 0x0, 0x3, "PathListControledJobs01");
+            JobsControl("", 0x4, 0x7, "PathListControledJobs04");
+            JobsControl("", 0x8, 0xb, "PathListControledJobs08");
+            JobsControl("", 0xc, 0xf, "PathListControledJobs0c");
         }
 
     }
