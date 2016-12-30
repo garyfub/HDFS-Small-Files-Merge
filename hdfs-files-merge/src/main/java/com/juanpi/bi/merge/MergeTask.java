@@ -129,7 +129,7 @@ public class MergeTask {
                             IOUtils.copyBytes(in, out, conf, false);
                         } finally
                         {
-                            System.out.println("key:" + dateHourStr + "==>> mergingFiles:" + logfile.toString());
+//                            System.out.println("key:" + dateHourStr + "==>> mergingFiles:" + logfile.toString());
                             in.close();
                         }
                     }
