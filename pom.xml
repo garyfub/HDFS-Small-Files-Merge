@@ -128,17 +128,11 @@
         </plugins>
     </build>
 
-    <repositories>
-
+    <distributionManagement>
         <repository>
-            <id>cloudera</id>
-            <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+            <id>releases</id>
+            <name>Nexus Release Repository</name>
+            <url>http://192.168.18.110:8181/nexus/content/repositories/releases/</url>
         </repository>
-
-        <repository>
-            <id>OSChina</id>
-            <url>http://maven.oschina.net/content/groups/public/</url>
-        </repository>
-
-    </repositories>
+    </distributionManagement>
 </project>

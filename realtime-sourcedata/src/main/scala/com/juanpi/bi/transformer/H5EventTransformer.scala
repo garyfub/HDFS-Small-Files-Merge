@@ -345,7 +345,6 @@ class H5EventTransformer {
 
     val appVersion = ""
 
-
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPage.get(pageId.toString).getOrElse(0, 0, "", 0)
     val pageLevelId = d_page_level_id
     val pageLevel2Value = getPageLevel2Value(pageId.toString, shopId, baseUrl)
