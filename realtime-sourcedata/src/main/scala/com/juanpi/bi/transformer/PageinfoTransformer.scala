@@ -157,14 +157,14 @@ class PageinfoTransformer extends ITransformer {
     val jpk = 0
     val table_source = "mb_page"
     // 最终返回值
-    val event_id, event_value, rule_id, test_id, select_id, event_lvl2_value, loadTime = ""
+    val event_id, event_value, rule_id, test_id, select_id, event_lvl2_value, loadTime, ug_id = ""
 
     val (date, hour) = DateUtils.dateHourStr(endTime.toLong)
 
     val user = User.apply(gu_id, uid, utm, gu_create_time, session_id, terminal_id, appVersion, site_id, ref_site_id, ctag, location, jpk, uGroup, date, hour)
     val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, startTime, endTime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(parsed_source, ip, url, urlref, deviceid, to_switch)
-    val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime)
+    val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime, ug_id)
 
     if (-1 == page_id || 10069 == page_id) {
       println("for_pageid:" + forPageId, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id,

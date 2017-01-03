@@ -66,7 +66,7 @@ from (
         -- 以gu_id 最后一个字母作为分区字段
         lower(substring(gu_id, -1)) as gu_hash,
         case when length(ug_id) > 0 then ug_id else NUll end ug_id
-    FROM  dw.fct_event_reg
+      FROM  dw.fct_event_reg
     where date = '${date}'
         and gu_id is not null
         and length(gu_id) > 0

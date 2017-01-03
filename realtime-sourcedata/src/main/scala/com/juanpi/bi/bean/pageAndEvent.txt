@@ -1,5 +1,4 @@
-gu_id: String,
-user_id: String,
+gu_id: String,user_id: String,
 var utm: String,
 var gu_create_time: String,
 session_id: String,
@@ -13,8 +12,6 @@ jpk: Int,
 ugroup: String,
 date: String,
 hour: String
-
-// page and event 公共属性
 page_id: Int,
 page_value: String,
 ref_page_id: Int,
@@ -34,21 +31,17 @@ lplid: String,
 ptplid: String,
 gid: String,
 table_source: String
-
-
-// page 独有属性
 source: String,
 ip: String,
 url: String,
 urlref: String,
 deviceid: String,
 to_switch: String
-
-// event 独有属性
 event_id: String,
 event_value: String,
 event_lvl2_value: String,
 rule_id: String,
 test_id: String,
 select_id: String,
-loadtime: String
+loadtime: String,
+ug_id: String

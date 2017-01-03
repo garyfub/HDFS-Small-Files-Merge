@@ -1,6 +1,5 @@
 package com.juanpi.bi.transformer
 
-import com.juanpi.hive.udf.GetPageID
 import play.api.libs.json.Json
 
 /**

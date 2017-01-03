@@ -20,7 +20,7 @@
         <scala.binary.version>2.10</scala.binary.version>
         <spark.version>1.6.1</spark.version>
         <hbase.version>1.2.0-cdh5.7.1</hbase.version>
-        <hive-udf.version>1.0.2</hive-udf.version>
+        <hive-udf.version>1.0.3</hive-udf.version>
         <encoding>UTF-8</encoding>
         <path.to.root>..</path.to.root>
     </properties>
@@ -37,12 +37,6 @@
             <artifactId>spark-streaming_${scala.binary.version}</artifactId>
             <version>${spark.version}</version>
             <!--<scope>provided</scope>-->
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.35</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
@@ -102,6 +96,12 @@
             <groupId>org.scalikejdbc</groupId>
             <artifactId>scalikejdbc-config_${scala.binary.version}</artifactId>
             <version>2.2.7</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.35</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.log4s</groupId>

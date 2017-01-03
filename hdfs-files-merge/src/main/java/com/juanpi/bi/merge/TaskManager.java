@@ -1,11 +1,7 @@
 package com.juanpi.bi.merge;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.util.Calendar;
-
 import com.juanpi.bi.merge.util.DateUtil;
-import com.juanpi.bi.merge.util.ProcessUtil;
 
 /**
  * 
@@ -26,7 +22,7 @@ public class TaskManager {
 
     // 路径正则
 	private String getDirRegex(String dateStr) {
-		return baseDir + "/{mb_event_hash2,mb_pageinfo_hash2}/date=" + dateStr + "/gu_hash=*/logs/";
+		return baseDir + "/{mb_event_hash2,mb_pageinfo_hash2,pc_events_hash3}/date=" + dateStr + "/gu_hash=*/logs/";
 	}
 	
 	/**

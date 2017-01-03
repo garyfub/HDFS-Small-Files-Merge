@@ -48,9 +48,15 @@ class H5EventTransformer {
     val ul_id = (row \ "ul_id").asOpt[String].getOrElse("")
     val timeStamp = (row \ "timestamp").as[String].toLong
 
-    val gu_id = if(ul_id.isEmpty()) qm_jpid else ul_id
+    val gu_id = if(ul_id.isEmpty() && qm_jpid.isEmpty) {
+      ""
+    } else if(ul_id.isEmpty) {
+      qm_jpid
+    } else {
+      ul_id
+    }
 
-    val ret = if (gu_id.nonEmpty) {
+    val ret = if (gu_id.nonEmpty && !gu_id.equalsIgnoreCase("null")) {
       val endtime = (row \ "endtime").asOpt[String].getOrElse("")
       val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
 
@@ -66,6 +72,8 @@ class H5EventTransformer {
             case y if y == null || y.toString.isEmpty => "\\N"
             case _ => x
           }).mkString("\001")
+
+          // 创建分区，格式：date=2016-12-27/gu_hash=a
           val partitionStr = DateUtils.dateGuidPartitions(timeStamp, gu_id)
           (partitionStr, "h5_event", res_str)
         }
@@ -142,7 +150,9 @@ class H5EventTransformer {
       e_v
     }
 
-    val log = BaseLog(actName, utmId, goodid, baseUrl, baseUrlRef, ul_id, ul_idts, ul_ref, s_uid, timeStamp, sessionid, click_action_name, click_url, qm_device_id, actionType, action_name, e_n, eV, ip, qm_session_id, qm_jpid)
+    val log = BaseLog(actName, utmId, goodid, baseUrl, baseUrlRef, ul_id, ul_idts,
+      ul_ref, s_uid, timeStamp, sessionid, click_action_name, click_url,
+      qm_device_id, actionType, action_name, e_n, eV, ip, qm_session_id, qm_jpid)
 
     val res = if (qm_device_id.length > 6 && baseTerminalId == 2) {
       // m.域名且带有设备号的为APP H5页面
@@ -266,6 +276,7 @@ class H5EventTransformer {
     val hotGoodsId = ""
     val deviceId = ""
     val to_switch = ""
+    val ug_id = ""
     val utm = baseLog.utmId
     val startTime = baseLog.timeStamp
     val endTime = baseLog.timeStamp
@@ -280,7 +291,7 @@ class H5EventTransformer {
     val user = User.apply(guId, userId.toString, utm, "", dwSessionId, dwTeminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceId, to_switch)
-    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Value, rule_id, test_id, select_id, loadTime)
+    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Value, rule_id, test_id, select_id, loadTime, ug_id)
 
     (user, pe, page, event)
   }
@@ -334,8 +345,6 @@ class H5EventTransformer {
 
     val appVersion = ""
 
-
-    // TODO 以 page_id 为key
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPage.get(pageId.toString).getOrElse(0, 0, "", 0)
     val pageLevelId = d_page_level_id
     val pageLevel2Value = getPageLevel2Value(pageId.toString, shopId, baseUrl)
@@ -353,6 +362,7 @@ class H5EventTransformer {
     val loadTime = "0"
     val source = ""
     val ip = ""
+    val ug_id = ""
     val hotGoodsId = ""
 
     val ctag = ""
@@ -370,7 +380,7 @@ class H5EventTransformer {
     val user = User.apply(guId, userId.toString, baseLog.utmId, "", dwSessionId, dwTerminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceId, to_switch)
-    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Vlue, rule_id, test_id, select_id, loadTime)
+    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Vlue, rule_id, test_id, select_id, loadTime, ug_id)
 
     (user, pe, page, event)
   }
