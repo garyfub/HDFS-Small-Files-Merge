@@ -137,5 +137,6 @@ create external table path_list_real (
 PARTITIONED BY (`date` string, `gu_hash` string)
 row format delimited fields terminated by '\t'
 lines terminated by '\n';
-stored as orc tblproperties ("orc.compress"="SNAPPY");
+
+-- stored as orc tblproperties ("orc.compress"="SNAPPY")
 
