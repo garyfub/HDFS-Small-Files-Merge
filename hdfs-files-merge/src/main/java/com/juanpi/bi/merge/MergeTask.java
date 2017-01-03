@@ -3,7 +3,6 @@ package com.juanpi.bi.merge;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.ParseException;
 import java.util.*;
 
 import com.juanpi.bi.merge.util.DateUtil;
@@ -144,7 +143,7 @@ public class MergeTask {
                     if(mergingFiles.size() > 0)
                     {
                         // 强制类型转换
-                        System.out.println("删除小文件：" + dateHourStr + ",目录：" + mergingFiles.get(0).getParent());
+//                        System.out.println("删除小文件：" + dateHourStr + ",目录：" + mergingFiles.get(0).getParent());
                         delete(mergingFiles);
                     }
                 }
