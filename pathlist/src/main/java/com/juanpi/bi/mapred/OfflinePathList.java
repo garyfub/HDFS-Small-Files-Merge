@@ -171,7 +171,7 @@ public class OfflinePathList {
 
         //1.3 指定分区类
         job.setPartitionerClass(HashPartitioner.class);
-        job.setNumReduceTasks(1);
+        job.setNumReduceTasks(10);
 
         //1.4 TODO 排序、分区
         job.setGroupingComparatorClass(OfflinePathList.MyGroupingComparator.class);

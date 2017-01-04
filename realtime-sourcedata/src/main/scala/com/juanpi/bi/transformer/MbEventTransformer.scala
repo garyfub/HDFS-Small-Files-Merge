@@ -290,20 +290,23 @@ object MbEventTransformer {
     var cid = ""
     var cid2 = ""
     val server_jsonstr = """{"pit_info":"ad_id::135::block_id::618::img_id::386::3_1","cid":"","_t":1471509688}"""
-    if (server_jsonstr.contains("cid")) {
-      val js_server_jsonstr = Json.parse(server_jsonstr)
-      cid = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
-      cid2 = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
-    }
-    if (!cid.isEmpty) println(cid.toInt)
-    val tu = (t, cid, cid2, 0, null)
-    val tu1 = (t, cid)
-    val res = pageAndEventParser.combineTuple(tu, tu1).map(x => x match {
-      case null => "\\N"
-      //      case z if z == null => "\\N"
-      case y if y == "" | y.toString.isEmpty => "\\N"
-      case _ => x
-    }).mkString("\001")
+
+    val res = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_t")
+
+//    if (server_jsonstr.contains("cid")) {
+//      val js_server_jsonstr = Json.parse(server_jsonstr)
+//      cid = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
+//      cid2 = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
+//    }
+//    if (!cid.isEmpty) println(cid.toInt)
+//    val tu = (t, cid, cid2, 0, null)
+//    val tu1 = (t, cid)
+//    val res = pageAndEventParser.combineTuple(tu, tu1).map(x => x match {
+//      case null => "\\N"
+//      //      case z if z == null => "\\N"
+//      case y if y == "" | y.toString.isEmpty => "\\N"
+//      case _ => x
+//    }).mkString("\001")
     println(res)
   }
 }

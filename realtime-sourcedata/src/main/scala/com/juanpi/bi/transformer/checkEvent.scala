@@ -9,6 +9,8 @@ import play.api.libs.json.Json
   */
 object checkEvent {
 
+  val line = "{\"activityname\":\"click_temai_retract\",\"app_name\":\"jiu\",\"app_version\":\"4.2.2\",\"c_label\":\"C2\",\"c_server\":\"{\\\"gid\\\":\\\"C2\\\",\\\"ugroup\\\":\\\"453_457_377_486_485_573_496_578_517\\\"}\",\"cube_position\":\"\",\"deviceid\":\"868790026567609\",\"endtime\":\"1483513419500\",\"endtime_origin\":\"1483513414952\",\"extend_params\":\"27997416\",\"ip\":\"112.14.78.228\",\"jpid\":\"00000000-5efe-b3e9-b230-6ee94352dbe7\",\"location\":\"浙江省温州市平阳县海滨东路靠近杨北村\",\"os\":\"android\",\"os_version\":\"5.0.2\",\"page_extends_param\":\"27997416\",\"pagename\":\"page_temai_goods\",\"pre_extends_param\":\"3096603014809873729\",\"pre_page\":\"page_temai_orderdetails\",\"result\":\"1\",\"server_jsonstr\":\"{}\",\"session_id\":\"1481209824493_jiu_1483513263889\",\"source\":\"\",\"starttime\":\"1483513419500\",\"starttime_origin\":\"1483513414952\",\"ticks\":\"1481209824493\",\"to_switch\":\"1\",\"uid\":\"42284096\",\"utm\":\"101214\"}"
+
   def testcid(server_jsonstr: String): Any = {
     if (server_jsonstr.contains("cid")) {
       val js_server_jsonstr = Json.parse(server_jsonstr)
@@ -113,6 +115,27 @@ object checkEvent {
   }
 
   def main(args: Array[String]): Unit = {
-    testDateGuidPartitions()
+//    testDateGuidPartitions()
+
+    val res = eventParser.filterFunc(line)
+
+    val row = Json.parse(line)
+
+    val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
+
+    val activityname = (row \ "activityname").asOpt[String].getOrElse("").toLowerCase()
+
+
+    val cid = pageAndEventParser.getJsonValueByKey(server_jsonstr, "cid")
+
+    val extend_params = (row \ "extend_params").asOpt[String].getOrElse("")
+
+    val app_version = (row \ "app_version").asOpt[String].getOrElse("0")
+
+    val t_extend_params = eventParser.getExtendParamsFromBase(activityname, extend_params, app_version)
+
+    val forEventId = eventParser.getForEventId(cid, activityname, t_extend_params)
+
+    println(forEventId)
   }
 }

@@ -1,11 +1,10 @@
 package com.juanpi.bi.streaming
 
 import java.io.Serializable
-import java.text.SimpleDateFormat
 
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.InitConfig
-import com.juanpi.bi.transformer.{H5EventTransformer, ITransformer, pageAndEventParser}
+import com.juanpi.bi.transformer.{H5EventTransformer, ITransformer, eventParser, pageAndEventParser}
 import kafka.serializer.StringDecoder
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, _}
 import org.apache.hadoop.hbase.util.Bytes
@@ -15,9 +14,10 @@ import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat
 import org.apache.spark.Logging
 import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
-import org.apache.spark.streaming.{StreamingContext}
+import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
+import play.api.libs.json.Json
 
 import scala.collection.mutable
 
@@ -130,7 +130,7 @@ class KafkaConsumer(topic: String,
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     val data = sourceLog.map(_._2.replace("\0",""))
-      .filter(line => !line.contains("collect_api_responsetime"))
+      .filter(eventParser.filterFunc)
       .map(msg => parseH5Message(msg))
       .filter(_._1.nonEmpty)
 
