@@ -3,6 +3,7 @@ package com.juanpi.bi.transformer
 import java.util.regex.Pattern
 
 import com.fasterxml.jackson.core.JsonParseException
+import com.juanpi.bi.sc_utils.StringUtils
 import com.juanpi.hive.udf.{GetDwMbPageValue, GetDwPcPageValue, GetGoodsId, GetPageID}
 import play.api.libs.json._
 
@@ -134,9 +135,9 @@ object pageAndEventParser {
     * @param page_level_id
     * @return
     */
-  def getPageLevelId(x_page_id: Int, x_extend_params: String, page_level_id: Int, forLevelId: Int): Int = {
-    if(x_page_id == 254 && forLevelId == 2) {
-      forLevelId
+  def getPageLevelId(x_page_id: Int, x_extend_params: String, page_level_id: Int, forLevelId: String): Int = {
+    if(x_page_id == 254 && forLevelId == "2") {
+      StringUtils.strToInt(forLevelId)
     } else if(x_page_id != 154 || x_page_id != 289) {
       page_level_id
     } else {

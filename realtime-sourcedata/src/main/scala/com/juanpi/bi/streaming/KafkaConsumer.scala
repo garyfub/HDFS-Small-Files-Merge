@@ -4,7 +4,7 @@ import java.io.Serializable
 
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.InitConfig
-import com.juanpi.bi.transformer.{H5EventTransformer, ITransformer, eventParser, pageAndEventParser}
+import com.juanpi.bi.transformer._
 import kafka.serializer.StringDecoder
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, _}
 import org.apache.hadoop.hbase.util.Bytes
@@ -24,13 +24,11 @@ import scala.collection.mutable
 class KafkaConsumer(topic: String,
                     dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                     dimEvent: mutable.HashMap[String, (Int, Int)],
-                    fCate: mutable.HashMap[Int, Int],
+                    fCate: mutable.HashMap[String, String],
                     dimH5EVENT: mutable.HashMap[String, (Int, Int)],
                     zkQuorum: String)
   extends Logging with Serializable {
   import KafkaConsumer._
-
-  var logTransformer:ITransformer = null
 
   /**
     * 解析 event
@@ -49,7 +47,7 @@ class KafkaConsumer(topic: String,
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
     val data = sourceLog.map(_._2.replace("\0",""))
       .filter(eventParser.filterFunc)
-      .map(msg => parseMessage(msg))
+      .map(msg => parseMBEventMessage(msg))
       .filter(_._1.nonEmpty)
 
     data.foreachRDD((rdd, time) =>
@@ -81,7 +79,7 @@ class KafkaConsumer(topic: String,
                   km: KafkaManager) = {
 
     val data = dataDStream.map(_._2.replace("\0",""))
-        .map(msg => parseMessage(msg))
+        .map(msg => parseMBPageMessage(msg))
         .filter(_._1.nonEmpty)
 
      data.foreachRDD((rdd, time) => {
@@ -158,19 +156,14 @@ class KafkaConsumer(topic: String,
     h5LogTransformer.logParser(message, dimPage, dimH5EVENT)
   }
 
-  def parseMessage(message:String):(String, String, Any) = {
-    getTransformer().logParser(message, dimPage, dimEvent, fCate)
+  def parseMBEventMessage(message:String):(String, String, Any) = {
+    val mbEventTransformer = new MbEventTransformer()
+    mbEventTransformer.logParser(message, dimPage, dimEvent, fCate)
   }
 
-  def transMessage(rdd:RDD[String]):RDD[(String, String, Any)] = {
-    rdd.map { msg => parseMessage(msg) }
-  }
-
-  def getTransformer():ITransformer = {
-    if(logTransformer == null){
-      logTransformer = Class.forName(Config.getTopicTransformerClass(topic)).newInstance().asInstanceOf[ITransformer]
-    }
-    logTransformer
+  def parseMBPageMessage(message:String):(String, String, Any) = {
+    val pageTransformer = new PageinfoTransformer()
+    pageTransformer.logParser(message, dimPage, dimEvent, fCate)
   }
 }
 

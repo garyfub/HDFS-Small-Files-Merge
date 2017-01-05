@@ -10,7 +10,7 @@ import scala.collection.mutable
 /**
   * Created by gongzi on 2016/7/11.
   */
-class MbEventTransformer extends ITransformer {
+class MbEventTransformer {
 
   /**
     *
@@ -22,7 +22,7 @@ class MbEventTransformer extends ITransformer {
   def logParser(line: String,
                 dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
                 dimevent: mutable.HashMap[String, (Int, Int)],
-                fCate: mutable.HashMap[Int, Int]): (String, String, Any) = {
+                fCate: mutable.HashMap[String, String]): (String, String, Any) = {
 
     val row = Json.parse(line)
     val ticks = (row \ "ticks").asOpt[String].getOrElse("")
@@ -92,7 +92,7 @@ class MbEventTransformer extends ITransformer {
   def parse(row: JsValue,
             dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
             dimevent: mutable.HashMap[String, (Int, Int)],
-            fCate: mutable.HashMap[Int, Int]): (User, PageAndEvent, Page, Event) = {
+            fCate: mutable.HashMap[String, String]): (User, PageAndEvent, Page, Event) = {
 
     // ---------------------------------------------------------------- mb_event ----------------------------------------------------------------
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
@@ -196,8 +196,8 @@ class MbEventTransformer extends ITransformer {
     val page_id = pageAndEventParser.getPageId(d_page_id, f_page_extend_params)
 
     val forLevelId = if (d_page_id == 254 && f_page_extend_params.nonEmpty) {
-      fCate.get(f_page_extend_params.toInt).getOrElse(0)
-    } else 0
+      fCate.get(f_page_extend_params).getOrElse("0")
+    } else "0"
 
     val page_value = eventParser.getPageValue(d_page_id, f_page_extend_params, cid, page_type_id, d_page_value)
 
@@ -286,35 +286,5 @@ class MbEventTransformer extends ITransformer {
     */
   def getActivityid(activityname: String): Int = {
     new GetMbActionId().evaluate(activityname)
-  }
-}
-
-// for test
-object MbEventTransformer {
-
-  def main(args: Array[String]) {
-    val t = pageAndEventParser.getJsonValueByKey("""{"pit_info":"goods::16915719::2_19","cid":0,"_t":1470639193}""", "_t")
-    println(t)
-    var cid = ""
-    var cid2 = ""
-    val server_jsonstr = """{"pit_info":"ad_id::135::block_id::618::img_id::386::3_1","cid":"","_t":1471509688}"""
-
-    val res = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_t")
-
-//    if (server_jsonstr.contains("cid")) {
-//      val js_server_jsonstr = Json.parse(server_jsonstr)
-//      cid = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
-//      cid2 = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
-//    }
-//    if (!cid.isEmpty) println(cid.toInt)
-//    val tu = (t, cid, cid2, 0, null)
-//    val tu1 = (t, cid)
-//    val res = pageAndEventParser.combineTuple(tu, tu1).map(x => x match {
-//      case null => "\\N"
-//      //      case z if z == null => "\\N"
-//      case y if y == "" | y.toString.isEmpty => "\\N"
-//      case _ => x
-//    }).mkString("\001")
-    println(res)
   }
 }

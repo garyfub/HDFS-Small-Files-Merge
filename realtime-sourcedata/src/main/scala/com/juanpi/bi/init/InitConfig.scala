@@ -23,13 +23,13 @@ class InitConfig() {
 
   def initDimTables(): (mutable.HashMap[String, (Int, Int, String, Int)],
     mutable.HashMap[String, (Int, Int)],
-    mutable.HashMap[Int, Int]) = {
+    mutable.HashMap[String, String]) = {
 
     // 查询 hive 中的 dim_page 和 dim_event
     val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
     val dp: mutable.HashMap[String, (Int, Int, String, Int)] = initDimPage(sqlContext)
     val de: mutable.HashMap[String, (Int, Int)] = initDimEvent(sqlContext)
-    val fCate: mutable.HashMap[Int, Int] = initDimFrontCate(sqlContext)
+    val fCate: mutable.HashMap[String, String] = initDimFrontCate(sqlContext)
 
     (dp, de, fCate)
   }
@@ -235,9 +235,9 @@ class InitConfig() {
     * @param sqlContext
     * @return
     */
-  def initDimFrontCate(sqlContext: HiveContext): mutable.HashMap[Int, Int] =
+  def initDimFrontCate(sqlContext: HiveContext): mutable.HashMap[String, String] =
   {
-    var dimValues = new mutable.HashMap[Int, Int]
+    var dimValues = new mutable.HashMap[String, String]
     val sql = s"""select front_cate_id, level_id
                           | from dw.dim_front_cate
                           | order by front_cate_id""".stripMargin
@@ -245,8 +245,8 @@ class InitConfig() {
     val dimData = sqlContext.sql(sql).persist(StorageLevel.MEMORY_AND_DISK)
 
     dimData.map(line => {
-      val front_cate_id = line.getAs[Int]("front_cate_id")
-      val level_id = line.getAs[Int]("level_id")
+      val front_cate_id = line.getAs[String]("front_cate_id")
+      val level_id = line.getAs[String]("level_id")
 
       val key = front_cate_id
       (key, level_id)
@@ -269,7 +269,7 @@ object InitConfig {
   val ic = new InitConfig()
   var DIMPAGE = new mutable.HashMap[String, (Int, Int, String, Int)]
   var DIMENT = new mutable.HashMap[String, (Int, Int)]
-  var FCATE = new mutable.HashMap[Int, Int]
+  var FCATE = new mutable.HashMap[String, String]
 
   def initH5Dim() = {
     val dp = ic.initDimH5Tables()._1

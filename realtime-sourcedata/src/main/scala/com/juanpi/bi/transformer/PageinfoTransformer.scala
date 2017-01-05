@@ -9,13 +9,13 @@ import scala.collection.mutable
 /**
   * 解析逻辑的具体实现
   */
-class PageinfoTransformer extends ITransformer {
+class PageinfoTransformer {
 
   // 返回解析的结果
   def logParser(line: String,
                 dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                 dimEvent: mutable.HashMap[String, (Int, Int)],
-                fCate: mutable.HashMap[Int, Int]): (String, String, Any) = {
+                fCate: mutable.HashMap[String, String]): (String, String, Any) = {
 
     //play
     val row = Json.parse(line.replaceAll("null", """\\"\\""""))
@@ -60,8 +60,9 @@ class PageinfoTransformer extends ITransformer {
     }
   }
 
-  private def parse(row: JsValue, dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
-                    fCate: mutable.HashMap[Int, Int]): (User, PageAndEvent, Page, Event) = {
+  private def parse(row: JsValue,
+                    dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
+                    fCate: mutable.HashMap[String, String]): (User, PageAndEvent, Page, Event) = {
     // mb_pageinfo
 //    val ticks = (row \ "ticks").asOpt[String].getOrElse("")
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
@@ -140,7 +141,7 @@ class PageinfoTransformer extends ITransformer {
     val shop_id = pageAndEventParser.getShopId(d_page_id, fct_extendParams)
     val ref_shop_id = pageAndEventParser.getShopId(d_pre_page_id, fct_preExtendParams)
 
-    val forLevelId = if(d_page_id == 254 && fct_extendParams.nonEmpty){fCate.get(fct_extendParams.toInt).getOrElse(0)} else 0
+    val forLevelId = if(d_page_id == 254 && fct_extendParams.nonEmpty){fCate.get(fct_extendParams).getOrElse("0")} else "0"
 
     val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, fct_extendParams, d_page_level_id, forLevelId)
 

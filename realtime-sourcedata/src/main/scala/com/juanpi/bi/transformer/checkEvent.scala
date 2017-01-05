@@ -9,7 +9,7 @@ import play.api.libs.json.Json
   */
 object checkEvent {
 
-  val line = "{\"activityname\":\"click_temai_retract\",\"app_name\":\"jiu\",\"app_version\":\"4.2.2\",\"c_label\":\"C2\",\"c_server\":\"{\\\"gid\\\":\\\"C2\\\",\\\"ugroup\\\":\\\"453_457_377_486_485_573_496_578_517\\\"}\",\"cube_position\":\"\",\"deviceid\":\"868790026567609\",\"endtime\":\"1483513419500\",\"endtime_origin\":\"1483513414952\",\"extend_params\":\"27997416\",\"ip\":\"112.14.78.228\",\"jpid\":\"00000000-5efe-b3e9-b230-6ee94352dbe7\",\"location\":\"浙江省温州市平阳县海滨东路靠近杨北村\",\"os\":\"android\",\"os_version\":\"5.0.2\",\"page_extends_param\":\"27997416\",\"pagename\":\"page_temai_goods\",\"pre_extends_param\":\"3096603014809873729\",\"pre_page\":\"page_temai_orderdetails\",\"result\":\"1\",\"server_jsonstr\":\"{}\",\"session_id\":\"1481209824493_jiu_1483513263889\",\"source\":\"\",\"starttime\":\"1483513419500\",\"starttime_origin\":\"1483513414952\",\"ticks\":\"1481209824493\",\"to_switch\":\"1\",\"uid\":\"42284096\",\"utm\":\"101214\"}"
+  val line = "{\"activityname\":\"click_cube_block\",\"app_name\":\"jiu\",\"app_version\":\"4.2.2\",\"c_label\":\"C2\",\"c_server\":\"{\\\"gid\\\":\\\"C2\\\",\\\"ugroup\\\":\\\"523_494_457_544_582_575_486_478_336_450_496\\\"}\",\"cube_position\":\"1_2\",\"deviceid\":\"864178021375802\",\"endtime\":\"1483587942706\",\"endtime_origin\":\"1483587939959\",\"extend_params\":\"\",\"ip\":\"123.147.82.219\",\"jpid\":\"ffffffff-b46f-b9e1-36a0-f4dc62cce3ff\",\"location\":\"重庆市渝中区棉花街靠近新重庆国际小商品批发中心\",\"os\":\"android\",\"os_version\":\"4.3\",\"page_extends_param\":\"https://m.juanpi.com/zhuanti/nzbgm?mobile=1&qmshareview=1\",\"pagename\":\"page_h5\",\"pre_extends_param\":\"312\",\"pre_page\":\"page_tab\",\"result\":\"1\",\"server_jsonstr\":\"{\\\"pit_info\\\":\\\"ad_id::152::block_id::1987::img_id::4565::1_2\\\",\\\"cid\\\":\\\"312\\\",\\\"_t\\\":1483586665,\\\"_z\\\":\\\"0\\\"}\",\"session_id\":\"1483581574042_jiu_1483587919928\",\"source\":\"\",\"starttime\":\"1483587942706\",\"starttime_origin\":\"1483587939959\",\"ticks\":\"1483581574042\",\"to_switch\":\"2\",\"uid\":\"41132877\",\"utm\":\"101214\"}"
 
   def testcid(server_jsonstr: String): Any = {
     if (server_jsonstr.contains("cid")) {
@@ -125,7 +125,6 @@ object checkEvent {
 
     val activityname = (row \ "activityname").asOpt[String].getOrElse("").toLowerCase()
 
-
     val cid = pageAndEventParser.getJsonValueByKey(server_jsonstr, "cid")
 
     val extend_params = (row \ "extend_params").asOpt[String].getOrElse("")
@@ -133,6 +132,12 @@ object checkEvent {
     val app_version = (row \ "app_version").asOpt[String].getOrElse("0")
 
     val t_extend_params = eventParser.getExtendParamsFromBase(activityname, extend_params, app_version)
+
+    val pagename = (row \ "pagename").asOpt[String].getOrElse("").toLowerCase()
+
+    val page_extends_param = (row \ "page_extends_param").asOpt[String].getOrElse("")
+
+    val f_page_extend_params = pageAndEventParser.getExtendParams(pagename, page_extends_param)
 
     val forEventId = eventParser.getForEventId(cid, activityname, t_extend_params)
 
