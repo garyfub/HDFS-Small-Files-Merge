@@ -101,7 +101,15 @@ class MbEventTransformer extends ITransformer {
 //    val endtime = (row \ "endtime").asOpt[String].getOrElse("")
 //    修正过的时间
     val startTime = (row \ "starttime_origin").asOpt[String].getOrElse("")
-    val endTime = (row \ "endtime_origin").asOpt[String].getOrElse("")
+    
+    val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
+
+    val endTime = if (endtime_origin.isEmpty) {
+      startTime
+    } else {
+      endtime_origin
+    }
+
 
     val result = (row \ "result").asOpt[String].getOrElse("")
     val uid = (row \ "uid").asOpt[String].getOrElse("0")
