@@ -48,7 +48,7 @@ class KafkaConsumer(topic: String,
     // 数据块中的每一条记录需要处理
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
     val data = sourceLog.map(_._2.replace("\0",""))
-      .filter(line => !line.contains("collect_api_responsetime"))
+      .filter(eventParser.filterFunc)
       .map(msg => parseMessage(msg))
       .filter(_._1.nonEmpty)
 
