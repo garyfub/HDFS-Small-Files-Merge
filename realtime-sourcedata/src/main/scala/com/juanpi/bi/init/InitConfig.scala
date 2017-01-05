@@ -245,11 +245,11 @@ class InitConfig() {
     val dimData = sqlContext.sql(sql).persist(StorageLevel.MEMORY_AND_DISK)
 
     dimData.map(line => {
-      val front_cate_id = line.getAs[String]("front_cate_id")
-      val level_id = line.getAs[String]("level_id")
+      val front_cate_id = line.getAs[Int]("front_cate_id")
+      val level_id = line.getAs[Int]("level_id")
 
-      val key = front_cate_id
-      (key, level_id)
+      val key = front_cate_id.toString
+      (key, level_id.toString)
     })
       .collect()
       .foreach( items => {

@@ -12,12 +12,10 @@ import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
 import org.apache.hadoop.io.NullWritable
 import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat
 import org.apache.spark.Logging
-import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
-import play.api.libs.json.Json
 
 import scala.collection.mutable
 
