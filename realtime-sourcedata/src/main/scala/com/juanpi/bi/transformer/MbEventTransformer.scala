@@ -254,7 +254,7 @@ class MbEventTransformer extends ITransformer {
         " ,activityname:" + activityname,
         " ,t_extend_params:" + t_extend_params,
         " ,event_value:" + event_value)
-      println("page_id异常>>原始数据为：" + row)
+      println("page_id=-1 ==> 原始数据为：" + row)
     }
 
     if (-1 == event_id) {
@@ -274,7 +274,7 @@ class MbEventTransformer extends ITransformer {
         " ,activityname:" + activityname,
         " ,t_extend_params:" + t_extend_params,
         " ,event_value:" + event_value)
-      println("event_id=-1>>原始数据为：" + row)
+      println("event_id=-1 ==> 原始数据为：" + row)
     }
 
     (user, pe, page, event)

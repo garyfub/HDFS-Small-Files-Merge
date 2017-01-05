@@ -172,12 +172,12 @@ class PageinfoTransformer extends ITransformer {
     val page = Page.apply(parsed_source, ip, url, urlref, deviceid, to_switch)
     val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime, ug_id)
 
-    if (-1 == page_id || 10069 == page_id) {
+    if (-1 == page_id) {
       println("for_pageid:" + forPageId, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id,
         " ,pageName:" + pageName, " ,fct_extendParams:" + fct_extendParams,
         " ,page_value:" + page_value, " ,fct_extendParams:" + fct_extendParams,
         " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value)
-      println("page_id异常>>原始数据为：" + row)
+      println("page_id=-1===>原始数据为：" + row)
     }
 
     (user, pe, page, event)
