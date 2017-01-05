@@ -79,7 +79,13 @@ class PageinfoTransformer extends ITransformer {
     val source = (row \ "source").asOpt[String].getOrElse("")
 //    修正过的时间
     val startTime = (row \ "starttime_origin").asOpt[String].getOrElse("")
-    val endTime = (row \ "endtime_origin").asOpt[String].getOrElse("")
+    val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
+
+    val endTime = if (endtime_origin.isEmpty) {
+      startTime
+    } else {
+      endtime_origin
+    }
 
     val pre_extend_params = (row \ "pre_extend_params").asOpt[String].getOrElse("")
     val url = (row \ "wap_url").asOpt[String].getOrElse("")
