@@ -48,7 +48,10 @@ class PageinfoTransformer {
           (partitionStr, "page", res)
         } catch {
           //使用模式匹配来处理异常
-          case ex:Exception => { println(ex.getStackTraceString) }
+          case ex:Exception => {
+            println(ex.getStackTraceString)
+            ex.printStackTrace()
+          }
             println("=======>> Page: parse Exception!!" + "======>>异常数据:" + row)
             ("", "", None)
         }
