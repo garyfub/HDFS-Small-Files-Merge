@@ -29,7 +29,7 @@ object eventParser {
     } else if ("page_h5".equals(pagename)) {
       val pid = new GetPageID().evaluate(f_page_extend_params).toInt
       pid match {
-        case 34 | 65 | 10069 => "page_active"
+        case i if i > 0 => "page_active"
         case _ => (pagename + f_page_extend_params).toLowerCase()
       }
     } else if (!"page_tab".equals(pagename)) {

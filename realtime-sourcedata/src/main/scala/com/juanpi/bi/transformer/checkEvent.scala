@@ -107,7 +107,6 @@ object checkEvent {
 
     val forEventId = eventParser.getForEventId(cid, activityname, t_extend_params)
 
-
     println("")
   }
 
