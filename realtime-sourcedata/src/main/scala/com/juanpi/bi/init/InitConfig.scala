@@ -89,7 +89,7 @@ class InitConfig() {
   def initDimPage(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int, String, Int)] =
   {
     var dimPages = new mutable.HashMap[String, (Int, Int, String, Int)]
-    val dimPageSql = s"""select page_id,page_exp1, page_exp2, page_type_id, page_value, page_level_id, concat_ws(",", url1, url2, url3,regexp1, regexp2, regexp3) as url_pattern
+    val dimPageSql = s"""select page_id,page_exp1, page_exp2, page_type_id, page_value, page_level_id
                          | from dw.dim_page
                          | where page_id > 0
                          | and terminal_lvl1_id = 2

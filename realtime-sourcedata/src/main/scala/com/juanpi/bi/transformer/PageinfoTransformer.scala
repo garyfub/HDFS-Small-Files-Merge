@@ -27,7 +27,10 @@ class PageinfoTransformer {
       val jpid = (row \ "jpid").asOpt[String].getOrElse("")
       val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
       val os = (row \ "os").asOpt[String].getOrElse("")
-      val endTime = (row \ "endtime").as[String].toLong
+
+      val startTime = (row \ "starttime_origin").asOpt[String].getOrElse("")
+      val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
+      val endTime = pageAndEventParser.getEndTime(startTime, endtime_origin)
 
       try
       {
@@ -41,7 +44,7 @@ class PageinfoTransformer {
       val ret = if(gu_id.nonEmpty) {
         try {
           val res = parse(row, dimPage, fCate)
-          val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
+          val partitionStr = DateUtils.dateGuidPartitions(endTime.toLong, gu_id)
           (partitionStr, "page", res)
         } catch {
           //使用模式匹配来处理异常

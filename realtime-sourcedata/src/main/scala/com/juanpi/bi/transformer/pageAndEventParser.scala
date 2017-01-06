@@ -62,6 +62,15 @@ object pageAndEventParser {
     gu_id
   }
 
+  def getEndTime(startTimeOrigin: String, endTimeOrigin: String): String = {
+    val endTime = if (endTimeOrigin.isEmpty) {
+      startTimeOrigin
+    } else {
+      endTimeOrigin
+    }
+    endTime
+  }
+
   /**
     * 由于原始数据同一个字段传值的类型不完全一样，比如cid，有时候传的是整形，有时候又是字符串。
     *  强化 getJsonValueByKey 函数，根据Json中解析到的类型进行判断，然后再转为String，

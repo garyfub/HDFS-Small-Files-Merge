@@ -8,8 +8,11 @@ import play.api.libs.json.Json
   * Created by gongzi on 2016/9/28.
   */
 object checkEvent {
+//  (for_pageid:page_h5https://tuan.juanpi.com/pintuan/item/36717717, ,page_type_id:0, ,page_level_id:0, ,cid, ,f_page_extend_params:https://tuan.juanpi.com/pintuan/item/36717717, ,pagename:page_h5, ,page_value:https://tuan.juanpi.com/pintuan/item/36717717, ,f_page_extend_params:https://tuan.juanpi.com/pintuan/item/36717717, ,d_page_id:0, ,d_page_value:, ,for_eventid:click_share, ,event_id:497, ,d_event_id:497, ,event_type_id:0, ,cid:, ,activityname:click_share, ,t_extend_params:https://tuan.juanpi.com/pintuanlottery/item/36717717/, ,event_value:https://tuan.juanpi.com/pintuanlottery/item/36717717/)
 
-  val line = "{\"activityname\":\"click_cube_block\",\"app_name\":\"jiu\",\"app_version\":\"4.2.2\",\"c_label\":\"C2\",\"c_server\":\"{\\\"gid\\\":\\\"C2\\\",\\\"ugroup\\\":\\\"523_494_457_544_582_575_486_478_336_450_496\\\"}\",\"cube_position\":\"1_2\",\"deviceid\":\"864178021375802\",\"endtime\":\"1483587942706\",\"endtime_origin\":\"1483587939959\",\"extend_params\":\"\",\"ip\":\"123.147.82.219\",\"jpid\":\"ffffffff-b46f-b9e1-36a0-f4dc62cce3ff\",\"location\":\"重庆市渝中区棉花街靠近新重庆国际小商品批发中心\",\"os\":\"android\",\"os_version\":\"4.3\",\"page_extends_param\":\"https://m.juanpi.com/zhuanti/nzbgm?mobile=1&qmshareview=1\",\"pagename\":\"page_h5\",\"pre_extends_param\":\"312\",\"pre_page\":\"page_tab\",\"result\":\"1\",\"server_jsonstr\":\"{\\\"pit_info\\\":\\\"ad_id::152::block_id::1987::img_id::4565::1_2\\\",\\\"cid\\\":\\\"312\\\",\\\"_t\\\":1483586665,\\\"_z\\\":\\\"0\\\"}\",\"session_id\":\"1483581574042_jiu_1483587919928\",\"source\":\"\",\"starttime\":\"1483587942706\",\"starttime_origin\":\"1483587939959\",\"ticks\":\"1483581574042\",\"to_switch\":\"2\",\"uid\":\"41132877\",\"utm\":\"101214\"}"
+  val linePage = "{\"activityname\":\"click_share\",\"app_name\":\"zhe\",\"app_version\":\"4.2.2\",\"c_label\":\"C2\",\"c_server\":\"{\\\"gid\\\":\\\"C2\\\",\\\"ugroup\\\":\\\"491_451_580_486_538_485_573_496_517_578_449\\\"}\",\"cube_position\":\"\",\"deviceid\":\"357630056196218\",\"endtime\":\"1483604219816\",\"endtime_origin\":\"1483604219418\",\"extend_params\":\"https://tuan.juanpi.com/pintuanlottery/item/36717717/\",\"ip\":\"221.206.145.223\",\"jpid\":\"ffffffff-8d79-be98-cc72-9cfe62cce3ff\",\"location\":\"黑龙江省牡丹江市宁安市宁马线靠近小北沟村\",\"os\":\"android\",\"os_version\":\"5.0\",\"page_extends_param\":\"https://tuan.juanpi.com/pintuan/item/36717717\",\"pagename\":\"page_h5\",\"pre_extends_param\":\"https://tuan.juanpi.com/pintuan/item/36717717\",\"pre_page\":\"page_h5\",\"result\":\"1\",\"server_jsonstr\":\"{}\",\"session_id\":\"1461985086574_zhe_1483604071977\",\"source\":\"\",\"starttime\":\"1483604219816\",\"starttime_origin\":\"1483604219418\",\"ticks\":\"1461985086574\",\"to_switch\":\"0\",\"uid\":\"27653136\",\"utm\":\"101218\"}"
+
+  val lineEvent = "{\"activityname\":\"click_cube_goods\",\"app_name\":\"zhe\",\"app_version\":\"4.2.2\",\"c_label\":\"C2\",\"c_server\":\"{\\\"gid\\\":\\\"C2\\\",\\\"ugroup\\\":\\\"581_486_485_478_496_337_453_493_447_457_377_574_547_584_572_593\\\"}\",\"cube_position\":\"\",\"deviceid\":\"861463039027477\",\"endtime\":\"1483669710474\",\"endtime_origin\":\"1483669703060\",\"extend_params\":\"\",\"ip\":\"112.96.109.136\",\"jpid\":\"00000000-72f7-1057-3187-cb37480a43f3\",\"location\":\"广东省广州市花都区清莲路靠近广州金明进出口有限公司\",\"os\":\"android\",\"os_version\":\"5.1\",\"page_extends_param\":\"313\",\"pagename\":\"page_tab\",\"pre_extends_param\":\"https://m.juanpi.com/zhuanti/xbsdhh?qminkview=1&qmshareview=1\",\"pre_page\":\"page_h5\",\"result\":\"1\",\"server_jsonstr\":\"{\\\"pit_info\\\":\\\"brand::1893518::1_5\\\",\\\"hot_goods_id\\\":\\\"38030687\\\",\\\"cid\\\":313,\\\"_t\\\":1483669188,\\\"_gsort_key\\\":\\\"GSORT2_SERVICE_POSTION_SORT_175_20170106_10_261_410_175586efd3561c4c\\\",\\\"_pit_type\\\":6,\\\"_z\\\":\\\"5\\\"}\",\"session_id\":\"1462589463756_zhe_1483669164198\",\"source\":\"\",\"starttime\":\"1483669710474\",\"starttime_origin\":\"1483669703060\",\"ticks\":\"1462589463756\",\"to_switch\":\"0\",\"uid\":\"31215985\",\"utm\":\"101221\"}"
 
   def testcid(server_jsonstr: String): Any = {
     if (server_jsonstr.contains("cid")) {
@@ -20,71 +23,6 @@ object checkEvent {
   }
 
   def eventParse(): Unit = {
-    //    val line = """{"activityname":"click_cube_goods","app_name":"zhe","app_version":"4.1.1","c_label":"C3","c_server":"{\"gid\":\"C3\",\"ugroup\":\"222\"}","cube_position":"1_1","deviceid":"49A3FDC8-2501-4250-8A06-BAF463A008E6","endtime":"1475052337104","endtime_origin":"1475052335999","extend_params":"","ip":"180.156.82.107","jpid":"ba67668beaf7eb8c00cc854dff02e3490b6a890c","location":"","os":"iOS","os_version":"9.3.2","page_extends_param":"345","pagename":"page_tab","pre_extends_param":"316","pre_page":"page_tab","result":"1","server_jsonstr":"{\"pit_info\":\"goods::21761493::1_1\",\"ab_attr\":\"9\",\"cid\":345,\"_t\":1475052281,\"_gsort_key\":\"DEFAULT_SORT_221_20160928_16_276\",\"_pit_type\":3}","session_id":"1448354623610_zhe_1475052328304","source":"","starttime":"1475052337104","starttime_origin":"1475052335999","ticks":"1448354623610","to_switch":"0","uid":"0","utm":"101431"}"""
-    //
-    //    //    (for_pageid:page_active, ,page_type_id:5, ,page_level_id:3, ,page_value:null, ,f_page_extend_params:http://tuan.juanpi.com/pintuan/shop/1370792, ,d_page_id:154, ,d_page_value:活动str, ,for_eventid:click_share, ,d_event_id:497, ,event_type_id:0, ,event_id:497, ,event_value:http://wx.juanpi.com/pintuan/item/16389601?utm=106747)
-    //    // (for_pageid:page_taball, ,page_type_id:10, ,page_level_id:1, ,page_value:最新折扣, ,f_page_extend_params:all, ,
-    //    // d_page_id:219, ,d_page_value:最新折扣, ,for_eventid:collect_mainpage_loadtime, ,d_event_id:0, ,event_type_id:0, ,event_id:-1, ,event_value:921)
-    //    val line7 =
-    //    """{"activityname":"collect_mainpage_loadtime","app_name":"jiu","app_version":"4.1.0","c_label":"C3","c_server":"{\"gid\":\"C3\",\"ugroup\":\"143_223_142_237\"}","cube_position":"","deviceid":"355228562118230","endtime":"1476180047226","endtime_origin":"1476180046863","extend_params":"921","ip":"171.12.94.5","jpid":"ffffffff-f05d-dda3-573b-688300000030","location":"河南省","os":"android","os_version":"5.1","page_extends_param":"all","pagename":"page_tab","pre_extends_param":"","pre_page":"","result":"1","server_jsonstr":"{}","session_id":"1473548965006_jiu_1476180046117","source":"","starttime":"1476180046305","starttime_origin":"1476180045942","ticks":"1473548965006","to_switch":"1","uid":"43721797","utm":"101212"}""".stripMargin
-    //
-    //    // base 层
-    //    val row = Json.parse(line7)
-    //    val pagename = (row \ "pagename").asOpt[String].getOrElse("").toLowerCase()
-    //    val page_extends_param = (row \ "page_extends_param").asOpt[String].getOrElse("")
-    //    // f -> fct
-    //    val f_page_extend_params = pageAndEventParser.getExtendParams(pagename, page_extends_param)
-    //
-    //    val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
-    //    val deviceid = (row \ "deviceid").asOpt[String].getOrElse("")
-    //    val cube_position = (row \ "cube_position").asOpt[String].getOrElse("")
-    //    val activityname = (row \ "activityname").asOpt[String].getOrElse("").toLowerCase()
-    //    val extend_params = (row \ "extend_params").asOpt[String].getOrElse("")
-    //    val app_version = (row \ "app_version").asOpt[String].getOrElse("0")
-    //    // t -> tmp
-    //    val t_extend_params = eventParser.getExtendParamsFromBase(activityname, extend_params, app_version)
-    //
-    //    // fct 层
-    //    val cid = pageAndEventParser.getJsonValueByKey(server_jsonstr, "cid")
-    //
-    //    if (!cid.isEmpty) {
-    //      println(cid.toInt)
-    //    }
-    //
-    //    val forEventid = eventParser.getForEventId(cid, activityname, t_extend_params)
-    //    val eventForPageId = eventParser.getForPageId(cid, f_page_extend_params, pagename)
-    //    val f_extend_params = eventParser.getForExtendParams(activityname, t_extend_params, cube_position, server_jsonstr)
-    //    val (pit_type, gsort_key) = pageAndEventParser.getGsortPit(server_jsonstr)
-    //
-    //    val d_event_id = 528
-    //    val d_page_id = 0
-    //    //    val pPageId = pageAndEventParser.getPageId(d_page_id, f_page_extend_params)
-    //    val ePageId = pageAndEventParser.getPageId(d_page_id, f_page_extend_params)
-    //
-    //    val event_value = eventParser.getEventValue(10, activityname, f_extend_params, server_jsonstr)
-    //    val event_id = eventParser.getEventId(d_event_id, app_version) + ""
-    //    //    val event_id = eventParser.getEventId(d_event_id, app_version) + ""
-    //
-    //    val forLevelId = if (d_page_id == 254 && f_page_extend_params.nonEmpty) {
-    //      433
-    //    } else 0
-    //
-    //    val jpid = (row \ "jpid").asOpt[String].getOrElse("")
-    //    val os = (row \ "os").asOpt[String].getOrElse("")
-    //    val guId = pageAndEventParser.getGuid(jpid, deviceid, os)
-    //
-    //    val flag = eventParser.filterOutlierPageId(activityname, pagename, cid, f_page_extend_params)
-    //
-    //    println(guId, deviceid, flag)
-    //
-    //    println("pagename:" + pagename, " page_extends_param:" + page_extends_param, " f_page_extend_params:" + f_page_extend_params, " f_extend_params:" + f_extend_params)
-    //    println("eventParser.getForPageId:" + eventForPageId)
-    //    println("server_jsonstr:" + server_jsonstr, "deviceid:" + deviceid)
-    //    println("cid:" + cid, " activityname:" + activityname, " t_extend_params:" + t_extend_params,
-    //      " cube_position:" + cube_position, " extend_params:" + extend_params, " app_version:" + app_version, " ,forEventid:" + forEventid, " event_id:" + event_id)
-    //    println(" ePageId:" + ePageId)
-    //    println("event_value:" + event_value)
-
     val pp = new GetDwPcPageValue()
     val url = "https://m.juanpi.com/zhuanti/lstop?mobile=1&qminkview=1&qmshareview=1"
     val value = pp.evaluate(url)
@@ -114,33 +52,67 @@ object checkEvent {
     println(partitionStr)
   }
 
-  def main(args: Array[String]): Unit = {
-//    testDateGuidPartitions()
+  def checkLinePage(): Unit = {
+//    val res = eventParser.filterFunc(linePage)
 
-    val res = eventParser.filterFunc(line)
+//    val row = Json.parse(linePage)
+    val row = Json.parse(lineEvent)
 
-    val row = Json.parse(line)
-
-    val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
-
+//    val session_id = (row \ "session_id").asOpt[String].getOrElse("")
     val activityname = (row \ "activityname").asOpt[String].getOrElse("").toLowerCase()
 
-    val cid = pageAndEventParser.getJsonValueByKey(server_jsonstr, "cid")
-
+    //    修正过的时间
+//    val startTime = (row \ "starttime_origin").asOpt[String].getOrElse("")
+//    val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
+//    val endTime = pageAndEventParser.getEndTime(startTime, endtime_origin)
+//
+//    //    val result = (row \ "result").asOpt[String].getOrElse("")
+//    val uid = (row \ "uid").asOpt[String].getOrElse("0")
     val extend_params = (row \ "extend_params").asOpt[String].getOrElse("")
-
+    // utm 的值还会改变，故定义成var
+//    val utm = (row \ "utm").asOpt[String].getOrElse("")
+//    val source = ""
+//
+//    val app_name = (row \ "app_name").asOpt[String].getOrElse("")
     val app_version = (row \ "app_version").asOpt[String].getOrElse("0")
+//    val os = (row \ "os").asOpt[String].getOrElse("")
+    val pagename = (row \ "pagename").asOpt[String].getOrElse("").toLowerCase()
+    val page_extends_param = (row \ "page_extends_param").asOpt[String].getOrElse("")
+//    val deviceid = (row \ "deviceid").asOpt[String].getOrElse("")
+    val pre_page = (row \ "pre_page").asOpt[String].getOrElse("")
+//    // 字段与pageinfo中的不太一样
+    val pre_extends_param = (row \ "pre_extends_param").asOpt[String].getOrElse("")
+//    val jpid = (row \ "jpid").asOpt[String].getOrElse("")
+//    val ip = ""
+//    val to_switch = (row \ "to_switch").asOpt[String].getOrElse("")
+    val cube_position = (row \ "cube_position").asOpt[String].getOrElse("")
+//    val location = (row \ "location").asOpt[String].getOrElse("")
+//    val ctag = (row \ "c_label").asOpt[String].getOrElse("")
+    val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
+
+//    val loadTime = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_t")
+//    val ug_id = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_z")
+
+    // ------------------------------------------------------------- mb_event -> mb_event_log --------------------------------------------------------------
+    val f_page_extend_params = pageAndEventParser.getExtendParams(pagename, page_extends_param)
+    val f_pre_extend_params = pageAndEventParser.getExtendParams(pagename, pre_extends_param)
 
     val t_extend_params = eventParser.getExtendParamsFromBase(activityname, extend_params, app_version)
+//    val f_extend_params = eventParser.getForExtendParams(activityname, t_extend_params, cube_position, server_jsonstr)
+    val cid = pageAndEventParser.getJsonValueByKey(server_jsonstr, "cid")
 
-    val pagename = (row \ "pagename").asOpt[String].getOrElse("").toLowerCase()
+    val forPageId = eventParser.getForPageId(cid, f_page_extend_params, pagename)
 
-    val page_extends_param = (row \ "page_extends_param").asOpt[String].getOrElse("")
-
-    val f_page_extend_params = pageAndEventParser.getExtendParams(pagename, page_extends_param)
+    val forPrePageid = eventParser.getForPrePageId(pagename, f_pre_extend_params, pre_page)
 
     val forEventId = eventParser.getForEventId(cid, activityname, t_extend_params)
 
-    println(forEventId)
+
+    println("")
+  }
+
+  def main(args: Array[String]): Unit = {
+//    testDateGuidPartitions()
+    checkLinePage
   }
 }
