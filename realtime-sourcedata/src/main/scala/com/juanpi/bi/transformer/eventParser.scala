@@ -28,10 +28,7 @@ object eventParser {
       ""
     } else if ("page_h5".equals(pagename)) {
       val pid = new GetPageID().evaluate(f_page_extend_params).toInt
-      pid match {
-        case i if i > 0 => "page_active"
-        case _ => (pagename + f_page_extend_params).toLowerCase()
-      }
+      if (pid > 0) { "page_active" } else (pagename + f_page_extend_params).toLowerCase()
     } else if (!"page_tab".equals(pagename)) {
       pagename
     } else {
@@ -95,12 +92,11 @@ object eventParser {
     val forPrePageId =
       if ("page_h5".equals(pagename)) {
         val pid = new GetPageID().evaluate(f_pre_extend_params)
-        if(pid != null) {
-          pid.toInt match {
-            case 34 | 65 | 10069 => "page_active"
-            case _ => (pagename + f_pre_extend_params).toLowerCase()
-          }
-        } else {""}
+        if (pid > 0) {
+          "page_active"
+        } else {
+          (pagename + f_pre_extend_params).toLowerCase()
+        }
       } else if (!"page_tab".equals(pre_page)) {
         pre_page.toLowerCase()
       }
