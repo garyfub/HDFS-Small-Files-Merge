@@ -22,6 +22,10 @@ public class CommonLogic {
             if("10084".equals(pageId) || "10085".equals(pageId)){
                 pageLvlId = "5";
             }
+        } else if("10050".equals(eventId)){
+            if("10085".equals(pageId)){
+                pageLvlId = "5";
+            }
         } else if("448".equals(eventId)){
             if("158".equals(pageId)){
                 pageLvlId = "5";
