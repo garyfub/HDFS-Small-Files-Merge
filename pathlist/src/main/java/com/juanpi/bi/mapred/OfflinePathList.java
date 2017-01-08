@@ -36,7 +36,7 @@ public class OfflinePathList {
     // hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr
     static String base = "hdfs://nameservice1/user/hive";
     static final String SOURCE_DIR = "fct_path_list_mapr";
-    static final String TARGET_DIR = "fct_for_path_list_testoffline";
+    static final String TARGET_DIR = "fct_for_path_list_test2offline";
     static Configuration conf = new Configuration();
 
     static FileSystem fs;
@@ -447,11 +447,11 @@ public class OfflinePathList {
      * @param args
      */
     public static void main(String[] args){
-//        run("");
+        run("");
 
 //        {
 //            System.out.println(getInputPath("a"));
-            System.out.println(getOutputPath("a"));
+//            System.out.println(getOutputPath("a"));
 //        }
     }
 }
