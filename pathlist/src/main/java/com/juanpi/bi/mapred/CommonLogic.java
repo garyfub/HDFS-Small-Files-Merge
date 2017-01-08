@@ -36,8 +36,7 @@ public class CommonLogic {
         return pageLvlId;
     }
 
-    public static String getVisitPath(String initStr, int pageLvlId, String pageLvl, String level1, String level2, String level3, String level4, String level5) {
-
+    public static String getKeyStr(String pageLvl, int pageLvlId, String level1, String level2, String level3, String level4, String level5, String initStr) {
         if(pageLvlId == 1){
             level1= pageLvl;
             level2 = initStr;
@@ -60,8 +59,8 @@ public class CommonLogic {
             level5 = pageLvl;
         }
 
-        String key = level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5;
-        return key;
+        String keyStr = level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5;
+        return keyStr;
     }
 
 }

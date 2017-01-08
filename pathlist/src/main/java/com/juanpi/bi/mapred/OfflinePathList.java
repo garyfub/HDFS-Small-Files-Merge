@@ -36,7 +36,7 @@ public class OfflinePathList {
     // hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr
     static String base = "hdfs://nameservice1/user/hive";
     static final String SOURCE_DIR = "fct_path_list_mapr";
-    static final String TARGET_DIR = "fct_for_path_list_test2offline";
+    static final String TARGET_DIR = "fct_for_path_list_test3offline";
     static Configuration conf = new Configuration();
 
     static FileSystem fs;
@@ -291,30 +291,10 @@ public class OfflinePathList {
                     String pageLvl = v2.toStrings()[1];
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
 
-                    if(pageLvlId == 1){
-                        level1= pageLvl;
-                        level2 = initStr;
-                        level3 = initStr;
-                        level4 = initStr;
-                        level5 = initStr;
-                    } else if(pageLvlId == 2){
-                        level2= pageLvl;
-                        level3 = initStr;
-                        level4 = initStr;
-                        level5 = initStr;
-                    } else if(pageLvlId == 3){
-                        level3 = pageLvl;
-                        level4 = initStr;
-                        level5 = initStr;
-                    } else if(pageLvlId == 4){
-                        level4 = pageLvl;
-                        level5 = initStr;
-                    } else if(pageLvlId == 5){
-                        level5 = pageLvl;
-                    }
+                    String keyStr = CommonLogic.getKeyStr(pageLvl, pageLvlId, level1, level2, level3, level4, level5, initStr);
 
                     // 5 个级别
-                    Text key2 = new Text(level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5);
+                    Text key2 = new Text(keyStr);
                     Text value2 = new Text(v2.toStrings()[2]);
                     context.write(key2, value2);
                 } catch (Exception e) {

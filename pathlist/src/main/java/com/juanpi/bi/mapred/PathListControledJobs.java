@@ -276,7 +276,7 @@ public class PathListControledJobs {
                 String pageLvlIdStr = v2.toStrings()[0];
                 String pageLvl = v2.toStrings()[1];
                 int pageLvlId = Integer.parseInt(pageLvlIdStr);
-                String visitPath = CommonLogic.getVisitPath(initStr, pageLvlId, pageLvl, level1, level2, level3, level4, level5);
+                String visitPath = CommonLogic.getKeyStr(initStr, pageLvlId, pageLvl, level1, level2, level3, level4, level5);
                 // 5 个级别
                 Text key2 = new Text(visitPath);
                 Text value2 = new Text(v2.toStrings()[2]);
