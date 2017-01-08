@@ -36,7 +36,7 @@ public class OfflinePathList {
     // hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr
     static String base = "hdfs://nameservice1/user/hive";
     static final String SOURCE_DIR = "fct_path_list_mapr";
-    static final String TARGET_DIR = "fct_for_path_list_offline";
+    static final String TARGET_DIR = "fct_for_path_list_testoffline";
     static Configuration conf = new Configuration();
 
     static FileSystem fs;
@@ -171,7 +171,7 @@ public class OfflinePathList {
 
         //1.3 指定分区类
         job.setPartitionerClass(HashPartitioner.class);
-        job.setNumReduceTasks(10);
+        job.setNumReduceTasks(1);
 
         //1.4 TODO 排序、分区
         job.setGroupingComparatorClass(OfflinePathList.MyGroupingComparator.class);
@@ -284,11 +284,11 @@ public class OfflinePathList {
             String level4 = initStr;
             String level5 = initStr;
 
-
             for (OfflinePathList.TextArrayWritable v2 : v2s) {
-
                 try {
+                    // 页面层级id
                     String pageLvlIdStr = v2.toStrings()[0];
+                    // 页面层级对应的值
                     String pageLvl = v2.toStrings()[1];
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
                     String path = CommonLogic.getVisitPath(initStr, pageLvlId, pageLvl, level1, level2, level3, level4, level5);
