@@ -103,9 +103,9 @@ class MbEventTransformer {
     val activityname = (row \ "activityname").asOpt[String].getOrElse("").toLowerCase()
 
 //    修正过的时间
-    val startTime = (row \ "starttime_origin").asOpt[String].getOrElse("")
-    val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
-    val endTime = pageAndEventParser.getEndTime(startTime, endtime_origin)
+    val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
+    val starttime = (row \ "starttime").asOpt[String].getOrElse("")
+    val endTime = pageAndEventParser.getEndTime(starttime, starttime_origin)
 
 //    val result = (row \ "result").asOpt[String].getOrElse("")
     val uid = (row \ "uid").asOpt[String].getOrElse("0")
