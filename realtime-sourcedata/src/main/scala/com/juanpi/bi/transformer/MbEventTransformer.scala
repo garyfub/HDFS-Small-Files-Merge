@@ -30,7 +30,6 @@ class MbEventTransformer {
     val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
     val os = (row \ "os").asOpt[String].getOrElse("")
 
-    val endtime = (row \ "endtime").asOpt[String].getOrElse("")
     val starttime = (row \ "starttime").asOpt[String].getOrElse("")
 
     if(starttime.isEmpty) {
@@ -45,8 +44,8 @@ class MbEventTransformer {
       try {
         gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
       } catch {
-        case ex: Exception => { println(ex.getStackTraceString) }
-        println("=======>> Event: getGuid Exception!!" + "======>>异常数据:" + row)
+        case ex: Exception => { println("=========>>pageAndEventParser.getGuid: " + ex.getStackTraceString) }
+        println("=======>> Event: getGuid Exception 0000 ======>>异常数据:" + row)
       }
 
       val ret = if (gu_id.nonEmpty && !gu_id.equalsIgnoreCase("null")) {
@@ -57,15 +56,16 @@ class MbEventTransformer {
         if (loadTime.nonEmpty &&
           DateUtils.dateStr(partitionTime.toLong) != DateUtils.dateStr(loadTime.toLong * 1000)) {
           ("", "", None)
-        } else {
+        }
+        else {
           try {
             val res = parse(partitionTime, row, dimpage, dimevent, fCate)
-            // 过滤异常的数据，具体见解析函数 eventParser.filterOutlierPageId
             if (res == null) {
               ("", "", None)
             }
             else {
               val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = res
+
               val res_str = pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x => x match {
                 case y if y == null || y.toString.isEmpty => "\\N"
                 case _ => x
@@ -78,20 +78,19 @@ class MbEventTransformer {
           catch {
             //使用模式匹配来处理异常
             case ex:Exception => {
-              ex.getStackTraceString
-              ex.printStackTrace()
+              println("=======>> parse Exception: " + ex.getStackTraceString)
             }
               println("=======>> Event: parse Exception!!" + "======>>异常数据:" + row)
             ("", "", None)
           }
         }
       } else {
-        println("=======>> Event: GU_ID IS NULL!!" + "\n======>>异常数据:" + row)
+        println("=======>> Event: GU_ID IS NULL 1111!! ======>>异常数据:" + row)
         ("", "", None)
       }
       ret
     } else {
-      println("=======>> Event: ROW IS NULL!!" + "\n======>>异常数据:" + row)
+      println("=======>> Event: ROW IS NULL 22222 ======>>异常数据:" + row)
       ("", "", None)
     }
   }

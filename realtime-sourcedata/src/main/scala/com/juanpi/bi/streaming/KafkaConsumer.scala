@@ -246,7 +246,7 @@ object KafkaConsumer{
     */
   def main(args: Array[String]) {
 
-    println("======>> com.juanpi.bi.streaming.KafkaConsumer 开始运行，参数个数：" + args.length)
+    println("======>> 2017-01-09 com.juanpi.bi.streaming.KafkaConsumer 开始运行，参数个数：" + args.length)
 
     // 判断传入的参数
     if (args.length < 3) {

@@ -39,7 +39,7 @@ class PageinfoTransformer {
         gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
       } catch {
         case ex:Exception => { println(ex.getStackTraceString)}
-          println("=======>> Event: getGuid Exception!!" + "\n======>>异常数据:" + row)
+          println("=======>> Event: getGuid Exception 0000 ======>>异常数据:" + row)
       }
 
       val ret = if(gu_id.nonEmpty) {
@@ -49,19 +49,19 @@ class PageinfoTransformer {
           (partitionStr, "page", res)
         } catch {
           case ex:Exception => {
-            println(ex.getStackTraceString)
+            println("=======>> parse Exception" + ex.getStackTraceString)
             ex.printStackTrace()
           }
             println("=======>> Page-real: parse Exception!!" + "======>>异常数据:" + row)
             ("", "", None)
         }
       } else {
-        println("=======>> Page: GU_ID IS NULL!!" + "======>>异常数据:" + row)
+        println("=======>> Page: GU_ID IS NULL 1111 =====>>异常数据:" + row)
         ("", "", None)
       }
       ret
     } else {
-      println("=======>> Page: ROW IS NULL!!" + "======>>异常数据:" + row)
+      println("=======>> Page: ROW IS NULL 2222 =====>>异常数据:" + row)
       ("", "", None)
     }
   }
