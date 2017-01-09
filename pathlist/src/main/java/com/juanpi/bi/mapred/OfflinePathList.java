@@ -239,7 +239,7 @@ public class OfflinePathList {
                             pageLvlId = "5";
                         }
                     } else if("10050".equals(eventId)){
-                        if("10085".equals(pageId)){
+                        if("10085".equals(pageId) || "10107".equals(pageId)){
                             pageLvlId = "5";
                         }
                     } else if("448".equals(eventId)){
