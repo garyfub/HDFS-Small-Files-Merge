@@ -17,37 +17,37 @@ class PageinfoTransformer {
                 dimEvent: mutable.HashMap[String, (Int, Int)],
                 fCate: mutable.HashMap[String, String]): (String, String, Any) = {
 
-    //play
     val row = Json.parse(line.replaceAll("null", """\\"\\""""))
 
     if (row != null) {
-      // 解析逻辑
       var gu_id = ""
       val ticks = (row \ "ticks").asOpt[String].getOrElse("")
       val jpid = (row \ "jpid").asOpt[String].getOrElse("")
       val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
       val os = (row \ "os").asOpt[String].getOrElse("")
 
-      val startTime = (row \ "starttime_origin").asOpt[String].getOrElse("")
-      val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
-      val endTime = pageAndEventParser.getEndTime(startTime, endtime_origin)
+      val starttime = (row \ "starttime").asOpt[String].getOrElse("")
+
+      if(starttime.isEmpty) {
+        return null
+      }
+
+      val partitionTime = starttime
 
       try
       {
         gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
       } catch {
-        //使用模式匹配来处理异常
         case ex:Exception => { println(ex.getStackTraceString)}
           println("=======>> Event: getGuid Exception!!" + "\n======>>异常数据:" + row)
       }
 
       val ret = if(gu_id.nonEmpty) {
         try {
-          val res = parse(row, dimPage, fCate)
-          val partitionStr = DateUtils.dateGuidPartitions(endTime.toLong, gu_id)
+          val res = parse(partitionTime, row, dimPage, fCate)
+          val partitionStr = DateUtils.dateGuidPartitions(partitionTime.toLong, gu_id)
           (partitionStr, "page", res)
         } catch {
-          //使用模式匹配来处理异常
           case ex:Exception => {
             println(ex.getStackTraceString)
             ex.printStackTrace()
@@ -66,30 +66,26 @@ class PageinfoTransformer {
     }
   }
 
-  private def parse(row: JsValue,
+  private def parse(partitionTime: String,
+                    row: JsValue,
                     dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                     fCate: mutable.HashMap[String, String]): (User, PageAndEvent, Page, Event) = {
-    // mb_pageinfo
-//    val ticks = (row \ "ticks").asOpt[String].getOrElse("")
+
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
     val pageName = (row \ "pagename").asOpt[String].getOrElse("").toLowerCase()
-//    val startTime = (row \ "starttime").asOpt[String].getOrElse("0")
-//    val endTime = (row \ "endtime").asOpt[String].getOrElse("0")
     val prePage = (row \ "pre_page").asOpt[String].getOrElse("")
     val uid = (row \ "uid").asOpt[String].getOrElse("0")
     val extendParams = (row \ "extend_params").asOpt[String].getOrElse("")
     val appName = (row \ "app_name").asOpt[String].getOrElse("")
     val appVersion = (row \ "app_version").asOpt[String].getOrElse("")
-//    val os_version = (row \ "os_version").asOpt[String].getOrElse("")
     val os = (row \ "os").asOpt[String].getOrElse("")
     val utm = (row \ "utm").asOpt[String].getOrElse("0")
     val source = (row \ "source").asOpt[String].getOrElse("")
-//    修正过的时间
-    val startTime = (row \ "starttime_origin").asOpt[String].getOrElse("")
+    val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
     val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
 
     val endTime = if (endtime_origin.isEmpty) {
-      startTime
+      starttime_origin
     } else {
       endtime_origin
     }
@@ -114,7 +110,6 @@ class PageinfoTransformer {
     val gu_create_time = ""
 
     // =========================================== base to dw ===========================================  //
-    // 用户画像中定义的
     var gid = ""
     var uGroup = ""
 
@@ -126,15 +121,13 @@ class PageinfoTransformer {
       uGroup = (js_c_server \ "ugroup").asOpt[String].getOrElse("0")
     }
 
-    // mb_pageinfo -> mb_pageinfo_log
     val fct_extendParams = pageAndEventParser.getExtendParams(pageName, extendParams)
     val fct_preExtendParams = pageAndEventParser.getExtendParams(pageName, pre_extend_params)
 
-    // for_pageid 判断
     val forPageId = pageParser.forPageId(pageName, fct_extendParams, server_jsonstr)
 
     // 154 289 活动页，如果url为空，就直接过滤
-    if((forPageId == 154 | forPageId == 289) && url.isEmpty) { return null}
+    if((forPageId == 154 | forPageId == 289) && url.isEmpty) { return null }
 
     val forPrePageid = pageParser.forPageId(prePage, fct_preExtendParams, server_jsonstr)
 
@@ -155,7 +148,6 @@ class PageinfoTransformer {
 
     val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, fct_extendParams, d_page_level_id, forLevelId)
 
-    // WHEN p1.page_id = 250 THEN getgoodsid(NVL(split(a.extendParams1,'_')[2],''))
     val hot_goods_id = if(d_page_id == 250 && fct_extendParams.nonEmpty && fct_extendParams.contains("_") && fct_extendParams.split("_").length > 2)
     {
       new GetGoodsId().evaluate(fct_extendParams.split("_")(2))
@@ -176,10 +168,11 @@ class PageinfoTransformer {
     // 最终返回值
     val event_id, event_value, rule_id, test_id, select_id, event_lvl2_value, loadTime, ug_id = ""
 
-    val (date, hour) = DateUtils.dateHourStr(endTime.toLong)
+    // 根据分区时间来确定
+    val (date, hour) = DateUtils.dateHourStr(partitionTime.toLong)
 
     val user = User.apply(gu_id, uid, utm, gu_create_time, session_id, terminal_id, appVersion, site_id, ref_site_id, ctag, location, jpk, uGroup, date, hour)
-    val pe = PageAndEvent.apply(pageId, pageValue, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, startTime, endTime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
+    val pe = PageAndEvent.apply(pageId, pageValue, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, starttime_origin, endTime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(parsed_source, ip, url, urlref, deviceid, to_switch)
     val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime, ug_id)
 
@@ -192,32 +185,5 @@ class PageinfoTransformer {
     }
 
     (user, pe, page, event)
-  }
-}
-
-// for test
-object PageinfoTransformer{
-
-  def main(args: Array[String]) {
-
-    val pp = new PageinfoTransformer
-    val liuliang =
-      """
-        |{"app_name":"zhe","app_version":"3.4.6","c_label":"C3","c_server":"{\"gid\":\"C3\",\"ugroup\":\"143_223_112_142\"}","deviceid":"867568022962029","endtime":"1468929132822","endtime_origin":"1468929131796","extend_params":"1","gj_ext_params":"past_zhe,1580540_1500762_13504152,past_zhe,crazy_zhe","gj_page_names":"page_tab,page_home_brand_in,page_tab,page_tab","ip":"119.109.179.179","jpid":"ffffffff-bc21-7da8-ffff-ffffe4de7969","location":"辽宁省","os":"android","os_version":"4.4.4","pagename":"page_tab","pre_extend_params":"past_zhe","pre_page":"page_tab","server_jsonstr":"{\"ab_info\":{\"rule_id\":\"\",\"test_id\":\"\",\"select\":\"\"},\"ab_attr\":\"7\"}","session_id":"1468155168409_zhe_1468929047609","source":"","starttime":"1468929130209","starttime_origin":"1468929129183","ticks":"1468155168409","to_switch":"0","uid":"40102432","utm":"104954","wap_pre_url":"","wap_url":""}
-        |""".stripMargin
-
-
-    val pl = liuliang.replaceAll("null", """\\"\\"""").replaceAll("\\\\n\\s+", "\\\\")
-//    println(pl)
-
-    try{
-      val line = Json.parse(pl)
-    }catch{
-      //使用模式匹配来处理异常
-      case ex:IllegalArgumentException=>println(ex.getMessage())
-      case ex:RuntimeException=>{ println("ok")}
-      case ex:StringIndexOutOfBoundsException=>println("Invalid Index")
-      case ex:Exception => println(ex.getStackTraceString, "\n======>>异常数据:" + pl)
-    }
   }
 }
