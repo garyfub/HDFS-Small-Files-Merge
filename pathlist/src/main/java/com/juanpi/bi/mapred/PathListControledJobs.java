@@ -113,7 +113,7 @@ public class PathListControledJobs {
 
         while(true){
             if(jc.allFinished()){
-                System.out.println("8个目录的数据处理完毕！");
+                System.out.println("4个目录的数据处理完毕！");
                 System.out.println(jc.getSuccessfulJobList());
                 jc.stop();
                 // 如果不加 break 或者 return，程序会一直循环
@@ -456,10 +456,10 @@ public class PathListControledJobs {
             JobsControl("", 0xc, 0xf, "PathListControledJobs0c");
         } else
         {
-            JobsControl("", 0x0, 0x3, "PathListControledJobs01");
-            JobsControl("", 0x4, 0x7, "PathListControledJobs04");
-            JobsControl("", 0x8, 0xb, "PathListControledJobs08");
-            JobsControl("", 0xc, 0xf, "PathListControledJobs0c");
+            JobsControl(dateStr, 0x0, 0x3, "PathListControledJobs01");
+            JobsControl(dateStr, 0x4, 0x7, "PathListControledJobs04");
+            JobsControl(dateStr, 0x8, 0xb, "PathListControledJobs08");
+            JobsControl(dateStr, 0xc, 0xf, "PathListControledJobs0c");
         }
 
     }
