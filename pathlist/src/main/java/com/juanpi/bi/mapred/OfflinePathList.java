@@ -36,7 +36,7 @@ public class OfflinePathList {
     // hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr
     static String base = "hdfs://nameservice1/user/hive";
     static final String SOURCE_DIR = "fct_path_list_mapr";
-    static final String TARGET_DIR = "fct_for_path_list_offline";
+    static final String TARGET_DIR = "fct_for_path_list_test3offline";
     static Configuration conf = new Configuration();
 
     static FileSystem fs;
@@ -284,16 +284,17 @@ public class OfflinePathList {
             String level4 = initStr;
             String level5 = initStr;
 
-
             for (OfflinePathList.TextArrayWritable v2 : v2s) {
 
                 try {
                     String pageLvlIdStr = v2.toStrings()[0];
                     String pageLvl = v2.toStrings()[1];
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
-                    String path = CommonLogic.getVisitPath(initStr, pageLvlId, pageLvl, level1, level2, level3, level4, level5);
+
+                    String keyStr = CommonLogic.getKeyStr(pageLvl, pageLvlId, level1, level2, level3, level4, level5, initStr);
+
                     // 5 个级别
-                    Text key2 = new Text(path);
+                    Text key2 = new Text(keyStr);
                     Text value2 = new Text(v2.toStrings()[2]);
                     context.write(key2, value2);
                 } catch (Exception e) {

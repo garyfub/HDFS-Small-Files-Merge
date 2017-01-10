@@ -1,12 +1,15 @@
 package com.juanpi.bi.streaming
 
 import java.io.Serializable
-import java.text.SimpleDateFormat
 
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.InitConfig
+<<<<<<< HEAD
 import com.juanpi.bi.transformer.{H5EventTransformer, ITransformer, pageAndEventParser}
 //import com.juanpi.bi.transformer.{H5EventTransformer}
+=======
+import com.juanpi.bi.transformer._
+>>>>>>> e864ce6468823eefdd30d33c2c662cfa1a94185b
 import kafka.serializer.StringDecoder
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, _}
 import org.apache.hadoop.hbase.util.Bytes
@@ -14,9 +17,8 @@ import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
 import org.apache.hadoop.io.NullWritable
 import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat
 import org.apache.spark.Logging
-import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
-import org.apache.spark.streaming.{StreamingContext}
+import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
 
@@ -25,13 +27,11 @@ import scala.collection.mutable
 class KafkaConsumer(topic: String,
                     dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                     dimEvent: mutable.HashMap[String, (Int, Int)],
-                    fCate: mutable.HashMap[Int, Int],
+                    fCate: mutable.HashMap[String, String],
                     dimH5EVENT: mutable.HashMap[String, (Int, Int)],
                     zkQuorum: String)
   extends Logging with Serializable {
   import KafkaConsumer._
-
-  var logTransformer:ITransformer = null
 
   /**
     * 解析 event
@@ -49,8 +49,8 @@ class KafkaConsumer(topic: String,
     // 数据块中的每一条记录需要处理
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
     val data = sourceLog.map(_._2.replace("\0",""))
-      .filter(line => !line.contains("collect_api_responsetime"))
-      .map(msg => parseMessage(msg))
+      .filter(eventParser.filterFunc)
+      .map(msg => parseMBEventMessage(msg))
       .filter(_._1.nonEmpty)
 
     data.foreachRDD((rdd, time) =>
@@ -82,7 +82,7 @@ class KafkaConsumer(topic: String,
                   km: KafkaManager) = {
 
     val data = dataDStream.map(_._2.replace("\0",""))
-        .map(msg => parseMessage(msg))
+        .map(msg => parseMBPageMessage(msg))
         .filter(_._1.nonEmpty)
 
      data.foreachRDD((rdd, time) => {
@@ -131,7 +131,7 @@ class KafkaConsumer(topic: String,
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     val data = sourceLog.map(_._2.replace("\0",""))
-      .filter(line => !line.contains("collect_api_responsetime"))
+      .filter(eventParser.filterFunc)
       .map(msg => parseH5Message(msg))
       .filter(_._1.nonEmpty)
 
@@ -159,19 +159,14 @@ class KafkaConsumer(topic: String,
     h5LogTransformer.logParser(message, dimPage, dimH5EVENT)
   }
 
-  def parseMessage(message:String):(String, String, Any) = {
-    getTransformer().logParser(message, dimPage, dimEvent, fCate)
+  def parseMBEventMessage(message:String):(String, String, Any) = {
+    val mbEventTransformer = new MbEventTransformer()
+    mbEventTransformer.logParser(message, dimPage, dimEvent, fCate)
   }
 
-  def transMessage(rdd:RDD[String]):RDD[(String, String, Any)] = {
-    rdd.map { msg => parseMessage(msg) }
-  }
-
-  def getTransformer():ITransformer = {
-    if(logTransformer == null){
-      logTransformer = Class.forName(Config.getTopicTransformerClass(topic)).newInstance().asInstanceOf[ITransformer]
-    }
-    logTransformer
+  def parseMBPageMessage(message:String):(String, String, Any) = {
+    val pageTransformer = new PageinfoTransformer()
+    pageTransformer.logParser(message, dimPage, dimEvent, fCate)
   }
 }
 

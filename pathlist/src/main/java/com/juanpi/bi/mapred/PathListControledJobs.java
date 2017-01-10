@@ -157,7 +157,7 @@ public class PathListControledJobs {
 
         //1.3 指定分区类
         job.setPartitionerClass(HashPartitioner.class);
-        job.setNumReduceTasks(1);
+        job.setNumReduceTasks(20);
 
         //1.4 TODO 排序、分区
         job.setGroupingComparatorClass(MyGroupingComparator.class);
@@ -276,7 +276,7 @@ public class PathListControledJobs {
                 String pageLvlIdStr = v2.toStrings()[0];
                 String pageLvl = v2.toStrings()[1];
                 int pageLvlId = Integer.parseInt(pageLvlIdStr);
-                String visitPath = CommonLogic.getVisitPath(initStr, pageLvlId, pageLvl, level1, level2, level3, level4, level5);
+                String visitPath = CommonLogic.getKeyStr(initStr, pageLvlId, pageLvl, level1, level2, level3, level4, level5);
                 // 5 个级别
                 Text key2 = new Text(visitPath);
                 Text value2 = new Text(v2.toStrings()[2]);

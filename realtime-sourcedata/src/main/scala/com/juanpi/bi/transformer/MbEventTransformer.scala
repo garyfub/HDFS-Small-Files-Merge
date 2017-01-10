@@ -10,7 +10,7 @@ import scala.collection.mutable
 /**
   * Created by gongzi on 2016/7/11.
   */
-class MbEventTransformer extends ITransformer {
+class MbEventTransformer {
 
   /**
     *
@@ -22,14 +22,17 @@ class MbEventTransformer extends ITransformer {
   def logParser(line: String,
                 dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
                 dimevent: mutable.HashMap[String, (Int, Int)],
-                fCate: mutable.HashMap[Int, Int]): (String, String, Any) = {
+                fCate: mutable.HashMap[String, String]): (String, String, Any) = {
 
     val row = Json.parse(line)
     val ticks = (row \ "ticks").asOpt[String].getOrElse("")
     val jpid = (row \ "jpid").asOpt[String].getOrElse("")
     val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
     val os = (row \ "os").asOpt[String].getOrElse("")
-    val endTime = (row \ "endtime").as[String].toLong
+
+    val startTime = (row \ "starttime_origin").asOpt[String].getOrElse("")
+    val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
+    val endTime = pageAndEventParser.getEndTime(startTime, endtime_origin)
 
     // TODO 逻辑待优化
     if (ticks.length() >= 13) {
@@ -44,13 +47,12 @@ class MbEventTransformer extends ITransformer {
       }
 
       val ret = if (gu_id.nonEmpty && !gu_id.equalsIgnoreCase("null")) {
-        val endtime = (row \ "endtime").asOpt[String].getOrElse("")
         val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
         val loadTime = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_t")
 
         // 如果loadTime非空，就需要判断是否是当天的数据，如果不是，需要过滤掉,因此不需要处理
         if (loadTime.nonEmpty &&
-          DateUtils.dateStr(endtime.toLong) != DateUtils.dateStr(loadTime.toLong * 1000)) {
+          DateUtils.dateStr(endTime.toLong) != DateUtils.dateStr(loadTime.toLong * 1000)) {
           ("", "", None)
         } else {
           try {
@@ -61,19 +63,21 @@ class MbEventTransformer extends ITransformer {
             }
             else {
               val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = res
-
               val res_str = pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x => x match {
                 case y if y == null || y.toString.isEmpty => "\\N"
                 case _ => x
               }).mkString("\001")
 
-              val partitionStr = DateUtils.dateGuidPartitions(endTime, gu_id)
+              val partitionStr = DateUtils.dateGuidPartitions(endTime.toLong, gu_id)
               (partitionStr, "event", res_str)
             }
           }
           catch {
             //使用模式匹配来处理异常
-            case ex:Exception => { println(ex.getStackTraceString) }
+            case ex:Exception => {
+              ex.getStackTraceString
+              ex.printStackTrace()
+            }
               println("=======>> Event: parse Exception!!" + "======>>异常数据:" + row)
             ("", "", None)
           }
@@ -92,18 +96,18 @@ class MbEventTransformer extends ITransformer {
   def parse(row: JsValue,
             dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
             dimevent: mutable.HashMap[String, (Int, Int)],
-            fCate: mutable.HashMap[Int, Int]): (User, PageAndEvent, Page, Event) = {
+            fCate: mutable.HashMap[String, String]): (User, PageAndEvent, Page, Event) = {
 
     // ---------------------------------------------------------------- mb_event ----------------------------------------------------------------
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
     val activityname = (row \ "activityname").asOpt[String].getOrElse("").toLowerCase()
-//    val starttime = (row \ "starttime").asOpt[String].getOrElse("")
-//    val endtime = (row \ "endtime").asOpt[String].getOrElse("")
+
 //    修正过的时间
     val startTime = (row \ "starttime_origin").asOpt[String].getOrElse("")
-    val endTime = (row \ "endtime_origin").asOpt[String].getOrElse("")
+    val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
+    val endTime = pageAndEventParser.getEndTime(startTime, endtime_origin)
 
-    val result = (row \ "result").asOpt[String].getOrElse("")
+//    val result = (row \ "result").asOpt[String].getOrElse("")
     val uid = (row \ "uid").asOpt[String].getOrElse("0")
     val extend_params = (row \ "extend_params").asOpt[String].getOrElse("")
     // utm 的值还会改变，故定义成var
@@ -157,6 +161,7 @@ class MbEventTransformer extends ITransformer {
     val cid = pageAndEventParser.getJsonValueByKey(server_jsonstr, "cid")
 
     val flag = eventParser.filterOutlierPageId(activityname, pagename, cid, f_page_extend_params)
+
     if (flag) {
       // 如果需要过滤，本条数据解析致此结束
       return null
@@ -188,8 +193,8 @@ class MbEventTransformer extends ITransformer {
     val page_id = pageAndEventParser.getPageId(d_page_id, f_page_extend_params)
 
     val forLevelId = if (d_page_id == 254 && f_page_extend_params.nonEmpty) {
-      fCate.get(f_page_extend_params.toInt).getOrElse(0)
-    } else 0
+      fCate.get(f_page_extend_params).getOrElse("0")
+    } else "0"
 
     val page_value = eventParser.getPageValue(d_page_id, f_page_extend_params, cid, page_type_id, d_page_value)
 
@@ -246,7 +251,7 @@ class MbEventTransformer extends ITransformer {
         " ,activityname:" + activityname,
         " ,t_extend_params:" + t_extend_params,
         " ,event_value:" + event_value)
-      println("page_id异常>>原始数据为：" + row)
+      println("page_id=-1 ==> 原始数据为：" + row)
     }
 
     if (-1 == event_id) {
@@ -266,7 +271,7 @@ class MbEventTransformer extends ITransformer {
         " ,activityname:" + activityname,
         " ,t_extend_params:" + t_extend_params,
         " ,event_value:" + event_value)
-      println("event_id=-1>>原始数据为：" + row)
+      println("event_id=-1 ==> 原始数据为：" + row)
     }
 
     (user, pe, page, event)
@@ -278,32 +283,5 @@ class MbEventTransformer extends ITransformer {
     */
   def getActivityid(activityname: String): Int = {
     new GetMbActionId().evaluate(activityname)
-  }
-}
-
-// for test
-object MbEventTransformer {
-
-  def main(args: Array[String]) {
-    val t = pageAndEventParser.getJsonValueByKey("""{"pit_info":"goods::16915719::2_19","cid":0,"_t":1470639193}""", "_t")
-    println(t)
-    var cid = ""
-    var cid2 = ""
-    val server_jsonstr = """{"pit_info":"ad_id::135::block_id::618::img_id::386::3_1","cid":"","_t":1471509688}"""
-    if (server_jsonstr.contains("cid")) {
-      val js_server_jsonstr = Json.parse(server_jsonstr)
-      cid = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
-      cid2 = (js_server_jsonstr \ "cid").asOpt[String].getOrElse("")
-    }
-    if (!cid.isEmpty) println(cid.toInt)
-    val tu = (t, cid, cid2, 0, null)
-    val tu1 = (t, cid)
-    val res = pageAndEventParser.combineTuple(tu, tu1).map(x => x match {
-      case null => "\\N"
-      //      case z if z == null => "\\N"
-      case y if y == "" | y.toString.isEmpty => "\\N"
-      case _ => x
-    }).mkString("\001")
-    println(res)
   }
 }

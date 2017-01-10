@@ -12,7 +12,9 @@ public class CommonLogic {
      * @return
      */
     public static String getPageLevelId(String pageLevelId, String pageId, String eventId) {
+
         String pageLvlId = pageLevelId;
+
         // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
         if("481".equals(eventId) || "10041".equals(eventId)){
             if("158".equals(pageId) || "167".equals(pageId) || "250".equals(pageId) || "26".equals(pageId)) {
@@ -20,6 +22,10 @@ public class CommonLogic {
             }
         } else if("10043".equals(eventId)){
             if("10084".equals(pageId) || "10085".equals(pageId)){
+                pageLvlId = "5";
+            }
+        } else if("10050".equals(eventId)){
+            if("10085".equals(pageId)){
                 pageLvlId = "5";
             }
         } else if("448".equals(eventId)){
@@ -30,8 +36,7 @@ public class CommonLogic {
         return pageLvlId;
     }
 
-    public static String getVisitPath(String initStr, int pageLvlId,String pageLvl, String level1, String level2, String level3, String level4, String level5) {
-
+    public static String getKeyStr(String pageLvl, int pageLvlId, String level1, String level2, String level3, String level4, String level5, String initStr) {
         if(pageLvlId == 1){
             level1= pageLvl;
             level2 = initStr;
@@ -54,9 +59,8 @@ public class CommonLogic {
             level5 = pageLvl;
         }
 
-        String key = level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5;
-        return key;
-
+        String keyStr = level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5;
+        return keyStr;
     }
 
 }
