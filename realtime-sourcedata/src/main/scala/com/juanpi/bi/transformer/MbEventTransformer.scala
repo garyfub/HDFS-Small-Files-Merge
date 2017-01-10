@@ -30,20 +30,22 @@ class MbEventTransformer {
     val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
     val os = (row \ "os").asOpt[String].getOrElse("")
 
-    val startTime = (row \ "starttime_origin").asOpt[String].getOrElse("")
-    val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
-    val endTime = pageAndEventParser.getEndTime(startTime, endtime_origin)
+    val starttime = (row \ "starttime").asOpt[String].getOrElse("")
+
+    if(starttime.isEmpty) {
+      return null
+    }
+
+    val partitionTime = starttime
 
     // TODO 逻辑待优化
     if (ticks.length() >= 13) {
-      // 解析逻辑
       var gu_id = ""
       try {
         gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
       } catch {
-        //使用模式匹配来处理异常
-        case ex: Exception => { println(ex.getStackTraceString) }
-        println("=======>> Event: getGuid Exception!!" + "======>>异常数据:" + row)
+        case ex: Exception => { println("=========>>pageAndEventParser.getGuid: " + ex.getStackTraceString) }
+        println("=======>> Event: getGuid Exception 0000 ======>>异常数据:" + row)
       }
 
       val ret = if (gu_id.nonEmpty && !gu_id.equalsIgnoreCase("null")) {
@@ -52,48 +54,49 @@ class MbEventTransformer {
 
         // 如果loadTime非空，就需要判断是否是当天的数据，如果不是，需要过滤掉,因此不需要处理
         if (loadTime.nonEmpty &&
-          DateUtils.dateStr(endTime.toLong) != DateUtils.dateStr(loadTime.toLong * 1000)) {
+          DateUtils.dateStr(partitionTime.toLong) != DateUtils.dateStr(loadTime.toLong * 1000)) {
           ("", "", None)
-        } else {
+        }
+        else {
           try {
-            val res = parse(row, dimpage, dimevent, fCate)
-            // 过滤异常的数据，具体见解析函数 eventParser.filterOutlierPageId
+            val res = parse(partitionTime, row, dimpage, dimevent, fCate)
             if (res == null) {
               ("", "", None)
             }
             else {
               val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = res
+
               val res_str = pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x => x match {
                 case y if y == null || y.toString.isEmpty => "\\N"
                 case _ => x
               }).mkString("\001")
 
-              val partitionStr = DateUtils.dateGuidPartitions(endTime.toLong, gu_id)
+              val partitionStr = DateUtils.dateGuidPartitions(partitionTime.toLong, gu_id)
               (partitionStr, "event", res_str)
             }
           }
           catch {
             //使用模式匹配来处理异常
             case ex:Exception => {
-              ex.getStackTraceString
-              ex.printStackTrace()
+              println("=======>> parse Exception: " + ex.getStackTraceString)
             }
               println("=======>> Event: parse Exception!!" + "======>>异常数据:" + row)
             ("", "", None)
           }
         }
       } else {
-        println("=======>> Event: GU_ID IS NULL!!" + "\n======>>异常数据:" + row)
+        println("=======>> Event: GU_ID IS NULL 1111!! ======>>异常数据:" + row)
         ("", "", None)
       }
       ret
     } else {
-      println("=======>> Event: ROW IS NULL!!" + "\n======>>异常数据:" + row)
+      println("=======>> Event: ROW IS NULL 22222 ======>>异常数据:" + row)
       ("", "", None)
     }
   }
 
-  def parse(row: JsValue,
+  def parse(partitionTime: String,
+            row: JsValue,
             dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
             dimevent: mutable.HashMap[String, (Int, Int)],
             fCate: mutable.HashMap[String, String]): (User, PageAndEvent, Page, Event) = {
@@ -102,12 +105,15 @@ class MbEventTransformer {
     val session_id = (row \ "session_id").asOpt[String].getOrElse("")
     val activityname = (row \ "activityname").asOpt[String].getOrElse("").toLowerCase()
 
-//    修正过的时间
-    val startTime = (row \ "starttime_origin").asOpt[String].getOrElse("")
+    val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
     val endtime_origin = (row \ "endtime_origin").asOpt[String].getOrElse("")
-    val endTime = pageAndEventParser.getEndTime(startTime, endtime_origin)
 
-//    val result = (row \ "result").asOpt[String].getOrElse("")
+    val endTime = if (endtime_origin.isEmpty) {
+      starttime_origin
+    } else {
+      endtime_origin
+    }
+
     val uid = (row \ "uid").asOpt[String].getOrElse("0")
     val extend_params = (row \ "extend_params").asOpt[String].getOrElse("")
     // utm 的值还会改变，故定义成var
@@ -121,7 +127,6 @@ class MbEventTransformer {
     val page_extends_param = (row \ "page_extends_param").asOpt[String].getOrElse("")
     val deviceid = (row \ "deviceid").asOpt[String].getOrElse("")
     val pre_page = (row \ "pre_page").asOpt[String].getOrElse("")
-    // 字段与pageinfo中的不太一样
     val pre_extends_param = (row \ "pre_extends_param").asOpt[String].getOrElse("")
     val jpid = (row \ "jpid").asOpt[String].getOrElse("")
     val ip = ""
@@ -223,11 +228,12 @@ class MbEventTransformer {
 
     val jpk = 0
 
-    val (date, hour) = DateUtils.dateHourStr(endTime.toLong)
+    val (date, hour) = DateUtils.dateHourStr(partitionTime.toLong)
+
     val table_source = "mb_event"
 
     val user = User.apply(gu_id, uid, utm, "", session_id, terminal_id, app_version, site_id, ref_site_id, ctag, location, jpk, ugroup, date, hour)
-    val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, startTime, endTime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
+    val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, starttime_origin, endTime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceid, to_switch)
     val event = Event.apply(event_id.toString, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime, ug_id)
 

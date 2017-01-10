@@ -3,7 +3,7 @@ package com.juanpi.bi.transformer
 import java.util.regex.Pattern
 
 import com.fasterxml.jackson.core.JsonParseException
-import com.juanpi.bi.sc_utils.StringUtils
+import com.juanpi.bi.sc_utils.{DateUtils, StringUtils}
 import com.juanpi.hive.udf.{GetDwMbPageValue, GetDwPcPageValue, GetGoodsId, GetPageID}
 import play.api.libs.json._
 
@@ -62,18 +62,35 @@ object pageAndEventParser {
     gu_id
   }
 
-  def getEndTime(startTimeOrigin: String, endTimeOrigin: String): String = {
-    val endTime = if (endTimeOrigin.isEmpty) {
+  /**
+    * 根据开始时间分区，如果 startTimeOrigin 与 startTime 是同一天，就取 startTimeOrigin；如果startTimeOrigin为空，就取 startTime
+    * @param startTimeOrigin
+    * @param startTime
+    * @return
+    */
+  def getPartitionTime(startTimeOrigin: String, startTime: String): String = {
+
+    val originDate = if(startTimeOrigin.nonEmpty) {
+      DateUtils.dateHourStr(startTimeOrigin.toLong)._1
+    } else ""
+
+    val date = if(startTime.nonEmpty) {
+      DateUtils.dateHourStr(startTime.toLong)._1
+    } else ""
+
+    val res = if(date.equals(originDate)){
       startTimeOrigin
+    } else if(startTimeOrigin.isEmpty) {
+      startTime
     } else {
-      endTimeOrigin
+      startTime
     }
-    endTime
+    res
   }
 
   /**
     * 由于原始数据同一个字段传值的类型不完全一样，比如cid，有时候传的是整形，有时候又是字符串。
-    *  强化 getJsonValueByKey 函数，根据Json中解析到的类型进行判断，然后再转为String，
+    * 强化 getJsonValueByKey 函数，根据Json中解析到的类型进行判断，然后再转为String，
     * @param jsonStr
     * @param key
     * @return

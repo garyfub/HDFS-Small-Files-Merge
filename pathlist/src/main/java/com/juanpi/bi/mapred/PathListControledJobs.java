@@ -157,7 +157,7 @@ public class PathListControledJobs {
 
         //1.3 指定分区类
         job.setPartitionerClass(HashPartitioner.class);
-        job.setNumReduceTasks(20);
+        job.setNumReduceTasks(10);
 
         //1.4 TODO 排序、分区
         job.setGroupingComparatorClass(MyGroupingComparator.class);
@@ -196,11 +196,11 @@ public class PathListControledJobs {
                     //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
                     // page_level_id  对应的路径 line
                     // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 40: event_value; 36: event_lvl2_value; 22: starttime
-                    String page_level_id = (splited[21] == null)? "\\N":splited[21];
-                    String page_id = (splited[15] == null) ? "\\N":splited[15];
+                    String pageLevelId = (splited[21] == null)? "\\N":splited[21];
+                    String pageId = (splited[15] == null) ? "\\N":splited[15];
                     String page_value = (splited[16] == null) ? "\\N":splited[16];
                     String page_lvl2_value = (splited[25] == null) ? "\\N":splited[25];
-                    String event_id = (splited[40] == null) ? "\\N":splited[40];
+                    String eventId = (splited[40] == null) ? "\\N":splited[40];
                     String event_value = (splited[41] == null) ? "\\N":splited[41];
                     String event_lvl2_value = (splited[42] == null) ? "\\N":splited[42];
                     String startTime = (splited[22] == null) ? "\\N":splited[22];
@@ -216,14 +216,33 @@ public class PathListControledJobs {
                     String ug_id  = (splited[47] == null) ? "\\N":splited[47];
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
-                    String pageLvlId = CommonLogic.getPageLevelId(page_level_id, page_id, event_id);
+                    String pageLvlId = pageLevelId;
+
+                    // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
+                    if("481".equals(eventId) || "10041".equals(eventId)){
+                        if("158".equals(pageId) || "167".equals(pageId) || "250".equals(pageId) || "26".equals(pageId)) {
+                            pageLvlId = "1";
+                        }
+                    } else if("10043".equals(eventId)){
+                        if("10084".equals(pageId) || "10085".equals(pageId)){
+                            pageLvlId = "5";
+                        }
+                    } else if("10050".equals(eventId)){
+                        if("10085".equals(pageId) || "10107".equals(pageId)){
+                            pageLvlId = "5";
+                        }
+                    } else if("448".equals(eventId)){
+                        if("158".equals(pageId)){
+                            pageLvlId = "5";
+                        }
+                    }
 
                     String str[] = {
                             pageLvlId,
-                            page_id
+                            pageId
                             + "\t" + page_value
                             + "\t" + page_lvl2_value
-                            + "\t" + event_id
+                            + "\t" + eventId
                             + "\t" + event_value
                             + "\t" + event_lvl2_value
                             + "\t" + startTime
@@ -273,14 +292,44 @@ public class PathListControledJobs {
             String level5 = initStr;
 
             for (TextArrayWritable v2 : v2s) {
-                String pageLvlIdStr = v2.toStrings()[0];
-                String pageLvl = v2.toStrings()[1];
-                int pageLvlId = Integer.parseInt(pageLvlIdStr);
-                String visitPath = CommonLogic.getKeyStr(initStr, pageLvlId, pageLvl, level1, level2, level3, level4, level5);
-                // 5 个级别
-                Text key2 = new Text(visitPath);
-                Text value2 = new Text(v2.toStrings()[2]);
-                context.write(key2, value2);
+
+                try {
+                    String pageLvlIdStr = v2.toStrings()[0];
+                    String pageLvl = v2.toStrings()[1];
+                    int pageLvlId = Integer.parseInt(pageLvlIdStr);
+
+                    if(pageLvlId == 1){
+                        level1= pageLvl;
+                        level2 = initStr;
+                        level3 = initStr;
+                        level4 = initStr;
+                        level5 = initStr;
+                    } else if(pageLvlId == 2){
+                        level2= pageLvl;
+                        level3 = initStr;
+                        level4 = initStr;
+                        level5 = initStr;
+                    } else if(pageLvlId == 3){
+                        level3 = pageLvl;
+                        level4 = initStr;
+                        level5 = initStr;
+                    } else if(pageLvlId == 4){
+                        level4 = pageLvl;
+                        level5 = initStr;
+                    } else if(pageLvlId == 5){
+                        level5 = pageLvl;
+                    }
+
+                    String keyStr = level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5;
+
+                    // 5 个级别
+                    Text key2 = new Text(keyStr);
+                    Text value2 = new Text(v2.toStrings()[2]);
+                    context.write(key2, value2);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("======>>Exception: " +  Joiner.on("#").join(v2.toStrings()));
+                }
             }
         }
     }

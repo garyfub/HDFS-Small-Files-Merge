@@ -36,7 +36,7 @@ public class OfflinePathList {
     // hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr
     static String base = "hdfs://nameservice1/user/hive";
     static final String SOURCE_DIR = "fct_path_list_mapr";
-    static final String TARGET_DIR = "fct_for_path_list_test3offline";
+    static final String TARGET_DIR = "fct_for_path_list_offline";
     static Configuration conf = new Configuration();
 
     static FileSystem fs;
@@ -154,7 +154,6 @@ public class OfflinePathList {
         Job job = Job.getInstance(conf, "OfflinePathList_Partition_" + guStr);
 
         // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
-//        job.setJar("pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar");
         job.setJarByClass(OfflinePathList.class);
 
         //1.1 指定输入文件路径
@@ -204,20 +203,19 @@ public class OfflinePathList {
             final String[] splited = value.toString().split("\001");
 
             try {
-                // gu_id 和starttime 作为联合主键
+                // gu_id 和 starttime_origin 作为联合主键
                 String gu_id = splited[1];
                 if(!gu_id.isEmpty() && !gu_id.equals("0"))
                 {
                     final OfflinePathList.NewK2 k2 = new OfflinePathList.NewK2(splited[1], Long.parseLong(splited[11]));
 
-                    String page_level_id = (splited[0] == null) ? "\\N":splited[0];
-                    String page_id = (splited[2] == null) ? "\\N":splited[2];
+                    String pageLevelId = (splited[0] == null) ? "\\N":splited[0];
+                    String pageId = (splited[2] == null) ? "\\N":splited[2];
                     String page_value = (splited[3] == null) ? "\\N":splited[3];
                     String page_lvl2_value = (splited[4] == null) ? "\\N":splited[4];
-                    String event_id = (splited[5] == null) ? "\\N":splited[5];
+                    String eventId = (splited[5] == null) ? "\\N":splited[5];
                     String event_value = (splited[6] == null) ? "\\N":splited[6];
                     String event_lvl2_value = (splited[7] == null) ? "\\N":splited[7];
-                    String rule_id = (splited[8] == null) ? "\\N":splited[8];
                     String test_id = (splited[9] == null) ? "\\N":splited[9];
                     String select_id = (splited[10] == null) ? "\\N":splited[10];
                     String starttime = (splited[11] == null) ? "\\N":splited[11];
@@ -229,14 +227,33 @@ public class OfflinePathList {
                     String ug_id  = (splited[17] == null) ? "\\N":splited[17];
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
-                    String pageLvlId = CommonLogic.getPageLevelId(page_level_id, page_id, event_id);
+                    String pageLvlId = pageLevelId;
+
+                    // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
+                    if("481".equals(eventId) || "10041".equals(eventId)){
+                        if("158".equals(pageId) || "167".equals(pageId) || "250".equals(pageId) || "26".equals(pageId)) {
+                            pageLvlId = "1";
+                        }
+                    } else if("10043".equals(eventId)){
+                        if("10084".equals(pageId) || "10085".equals(pageId)){
+                            pageLvlId = "5";
+                        }
+                    } else if("10050".equals(eventId)){
+                        if("10085".equals(pageId) || "10107".equals(pageId)){
+                            pageLvlId = "5";
+                        }
+                    } else if("448".equals(eventId)){
+                        if("158".equals(pageId)){
+                            pageLvlId = "5";
+                        }
+                    }
 
                     String str[] = {
                             pageLvlId,
-                            page_id
+                            pageId
                                     + "\t" + page_value
                                     + "\t" + page_lvl2_value
-                                    + "\t" + event_id
+                                    + "\t" + eventId
                                     + "\t" + event_value
                                     + "\t" + event_lvl2_value
                                     + "\t" + starttime
@@ -291,7 +308,29 @@ public class OfflinePathList {
                     String pageLvl = v2.toStrings()[1];
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
 
-                    String keyStr = CommonLogic.getKeyStr(pageLvl, pageLvlId, level1, level2, level3, level4, level5, initStr);
+                    if(pageLvlId == 1){
+                        level1= pageLvl;
+                        level2 = initStr;
+                        level3 = initStr;
+                        level4 = initStr;
+                        level5 = initStr;
+                    } else if(pageLvlId == 2){
+                        level2= pageLvl;
+                        level3 = initStr;
+                        level4 = initStr;
+                        level5 = initStr;
+                    } else if(pageLvlId == 3){
+                        level3 = pageLvl;
+                        level4 = initStr;
+                        level5 = initStr;
+                    } else if(pageLvlId == 4){
+                        level4 = pageLvl;
+                        level5 = initStr;
+                    } else if(pageLvlId == 5){
+                        level5 = pageLvl;
+                    }
+
+                    String keyStr = level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5;
 
                     // 5 个级别
                     Text key2 = new Text(keyStr);

@@ -475,28 +475,3 @@ class H5EventTransformer {
     eventValue
   }
 }
-
-
-object H5EventTransformer {
-
-  def main(args: Array[String]): Unit = {
-//    val h5 = new H5EventTransformer()
-
-    val url = "http://tuan.juanpi.com"
-    if(url matches("http(s)?://(wx|kan).juanpi.com.*")){
-     println(2)
-    }
-    if (url matches("http(s?)://(tuan|m).*")) {
-      println(6)
-    }
-
-//    val urlPageId = 29
-//    val upa = Array(12, 14, 25, 26, 28, 29)
-//    val res = urlPageId match {
-//      case 33 => "aaaa"
-//      case x if (upa.exists({ x: Int => x == urlPageId })) => "bbbb"
-//      case _ => ""
-//    }
-//    println(res)
-  }
-}
