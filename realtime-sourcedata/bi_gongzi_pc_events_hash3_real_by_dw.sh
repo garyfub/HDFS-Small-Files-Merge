@@ -6,7 +6,7 @@ echo "gongzi com.juanpi.bi.streaming.KafkaConsumer pc_events_hash3 start..."
 
 /data/apache_projects/spark-hadoop-2.4.0/bin/spark-submit \
     --class com.juanpi.bi.streaming.KafkaConsumer \
-    --master spark://GZ-JSQ-JP-BI-SPARK-002.jp:7077,GZ-JSQ-JP-BI-SPARK-001.jp:7077 \
+    --master spark://GZ-JSQ-JP-BI-SPARK-MASTER-001.JP:7077,GZ-JSQ-JP-BI-SPARK-MASTER-002.JP:7077 \
     --deploy-mode client \
     --driver-memory 4g \
     --executor-memory 4g \
