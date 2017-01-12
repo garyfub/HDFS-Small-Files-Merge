@@ -37,7 +37,7 @@ fi
 echo "当前时间为=> $curdt, 处理数据开始..."
 
 fm_tbegin=$(date +%s)
-yarn jar ./hdfs-files-merge-1.0.jar "$today"
+yarn jar ./hdfs-files-merge-1.0.jar com.juanpi.bi.merge.TaskManager "$today"
 
 fm_tend=$(date +%s)
 echo "当前时间: $curdt, 合并小文件完毕. 处理日期为：$today, total耗时: $(($fm_tend-$fm_tbegin)) 秒!!!"
