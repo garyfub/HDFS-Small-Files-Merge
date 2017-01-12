@@ -55,7 +55,6 @@ public class CleanHistoricalData {
 
     public static void main(String[] args) {
         String dateStr = "";
-        String dir = "";
 
         System.out.println("args 参数个数：" + args.length);
 
@@ -64,16 +63,6 @@ public class CleanHistoricalData {
             dateStr = args[0];
         }
 
-        if(args.length == 2)
-        {
-            dateStr = args[0];
-            dir = args[1];
-        }
-
-        if(null == dir || dir.isEmpty())
-        {
-            dir = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
-        }
 
         CleanHistoricalData chd = new CleanHistoricalData();
         try {
