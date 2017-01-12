@@ -36,7 +36,9 @@ public class CleanHistoricalData {
     // 删除指定文件
     private static void delete(List<Path> files) throws IOException {
         for (Path file : files) {
-            HdfsUtil.delete(file);
+
+            System.out.println(file);
+//            HdfsUtil.delete(file);
         }
     }
 
