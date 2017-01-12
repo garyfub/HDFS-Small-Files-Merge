@@ -15,7 +15,7 @@ public class CleanHistoricalData {
     String baseDir = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
     // 路径正则
     private String getDirRegex(String dateStr) {
-        return baseDir + "/{mb_event_hash2,mb_pageinfo_hash2,pc_events_hash3}/date=" + dateStr;
+        return baseDir + "/{mb_event_hash2,mb_pageinfo_hash2,pc_events_hash3}/date=*";
     }
 
     // 获取匹配HDFS路径
