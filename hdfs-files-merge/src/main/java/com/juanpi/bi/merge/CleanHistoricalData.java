@@ -96,8 +96,9 @@ public class CleanHistoricalData {
             if((curMs - uriMs) > 0) {
                 matchPath.add(matchDir);
             }
-            delete(matchPath);
         }
+        
+        delete(matchPath);
     }
 
     public static void main(String[] args) {
