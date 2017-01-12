@@ -38,11 +38,13 @@ public class CleanHistoricalData {
 
         String srcDirRegex = getDirRegex(dateStr);
         Path[] matchDirs = getMatchDir(srcDirRegex);
+
         if (matchDirs == null || matchDirs.length < 1) {
             System.out.println("matchDirs is null....");
             return;
         }
 
+        // 排序
         Arrays.sort(matchDirs);
 
         for (Path matchDir : matchDirs) {
