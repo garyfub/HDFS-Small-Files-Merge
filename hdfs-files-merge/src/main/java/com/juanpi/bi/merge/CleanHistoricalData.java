@@ -1,10 +1,18 @@
 package com.juanpi.bi.merge;
 
+import com.juanpi.bi.merge.util.DateUtil;
 import com.juanpi.bi.merge.util.HdfsUtil;
+import org.apache.avro.generic.GenericData;
 import org.apache.hadoop.fs.Path;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 清理实时数据
@@ -25,8 +33,31 @@ public class CleanHistoricalData {
         return matchPaths;
     }
 
-    private void del(Path matchDir) {
+    // 删除指定文件
+    private static void delete(List<Path> files) throws IOException {
+        for (Path file : files) {
+            HdfsUtil.delete(file);
+        }
+    }
 
+    /**
+     * 返回时间对应的毫秒
+     * @param dateStr
+     * @return
+     */
+    private long dateFormatString(String dateStr) {
+        DateFormat df = new SimpleDateFormat("yyyyMMdd");
+
+        Date dt;
+        long miliSeconds = 0;
+        try {
+            dt = df.parse(dateStr);
+            miliSeconds = dt.getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return miliSeconds;
     }
 
     /**
@@ -47,9 +78,23 @@ public class CleanHistoricalData {
         // 排序
         Arrays.sort(matchDirs);
 
+        // 传入时间
+        String ds = DateUtil.getSpecifiedDayAgo(dateStr, 7);
+        long curMs = dateFormatString(ds);
+
+        ArrayList matchPath = new ArrayList();
         for (Path matchDir : matchDirs) {
-            System.out.println("matchDir is:" + matchDir);
-//            del(matchDir);
+            System.out.println("find matchDir:" + matchDir);
+
+            // date=2017-01-01
+            String name = matchDir.getName();
+            String uriDtStr = name.substring(5);
+            // 从uri中解析出来的时间
+            long uriMs = dateFormatString(uriDtStr);
+            if((curMs - uriMs) > 0) {
+                matchPath.add(matchDir);
+            }
+            delete(matchPath);
         }
     }
 
@@ -63,8 +108,15 @@ public class CleanHistoricalData {
             dateStr = args[0];
         }
 
-
         CleanHistoricalData chd = new CleanHistoricalData();
+
+//        String path = new Path("hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list/pc_events_hash3/date=2017-01-12").getName();
+//        System.out.println(path);
+//
+//        long time = chd.dateFormatString(path.substring(5));
+//        System.out.println(time);
+//        System.exit(11);
+
         try {
             chd.clean(dateStr);
         } catch (IOException e) {
