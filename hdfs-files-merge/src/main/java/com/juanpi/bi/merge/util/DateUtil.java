@@ -176,42 +176,53 @@ public class DateUtil {
         return milis;
     }
 
-    public static void main(String[] args){
-//        String dateHourStr = DateUtil.dateHourStr("1473491100000", "yyyyMMddHH");
-//        System.out.println(dateHourStr);
-//        System.out.println(millisToMins("1473351420000"));
-//
-//        String fmt = "yyyy-MM-dd HH:00:00";
-//        String dt = DateUtil.getHourIntervalDate(0, fmt);
-//        try {
-//            long milis = DateUtil.dateToMillis(dt, fmt);
-//            System.out.println("milis==" + milis);
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
-//
-//        System.out.println(getOneDateAgoDate());
-//        System.out.println(getOneHourAgoDate());
-//        System.out.println(getHourIntervalMillis(-1));
-
-        long mm = getHoursAgoMillis();
-        System.out.println("ddddd==" + mm);
-
-//        String tdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal.getTime());
-//        System.out.println("dateIntervalDate= =: " + tdt);
-//        cal.add(Calendar.DATE, -1);
-//        String oneDayAgo = new SimpleDateFormat(AM0_FMT).format(cal.getTime());
-//        fmt = "yyyy-MM-dd HH:mm:ss";
-//
-//        try {
-//            long millis = DateUtil.dateToMillis(oneDayAgo, fmt);
-//            System.out.println(millis);
-////         1474559999000
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
-
+    /**
+     * 指定日期和日期间隔，返回间隔之前的日期
+     * @param specifiedDay
+     * @param interval
+     * @return
+     */
+    public static String getSpecifiedDayAgo(String specifiedDay, int interval){
+        return getSpecifiedDay(specifiedDay, interval, "-");
     }
 
+    /**
+     * 指定日期和日期间隔，返回间隔之前的日期
+     * @param specifiedDay
+     * @param interval
+     * @return
+     */
+    public static String getSpecifiedDayAfter(String specifiedDay, int interval){
+        return getSpecifiedDay(specifiedDay, interval, "+");
+    }
 
+    private static String getSpecifiedDay(String specifiedDay, int interval, String func) {
+        Calendar c = Calendar.getInstance();
+        Date date = null;
+        try {
+            date = new SimpleDateFormat("yyyy-MM-dd").parse(specifiedDay);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        c.setTime(date);
+        int day=c.get(Calendar.DATE);
+
+        if("+".equals(func)) {
+            c.set(Calendar.DATE, day + interval);
+        } else if("-".equals(func)) {
+            c.set(Calendar.DATE, day - interval);
+        } else {
+            return null;
+        }
+
+        String dayAfter = new SimpleDateFormat("yyyy-MM-dd").format(c.getTime());
+        return dayAfter;
+    }
+
+    public static void main(String[] args){
+        String d1 = getSpecifiedDayAfter("2017-01-11", 7);
+        String d2 = getSpecifiedDayAgo("2017-01-11", 7);
+        System.out.println(d1);
+        System.out.println(d2);
+    }
 }

@@ -64,6 +64,8 @@ case class User(
   * @param gid
   * @param table_source
   */
+//                         starttime_origin: String,
+//                         endtime_origin: String,
 case class PageAndEvent(
                          // page and event 公共属性
                          page_id: Int,
