@@ -32,6 +32,10 @@ class MbEventTransformer {
 
     val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
 
+    if(starttime_origin.isEmpty) {
+      return ("", "", null)
+    }
+
     val originDateStr = DateUtils.dateStr(starttime_origin.toLong)
 
     val sDate = DateUtils.getWeekAgoDateStr()
@@ -44,7 +48,7 @@ class MbEventTransformer {
     }
 
     if(startTime.isEmpty) {
-      return null
+      return ("", "", null)
     }
 
     val partitionTime = startTime

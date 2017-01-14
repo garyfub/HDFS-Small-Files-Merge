@@ -33,6 +33,10 @@ class PageinfoTransformer {
       val sDate = DateUtils.getWeekAgoDateStr()
       val eDate = DateUtils.getWeekLaterDateStr()
 
+      if(starttime_origin.isEmpty) {
+        return ("", "", null)
+      }
+
       val startTime = if(originDateStr > sDate && originDateStr < eDate) {
         starttime_origin
       } else {
@@ -40,7 +44,7 @@ class PageinfoTransformer {
       }
 
       if(startTime.isEmpty) {
-        return null
+        return ("", "", null)
       }
 
       val partitionTime = startTime
