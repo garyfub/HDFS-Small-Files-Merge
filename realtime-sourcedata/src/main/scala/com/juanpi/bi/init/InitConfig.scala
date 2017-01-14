@@ -22,13 +22,13 @@ class InitConfig() {
   @BeanProperty var duration: Duration = _
 
   def initDimTables(): (mutable.HashMap[String, (Int, Int, String, Int)],
-    mutable.HashMap[String, (Int, Int)],
+    mutable.HashMap[String, (Int, Int, Int)],
     mutable.HashMap[String, String]) = {
 
     // 查询 hive 中的 dim_page 和 dim_event
     val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
     val dp: mutable.HashMap[String, (Int, Int, String, Int)] = initDimPage(sqlContext)
-    val de: mutable.HashMap[String, (Int, Int)] = initDimEvent(sqlContext)
+    val de: mutable.HashMap[String, (Int, Int, Int)] = initDimEvent(sqlContext)
     val fCate: mutable.HashMap[String, String] = initDimFrontCate(sqlContext)
 
     (dp, de, fCate)
@@ -39,13 +39,27 @@ class InitConfig() {
     * @return
     */
   def initDimH5Tables(): (mutable.HashMap[String, (Int, Int, String, Int)],
-    mutable.HashMap[String, (Int, Int)]) = {
+    mutable.HashMap[String, (Int, Int, Int)]) = {
 
     // 查询 hive 中的 dim_page 和 dim_event
     val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
     val dp: mutable.HashMap[String, (Int, Int, String, Int)] = initDimH5Page(sqlContext)
     val dH5 = initDimH5Event(sqlContext)
 
+    (dp, dH5)
+  }
+
+  /**
+    * 解析h5需用到的 dim_page 和 dim_event
+    * @return
+    */
+  def initEventDimTables(): (mutable.HashMap[String, (Int, Int, String, Int)],
+    mutable.HashMap[String, (Int, Int, Int)]) = {
+
+    // 查询 hive 中的 dim_page 和 dim_event
+    val sqlContext: HiveContext = new HiveContext(this.getSsc().sparkContext)
+    val dp: mutable.HashMap[String, (Int, Int, String, Int)] = initDimH5Page(sqlContext)
+    val dH5 = initDimH5Event(sqlContext)
     (dp, dH5)
   }
 
@@ -127,10 +141,10 @@ class InitConfig() {
     * @param sqlContext
     * @return
     */
-  def initDimEvent(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int)] =
+  def initDimEvent(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int, Int)] =
   {
-    var dimEvents = new mutable.HashMap[String, (Int, Int)]
-    val dimEventSql = s"""select event_id, event_exp1, event_exp2, event_type_id
+    var dimEvents = new mutable.HashMap[String, (Int, Int, Int)]
+    val dimEventSql = s"""select event_id, event_exp1, event_exp2, event_type_id, event_level_id
                          | from dw.dim_event
                          | where event_id > 0
                          | and terminal_lvl1_id = 2
@@ -144,16 +158,18 @@ class InitConfig() {
       val event_type_id = line.getAs[Int]("event_type_id")
       val event_exp1 = line.getAs[String]("event_exp1")
       val event_exp2 = line.getAs[String]("event_exp2")
+      val event_level_id = line.getAs[Int]("event_level_id")
 
       val key = event_exp1 + event_exp2
-      (event_id, event_type_id, key)
+      (event_id, event_type_id, key, event_level_id)
     })
     .collect()
     .foreach( items => {
       val event_id: Int = items._1
       val event_type_id = items._2
       val key = items._3
-      dimEvents += ( key -> (event_id, event_type_id))
+      val event_level_id = items._4
+      dimEvents += (key -> (event_id, event_type_id, event_level_id))
     })
 
     dimData.unpersist(true)
@@ -200,10 +216,10 @@ class InitConfig() {
     * @param sqlContext
     * @return
     */
-  def initDimH5Event(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int)] =
+  def initDimH5Event(sqlContext: HiveContext): mutable.HashMap[String, (Int, Int, Int)] =
   {
-    var dimEvents = new mutable.HashMap[String, (Int, Int)]
-    val dimEventSql = s"""select event_id, event_exp1, event_exp2, event_type_id, event_type_name
+    var dimEvents = new mutable.HashMap[String, (Int, Int, Int)]
+    val dimEventSql = s"""select event_id, event_exp1, event_exp2, event_type_id, event_type_name, event_level_id
                           | from dw.dim_event
                           | where event_id > 0
                           | and terminal_lvl1_id = 1
@@ -217,13 +233,14 @@ class InitConfig() {
       val eventTypeId = line.getAs[Int]("event_type_id")
       val eventExp1 = line.getAs[String]("event_exp1")
       val eventTypeName = line.getAs[String]("event_type_name")
+      val eventLevelId =  line.getAs[Int]("event_level_id")
 
       val key = eventExp1 + ScalaConstants.JoinDelimiter + eventTypeName
-      (key, eventId, eventTypeId)
+      (key, eventId, eventTypeId, eventLevelId)
     })
       .collect()
       .foreach( items => {
-        dimEvents += ( items._1 -> (items._2, items._3))
+        dimEvents += ( items._1 -> (items._2, items._3, items._4))
       })
 
     dimData.unpersist(true)
@@ -238,7 +255,7 @@ class InitConfig() {
   def initDimFrontCate(sqlContext: HiveContext): mutable.HashMap[String, String] =
   {
     var dimValues = new mutable.HashMap[String, String]
-    val sql = s"""select front_cate_id, level_id
+    val sql = s"""select front_cate_id, case when (pid = 490 or front_cate_id = 490) then level_id +1 else level_id end level_id
                           | from dw.dim_front_cate
                           | order by front_cate_id""".stripMargin
 
@@ -267,14 +284,25 @@ object InitConfig {
 
   // 主构造器
   val ic = new InitConfig()
-  var DIMPAGE = new mutable.HashMap[String, (Int, Int, String, Int)]
-  var DIMENT = new mutable.HashMap[String, (Int, Int)]
-  var FCATE = new mutable.HashMap[String, String]
+//  var DIMPAGE = new mutable.HashMap[String, (Int, Int, String, Int)]
+//  var DIMENT = new mutable.HashMap[String, (Int, Int)]
+//  var FCATE = new mutable.HashMap[String, String]
 
   def initH5Dim() = {
     val dp = ic.initDimH5Tables()._1
     val de = ic.initDimH5Tables()._2
     (dp, de)
+  }
+
+  def initMBDim() = {
+    // 初始化 page and event
+    val initDimTables = ic.initDimTables()
+
+    val dp = initDimTables._1
+    val de  = initDimTables._2
+    val df   = initDimTables._3
+
+    (dp, de, df)
   }
 
   def initParam(appName: String, interval: Int, maxRecords: String) = {
@@ -287,11 +315,11 @@ object InitConfig {
     ic.setStreamingContext()
 
     // 初始化 page and event
-    val initDimTables = ic.initDimTables()
-
-    DIMPAGE = initDimTables._1
-    DIMENT  = initDimTables._2
-    FCATE   = initDimTables._3
+//    val initDimTables = ic.initDimTables()
+//
+//    DIMPAGE = initDimTables._1
+//    DIMENT  = initDimTables._2
+//    FCATE   = initDimTables._3
   }
 
   def getStreamingContext(): StreamingContext = {

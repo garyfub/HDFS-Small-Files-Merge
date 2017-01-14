@@ -21,7 +21,7 @@ class MbEventTransformer {
     */
   def logParser(line: String,
                 dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
-                dimevent: mutable.HashMap[String, (Int, Int)],
+                dimevent: mutable.HashMap[String, (Int, Int, Int)],
                 fCate: mutable.HashMap[String, String]): (String, String, Any) = {
 
     val row = Json.parse(line)
@@ -30,13 +30,24 @@ class MbEventTransformer {
     val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
     val os = (row \ "os").asOpt[String].getOrElse("")
 
-    val starttime = (row \ "starttime").asOpt[String].getOrElse("")
+    val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
 
-    if(starttime.isEmpty) {
+    val originDateStr = DateUtils.dateStr(starttime_origin.toLong)
+
+    val sDate = DateUtils.getWeekAgoDateStr()
+    val eDate = DateUtils.getWeekLaterDateStr()
+
+    val startTime = if(originDateStr > sDate && originDateStr < eDate) {
+      starttime_origin
+    } else {
+      ""
+    }
+
+    if(startTime.isEmpty) {
       return null
     }
 
-    val partitionTime = starttime
+    val partitionTime = startTime
 
     // TODO 逻辑待优化
     if (ticks.length() >= 13) {
@@ -97,8 +108,8 @@ class MbEventTransformer {
 
   def parse(partitionTime: String,
             row: JsValue,
-            dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
-            dimevent: mutable.HashMap[String, (Int, Int)],
+            dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
+            dimEvent: mutable.HashMap[String, (Int, Int, Int)],
             fCate: mutable.HashMap[String, String]): (User, PageAndEvent, Page, Event) = {
 
     // ---------------------------------------------------------------- mb_event ----------------------------------------------------------------
@@ -174,7 +185,7 @@ class MbEventTransformer {
 
     val forPageId = eventParser.getForPageId(cid, f_page_extend_params, pagename)
 
-    val forPrePageid = eventParser.getForPrePageId(pagename, f_pre_extend_params, pre_page)
+    val forPrePageId = eventParser.getForPrePageId(pagename, f_pre_extend_params, pre_page)
 
     val forEventId = eventParser.getForEventId(cid, activityname, t_extend_params)
 
@@ -186,15 +197,16 @@ class MbEventTransformer {
     val (sortdate, sorthour, lplid, ptplid) = eventParser.getGsortKey(gsort_key)
 
     // --------------------------------------------------------------------> event_reg ------------------------------------------------------------------
-    val (d_event_id: Int, event_type_id: Int) = dimevent.get(forEventId).getOrElse(0, 0)
+    val (d_event_id: Int, event_type_id: Int, event_level_id: Int) = dimEvent.get(forEventId).getOrElse(0, 0, 0)
     val event_id = eventParser.getEventId(d_event_id, app_version)
     val event_value = eventParser.getEventValue(event_type_id, activityname, f_extend_params, server_jsonstr)
 
-    val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimpage.get(forPrePageid).getOrElse(0, 0, "", 0)
+    // d_ 表示数据字段值从dim表出的
+    val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimPage.get(forPrePageId).getOrElse(0, 0, "", 0)
     val ref_page_id = pageAndEventParser.getPageId(d_pre_page_id, f_pre_extend_params)
     val ref_page_value = eventParser.getPageValue(d_pre_page_id, f_pre_extend_params, cid, d_pre_page_type_id, d_pre_page_value)
 
-    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimpage.get(forPageId).getOrElse(0, 0, "", 0)
+    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPage.get(forPageId).getOrElse(0, 0, "", 0)
     val page_id = pageAndEventParser.getPageId(d_page_id, f_page_extend_params)
 
     val forLevelId = if (d_page_id == 254 && f_page_extend_params.nonEmpty) {
@@ -206,7 +218,7 @@ class MbEventTransformer {
     val shop_id = pageAndEventParser.getShopId(d_page_id, f_page_extend_params)
     val ref_shop_id = pageAndEventParser.getShopId(ref_page_id, f_pre_extend_params)
 
-    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, f_page_extend_params, d_page_level_id, forLevelId)
+    val page_level_id = pageAndEventParser.getEventPageLevelId(event_level_id, d_page_id, f_page_extend_params, d_page_level_id, forLevelId)
 
     val hot_goods_id = if (d_page_id == 250 && !f_page_extend_params.isEmpty && f_page_extend_params.contains("_") && f_page_extend_params.split("_").length > 2) {
       new GetGoodsId().evaluate(f_page_extend_params.split("_")(2))

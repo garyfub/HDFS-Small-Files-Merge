@@ -112,7 +112,7 @@ public class MergeTask {
             {
                 StringBuilder dstFileBuf = new StringBuilder();
 
-                // 创建目标文件
+                // 创建目标文件 新目录
                 Path fileParnt = mergingFiles.get(0).getParent();
                 dstFileBuf.append(fileParnt.getParent().toString());
                 dstFileBuf.append("/merged/merged_" + dateHourStr);
@@ -126,9 +126,7 @@ public class MergeTask {
                         InputStream in = srcFS.open(logfile);
                         try {
                             IOUtils.copyBytes(in, out, conf, false);
-                        } finally
-                        {
-//                            System.out.println("key:" + dateHourStr + "==>> mergingFiles:" + logfile.toString());
+                        } finally {
                             in.close();
                         }
                     }
@@ -139,14 +137,14 @@ public class MergeTask {
                 }
 
                 // 合并后，删除小文件
-                if (deleteSource) {
-                    if(mergingFiles.size() > 0)
-                    {
-                        // 强制类型转换
-//                        System.out.println("删除小文件：" + dateHourStr + ",目录：" + mergingFiles.get(0).getParent());
-                        delete(mergingFiles);
-                    }
-                }
+//                if (deleteSource) {
+//                    if(mergingFiles.size() > 0)
+//                    {
+//                        // 强制类型转换
+////                        System.out.println("删除小文件：" + dateHourStr + ",目录：" + mergingFiles.get(0).getParent());
+//                        delete(mergingFiles);
+//                    }
+//                }
             }
         }
 	}

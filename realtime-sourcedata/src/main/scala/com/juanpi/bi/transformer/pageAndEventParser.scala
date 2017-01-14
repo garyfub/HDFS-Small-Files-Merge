@@ -4,7 +4,7 @@ import java.util.regex.Pattern
 
 import com.fasterxml.jackson.core.JsonParseException
 import com.juanpi.bi.sc_utils.{DateUtils, StringUtils}
-import com.juanpi.hive.udf.{GetDwMbPageValue, GetDwPcPageValue, GetGoodsId, GetPageID}
+import com.juanpi.hive.udf.{GetGoodsId, GetPageID}
 import play.api.libs.json._
 
 import scala.collection.mutable
@@ -154,20 +154,64 @@ object pageAndEventParser {
     extend_params_1
   }
 
+
+//  CASE WHEN p1.page_id = 254 and f.level_id = 2 then 2
+//  WHEN P1.page_id not in (154,289) THEN p1.page_level_id
+//  WHEN getpageid(a.extend_params) in (34,65) then 3
+//  when getpageid(a.extend_params) = 10069 then 4
+//  else 0 end page_level_id,
+//
+
   /**
     *
+    * @param event_level_id
     * @param x_page_id
     * @param x_extend_params
     * @param page_level_id
+    * @param forLevelId 从数据库查出来后转成了字符串
     * @return
     */
-  def getPageLevelId(x_page_id: Int, x_extend_params: String, page_level_id: Int, forLevelId: String): Int = {
+  def getEventPageLevelId(event_level_id: Int, x_page_id: Int, x_extend_params: String, page_level_id: Int, forLevelId: String): Int = {
+
+    val cateLevelId = StringUtils.strToInt(forLevelId)
+
+    val pageLevelId = if(event_level_id > 0) {
+      event_level_id
+    } else if(x_page_id == 221 || x_page_id == 222 || x_page_id == 279 || x_page_id == 280) {
+      // 9.9包邮,明日预告,昨日上新,最后疯抢 页面降级为2级入口
+      2
+    } else if(x_page_id == 254 && cateLevelId > 0) {
+      // 活动页的页面层级id
+      cateLevelId
+    } else if(x_page_id != 154 || x_page_id != 289) {
+      page_level_id
+    } else {
+      val pid = new GetPageID().evaluate(x_extend_params)
+      val res = pid.toInt match {
+        case 34|65 => 3
+        case 10069 => 4
+        case _ => 0
+      }
+      res
+    }
+
+    pageLevelId
+  }
+
+  /**
+    *
+    * @param x_page_id
+    * @param url
+    * @param page_level_id
+    * @return
+    */
+  def getPageLevelId(x_page_id: Int, url: String, page_level_id: Int, forLevelId: String): Int = {
     if(x_page_id == 254 && forLevelId == "2") {
       StringUtils.strToInt(forLevelId)
     } else if(x_page_id != 154 || x_page_id != 289) {
       page_level_id
     } else {
-      val pid = new GetPageID().evaluate(x_extend_params)
+      val pid = new GetPageID().evaluate(url)
       val res = pid.toInt match {
         case 34|65 => 3
         case 10069 => 4

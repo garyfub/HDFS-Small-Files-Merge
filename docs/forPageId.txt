@@ -3,7 +3,7 @@ select concat(page_exp1 , page_exp2) exp,page_id, page_type_id, page_value, page
  where page_id > 0
  and terminal_lvl1_id = 2
  and del_flag = 0
- order by page_id
+ order by page_id;
 
 exp page_id page_type_id    page_value  page_level_id
 page_home   98  0       1

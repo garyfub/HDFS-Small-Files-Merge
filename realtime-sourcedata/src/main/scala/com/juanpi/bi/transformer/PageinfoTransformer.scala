@@ -14,7 +14,7 @@ class PageinfoTransformer {
   // 返回解析的结果
   def logParser(line: String,
                 dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
-                dimEvent: mutable.HashMap[String, (Int, Int)],
+                dimEvent: mutable.HashMap[String, (Int, Int, Int)],
                 fCate: mutable.HashMap[String, String]): (String, String, Any) = {
 
     val row = Json.parse(line.replaceAll("null", """\\"\\""""))
@@ -26,13 +26,24 @@ class PageinfoTransformer {
       val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
       val os = (row \ "os").asOpt[String].getOrElse("")
 
-      val starttime = (row \ "starttime").asOpt[String].getOrElse("")
+      val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
 
-      if(starttime.isEmpty) {
+      val originDateStr = DateUtils.dateStr(starttime_origin.toLong)
+
+      val sDate = DateUtils.getWeekAgoDateStr()
+      val eDate = DateUtils.getWeekLaterDateStr()
+
+      val startTime = if(originDateStr > sDate && originDateStr < eDate) {
+        starttime_origin
+      } else {
+        ""
+      }
+
+      if(startTime.isEmpty) {
         return null
       }
 
-      val partitionTime = starttime
+      val partitionTime = startTime
 
       try
       {
@@ -146,7 +157,7 @@ class PageinfoTransformer {
 
     val forLevelId = if(d_page_id == 254 && fct_extendParams.nonEmpty){fCate.get(fct_extendParams).getOrElse("0")} else "0"
 
-    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, fct_extendParams, d_page_level_id, forLevelId)
+    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, url, d_page_level_id, forLevelId)
 
     val hot_goods_id = if(d_page_id == 250 && fct_extendParams.nonEmpty && fct_extendParams.contains("_") && fct_extendParams.split("_").length > 2)
     {

@@ -1,5 +1,8 @@
 package com.juanpi.bi.sc_utils
 
+import java.text.SimpleDateFormat
+import java.util.{Calendar, Date}
+
 import com.juanpi.bi.streaming.DateHour
 import org.joda.time.DateTime
 
@@ -48,23 +51,147 @@ object DateUtils {
     (dateTime.toString("yyyy-MM-dd"), dateTime.toString("H"))
   }
 
-  def md5Hash(text: String) : String = {
-    java.security.MessageDigest.getInstance("MD5").digest(text.getBytes()).map(0xFF & _).map { "%02x".format(_) }.foldLeft(""){_ + _}
+  /**
+    *
+    * @return 返回当前的日期串
+    */
+  def getDateNow():String={
+    val dateTime = new DateTime()
+    val dt = dateTime.toString("yyyy-MM-dd")
+    dt
+  }
+
+  /**
+    * 指定日期和间隔天数，返回指定日期前N天的日期 date - N days
+    * @param dt
+    * @param interval
+    * @return
+    */
+  def getDaysBefore(dt: Date, interval: Int):String = {
+    val dateFormat: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
+
+    val cal: Calendar = Calendar.getInstance()
+    cal.setTime(dt);
+
+    cal.add(Calendar.DATE, - interval)
+    val yesterday = dateFormat.format(cal.getTime())
+    yesterday
+  }
+
+
+  /**
+    * 指定日期和间隔天数，返回指定日期前N天的日期： date + N days
+    * @param dt
+    * @param interval
+    * @return
+    */
+  def getDaysLater(dt: Date, interval: Int):String = {
+    val dateFormat: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
+
+    val cal: Calendar = Calendar.getInstance()
+    cal.setTime(dt);
+
+    cal.add(Calendar.DATE, + interval)
+    val yesterday = dateFormat.format(cal.getTime())
+    yesterday
+  }
+
+  /**
+    * 2017-01-17  A Week Ago is 2017-01-07
+    * @return
+    */
+  def getWeekAgoDateStr(): String = {
+    val dt: Date = new Date()
+    val dtStr = getDaysBefore(dt, 7)
+    dtStr
+  }
+
+  /**
+    *  2017-01-17 A Week Later is  2017-01-21
+    * @return
+    */
+  def getWeekLaterDateStr(): String = {
+    val dt: Date = new Date()
+    val dtStr = getDaysLater(dt, 7)
+    dtStr
+  }
+
+  def getYesterday(): String = {
+    // Calendar.DATE
+    val dt: Date = new Date()
+    val yesterday = getDaysBefore(dt, 1)
+    return yesterday
+  }
+
+  def getNowWeekStart():String={
+    var period:String=""
+    var cal:Calendar =Calendar.getInstance();
+    var df:SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+    //获取本周一的日期
+    period=df.format(cal.getTime())
+    period
+  }
+
+  def getNowWeekEnd():String={
+    var period:String=""
+    var cal:Calendar =Calendar.getInstance();
+    var df:SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    //这种输出的是上个星期周日的日期，因为老外把周日当成第一天
+    cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+    // 增加一个星期，才是我们中国人的本周日的日期
+    cal.add(Calendar.WEEK_OF_YEAR, 1)
+    period=df.format(cal.getTime())
+    period
+  }
+
+
+  def getNowMonthStart():String={
+    var period:String=""
+    var cal:Calendar =Calendar.getInstance();
+    var df:SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    cal.set(Calendar.DATE, 1)
+    period=df.format(cal.getTime())//本月第一天
+    period
+  }
+
+  def getNowMonthEnd():String={
+    var period:String=""
+    var cal:Calendar =Calendar.getInstance();
+    var df:SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    cal.set(Calendar.DATE, 1)
+    cal.roll(Calendar.DATE,-1)
+    period=df.format(cal.getTime())//本月最后一天
+    period
+  }
+
+  /**
+    * 将时间戳转化成日期
+    * @param time
+    * @return
+    */
+  def DateFormat(time:String):String={
+    var sdf:SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
+    var date:String = sdf.format(new Date((time.toLong*1000l)))
+    date
+  }
+
+  /**
+    * 时间戳转化为时间
+    * @param time
+    * @return
+    */
+  def timeFormat(time:String):String={
+    var sdf:SimpleDateFormat = new SimpleDateFormat("HH:mm:ss")
+    var date:String = sdf.format(new Date((time.toLong*1000l)))
+    date
   }
 
   def main(args: Array[String]) {
-    val gu_id = "ffffffff-bc21-7da8-ffff-ffffe4de7969"
-    println((gu_id.last).toLower)
-
-    println(dateGuidPartitions("1468929132822".toLong, "13a69d96f245ab71b"))
-
-    val (date, hour) = dateHourStr("1473233633320".toLong)
-    println(date)
-    println(hour)
-
-    println(dateStr("1474972779928".toLong))
-    println(dateStr("1474973422".toLong * 1000))
-
-
+    val d1 = getWeekAgoDateStr
+    val d7 = getWeekLaterDateStr
+    if(d7 > d1) {
+      println("1111111")
+    }
   }
 }
