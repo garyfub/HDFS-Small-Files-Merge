@@ -20,7 +20,7 @@
         <scala.binary.version>2.10</scala.binary.version>
         <spark.version>1.6.1</spark.version>
         <hbase.version>1.2.0-cdh5.7.1</hbase.version>
-        <hive-udf.version>1.0.3</hive-udf.version>
+        <hive-udf.version>1.0.5</hive-udf.version>
         <encoding>UTF-8</encoding>
         <path.to.root>..</path.to.root>
     </properties>
