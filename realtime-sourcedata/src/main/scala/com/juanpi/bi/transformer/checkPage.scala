@@ -20,24 +20,25 @@ object checkPage {
   def main(args: Array[String]): Unit = {
 
     val pageName = "page_h5"
-    val extendParams = ""
+    val extendParams = "http://mact.juanpi.com/limitsell2?qminkview=1&qmshareview=1"
     val server_jsonstr = ""
     val fct_extendParams = pageAndEventParser.getExtendParams(pageName, extendParams)
     val forPageId = pageParser.forPageId(pageName, fct_extendParams, server_jsonstr)
 
+    // (http://mact.juanpi.com/limitsell2?qminkview=1&qmshareview=1,page_h5)
     println(fct_extendParams, forPageId)
 
-//    val forLevelId = if(d_page_id == 254 && fct_extendParams.nonEmpty){fCate.get(fct_extendParams).getOrElse("0")} else "0"
-
     val d_page_id = 289
+
+//    val forLevelId = if(d_page_id == 254 && fct_extendParams.nonEmpty){fCate.get(fct_extendParams).getOrElse("0")} else "0"
     val d_page_level_id = 0
     val forLevelId = "0"
     val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, fct_extendParams, d_page_level_id, forLevelId)
-
-    val url = "https://mact.juanpi.com/liangfancs3?mobile=1&qmshareview=1"
-
+//
+    val url = "http://mact.juanpi.com/limitsell2?qminkview=1&qmshareview=1"
+//
     val pageId = pageAndEventParser.getPageId(d_page_id, url)
-
+    println(pageId, page_level_id)
 
   }
 }

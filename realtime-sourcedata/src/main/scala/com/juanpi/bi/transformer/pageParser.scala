@@ -45,6 +45,11 @@ object pageParser {
           case a if a.contains("singlemessage") => "singlemessage"
           case b if b.contains("groupmessage") => "groupmessage"
           case c if c.contains("timeline") => "timeline"
+          case d if d.contains("ptsy_1") => "ptsy_1"
+          case e if e.contains("ggmk_1") => "ggmk_1"
+          case f if f.contains("push_app") => "push_app"
+          case g if g.contains("push_wx") => "push_wx"
+          case h if h.contains("ggmk_2") => "ggmk_2"
           case _ => ""
         }
       }

@@ -154,14 +154,6 @@ object pageAndEventParser {
     extend_params_1
   }
 
-
-//  CASE WHEN p1.page_id = 254 and f.level_id = 2 then 2
-//  WHEN P1.page_id not in (154,289) THEN p1.page_level_id
-//  WHEN getpageid(a.extend_params) in (34,65) then 3
-//  when getpageid(a.extend_params) = 10069 then 4
-//  else 0 end page_level_id,
-//
-
   /**
     *
     * @param event_level_id
@@ -183,7 +175,7 @@ object pageAndEventParser {
     } else if(x_page_id == 254 && cateLevelId > 0) {
       // 活动页的页面层级id
       cateLevelId
-    } else if(x_page_id != 154 || x_page_id != 289) {
+    } else if(x_page_id != 154 && x_page_id != 289) {
       page_level_id
     } else {
       val pid = new GetPageID().evaluate(x_extend_params)
@@ -198,6 +190,12 @@ object pageAndEventParser {
     pageLevelId
   }
 
+//  CASE WHEN p1.page_id = 254 and f.level_id = 2 then 2
+//  WHEN P1.page_id not in (154,289) THEN p1.page_level_id
+//  WHEN getpageid(a.extend_params) in (34,65) then 3
+//  when getpageid(a.extend_params) = 10069 then 4
+//  else 0 end page_level_id,
+
   /**
     *
     * @param x_page_id
@@ -208,7 +206,7 @@ object pageAndEventParser {
   def getPageLevelId(x_page_id: Int, url: String, page_level_id: Int, forLevelId: String): Int = {
     if(x_page_id == 254 && forLevelId == "2") {
       StringUtils.strToInt(forLevelId)
-    } else if(x_page_id != 154 || x_page_id != 289) {
+    } else if(x_page_id != 154 && x_page_id != 289) {
       page_level_id
     } else {
       val pid = new GetPageID().evaluate(url)
