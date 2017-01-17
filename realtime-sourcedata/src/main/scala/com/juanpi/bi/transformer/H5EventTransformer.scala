@@ -38,7 +38,7 @@ class H5EventTransformer {
 
   def logParser(line: String,
                 dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
-                dimEvent: mutable.HashMap[String, (Int, Int)]
+                dimEvent: mutable.HashMap[String, (Int, Int, Int)]
                ): (String, String, Any) = {
 
     val row = Json.parse(line)
@@ -95,7 +95,7 @@ class H5EventTransformer {
 
   def parse(row: JsValue,
             dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
-            dimEvent: mutable.HashMap[String, (Int, Int)]): (User, PageAndEvent, Page, Event) = {
+            dimEvent: mutable.HashMap[String, (Int, Int, Int)]): (User, PageAndEvent, Page, Event) = {
 
     // ---------------------------------------------------------------- mb_event ----------------------------------------------------------------
     val act_name = (row \ "act_name").asOpt[String].getOrElse("")
@@ -207,7 +207,7 @@ class H5EventTransformer {
     * @param eventJoinKey
     * @return
     */
-  def parseAppH5(dimEvent: mutable.HashMap[String, (Int, Int)],
+  def parseAppH5(dimEvent: mutable.HashMap[String, (Int, Int, Int)],
                  dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                  baseLog: BaseLog,
                  eventJoinKey: String): (User, PageAndEvent, Page, Event) = {
@@ -226,7 +226,7 @@ class H5EventTransformer {
 
     val appVersion = ""
 
-    val (d_event_id: Int, event_type_id: Int) = dimEvent.get(eventJoinKey).getOrElse(0, 0)
+    val (d_event_id: Int, event_type_id: Int, event_level_id: Int) = dimEvent.get(eventJoinKey).getOrElse(0, 0, 0)
     val eventId = d_event_id match {
       case a if a > 0 => a
       case _ => 0
@@ -251,7 +251,12 @@ class H5EventTransformer {
     val shopId = new GetShopId().evaluate(baseUrl)
     val refShopId = new GetShopId().evaluate(baseUrlRef)
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPage.get(pageId.toString).getOrElse(0, 0, "", 0)
-    val pageLevelId = d_page_level_id
+
+    val pageLevelId = if(event_level_id > 0) {
+      event_level_id
+    } else {
+      d_page_level_id
+    }
 
     val pageLevel2Value = getPageLevel2Value(pageId.toString, shopId, baseUrl)
     val refPageLevel2Value = getPageLevel2Value(pageId.toString, shopId, baseUrlRef)
@@ -306,7 +311,7 @@ class H5EventTransformer {
     * @param sid
     * @return
     */
-  def parsePcWapWx (dimEvent: mutable.HashMap[String, (Int, Int)],
+  def parsePcWapWx (dimEvent: mutable.HashMap[String, (Int, Int, Int)],
                     dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                     baseLog: BaseLog,
                     eventJoinKey: String,
@@ -318,7 +323,7 @@ class H5EventTransformer {
 
     val baseTerminalId = getTerminalIdFromBase(qm_device_id, baseUrl)
     val dwTerminalId = getTerminalIdForPC(baseTerminalId)
-    val (d_event_id: Int, event_type_id: Int) = dimEvent.get(eventJoinKey).getOrElse(0, 0)
+    val (d_event_id: Int, event_type_id: Int, event_level_id) = dimEvent.get(eventJoinKey).getOrElse(0, 0, 0)
     val eventId = d_event_id match {
       case a if a > 0 => a
       case _ => 0
@@ -346,7 +351,13 @@ class H5EventTransformer {
     val appVersion = ""
 
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPage.get(pageId.toString).getOrElse(0, 0, "", 0)
-    val pageLevelId = d_page_level_id
+
+    val pageLevelId = if(event_level_id > 0) {
+      event_level_id
+    } else {
+      d_page_level_id
+    }
+
     val pageLevel2Value = getPageLevel2Value(pageId.toString, shopId, baseUrl)
     val refPageLevel2Value = getPageLevel2Value(pageId.toString, shopId, baseUrlRef)
 

@@ -179,8 +179,7 @@ public class DateUtil {
         cald.set(Calendar.SECOND, 0); 
         cald.set(Calendar.MINUTE, 0); 
         cald.set(Calendar.MILLISECOND, 0); 
-        
-        
+
         return new Timestamp(cald.getTimeInMillis()).getTime();
     }
     

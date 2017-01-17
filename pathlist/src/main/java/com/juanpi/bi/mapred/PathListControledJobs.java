@@ -219,23 +219,23 @@ public class PathListControledJobs {
                     String pageLvlId = pageLevelId;
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
-                    if("481".equals(eventId) || "10041".equals(eventId)){
-                        if("158".equals(pageId) || "167".equals(pageId) || "250".equals(pageId) || "26".equals(pageId)) {
-                            pageLvlId = "1";
-                        }
-                    } else if("10043".equals(eventId)){
-                        if("10084".equals(pageId) || "10085".equals(pageId)){
-                            pageLvlId = "5";
-                        }
-                    } else if("10050".equals(eventId)){
-                        if("10085".equals(pageId) || "10107".equals(pageId)){
-                            pageLvlId = "5";
-                        }
-                    } else if("448".equals(eventId)){
-                        if("158".equals(pageId)){
-                            pageLvlId = "5";
-                        }
-                    }
+//                    if("481".equals(eventId) || "10041".equals(eventId)){
+//                        if("158".equals(pageId) || "167".equals(pageId) || "250".equals(pageId) || "26".equals(pageId)) {
+//                            pageLvlId = "1";
+//                        }
+//                    } else if("10043".equals(eventId)){
+//                        if("10084".equals(pageId) || "10085".equals(pageId)){
+//                            pageLvlId = "5";
+//                        }
+//                    } else if("10050".equals(eventId)){
+//                        if("10085".equals(pageId) || "10107".equals(pageId)){
+//                            pageLvlId = "5";
+//                        }
+//                    } else if("448".equals(eventId)){
+//                        if("158".equals(pageId)){
+//                            pageLvlId = "5";
+//                        }
+//                    }
 
                     String str[] = {
                             pageLvlId,

@@ -26,9 +26,9 @@ import scala.collection.mutable
 
 class KafkaConsumer(topic: String,
                     dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
-                    dimEvent: mutable.HashMap[String, (Int, Int)],
+                    dimEvent: mutable.HashMap[String, (Int, Int, Int)],
                     fCate: mutable.HashMap[String, String],
-                    dimH5EVENT: mutable.HashMap[String, (Int, Int)],
+                    dimH5EVENT: mutable.HashMap[String, (Int, Int, Int)],
                     zkQuorum: String)
   extends Logging with Serializable {
   import KafkaConsumer._
@@ -131,7 +131,6 @@ class KafkaConsumer(topic: String,
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     val data = sourceLog.map(_._2.replace("\0",""))
-      .filter(eventParser.filterFunc)
       .map(msg => parseH5Message(msg))
       .filter(_._1.nonEmpty)
 
@@ -325,13 +324,18 @@ object KafkaConsumer{
 
     // page 和 event 分开解析
     if(topic.equals("mb_pageinfo_hash2")) {
-      val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, ic.FCATE, null, zkQuorum)
+      val DimPage = InitConfig.initMBDim()._1
+      val DimEvent = InitConfig.initMBDim()._2
+      val DimFrontCate = InitConfig.initMBDim()._3
+      val consumer = new KafkaConsumer(topic, DimPage, DimEvent, DimFrontCate, null, zkQuorum)
       consumer.pageProcess(message, ssc, km)
     } else if(topic.equals("mb_event_hash2")) {
-      val consumer = new KafkaConsumer(topic, ic.DIMPAGE, ic.DIMENT, ic.FCATE, null, zkQuorum)
+      val DimPage = InitConfig.initMBDim()._1
+      val DimEvent = InitConfig.initMBDim()._2
+      val DimFrontCate = InitConfig.initMBDim()._3
+      val consumer = new KafkaConsumer(topic, DimPage, DimEvent, DimFrontCate, null, zkQuorum)
       consumer.eventProcess(message, ssc, km)
     } else if(topic.equals("pc_events_hash3")) {
-      // kafka topic: pc_events_hash3
       val DimH5Page = InitConfig.initH5Dim()._1
       val DimH5Event = InitConfig.initH5Dim()._2
       val consumer = new KafkaConsumer(topic, DimH5Page, null, null, DimH5Event, zkQuorum)
