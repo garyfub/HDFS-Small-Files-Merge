@@ -150,6 +150,14 @@ class PageinfoTransformer {
     val pageId = pageAndEventParser.getPageId(d_page_id, url)
     val pageValue = pageParser.getPageValue(d_page_id, url, fct_extendParams, page_type_id, d_page_value)
 
+    if (158 == pageId && pageName == "page_temai_goods") {
+      println("for_pageid:" + forPageId, " ,page_type_id:" + page_type_id, "url:" + url,
+        " ,pageName:" + pageName, " ,fct_extendParams:" + fct_extendParams,
+        " ,page_value:" + pageValue,
+        " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value)
+      println("pageName=page_temai_goods===>原始数据为：" + row)
+    }
+
     // ref_page_id
     val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimPage.get(forPrePageid).getOrElse(0, 0, "", 0)
     val ref_page_id = pageAndEventParser.getPageId(d_pre_page_id, urlref)
@@ -196,14 +204,6 @@ class PageinfoTransformer {
         " pageName:" + pageName, " fct_extendParams:" + fct_extendParams,
         " page_value:" + pageValue,
         " d_page_id:" + d_page_id, " d_page_value:" + d_page_value)
-      println("page_id=-1===>原始数据为：" + row)
-    }
-
-    if (158 == pageId && pageName == "page_temai_goods") {
-      println("for_pageid:" + forPageId, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id,
-        " ,pageName:" + pageName, " ,fct_extendParams:" + fct_extendParams,
-        " ,page_value:" + pageValue,
-        " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value)
       println("page_id=-1===>原始数据为：" + row)
     }
 
