@@ -149,11 +149,7 @@ class PageinfoTransformer {
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPage.get(forPageId).getOrElse(0, 0, "", 0)
     val pageId = pageAndEventParser.getPageId(d_page_id, url)
 
-    if (158 == pageId && pageName == "page_temai_goods") {
-      println("pageParser.getPageValue ===============================================>>")
-    }
-
-    val pageValue = pageParser.getPageValue(d_page_id, url, fct_extendParams, page_type_id, d_page_value)
+    val pageValue = pageParser.getPageValue(d_page_id, fct_extendParams, url, page_type_id, d_page_value)
 
     if (158 == pageId && pageName == "page_temai_goods") {
       println("for_pageid:" + forPageId, " ,page_type_id:" + page_type_id, "url:" + url,
