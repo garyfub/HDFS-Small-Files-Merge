@@ -199,6 +199,14 @@ class PageinfoTransformer {
       println("page_id=-1===>原始数据为：" + row)
     }
 
+    if (158 == pageId && pageName == "page_temai_goods") {
+      println("for_pageid:" + forPageId, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id,
+        " ,pageName:" + pageName, " ,fct_extendParams:" + fct_extendParams,
+        " ,page_value:" + pageValue, " ,fct_extendParams:" + fct_extendParams,
+        " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value)
+      println("page_id=-1===>原始数据为：" + row)
+    }
+
     (user, pe, page, event)
   }
 }
