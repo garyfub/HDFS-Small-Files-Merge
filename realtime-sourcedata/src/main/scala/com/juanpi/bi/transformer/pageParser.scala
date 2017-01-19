@@ -99,7 +99,7 @@ object pageParser {
         val res = new GetDwMbPageValue().evaluate(param, page_type_id.toString)
 
         println("pageParser.getPageValue", x_page_id, x_extend_params, url, page_type_id, x_page_value, param, page_type_id.toString, res)
-
+        
         res
       }
       page_value

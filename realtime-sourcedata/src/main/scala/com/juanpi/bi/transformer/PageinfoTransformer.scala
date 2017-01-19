@@ -148,6 +148,11 @@ class PageinfoTransformer {
 
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPage.get(forPageId).getOrElse(0, 0, "", 0)
     val pageId = pageAndEventParser.getPageId(d_page_id, url)
+
+    if (158 == pageId && pageName == "page_temai_goods") {
+      println("pageParser.getPageValue ===============================================>>")
+    }
+
     val pageValue = pageParser.getPageValue(d_page_id, url, fct_extendParams, page_type_id, d_page_value)
 
     if (158 == pageId && pageName == "page_temai_goods") {
@@ -198,14 +203,6 @@ class PageinfoTransformer {
     val pe = PageAndEvent.apply(pageId, pageValue, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, starttime_origin, endTime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(parsed_source, ip, url, urlref, deviceid, to_switch)
     val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime, ug_id)
-
-    if (-1 == pageId) {
-      println("for_pageid:" + forPageId, " page_type_id:" + page_type_id, " page_level_id:" + page_level_id,
-        " pageName:" + pageName, " fct_extendParams:" + fct_extendParams,
-        " page_value:" + pageValue,
-        " d_page_id:" + d_page_id, " d_page_value:" + d_page_value)
-      println("page_id=-1===>原始数据为：" + row)
-    }
 
     (user, pe, page, event)
   }
