@@ -70,7 +70,14 @@ object pageParser {
     // 解析 page_value
 
     val pid = new GetPageID().evaluate(url)
-    val page_value: String = if ((x_page_id == 289 || x_page_id == 154 || x_page_id == 254) && pid > 0) {
+
+    val pageId = if(pid == null) {
+      0
+    } else {
+      pid.toInt
+    }
+
+    val page_value: String = if ((x_page_id == 289 || x_page_id == 154 || x_page_id == 254) && pageId > 0) {
       val res = new GetDwPcPageValue().evaluate(url)
       res
     } else {
