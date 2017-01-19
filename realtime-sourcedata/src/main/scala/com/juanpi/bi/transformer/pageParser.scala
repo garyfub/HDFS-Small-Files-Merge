@@ -67,17 +67,17 @@ object pageParser {
     */
   def getPageValue(x_page_id:Int, x_extend_params: String, url: String, page_type_id: Int, x_page_value: String): String = {
     // 解析 page_value
-    val page_value: String =
-    if (x_page_id == 289 || x_page_id == 154) {
+
+    val pid = new GetPageID().evaluate(url)
+    val page_value: String = if ((x_page_id == 289 || x_page_id == 154 || x_page_id == 254) && pid > 0) {
       val res = new GetDwPcPageValue().evaluate(url)
       res
     } else {
-      val param = if(x_page_id == 254)
-      {
+      val param = if (x_page_id == 254) {
         x_extend_params
-      } else if(page_type_id == 1 || page_type_id == 4 || page_type_id == 10) {
+      } else if (page_type_id == 1 || page_type_id == 4 || page_type_id == 10) {
         x_page_value
-      } else if(x_page_id == 250) {
+      } else if (x_page_id == 250) {
         // app端品牌页面id = 250, page_extends_param 格式：加密brandid_shopid_引流款id,或者 加密brandid_shopid
         val goodsId = new GetGoodsId().evaluate(x_extend_params.split("_")(0))
         goodsId
@@ -89,7 +89,6 @@ object pageParser {
     }
     page_value
   }
-
 
   /**
     *

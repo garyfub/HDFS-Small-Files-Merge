@@ -7,7 +7,6 @@ import com.juanpi.bi.sc_utils.{DateUtils, StringUtils}
 import com.juanpi.hive.udf.{GetGoodsId, GetPageID}
 import play.api.libs.json._
 
-import scala.collection.mutable
 
 /**
   * Created by gongzi on 2016/7/19.
@@ -167,21 +166,35 @@ object pageAndEventParser {
 
     val cateLevelId = StringUtils.strToInt(forLevelId)
 
+    val id = new GetPageID().evaluate(x_extend_params)
+
+    // GetPageID 这个 udf 正常返回的是java Integer，异常时返回null，fuck!
+    val pageId = if(id == null) {
+      0
+    } else {
+      id
+    }
+
     val pageLevelId = if(event_level_id > 0) {
       event_level_id
-    } else if(x_page_id == 221 || x_page_id == 222 || x_page_id == 279 || x_page_id == 280) {
+    }
+    else if(pageId == 10081 || pageId == 10112) {
+        1
+    }
+    else if(x_page_id == 221 || x_page_id == 222 || x_page_id == 279 || x_page_id == 280) {
       // 9.9包邮,明日预告,昨日上新,最后疯抢 页面降级为2级入口
       2
     } else if(x_page_id == 254 && cateLevelId > 0) {
       // 活动页的页面层级id
       cateLevelId
     } else if(x_page_id != 154 && x_page_id != 289) {
+      // 154 是活动页；289 是 h5 页
       page_level_id
     } else {
-      val pid = new GetPageID().evaluate(x_extend_params)
-      val res = pid.toInt match {
-        case 34|65 => 3
+      val res = pageId match {
+        case 34|65|10113|10116|10118|10119 => 3
         case 10069 => 4
+        case 100083|10111 => 3
         case _ => 0
       }
       res
@@ -250,7 +263,7 @@ object pageAndEventParser {
   def getPageId(x_page_id: Int, x_extend_params: String): Int = {
     if(x_page_id == 0) {
       -1
-    } else if (x_page_id == 289 || x_page_id == 154) {
+    } else if (x_page_id == 289 || x_page_id == 154 || x_page_id == 254) {
       // 如果 x_extend_params 为空，pid的计算结果为null
       val pid = new GetPageID().evaluate(x_extend_params)
       if(pid == null){
@@ -268,11 +281,11 @@ object pageAndEventParser {
   // http://stackoverflow.com/questions/9028459/a-clean-way-to-combine-two-tuples-into-a-new-larger-tuple-in-scala
   def combineTuple(xss: Product*) = xss.toList.flatten(_.productIterator)
 
-  /*
-* 判断是否为整数
-* @param str 传入的字符串
-* @return 是整数返回true,否则返回false
-*/
+  /**
+    * 判断是否为整数
+    * @param str 传入的字符串
+    * @return 是整数返回true,否则返回false
+    */
   def  isInteger(str: String): Boolean = {
     val pattern: Pattern = Pattern.compile("^[-\\+]?[\\d]*$")
     if (str.nonEmpty) {
@@ -303,44 +316,18 @@ object pageAndEventParser {
   }
 
   def main(args: Array[String]) {
-//    println(getSource("push:小卷温馨提醒！=购物车的商品等你好久啦！你爱的时尚亲肤卡通床品套件低至49.00元疯抢中，果断带宝贝回家→=3465969792363098765"))
 
-    val dimPages_test = new mutable.HashMap[String, (Int, Int, String, Int)]
-    dimPages_test += ("page_taball" -> (219,10,"最新折扣",1))
-    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPages_test.get("page_taball").getOrElse(0, 0, "", 0)
-//    println(d_page_id, page_type_id, d_page_value,d_page_level_id)
-
-//    val s = """"server_jsonstr":"{\"ads_id\":\"1928\",\"user_group_id\":\"\"}""""
-    val s = "{}"
-    val sr = getParsedJson(s)
-    println(sr)
-
-    if(getParsedJson(s).equals(JsNull)) println("test")
-
-    val extend_params = ""
-
-    println(getJsonValueByKey(s, "item"))
-
-    println(getJsonValueByKey(s, "_rmd"))
-
-    println(getJsonValueByKey(s, "_t"))
-
-    val ab_info = pageAndEventParser.getJsonValueByKey(extend_params, "ab_info")
-    println(ab_info)
-    println(pageAndEventParser.getJsonValueByKey(ab_info, "rule_id"))
-
-    val strValue = getParsedJson(extend_params)
-    println((strValue \ "cid").asOpt[Int].getOrElse(0))
-
-    if(!strValue.equals(JsNull) && s.contains("order_status")) {
-      val res = (strValue \ "order_status").toString()
-      println("res:==" + res)
+    val pageId = new GetPageID().evaluate("https://tuan.juanpi.com/pintuan/shop/1051782")
+    if(pageId == 10084) {
+        println("10084")
     }
 
-      println("gu_id:" + getGuid("0", "0", ""))
+    val res = pageId.toInt match {
+      case 34|65 => 3
+      case 10069 => 4
+      case _ => 0
+    }
 
-    println("1_2_3".split("_").length)
-    println("1_2_3".split("_").length)
   }
 
 

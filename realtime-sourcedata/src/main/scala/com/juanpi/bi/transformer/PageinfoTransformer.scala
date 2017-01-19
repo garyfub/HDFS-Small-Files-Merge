@@ -161,7 +161,7 @@ class PageinfoTransformer {
 
     val forLevelId = if(d_page_id == 254 && fct_extendParams.nonEmpty){fCate.get(fct_extendParams).getOrElse("0")} else "0"
 
-    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, url, d_page_level_id, forLevelId)
+    val page_level_id = pageAndEventParser.getEventPageLevelId(0, d_page_id, url, d_page_level_id, forLevelId)
 
     val hot_goods_id = if(d_page_id == 250 && fct_extendParams.nonEmpty && fct_extendParams.contains("_") && fct_extendParams.split("_").length > 2)
     {
