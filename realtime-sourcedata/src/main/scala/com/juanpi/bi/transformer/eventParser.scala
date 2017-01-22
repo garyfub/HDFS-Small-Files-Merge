@@ -27,8 +27,9 @@ object eventParser {
     } else if ((cid == "0") && List("all", "past_zhe", "crazy_zhe", "jiu", "yugao").contains(f_page_extend_params)) {
       ""
     } else if ("page_h5".equals(pagename)) {
-      val pid = new GetPageID().evaluate(f_page_extend_params).toInt
-      if (pid > 0) { "page_active" } else (pagename + f_page_extend_params).toLowerCase()
+      val pid = new GetPageID().evaluate(f_page_extend_params)
+      val pageId = if(pid == null) {0} else pid.toInt
+      if (pageId > 0) { "page_active" } else (pagename + f_page_extend_params).toLowerCase()
     } else if (!"page_tab".equals(pagename)) {
       pagename
     } else {
