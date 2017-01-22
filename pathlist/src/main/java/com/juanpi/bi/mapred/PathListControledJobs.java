@@ -146,6 +146,7 @@ public class PathListControledJobs {
 
         //1.1 指定输入文件路径
         FileInputFormat.setInputPaths(job, inputPath);
+
         job.setInputFormatClass(TextInputFormat.class);//指定哪个类用来格式化输入文件
 
         //1.2指定自定义的Mapper类
@@ -158,7 +159,8 @@ public class PathListControledJobs {
 
         //1.3 指定分区类
         job.setPartitionerClass(HashPartitioner.class);
-        job.setNumReduceTasks(10);
+
+        job.setNumReduceTasks(1);
 
         //1.4 TODO 排序、分区
         job.setGroupingComparatorClass(MyGroupingComparator.class);
@@ -196,7 +198,9 @@ public class PathListControledJobs {
 
                     String ts = splited[22];
 
-                    System.out.println(" >>>>>>>timeStamp==" + ts + ">>>>>>>gu_id" + gu_id);
+                    if(ts.length() != 13){
+                        System.out.println(" >>>>>>>timeStamp==" + ts + ">>>>>>>gu_id=" + gu_id);
+                    }
 
                     String pageLevelId = (splited[21] == null)? "\\N":splited[21];
                     String pageId = (splited[15] == null) ? "\\N":splited[15];
