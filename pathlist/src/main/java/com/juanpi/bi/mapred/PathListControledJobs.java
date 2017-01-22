@@ -36,7 +36,7 @@ public class PathListControledJobs {
 
     static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
 
-    static final String PATH_JOBS = "dw_real_path_list_jobs";
+    static final String PATH_JOBS = "hotTest_dw_real_path_list_jobs";
 
     static Configuration conf = new Configuration();
 
@@ -87,8 +87,9 @@ public class PathListControledJobs {
             String str = "{0}/{1}/date={2}/gu_hash={3}/merged/";
             String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, guHash);
             String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, guHash);
+            String strh5Event = MessageFormat.format(str, INPUT_PATH_BASE, "pc_events_hash3", dateStr, guHash);
             // 文件输入路径
-            String inputPath = strEvent + "," + strPage;
+            String inputPath = strEvent + "," + strPage + "," + strh5Event;
 
             // PathList文件落地路径
             String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, PATH_JOBS, dateStr, guHash);
@@ -192,6 +193,10 @@ public class PathListControledJobs {
                 if(!gu_id.isEmpty() && !gu_id.equals("0"))
                 {
                     final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
+
+                    String ts = splited[22];
+
+                    System.out.println(" >>>>>>>timeStamp==" + ts + ">>>>>>>gu_id" + gu_id);
 
                     String pageLevelId = (splited[21] == null)? "\\N":splited[21];
                     String pageId = (splited[15] == null) ? "\\N":splited[15];
@@ -427,16 +432,16 @@ public class PathListControledJobs {
     public static void main(String[] args){
         String dateStr = args[0];
         if(dateStr== null || dateStr.isEmpty()){
-            JobsControl("", 0x0, 0x3, "PathListControledJobs01");
-            JobsControl("", 0x4, 0x7, "PathListControledJobs04");
-            JobsControl("", 0x8, 0xb, "PathListControledJobs08");
-            JobsControl("", 0xc, 0xf, "PathListControledJobs0c");
+            JobsControl("", 0x0, 0x0, "PathListControledJobs01");
+//            JobsControl("", 0x4, 0x7, "PathListControledJobs04");
+//            JobsControl("", 0x8, 0xb, "PathListControledJobs08");
+//            JobsControl("", 0xc, 0xf, "PathListControledJobs0c");
         } else
         {
-            JobsControl(dateStr, 0x0, 0x3, "PathListControledJobs01");
-            JobsControl(dateStr, 0x4, 0x7, "PathListControledJobs04");
-            JobsControl(dateStr, 0x8, 0xb, "PathListControledJobs08");
-            JobsControl(dateStr, 0xc, 0xf, "PathListControledJobs0c");
+            JobsControl(dateStr, 0x0, 0x0, "PathListControledJobs01");
+//            JobsControl(dateStr, 0x4, 0x7, "PathListControledJobs04");
+//            JobsControl(dateStr, 0x8, 0xb, "PathListControledJobs08");
+//            JobsControl(dateStr, 0xc, 0xf, "PathListControledJobs0c");
         }
 
     }
