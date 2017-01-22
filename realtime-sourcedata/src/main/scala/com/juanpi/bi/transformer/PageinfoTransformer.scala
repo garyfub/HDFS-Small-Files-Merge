@@ -197,7 +197,7 @@ class PageinfoTransformer {
         " ,pageName:" + pageName, " ,fct_extendParams:" + fct_extendParams,
         " ,page_value:" + pageValue,
         " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value)
-      println("pageName=page_temai_goods===>原始数据为：" + row)
+      println("pageId=-1===>原始数据为：" + row)
     }
 
     (user, pe, page, event)

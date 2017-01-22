@@ -193,9 +193,6 @@ public class PathListControledJobs {
                 {
                     final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
 
-                    //page_level_id,page_id,page_value,page_lvl2_value,event_id,event_value,event_lvl2_value,starttime作为 联合value
-                    // page_level_id  对应的路径 line
-                    // 21 page_level_id; 15 page_id; 16 page_value; 25: page_lvl2_value; 34: event_id; 40: event_value; 36: event_lvl2_value; 22: starttime
                     String pageLevelId = (splited[21] == null)? "\\N":splited[21];
                     String pageId = (splited[15] == null) ? "\\N":splited[15];
                     String page_value = (splited[16] == null) ? "\\N":splited[16];
@@ -217,25 +214,6 @@ public class PathListControledJobs {
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
                     String pageLvlId = pageLevelId;
-
-                    // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
-//                    if("481".equals(eventId) || "10041".equals(eventId)){
-//                        if("158".equals(pageId) || "167".equals(pageId) || "250".equals(pageId) || "26".equals(pageId)) {
-//                            pageLvlId = "1";
-//                        }
-//                    } else if("10043".equals(eventId)){
-//                        if("10084".equals(pageId) || "10085".equals(pageId)){
-//                            pageLvlId = "5";
-//                        }
-//                    } else if("10050".equals(eventId)){
-//                        if("10085".equals(pageId) || "10107".equals(pageId)){
-//                            pageLvlId = "5";
-//                        }
-//                    } else if("448".equals(eventId)){
-//                        if("158".equals(pageId)){
-//                            pageLvlId = "5";
-//                        }
-//                    }
 
                     String str[] = {
                             pageLvlId,
@@ -425,7 +403,6 @@ public class PathListControledJobs {
                 throw new RuntimeException(e);
             }
         }
-
     }
 
     public static class TextArrayWritable extends ArrayWritable {
