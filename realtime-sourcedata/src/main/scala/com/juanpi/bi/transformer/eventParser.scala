@@ -80,8 +80,9 @@ object eventParser {
       && !List("all", "past_zhe", "crazy_zhe", "jiu", "yugao").contains(fctPageExtendParams)) {
       true
     } else if("page_h5".equals(pageName)) {
-      val pid = new GetPageID().evaluate(fctPageExtendParams).toInt
-      pid match {
+      val pid = new GetPageID().evaluate(fctPageExtendParams)
+      val pageId = if(pid == null) {0} else pid.toInt
+      pageId match {
         case -1 => true
         case _ => false
       }
@@ -93,7 +94,8 @@ object eventParser {
     val forPrePageId =
       if ("page_h5".equals(pagename)) {
         val pid = new GetPageID().evaluate(f_pre_extend_params)
-        if (pid > 0) {
+        val pageId = if(pid == null) {0} else pid.toInt
+        if (pageId > 0) {
           "page_active"
         } else {
           (pagename + f_pre_extend_params).toLowerCase()

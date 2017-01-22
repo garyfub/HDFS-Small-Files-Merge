@@ -29,7 +29,9 @@ object pageParser {
       }
       else if(x_page_id == 154 || x_page_id == 289) {
         val pid = new GetPageID().evaluate(x_extend_params)
-        if(pid == 10104) {
+        val pageId = if(pid == null) {0} else pid.toInt
+
+        if(pageId == 10104) {
           new GetSkcId().evaluate(x_extend_params)
         }
         else if(pid == 10102) {
@@ -71,11 +73,7 @@ object pageParser {
 
     val pid = new GetPageID().evaluate(url)
 
-    val pageId = if(pid == null) {
-      0
-    } else {
-      pid.toInt
-    }
+    val pageId = if(pid == null) {0} else pid.toInt
 
     val page_value: String =
       if ((x_page_id == 289 || x_page_id == 154 || x_page_id == 254) && pageId > 0) {

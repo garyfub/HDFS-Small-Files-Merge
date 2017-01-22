@@ -21,17 +21,20 @@ object checkPage {
 
   def main(args: Array[String]): Unit = {
 
-    val for_pageid="page_temai_goods"
-    val page_type_id=8
-    val page_level_id="0"
-    val pageName="page_temai_goods"
-    val page_value="null"
-    val fct_extendParams="4497809"
-    val d_page_id=158
-    val d_page_value="goods_id"
-    val res = pageParser.getPageValue(d_page_id, fct_extendParams, "", page_type_id, d_page_value)
+//    val for_pageid="page_temai_goods"
+//    val page_type_id=8
+//    val page_level_id="0"
+//    val pageName="page_temai_goods"
+//    val page_value="null"
+//    val fct_extendParams="4497809"
+//    val d_page_id=158
+//    val d_page_value="goods_id"
+//    val res = pageParser.getPageValue(d_page_id, fct_extendParams, "", page_type_id, d_page_value)
+//
+//    println(res)
 
-    println(res)
+    val pid = -999: java.lang.Integer
+    println(pid.toInt)
 
 
 //    val row = Json.parse(line.replaceAll("null", """\\"\\""""))

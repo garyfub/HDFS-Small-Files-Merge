@@ -168,11 +168,11 @@ object pageAndEventParser {
 
     val id = new GetPageID().evaluate(x_extend_params)
 
-    // GetPageID 这个 udf 正常返回的是java Integer，异常时返回null，fuck!
+    // GetPageID 这个 udf 正常返回的是java Integer，异常时返回null!
     val pageId = if(id == null) {
       0
     } else {
-      id
+      id.toInt
     }
 
     val pageLevelId = if(event_level_id > 0) {
@@ -223,7 +223,8 @@ object pageAndEventParser {
       page_level_id
     } else {
       val pid = new GetPageID().evaluate(url)
-      val res = pid.toInt match {
+      val pageId = if(pid == null) {0} else pid.toInt
+      val res = pageId match {
         case 34|65 => 3
         case 10069 => 4
         case _ => 0
