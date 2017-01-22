@@ -36,7 +36,7 @@ public class PathListControledJobs {
 
     static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
 
-    static final String PATH_JOBS = "hotTest_dw_real_path_list_jobs";
+    static final String PATH_JOBS = "hotTest_r1_dw_real_path_list_jobs";
 
     static Configuration conf = new Configuration();
 
