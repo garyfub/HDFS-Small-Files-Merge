@@ -294,13 +294,13 @@ public class PathListControledJobs {
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
 
                     if(pageLvlId == 1){
-                        level1= pageLvl;
+                        level1 = pageLvl;
                         level2 = initStr;
                         level3 = initStr;
                         level4 = initStr;
                         level5 = initStr;
                     } else if(pageLvlId == 2){
-                        level2= pageLvl;
+                        level2 = pageLvl;
                         level3 = initStr;
                         level4 = initStr;
                         level5 = initStr;
@@ -340,16 +340,28 @@ public class PathListControledJobs {
      *
      */
     static class  NewK2 implements WritableComparable<PathListControledJobs.NewK2> {
-        String first;
-        Long second;
+        private String first;
+        private Long second;
 
         public NewK2(){}
+
+        public String getFirst() {
+            return first;
+        }
+        public void setFirst(String first) {
+            this.first = first;
+        }
+        public Long getSecond() {
+            return second;
+        }
+        public void setSecond(Long second) {
+            this.second = second;
+        }
 
         public NewK2(String first, long second){
             this.first = first;
             this.second = second;
         }
-
 
         @Override
         public void readFields(DataInput in) throws IOException {
@@ -369,11 +381,12 @@ public class PathListControledJobs {
          */
         @Override
         public int compareTo(PathListControledJobs.NewK2 o) {
-            final long minus = this.first.compareTo(o.first);
-            if(minus !=0){
-                return (int)minus;
+            // this在前代表升序
+            final int minus = this.getFirst().compareTo(o.getFirst());
+            if(minus != 0){
+                return minus;
             }
-            return (int)(this.second - o.second);
+            return (int)(this.getSecond() - o.getSecond());
         }
 
         @Override
@@ -383,11 +396,13 @@ public class PathListControledJobs {
 
         @Override
         public boolean equals(Object obj) {
+
             if(!(obj instanceof PathListControledJobs.NewK2)){
                 return false;
             }
-            PathListControledJobs.NewK2 oK2 = (PathListControledJobs.NewK2)obj;
-            return (this.first.equals(oK2.first))&&(this.second == oK2.second);
+
+            PathListControledJobs.NewK2 oK2 = (PathListControledJobs.NewK2) obj;
+            return (this.getFirst().equals(oK2.getFirst()))&&(this.getSecond() == oK2.getSecond());
         }
     }
 
@@ -395,7 +410,7 @@ public class PathListControledJobs {
 
         @Override
         public int compare(PathListControledJobs.NewK2 o1, PathListControledJobs.NewK2 o2) {
-            return (int)(o1.first.compareTo(o2.first));
+            return o1.getFirst().compareTo(o2.getFirst());
         }
 
         @Override
@@ -413,14 +428,13 @@ public class PathListControledJobs {
 
                 cmp = l11 > l21 ? 1 : (l11 == l21 ? 0 : -1);
                 if (cmp != 0) {
-
                     return cmp;
-
                 } else {
 
                     long l12 = readVLong(b1, s1 + n1);
                     long l22 = readVLong(b2, s2 + n2);
-                    return cmp = l12 > l22 ? 1 : (l12 == l22 ? 0 : -1);
+                    cmp = l12 > l22 ? 1 : (l12 == l22 ? 0 : -1);
+                    return cmp;
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
