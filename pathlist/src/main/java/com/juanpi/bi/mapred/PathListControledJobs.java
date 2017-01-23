@@ -150,12 +150,12 @@ public class PathListControledJobs {
         job.setInputFormatClass(TextInputFormat.class);//指定哪个类用来格式化输入文件
 
         //1.2指定自定义的Mapper类
-        job.setMapperClass(MyMapper.class);
+        job.setMapperClass(PathListControledJobs.MyMapper.class);
 
         //指定输出<k2,v2>的类型
-        job.setMapOutputKeyClass(NewK2.class);
+        job.setMapOutputKeyClass(PathListControledJobs.NewK2.class);
 
-        job.setMapOutputValueClass(TextArrayWritable.class);
+        job.setMapOutputValueClass(PathListControledJobs.TextArrayWritable.class);
 
         //1.3 指定分区类
         job.setPartitionerClass(HashPartitioner.class);
@@ -163,11 +163,11 @@ public class PathListControledJobs {
         job.setNumReduceTasks(1);
 
         //1.4 TODO 排序、分区
-        job.setGroupingComparatorClass(MyGroupingComparator.class);
+        job.setGroupingComparatorClass(PathListControledJobs.MyGroupingComparator.class);
         //1.5  TODO （可选）合并
 
         //2.2 指定自定义的reduce类
-        job.setReducerClass(MyReducer.class);
+        job.setReducerClass(PathListControledJobs.MyReducer.class);
 
         //指定输出<k3,v3>的类型
         job.setOutputKeyClass(Text.class);
@@ -182,7 +182,7 @@ public class PathListControledJobs {
         return job;
     }
 
-    static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
+    static class MyMapper extends Mapper<LongWritable, Text, PathListControledJobs.NewK2, PathListControledJobs.TextArrayWritable> {
         int xx = 0;
 
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException, ArrayIndexOutOfBoundsException, NumberFormatException {
@@ -196,7 +196,7 @@ public class PathListControledJobs {
                 {
 
                     String ts = splited[22];
-                    final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
+                    final PathListControledJobs.NewK2 k2 = new PathListControledJobs.NewK2(splited[0], Long.parseLong(splited[22]));
 
                     String pageLevelId = (splited[21] == null)? "\\N":splited[21];
                     String pageId = (splited[15] == null) ? "\\N":splited[15];
@@ -241,7 +241,7 @@ public class PathListControledJobs {
                             value.toString().replace("\001", "\t")
                     };
 
-                    final TextArrayWritable v2 = new TextArrayWritable(str);
+                    final PathListControledJobs.TextArrayWritable v2 = new PathListControledJobs.TextArrayWritable(str);
 
                     xx++;
 
@@ -266,9 +266,9 @@ public class PathListControledJobs {
     }
 
     //static class NewValue
-    static class MyReducer extends Reducer<NewK2, TextArrayWritable, Text, Text> {
+    static class MyReducer extends Reducer<PathListControledJobs.NewK2, PathListControledJobs.TextArrayWritable, Text, Text> {
 
-        protected void reduce(NewK2 k2, Iterable<TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
+        protected void reduce(PathListControledJobs.NewK2 k2, Iterable<PathListControledJobs.TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
             String[] initStrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N","\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" };
             String initStr = Joiner.on("\t").join(initStrArray);
 
@@ -278,7 +278,7 @@ public class PathListControledJobs {
             String level4 = initStr;
             String level5 = initStr;
 
-            for (TextArrayWritable v2 : v2s) {
+            for (PathListControledJobs.TextArrayWritable v2 : v2s) {
 
                 try {
                     // 0: page_level_id, 1: 层级, 2 最新的那条记录
