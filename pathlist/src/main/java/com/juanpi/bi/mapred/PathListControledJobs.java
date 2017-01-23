@@ -198,10 +198,6 @@ public class PathListControledJobs {
                     String ts = splited[22];
                     final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
 
-                    if("1485102480034".equals(ts)){
-                        System.out.println("======>>mapper gu_id is invalid: " + value.toString());
-                    }
-
                     String pageLevelId = (splited[21] == null)? "\\N":splited[21];
                     String pageId = (splited[15] == null) ? "\\N":splited[15];
                     String page_value = (splited[16] == null) ? "\\N":splited[16];
@@ -285,6 +281,7 @@ public class PathListControledJobs {
             for (TextArrayWritable v2 : v2s) {
 
                 try {
+                    // 0: page_level_id, 1: 层级, 2 最新的那条记录
                     String pageLvlIdStr = v2.toStrings()[0];
                     String pageLvl = v2.toStrings()[1];
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
@@ -329,7 +326,7 @@ public class PathListControledJobs {
      原来的v2不能参与排序，把原来的k2和v2封装到一个类中，作为新的k2
      *
      */
-    static class  NewK2 implements WritableComparable<NewK2> {
+    static class  NewK2 implements WritableComparable<PathListControledJobs.NewK2> {
         String first;
         Long second;
 
@@ -358,7 +355,7 @@ public class PathListControledJobs {
          * 当第一列不同时，升序；当第一列相同时，第二列升序
          */
         @Override
-        public int compareTo(NewK2 o) {
+        public int compareTo(PathListControledJobs.NewK2 o) {
             final long minus = this.first.compareTo(o.first);
             if(minus !=0){
                 return (int)minus;
@@ -373,18 +370,18 @@ public class PathListControledJobs {
 
         @Override
         public boolean equals(Object obj) {
-            if(!(obj instanceof NewK2)){
+            if(!(obj instanceof PathListControledJobs.NewK2)){
                 return false;
             }
-            NewK2 oK2 = (NewK2)obj;
+            PathListControledJobs.NewK2 oK2 = (PathListControledJobs.NewK2)obj;
             return (this.first.equals(oK2.first))&&(this.second == oK2.second);
         }
     }
 
-    static class MyGroupingComparator implements RawComparator<NewK2> {
+    static class MyGroupingComparator implements RawComparator<PathListControledJobs.NewK2> {
 
         @Override
-        public int compare(NewK2 o1, NewK2 o2) {
+        public int compare(PathListControledJobs.NewK2 o1, PathListControledJobs.NewK2 o2) {
             return (int)(o1.first.compareTo(o2.first));
         }
 
@@ -432,7 +429,6 @@ public class PathListControledJobs {
             set(texts);
         }
     }
-
     /**
      * 分两组并行计算
      * @param args
