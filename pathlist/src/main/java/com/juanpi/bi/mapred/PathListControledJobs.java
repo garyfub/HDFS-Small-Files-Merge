@@ -291,12 +291,6 @@ public class PathListControledJobs {
                     String pageLvlIdStr = v2.toStrings()[0];
                     String pageLvl = v2.toStrings()[1];
 
-                    if(pageLvl.contains("self_f7e0ac3b-ab6c-4d00-9a09-531edd8fda30")) {
-                        System.out.println("MyReducer==" + v2.toStrings()[0]);
-                        System.out.println("MyReducer==" + v2.toStrings()[1]);
-                        System.out.println("MyReducer==" + v2.toStrings()[2]);
-                    }
-
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
 
                     if(pageLvlId == 1){
@@ -322,6 +316,12 @@ public class PathListControledJobs {
                     }
 
                     String keyStr = level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5;
+
+                    if(v2.toStrings()[2].contains("self_f7e0ac3b-ab6c-4d00-9a09-531edd8fda30")) {
+                        System.out.println("MyReducer==" + v2.toStrings()[0]);
+                        System.out.println("MyReducer==" + v2.toStrings()[1]);
+                        System.out.println("MyReducer==" + v2.toStrings()[2]);
+                    }
 
                     // 5 个级别
                     Text key2 = new Text(keyStr);
