@@ -250,17 +250,21 @@ public class PathListControledJobs {
                     xx++;
 
                     context.write(k2, v2);
+                } else {
+                    System.out.println("======>>mapper gu_id is invalid: " + value.toString());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                System.out.println("======>>IOException: " + value.toString());
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                System.out.println("======>>InterruptedException: " + value.toString());
             } catch (ArrayIndexOutOfBoundsException | NumberFormatException | StringIndexOutOfBoundsException e) {
                 e.printStackTrace();
                 System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
+                System.out.println("======>>Exception: " + value.toString());
             }
         }
     }
@@ -315,7 +319,7 @@ public class PathListControledJobs {
                     context.write(key2, value2);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("======>>Exception: " +  Joiner.on("#").join(v2.toStrings()));
+                    System.out.println("======>>Reduce Exception: " +  Joiner.on("#").join(v2.toStrings()));
                 }
             }
         }
