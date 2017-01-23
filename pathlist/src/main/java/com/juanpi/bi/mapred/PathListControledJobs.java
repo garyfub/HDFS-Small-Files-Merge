@@ -196,7 +196,6 @@ public class PathListControledJobs {
                 if(!gu_id.isEmpty() && !gu_id.equals("0"))
                 {
 
-                    String ts = splited[22];
                     final PathListControledJobs.NewK2 k2 = new PathListControledJobs.NewK2(splited[0], Long.parseLong(splited[22]));
 
                     String pageLevelId = (splited[21] == null)? "\\N":splited[21];
@@ -242,6 +241,12 @@ public class PathListControledJobs {
                             value.toString().replace("\001", "\t")
                     };
 
+                    if("1485102480034".equals(startTime)) {
+                        System.out.println("MyMapper==" + str[0]);
+                        System.out.println("MyMapper==" + str[1]);
+                        System.out.println("MyMapper==" + str[2]);
+                    }
+
                     final PathListControledJobs.TextArrayWritable v2 = new PathListControledJobs.TextArrayWritable(str);
 
                     xx++;
@@ -285,6 +290,13 @@ public class PathListControledJobs {
                     // 0: page_level_id, 1: 层级, 2 最新的那条记录
                     String pageLvlIdStr = v2.toStrings()[0];
                     String pageLvl = v2.toStrings()[1];
+
+                    if(pageLvl.contains("1485102480034")) {
+                        System.out.println("MyReducer==" + v2.toStrings()[0]);
+                        System.out.println("MyReducer==" + v2.toStrings()[1]);
+                        System.out.println("MyReducer==" + v2.toStrings()[2]);
+                    }
+
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
 
                     if(pageLvlId == 1){
