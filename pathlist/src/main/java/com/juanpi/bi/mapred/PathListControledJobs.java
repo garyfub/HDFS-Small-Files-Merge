@@ -36,7 +36,7 @@ public class PathListControledJobs {
 
     static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
 
-    static final String PATH_JOBS = "hotTest_r1_dw_real_path_list_jobs";
+    static final String PATH_JOBS = "hotTest_r2_dw_real_path_list_jobs";
 
     static Configuration conf = new Configuration();
 
@@ -85,11 +85,12 @@ public class PathListControledJobs {
             String guHash = String.format("%x", i);
 
             String str = "{0}/{1}/date={2}/gu_hash={3}/merged/";
-            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, guHash);
+//            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, guHash);
             String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, guHash);
-            String strh5Event = MessageFormat.format(str, INPUT_PATH_BASE, "pc_events_hash3", dateStr, guHash);
+//            String strh5Event = MessageFormat.format(str, INPUT_PATH_BASE, "pc_events_hash3", dateStr, guHash);
             // 文件输入路径
-            String inputPath = strEvent + "," + strPage + "," + strh5Event;
+//            String inputPath = strEvent + "," + strPage + "," + strh5Event;
+            String inputPath = strPage;
 
             // PathList文件落地路径
             String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, PATH_JOBS, dateStr, guHash);
