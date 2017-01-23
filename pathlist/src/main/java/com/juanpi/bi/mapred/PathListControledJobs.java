@@ -194,12 +194,12 @@ public class PathListControledJobs {
                 String gu_id = splited[0];
                 if(!gu_id.isEmpty() && !gu_id.equals("0"))
                 {
-                    final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
 
                     String ts = splited[22];
+                    final NewK2 k2 = new NewK2(splited[0], Long.parseLong(splited[22]));
 
-                    if(ts.length() != 13){
-                        System.out.println(" >>>>>>>timeStamp==" + ts + ">>>>>>>gu_id=" + gu_id);
+                    if("1485102480034".equals(ts)){
+                        System.out.println("======>>mapper gu_id is invalid: " + value.toString());
                     }
 
                     String pageLevelId = (splited[21] == null)? "\\N":splited[21];
