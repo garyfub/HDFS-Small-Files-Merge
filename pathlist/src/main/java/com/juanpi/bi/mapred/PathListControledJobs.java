@@ -241,7 +241,7 @@ public class PathListControledJobs {
                             value.toString().replace("\001", "\t")
                     };
 
-                    if("1485102480034".equals(startTime)) {
+                    if("self_f7e0ac3b-ab6c-4d00-9a09-531edd8fda30".equals(gu_id)) {
                         System.out.println("MyMapper==" + str[0]);
                         System.out.println("MyMapper==" + str[1]);
                         System.out.println("MyMapper==" + str[2]);
@@ -291,7 +291,7 @@ public class PathListControledJobs {
                     String pageLvlIdStr = v2.toStrings()[0];
                     String pageLvl = v2.toStrings()[1];
 
-                    if(pageLvl.contains("1485102480034")) {
+                    if(pageLvl.contains("self_f7e0ac3b-ab6c-4d00-9a09-531edd8fda30")) {
                         System.out.println("MyReducer==" + v2.toStrings()[0]);
                         System.out.println("MyReducer==" + v2.toStrings()[1]);
                         System.out.println("MyReducer==" + v2.toStrings()[2]);
