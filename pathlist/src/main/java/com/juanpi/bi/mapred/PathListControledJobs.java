@@ -196,6 +196,12 @@ public class PathListControledJobs {
                 if(!gu_id.isEmpty() && !gu_id.equals("0"))
                 {
 
+                    String tsStr = splited[22];
+                    long ts = Long.parseLong(tsStr);
+                    if("self_f7e0ac3b-ab6c-4d00-9a09-531edd8fda30".equals(gu_id)){
+                        System.out.println("==>>gu_id=" + gu_id + ", tsStr=" + tsStr + ", ts=" + ts);
+                    }
+
                     final PathListControledJobs.NewK2 k2 = new PathListControledJobs.NewK2(splited[0], Long.parseLong(splited[22]));
 
                     String pageLevelId = (splited[21] == null)? "\\N":splited[21];
@@ -345,19 +351,6 @@ public class PathListControledJobs {
 
         public NewK2(){}
 
-        public String getFirst() {
-            return first;
-        }
-        public void setFirst(String first) {
-            this.first = first;
-        }
-        public Long getSecond() {
-            return second;
-        }
-        public void setSecond(Long second) {
-            this.second = second;
-        }
-
         public NewK2(String first, long second){
             this.first = first;
             this.second = second;
@@ -382,11 +375,11 @@ public class PathListControledJobs {
         @Override
         public int compareTo(PathListControledJobs.NewK2 o) {
             // this在前代表升序
-            final int minus = this.getFirst().compareTo(o.getFirst());
+            final int minus = this.first.compareTo(o.first);
             if(minus != 0){
                 return minus;
             }
-            return (int)(this.getSecond() - o.getSecond());
+            return (int)(this.second - o.second);
         }
 
         @Override
@@ -402,7 +395,7 @@ public class PathListControledJobs {
             }
 
             PathListControledJobs.NewK2 oK2 = (PathListControledJobs.NewK2) obj;
-            return (this.getFirst().equals(oK2.getFirst()))&&(this.getSecond() == oK2.getSecond());
+            return (this.first.equals(oK2.first))&&(this.second == oK2.second);
         }
     }
 
@@ -410,7 +403,7 @@ public class PathListControledJobs {
 
         @Override
         public int compare(PathListControledJobs.NewK2 o1, PathListControledJobs.NewK2 o2) {
-            return o1.getFirst().compareTo(o2.getFirst());
+            return o1.first.compareTo(o2.first);
         }
 
         @Override
