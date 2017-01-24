@@ -36,7 +36,7 @@ public class PathListControledJobs {
 
     static final String INPUT_PATH_BASE = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
 
-    static final String PATH_JOBS = "hotTest_r2_dw_real_path_list_jobs";
+    static final String PATH_JOBS = "dw_real_path_list_jobs";
 
     static Configuration conf = new Configuration();
 
@@ -56,6 +56,35 @@ public class PathListControledJobs {
             System.out.println(("初始化FileSystem失败！"));
             System.out.println(e.getMessage());
         }
+    }
+
+    /**
+     * eg. hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr/gu_hash=a/
+     * @param guStr
+     * @return
+     */
+    private static String getInputPath(String dateStr, String guStr)
+    {
+        String str = "{0}/{1}/date={2}/gu_hash={3}/merged/";
+        String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, guStr);
+        String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, guStr);
+        String strh5Event = MessageFormat.format(str, INPUT_PATH_BASE, "pc_events_hash3", dateStr, guStr);
+        // 文件输入路径
+        String inputPath = strEvent + "," + strPage + "," + strh5Event;
+        return inputPath;
+    }
+
+    /**
+     * eg. hdfs://nameservice1/user/hadoop/dw_realtime/fct_for_path_list_offline/gu_hash=a/
+     * @param guStr
+     * @return
+     */
+    private static String getOutputPath(String dateStr, String guStr)
+    {
+        // PathList文件落地路径
+        String patternStr = "{0}/{1}/date={2}/gu_hash={3}/";
+        String outPutPath = MessageFormat.format(patternStr, base, PATH_JOBS, dateStr, guStr);
+        return outPutPath;
     }
 
     /**
@@ -82,25 +111,20 @@ public class PathListControledJobs {
 
         // 遍历16个分区
         for(int i=start; i<=end; i++) {
-            String guHash = String.format("%x", i);
+            String guStr = String.format("%x", i);
 
-            String str = "{0}/{1}/date={2}/gu_hash={3}/merged/";
-            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, guHash);
-            String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, guHash);
-            String strh5Event = MessageFormat.format(str, INPUT_PATH_BASE, "pc_events_hash3", dateStr, guHash);
-            // 文件输入路径
-            String inputPath = strEvent + "," + strPage + "," + strh5Event;
-//            String inputPath = strPage;
+
+            String inputPath = getInputPath(dateStr, guStr);
 
             // PathList文件落地路径
-            String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, PATH_JOBS, dateStr, guHash);
+            String outputPath = getOutputPath(dateStr, guStr);
 
             getFileSystem(base, outputPath);
 
             // 将受控作业添加到控制器中
             // 添加控制job
             try {
-                Job job = jobConstructor(inputPath, outputPath, guHash);
+                Job job = jobConstructor(inputPath, outputPath, guStr);
                 ControlledJob cj = new ControlledJob(conf);
                 cj.setJob(job);
 
@@ -248,12 +272,6 @@ public class PathListControledJobs {
                             value.toString().replace("\001", "\t")
                     };
 
-//                    if("self_f7e0ac3b-ab6c-4d00-9a09-531edd8fda30".equals(gu_id)) {
-//                        System.out.println("MyMapper==" + str[0]);
-//                        System.out.println("MyMapper==" + str[1]);
-//                        System.out.println("MyMapper==" + str[2]);
-//                    }
-
                     final PathListControledJobs.TextArrayWritable v2 = new PathListControledJobs.TextArrayWritable(str);
 
                     xx++;
@@ -330,12 +348,6 @@ public class PathListControledJobs {
 
                     String keyStr = level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5;
 
-//                    if(v2.toStrings()[2].contains("self_f7e0ac3b-ab6c-4d00-9a09-531edd8fda30")) {
-//                        System.out.println("MyReducer==" + v2.toStrings()[0]);
-//                        System.out.println("MyReducer==" + v2.toStrings()[1]);
-//                        System.out.println("MyReducer==" + v2.toStrings()[2]);
-//                    }
-
                     // 5 个级别
                     Text key2 = new Text(keyStr);
                     Text value2 = new Text(v2.toStrings()[2]);
@@ -358,7 +370,6 @@ public class PathListControledJobs {
             return Math.abs(key.first.hashCode() * 127) % numPartitions;
         }
     }
-
 
     /**
      原来的v2不能参与排序，把原来的k2和v2封装到一个类中，作为新的k2
