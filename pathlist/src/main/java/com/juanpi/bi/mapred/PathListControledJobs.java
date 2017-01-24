@@ -85,12 +85,12 @@ public class PathListControledJobs {
             String guHash = String.format("%x", i);
 
             String str = "{0}/{1}/date={2}/gu_hash={3}/merged/";
-//            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, guHash);
+            String strEvent = MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, guHash);
             String strPage = MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, guHash);
-//            String strh5Event = MessageFormat.format(str, INPUT_PATH_BASE, "pc_events_hash3", dateStr, guHash);
+            String strh5Event = MessageFormat.format(str, INPUT_PATH_BASE, "pc_events_hash3", dateStr, guHash);
             // 文件输入路径
-//            String inputPath = strEvent + "," + strPage + "," + strh5Event;
-            String inputPath = strPage;
+            String inputPath = strEvent + "," + strPage + "," + strh5Event;
+//            String inputPath = strPage;
 
             // PathList文件落地路径
             String outputPath = MessageFormat.format("{0}/{1}/date={2}/gu_hash={3}/", base, PATH_JOBS, dateStr, guHash);
@@ -199,9 +199,9 @@ public class PathListControledJobs {
 
                     String tsStr = splited[22];
                     long ts = Long.parseLong(tsStr);
-                    if("self_f7e0ac3b-ab6c-4d00-9a09-531edd8fda30".equals(gu_id)){
-                        System.out.println("==>>gu_id=" + gu_id + ", tsStr=" + tsStr + ", ts=" + ts);
-                    }
+//                    if("self_f7e0ac3b-ab6c-4d00-9a09-531edd8fda30".equals(gu_id)){
+//                        System.out.println("==>>gu_id=" + gu_id + ", tsStr=" + tsStr + ", ts=" + ts);
+//                    }
 
                     final PathListControledJobs.NewK2 k2 = new PathListControledJobs.NewK2(splited[0], Long.parseLong(splited[22]));
 
@@ -248,11 +248,11 @@ public class PathListControledJobs {
                             value.toString().replace("\001", "\t")
                     };
 
-                    if("self_f7e0ac3b-ab6c-4d00-9a09-531edd8fda30".equals(gu_id)) {
-                        System.out.println("MyMapper==" + str[0]);
-                        System.out.println("MyMapper==" + str[1]);
-                        System.out.println("MyMapper==" + str[2]);
-                    }
+//                    if("self_f7e0ac3b-ab6c-4d00-9a09-531edd8fda30".equals(gu_id)) {
+//                        System.out.println("MyMapper==" + str[0]);
+//                        System.out.println("MyMapper==" + str[1]);
+//                        System.out.println("MyMapper==" + str[2]);
+//                    }
 
                     final PathListControledJobs.TextArrayWritable v2 = new PathListControledJobs.TextArrayWritable(str);
 
@@ -330,11 +330,11 @@ public class PathListControledJobs {
 
                     String keyStr = level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5;
 
-                    if(v2.toStrings()[2].contains("self_f7e0ac3b-ab6c-4d00-9a09-531edd8fda30")) {
-                        System.out.println("MyReducer==" + v2.toStrings()[0]);
-                        System.out.println("MyReducer==" + v2.toStrings()[1]);
-                        System.out.println("MyReducer==" + v2.toStrings()[2]);
-                    }
+//                    if(v2.toStrings()[2].contains("self_f7e0ac3b-ab6c-4d00-9a09-531edd8fda30")) {
+//                        System.out.println("MyReducer==" + v2.toStrings()[0]);
+//                        System.out.println("MyReducer==" + v2.toStrings()[1]);
+//                        System.out.println("MyReducer==" + v2.toStrings()[2]);
+//                    }
 
                     // 5 个级别
                     Text key2 = new Text(keyStr);
