@@ -1,7 +1,6 @@
 package com.juanpi.bi.mapred;
 
 import com.google.common.base.Joiner;
-import com.juanpi.bi.mr_example.SecondarySort;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -14,7 +13,6 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
 
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
@@ -369,6 +367,8 @@ public class PathListControledJobs {
     static class  NewK2 implements WritableComparable<PathListControledJobs.NewK2> {
         private String first;
         private Long second;
+
+        public NewK2(){}
 
         public NewK2(String first, long second){
             this.first = first;
