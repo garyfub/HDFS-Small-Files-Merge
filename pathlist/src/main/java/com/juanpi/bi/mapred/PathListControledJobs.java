@@ -1,10 +1,12 @@
 package com.juanpi.bi.mapred;
 
 import com.google.common.base.Joiner;
+import com.juanpi.bi.mr_example.SecondarySort;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.*;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -158,14 +160,15 @@ public class PathListControledJobs {
 
         job.setMapOutputValueClass(PathListControledJobs.TextArrayWritable.class);
 
+        //job.setPartitionerClass(HashPartitioner.class);
+        //job.setNumReduceTasks(1);
+        //job.setGroupingComparatorClass(PathListControledJobs.MyGroupingComparator.class);
+
         //1.3 指定分区类
-        job.setPartitionerClass(HashPartitioner.class);
+        job.setPartitionerClass(FirstPartitioner.class);
 
-        job.setNumReduceTasks(1);
-
-        //1.4 TODO 排序、分区
-        job.setGroupingComparatorClass(PathListControledJobs.MyGroupingComparator.class);
-        //1.5  TODO （可选）合并
+        //分组函数
+        job.setGroupingComparatorClass(PathListControledJobs.GroupingComparator.class);
 
         //2.2 指定自定义的reduce类
         job.setReducerClass(PathListControledJobs.MyReducer.class);
@@ -186,7 +189,7 @@ public class PathListControledJobs {
     static class MyMapper extends Mapper<LongWritable, Text, PathListControledJobs.NewK2, PathListControledJobs.TextArrayWritable> {
         int xx = 0;
 
-        protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException, ArrayIndexOutOfBoundsException, NumberFormatException {
+        protected void map(LongWritable key, Text value, Context context) {
 
             final String[] splited = value.toString().split("\001");
 
@@ -267,10 +270,16 @@ public class PathListControledJobs {
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 System.out.println("======>>InterruptedException: " + value.toString());
-            } catch (ArrayIndexOutOfBoundsException | NumberFormatException | StringIndexOutOfBoundsException e) {
+            } catch (ArrayIndexOutOfBoundsException e) {
                 e.printStackTrace();
                 System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
-            } catch (Exception e) {
+            } catch (StringIndexOutOfBoundsException e) {
+                e.printStackTrace();
+                System.out.println("======>>StringIndexOutOfBoundsException: " + value.toString());
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                System.out.println("======>>NumberFormatException: " + value.toString());
+            }catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("======>>Exception: " + value.toString());
             }
@@ -342,14 +351,24 @@ public class PathListControledJobs {
     }
 
     /**
+     * 分区函数类。根据first确定Partition。
+     */
+    public static class FirstPartitioner extends Partitioner<PathListControledJobs.NewK2, Text>
+    {
+        public int getPartition(PathListControledJobs.NewK2 key, Text value, int numPartitions)
+        {
+            return Math.abs(key.first.hashCode() * 127) % numPartitions;
+        }
+    }
+
+
+    /**
      原来的v2不能参与排序，把原来的k2和v2封装到一个类中，作为新的k2
      *
      */
     static class  NewK2 implements WritableComparable<PathListControledJobs.NewK2> {
         private String first;
         private Long second;
-
-        public NewK2(){}
 
         public NewK2(String first, long second){
             this.first = first;
@@ -434,6 +453,25 @@ public class PathListControledJobs {
             }
         }
     }
+
+    public static class GroupingComparator extends WritableComparator
+    {
+        protected GroupingComparator()
+        {
+            super(NewK2.class, true);
+        }
+        //Compare two WritableComparables.
+        //  重载 compare：对组合键按第一个自然键排序分组
+        public int compare(WritableComparable w1, WritableComparable w2)
+        {
+            NewK2 ip1 = (NewK2) w1;
+            NewK2 ip2 = (NewK2) w2;
+            String left = ip1.first;
+            String right = ip2.first;
+            return left.compareTo(right);
+        }
+    }
+
 
     public static class TextArrayWritable extends ArrayWritable {
         public TextArrayWritable() {
