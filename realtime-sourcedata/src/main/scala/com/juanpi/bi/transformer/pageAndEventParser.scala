@@ -166,13 +166,13 @@ object pageAndEventParser {
 
     val cateLevelId = StringUtils.strToInt(forLevelId)
 
-    val id = new GetPageID().evaluate(x_extend_params)
+    val pid = new GetPageID().evaluate(x_extend_params)
 
     // GetPageID 这个 udf 正常返回的是java Integer，异常时返回null!
-    val pageId = if(id == null) {
+    val pageId = if(pid == null) {
       0
     } else {
-      id.toInt
+      pid.toInt
     }
 
     val pageLevelId = if(event_level_id > 0) {
@@ -268,7 +268,7 @@ object pageAndEventParser {
       // 如果 x_extend_params 为空，pid的计算结果为null
       val pid = new GetPageID().evaluate(x_extend_params)
       if(pid == null){
-        -1
+        x_page_id
       } else if(pid > 0) {
         pid
       } else {
