@@ -117,6 +117,7 @@ class KafkaManager(val kafkaParams: Map[String, String],
       println(s"Error updating the offset to Kafka cluster: ${o.left.get}")
     }
   }
+
   def createDirectStream[K: ClassTag, V: ClassTag,
   KD <: Decoder[K]: ClassTag,
   VD <: Decoder[V]: ClassTag](ssc: StreamingContext,
