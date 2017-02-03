@@ -29,7 +29,7 @@ class KafkaConsumer(topic: String,
   import KafkaConsumer._
 
   /**
-    * 解析 event
+    * 解析 app 端原生页面点击数据
     * event 过滤 collect_api_responsetime
     * page 和 event 都需要过滤 gu_id 为空的数据，需要过滤 site_id 不为（2, 3）的数据
     *
