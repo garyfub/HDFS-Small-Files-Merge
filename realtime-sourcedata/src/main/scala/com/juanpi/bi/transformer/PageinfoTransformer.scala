@@ -28,14 +28,14 @@ class PageinfoTransformer {
 
       val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
 
+      if(starttime_origin.isEmpty) {
+        return ("", "", null)
+      }
+
       val originDateStr = DateUtils.dateStr(starttime_origin.toLong)
 
       val sDate = DateUtils.getWeekAgoDateStr()
       val eDate = DateUtils.getWeekLaterDateStr()
-
-      if(starttime_origin.isEmpty) {
-        return ("", "", null)
-      }
 
       val startTime = if(originDateStr > sDate && originDateStr < eDate) {
         starttime_origin
@@ -148,7 +148,8 @@ class PageinfoTransformer {
 
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPage.get(forPageId).getOrElse(0, 0, "", 0)
     val pageId = pageAndEventParser.getPageId(d_page_id, url)
-    val pageValue = pageParser.getPageValue(d_page_id, url, fct_extendParams, page_type_id, d_page_value)
+
+    val pageValue = pageParser.getPageValue(d_page_id, fct_extendParams, url, page_type_id, d_page_value)
 
     // ref_page_id
     val (d_pre_page_id: Int, d_pre_page_type_id: Int, d_pre_page_value: String, d_pre_page_level_id: Int) = dimPage.get(forPrePageid).getOrElse(0, 0, "", 0)
@@ -161,7 +162,7 @@ class PageinfoTransformer {
 
     val forLevelId = if(d_page_id == 254 && fct_extendParams.nonEmpty){fCate.get(fct_extendParams).getOrElse("0")} else "0"
 
-    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, url, d_page_level_id, forLevelId)
+    val page_level_id = pageAndEventParser.getEventPageLevelId(0, d_page_id, url, d_page_level_id, forLevelId)
 
     val hot_goods_id = if(d_page_id == 250 && fct_extendParams.nonEmpty && fct_extendParams.contains("_") && fct_extendParams.split("_").length > 2)
     {
@@ -192,11 +193,11 @@ class PageinfoTransformer {
     val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime, ug_id)
 
     if (-1 == pageId) {
-      println("for_pageid:" + forPageId, " ,page_type_id:" + page_type_id, " ,page_level_id:" + page_level_id,
+      println("for_pageid:" + forPageId, " ,page_type_id:" + page_type_id, "url:" + url,
         " ,pageName:" + pageName, " ,fct_extendParams:" + fct_extendParams,
-        " ,page_value:" + pageValue, " ,fct_extendParams:" + fct_extendParams,
+        " ,page_value:" + pageValue,
         " ,d_page_id:" + d_page_id, " ,d_page_value:" + d_page_value)
-      println("page_id=-1===>原始数据为：" + row)
+      println("pageId=-1===>原始数据为：" + row)
     }
 
     (user, pe, page, event)

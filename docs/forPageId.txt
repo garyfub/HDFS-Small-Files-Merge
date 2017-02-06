@@ -5,223 +5,222 @@ select concat(page_exp1 , page_exp2) exp,page_id, page_type_id, page_value, page
  and del_flag = 0
  order by page_id;
 
-exp page_id page_type_id    page_value  page_level_id
-page_home   98  0       1
-page_goods  99  7   goods_id    0
-page_check_scoremall    132 0   goods_id    0
-page_center 133 0       1
-page_about  134 0       0
-page_check  135 0       2
-page_scoremall_check    136 0       1
-page_scoremall_exchange 137 0       5
-page_scoremall_draw 138 0       5
-page_login  139 0       0
-page_register   140 0       0
-page_forget 141 0       0
-page_collection 142 0       5
-page_score  143 0       0
-page_address    144 0       0
-page_addaddress 145 0       0
-page_feedback   146 0       0
-page_fit    147 0       0
-page_invite 148 0       0
-page_code   149 0       0
-page_temai_returngoods  150 0       0
-page_search_results 151 0   goods_id    1
-page_information    152 0       0
-page_temai_returnwait   153 0       0
-page_active 154 5   活动str   3
-page_temai_goods    158 8   goods_id    0
-page_temai_parametergoods   160 0       0
-page_temai_orderconfirmation    162 0       0
-page_temai_orderfailed  163 0       0
-page_temai_paysuccess   164 0       0
-page_temai_payfailed    165 0       0
-page_temai_payments 166 0       0
-page_temai_bag  167 0       0
-page_temai_orderlist    168 0       5
-page_temai_orderdetails 169 0       0
-page_temai_couponavailable  170 0       0
-page_temai_couponinput  173 0       0
-page_temai_explain  174 0       0
-page_temai_logistics    175 0       0
-page_tabpifushi 177 4   服饰折扣    1
-page_tabpimuying    178 4   母婴折扣    1
-page_tabpijujia 179 4   居家折扣    1
-page_tabjiufushi    182 4   服饰折扣    1
-page_tabjiujujia    183 4   家居  1
-page_tabjiumuying   184 4   母婴  1
-page_tabjiumeishi   185 4   美食  1
-page_tabjiumeizhuang    186 4   美妆  1
-page_tabjiuxiebao   187 4   鞋包配饰    1
-page_tabjiushuma    188 4   数码电器    1
-page_tabjiuwenti    189 4   文体  1
-page_taball 219 10  最新折扣    1
-page_tabjiu 221 10  9.9包邮   3
-page_tabyugao   222 10  明日预告    2
-page_tabpifushiall  223 4   服饰全部    1
-page_tabpifuzhuang  224 4   服装  1
-page_tabpishangyi   225 4   上衣  1
-page_tabpiqunku 226 4   裙裤  1
-page_tabpineiyi 227 4   内衣  0
-page_tabpixiezi 228 4   鞋子  1
-page_tabpixiangbao  229 4   箱包  1
-page_tabpipeishi    230 4   配饰  1
-page_tabpizhonglaonian  231 4   中老年 1
-page_tabpitongzhuang    233 4   童装  1
-page_tabpitongxie   234 4   童鞋  1
-page_tabpixuexiwanju    235 4   学习玩具    1
-page_tabpiyuyingyongpin 236 4   孕婴用品    1
-page_tabpichuangpinbuyi 238 4   床品布艺    1
-page_tabpijujiabaihuo   239 4   居家百货    1
-page_tabpicanchuqingjie 240 4   餐厨清洁    1
-page_tabpijiajujiancai  241 4   家具建材    1
-page_tabpijiayongdianqi 242 4   家用电器    1
-page_tabpishuma_new 244 4   其他数码    1
-page_tabpimeishi_new    245 4   其他美食    1
-page_tabpiwenti_new 247 4   其他文体    1
-page_tabshijiu  248 4   19.9包邮  1
-page_tabzhe 249 0       0
-page_home_brand_in  250 3   brand_id    5
-page_tab    254 0       1
-page_temai_returnrecord 255 0       0
-page_mama_mather    256 0       0
-page_mama_brand 257 0       0
-page_mama_trailer   258 0       0
-page_mama_garments  260 0       0
-page_mama_shoes 261 0       0
-page_mama_toy   262 0       0
-page_mama_motherhood    263 0       0
-page_mama_center    264 0       0
-page_mama_set   265 0       0
-page_mama_help  266 0       0
-page_mama_feedback  267 0       0
-page_search 268 6   搜索的关键字  1
-page_login_shortcut 269 0       0
-page_login_password 270 0       0
-page_temai_freeorder    271 0       0
-page_temai_freeregcode  272 0       0
-page_temai_freeaddress  273 0       0
-page_temai_orderlist_dfh    274 0       3
-page_temai_orderlist_ysz    275 0       3
-page_temai_orderlist_ysd    276 0       3
-page_temai_orderlist_wdsh   277 0       3
-page_home_brand_list    278 2       3
-page_tabpast_zhe    279 10  昨日上新    1
-page_tabcrazy_zhe   280 10  最后疯抢    2
-page_changepassword 281 0       0
-page_home_brand_list_fushi  282 2       3
-page_home_brand_list_jujia  283 2       3
-page_home_brand_list_muying 284 2       3
-page_temai_orderlist_dfk    287 0       3
-page_h5 289 5       0
-page_ad_inscreen    290 0       1
-page_task   291 0       0
-page_task_userqq    292 0       0
-page_task_userweixin    293 0       0
-page_information_nickname   294 0       0
-page_info_verifyphone   295 0       0
-page_info_verifycode    296 0       0
-page_exchange_details   297 0       0
-page_exchange_iwant 298 0       0
-page_exchange_suc   299 0       0
-page_raffle_details 300 0       0
-page_raffle_iwant   301 0       0
-page_raffle_suc 302 0       0
-page_exchange_recordlist    303 0       0
-page_exchange_record_details    304 0       0
-page_raffle_recordlist  305 0       0
-page_raffle_record_details  306 0       0
-page_raffle_choaddress  307 0       0
-page_raffle_receivesuc  308 0       0
-page_customer_logistics 309 0       0
-page_customer_choose_company    310 0       0
-page_register_userinfo  311 0       0
-page_forget_passwords   312 0       0
-page_get_create 313 0       0
-page_scan   314 0       5
-page_tabpimeishi    316 4   美食折扣    1
-page_tabpimeizhuang 317 4   美妆折扣    1
-page_tabpijujia_jiaju   318 4   家居  1
-page_tabpijujia_baihuo  319 4   百货  1
-page_tabpijujia_shuma   320 4   数码  1
-page_tabpijujia_dianqi  321 4   电器  1
-page_tabpijujia_wenti   322 4   文体  1
-page_ad_inscreen1   323 0       1
-page_ad_inscreen2   324 0       1
-page_ad_inscreen3   325 0       1
-page_guide1 326 0       0
-page_guide2 327 0       0
-page_guide3 328 0       0
-page_guide4 329 0       0
-page_tabtaozhuang   330 4   套装  0
-page_temai_refund   331 0       0
-page_peerpay_apply  333 8       0
-page_verifynumber_old   334 0       0
-page_verifynumber_new   335 0       0
-page_kefu_webphone  336 0       0
-page_temai_returngoods_reason   337 0       0
-page_temai_returngoods_apply    338 0       0
-page_temai_property 339 0       0
-page_customer_logistics_scan    340 0       0
-page_sex_select 341 0       0
-page_verification_total 342 0       0
-page_verification_consignee 343 0       0
-page_verification_order 344 0       0
-page_verification_phone 345 0       0
-page_find_passwords_email   346 0       0
-page_find_passwords_email_confirm   347 0       0
-page_collection_brand   348 0       3
-page_unlock_suc 349 0       0
-page_verification_receiver  350 0       0
-page_verification_goodspic  351 0       0
-page_verification_sendemail 352 0       0
-page_verification_service   353 0       0
-page_verification_email 354 0       0
-page_verification_message   355 0       0
-page_findpass   356 0       0
-page_mall_exchange  357 0       5
-page_mall_lottery   358 0       5
-page_wallet_withdraw    359 0       0
-page_wallet_receivables 360 0       0
-page_balance_detail 361 0       0
-page_balance    362 0       0
-page_wallet 363 0       0
-page_findpass_payment   364 0       0
-page_setpass_payment    365 0       0
-page_category   366 0       1
-page_identification_add 367 0       0
-page_identification_detail  368 0       0
-page_identification 369 0       0
-page_message_notification   370 0       0
-page_message_logistics  371 0       0
-page_message_activity   372 0       0
-page_message    373 0       1
-page_service    374 0       0
-page_customer_service   375 0       0
-page_package_buy    376 0       0
-page_aftersale_exchange 377 0       0
-page_withdrawwechat 378 0       0
-page_group_orderconfirmation    379 0       0
-page_myaccount  380 0       0
-page_myassets   381 0       0
-page_label_collection   382 0       0
-page_identification_scan    383 0       0
-page_exchange_orderfailed   384 0       0
-page_exchange_payfailed 385 0       0
-page_exchange_paysuc    386 0       0
-page_exchange_pay   387 0       0
-page_account_security   388 0       0
-test    389 0       0
-page_temai_evaluate 390 0       0
-page_temai_exchange 391 0       0
-page_temai_multi_logistics  392 0       0
-page_nopassword_pay 393 0       0
-page_purchase   394 0       3
-page_shop_goods 395 0       0
-page_temai_realpic  396 0       0
-page_settlement_goodslist   397 0       0
-page_temai_repayment_result 398 0       0
-page_temai_repayment    399 0       0
-page_tabyugao_cai   10105   10  明日预告-猜你喜欢   1
-page_tab-100    10106   10  空购物袋页   0
+page_home	98	0		1
+page_goods	99	7	goods_id	0
+page_check_scoremall	132	0	goods_id	0
+page_center	133	0		1
+page_about	134	0		0
+page_check	135	0		2
+page_scoremall_check	136	0		1
+page_scoremall_exchange	137	0		5
+page_scoremall_draw	138	0		5
+page_login	139	0		0
+page_register	140	0		0
+page_forget	141	0		0
+page_collection	142	0		5
+page_score	143	0		0
+page_address	144	0		0
+page_addaddress	145	0		0
+page_feedback	146	0		0
+page_fit	147	0		0
+page_invite	148	0		0
+page_code	149	0		0
+page_temai_returngoods	150	0		0
+page_search_results	151	0	goods_id	1
+page_information	152	0		0
+page_temai_returnwait	153	0		0
+page_active	154	5	活动str	3
+page_temai_goods	158	8	goods_id	0
+page_temai_parametergoods	160	0		0
+page_temai_orderconfirmation	162	0		0
+page_temai_orderfailed	163	0		0
+page_temai_paysuccess	164	0		0
+page_temai_payfailed	165	0		0
+page_temai_payments	166	0		0
+page_temai_bag	167	0		0
+page_temai_orderlist	168	0		3
+page_temai_orderdetails	169	0		5
+page_temai_couponavailable	170	0		0
+page_temai_couponinput	173	0		0
+page_temai_explain	174	0		0
+page_temai_logistics	175	0		0
+page_tabpifushi	177	4	服饰折扣	1
+page_tabpimuying	178	4	母婴折扣	1
+page_tabpijujia	179	4	居家折扣	1
+page_tabjiufushi	182	4	服饰折扣	1
+page_tabjiujujia	183	4	家居	1
+page_tabjiumuying	184	4	母婴	1
+page_tabjiumeishi	185	4	美食	1
+page_tabjiumeizhuang	186	4	美妆	1
+page_tabjiuxiebao	187	4	鞋包配饰	1
+page_tabjiushuma	188	4	数码电器	1
+page_tabjiuwenti	189	4	文体	1
+page_taball	219	10	最新折扣	1
+page_tabjiu	221	10	9.9包邮	3
+page_tabyugao	222	10	明日预告	2
+page_tabpifushiall	223	4	服饰全部	1
+page_tabpifuzhuang	224	4	服装	1
+page_tabpishangyi	225	4	上衣	1
+page_tabpiqunku	226	4	裙裤	1
+page_tabpineiyi	227	4	内衣	0
+page_tabpixiezi	228	4	鞋子	1
+page_tabpixiangbao	229	4	箱包	1
+page_tabpipeishi	230	4	配饰	1
+page_tabpizhonglaonian	231	4	中老年	1
+page_tabpitongzhuang	233	4	童装	1
+page_tabpitongxie	234	4	童鞋	1
+page_tabpixuexiwanju	235	4	学习玩具	1
+page_tabpiyuyingyongpin	236	4	孕婴用品	1
+page_tabpichuangpinbuyi	238	4	床品布艺	1
+page_tabpijujiabaihuo	239	4	居家百货	1
+page_tabpicanchuqingjie	240	4	餐厨清洁	1
+page_tabpijiajujiancai	241	4	家具建材	1
+page_tabpijiayongdianqi	242	4	家用电器	1
+page_tabpishuma_new	244	4	其他数码	1
+page_tabpimeishi_new	245	4	其他美食	1
+page_tabpiwenti_new	247	4	其他文体	1
+page_tabshijiu	248	4	19.9包邮	1
+page_tabzhe	249	0		0
+page_home_brand_in	250	3	brand_id	5
+page_tab	254	0		1
+page_temai_returnrecord	255	0		0
+page_mama_mather	256	0		0
+page_mama_brand	257	0		0
+page_mama_trailer	258	0		0
+page_mama_garments	260	0		0
+page_mama_shoes	261	0		0
+page_mama_toy	262	0		0
+page_mama_motherhood	263	0		0
+page_mama_center	264	0		0
+page_mama_set	265	0		0
+page_mama_help	266	0		0
+page_mama_feedback	267	0		0
+page_search	268	6	搜索的关键字	1
+page_login_shortcut	269	0		0
+page_login_password	270	0		0
+page_temai_freeorder	271	0		0
+page_temai_freeregcode	272	0		0
+page_temai_freeaddress	273	0		0
+page_temai_orderlist_dfh	274	0		3
+page_temai_orderlist_ysz	275	0		3
+page_temai_orderlist_ysd	276	0		3
+page_temai_orderlist_wdsh	277	0		3
+page_home_brand_list	278	2		3
+page_tabpast_zhe	279	10	昨日上新	1
+page_tabcrazy_zhe	280	10	最后疯抢	2
+page_changepassword	281	0		0
+page_home_brand_list_fushi	282	2		3
+page_home_brand_list_jujia	283	2		3
+page_home_brand_list_muying	284	2		3
+page_temai_orderlist_dfk	287	0		3
+page_h5	289	5		0
+page_ad_inscreen	290	0		1
+page_task	291	0		0
+page_task_userqq	292	0		0
+page_task_userweixin	293	0		0
+page_information_nickname	294	0		0
+page_info_verifyphone	295	0		0
+page_info_verifycode	296	0		0
+page_exchange_details	297	0		0
+page_exchange_iwant	298	0		0
+page_exchange_suc	299	0		0
+page_raffle_details	300	0		0
+page_raffle_iwant	301	0		0
+page_raffle_suc	302	0		0
+page_exchange_recordlist	303	0		0
+page_exchange_record_details	304	0		0
+page_raffle_recordlist	305	0		0
+page_raffle_record_details	306	0		0
+page_raffle_choaddress	307	0		0
+page_raffle_receivesuc	308	0		0
+page_customer_logistics	309	0		0
+page_customer_choose_company	310	0		0
+page_register_userinfo	311	0		0
+page_forget_passwords	312	0		0
+page_get_create	313	0		0
+page_scan	314	0		5
+page_tabpimeishi	316	4	美食折扣	1
+page_tabpimeizhuang	317	4	美妆折扣	1
+page_tabpijujia_jiaju	318	4	家居	1
+page_tabpijujia_baihuo	319	4	百货	1
+page_tabpijujia_shuma	320	4	数码	1
+page_tabpijujia_dianqi	321	4	电器	1
+page_tabpijujia_wenti	322	4	文体	1
+page_ad_inscreen1	323	0		1
+page_ad_inscreen2	324	0		1
+page_ad_inscreen3	325	0		1
+page_guide1	326	0		0
+page_guide2	327	0		0
+page_guide3	328	0		0
+page_guide4	329	0		0
+page_tabtaozhuang	330	4	套装	0
+page_temai_refund	331	0		0
+page_peerpay_apply	333	8		0
+page_verifynumber_old	334	0		0
+page_verifynumber_new	335	0		0
+page_kefu_webphone	336	0		0
+page_temai_returngoods_reason	337	0		0
+page_temai_returngoods_apply	338	0		0
+page_temai_property	339	0		0
+page_customer_logistics_scan	340	0		0
+page_sex_select	341	0		0
+page_verification_total	342	0		0
+page_verification_consignee	343	0		0
+page_verification_order	344	0		0
+page_verification_phone	345	0		0
+page_find_passwords_email	346	0		0
+page_find_passwords_email_confirm	347	0		0
+page_collection_brand	348	0		3
+page_unlock_suc	349	0		0
+page_verification_receiver	350	0		0
+page_verification_goodspic	351	0		0
+page_verification_sendemail	352	0		0
+page_verification_service	353	0		0
+page_verification_email	354	0		0
+page_verification_message	355	0		0
+page_findpass	356	0		0
+page_mall_exchange	357	0		5
+page_mall_lottery	358	0		5
+page_wallet_withdraw	359	0		0
+page_wallet_receivables	360	0		0
+page_balance_detail	361	0		0
+page_balance	362	0		0
+page_wallet	363	0		0
+page_findpass_payment	364	0		0
+page_setpass_payment	365	0		0
+page_category	366	0		1
+page_identification_add	367	0		0
+page_identification_detail	368	0		0
+page_identification	369	0		0
+page_message_notification	370	0		0
+page_message_logistics	371	0		0
+page_message_activity	372	0		0
+page_message	373	0		1
+page_service	374	0		0
+page_customer_service	375	0		0
+page_package_buy	376	0		0
+page_aftersale_exchange	377	0		0
+page_withdrawwechat	378	0		0
+page_group_orderconfirmation	379	0		0
+page_myaccount	380	0		0
+page_myassets	381	0		0
+page_label_collection	382	0		0
+page_identification_scan	383	0		0
+page_exchange_orderfailed	384	0		0
+page_exchange_payfailed	385	0		0
+page_exchange_paysuc	386	0		0
+page_exchange_pay	387	0		0
+page_account_security	388	0		0
+test	389	0		0
+page_temai_evaluate	390	0		0
+page_temai_exchange	391	0		0
+page_temai_multi_logistics	392	0		0
+page_nopassword_pay	393	0		0
+page_purchase	394	0		3
+page_shop_goods	395	0		0
+page_temai_realpic	396	0		0
+page_settlement_goodslist	397	0		0
+page_temai_repayment_result	398	0		0
+page_temai_repayment	399	0		0
+page_tabyugao_cai	10105	10	明日预告-猜你喜欢	1
+page_tab-100	10106	10	空购物袋页	0

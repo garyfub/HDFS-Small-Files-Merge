@@ -28,30 +28,6 @@ public class JsonUtils {
 
     public static Object toBean(JSONObject object, Class beanClass) {
         Object obj = null;
-        /*try {
-            obj = JSONObject.toBean(object, beanClass);
-        } catch (JSONException e) {
-            System.out.println(object.toString());
-            e.printStackTrace();
-            Iterator<String> keys=object.keys();
-            Object o;
-            String key;
-            while(keys.hasNext()){
-                key=keys.next();
-                o=object.get(key);
-                if(o instanceof JSONObject){
-                    object.put(key, "\""+o.toString()+"\"");
-                } else if(o instanceof JSONArray) {
-                    object.put(key, "\""+o.toString()+"\"");
-                } else {
-
-                }
-            }
-            obj = JSONObject.toBean(object, beanClass);
-        } catch (Exception e) {
-            System.out.println(object.toString());
-            e.printStackTrace();
-        }*/
         try {
             Iterator<String> keys=object.keys();
             Object o;

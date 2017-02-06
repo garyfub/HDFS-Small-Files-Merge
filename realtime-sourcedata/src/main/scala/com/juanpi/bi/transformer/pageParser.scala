@@ -29,7 +29,9 @@ object pageParser {
       }
       else if(x_page_id == 154 || x_page_id == 289) {
         val pid = new GetPageID().evaluate(x_extend_params)
-        if(pid == 10104) {
+        val pageId = if(pid == null) {0} else pid.toInt
+
+        if(pageId == 10104) {
           new GetSkcId().evaluate(x_extend_params)
         }
         else if(pid == 10102) {
@@ -45,12 +47,18 @@ object pageParser {
           case a if a.contains("singlemessage") => "singlemessage"
           case b if b.contains("groupmessage") => "groupmessage"
           case c if c.contains("timeline") => "timeline"
+          case d if d.contains("ptsy_1") => "ptsy_1"
+          case e if e.contains("ggmk_1") => "ggmk_1"
+          case f if f.contains("push_app") => "push_app"
+          case g if g.contains("push_wx") => "push_wx"
+          case h if h.contains("ggmk_2") => "ggmk_2"
           case _ => ""
         }
       }
       else {""}
     page_lel2_value
   }
+
 
   /**
     *
@@ -62,29 +70,36 @@ object pageParser {
     */
   def getPageValue(x_page_id:Int, x_extend_params: String, url: String, page_type_id: Int, x_page_value: String): String = {
     // 解析 page_value
+
+    val pid = new GetPageID().evaluate(url)
+
+    val pageId = if(pid == null) {0} else pid.toInt
+
     val page_value: String =
-    if (x_page_id == 289 || x_page_id == 154) {
+      if ((x_page_id == 289 || x_page_id == 154 || x_page_id == 254) && pageId > 0) {
       val res = new GetDwPcPageValue().evaluate(url)
       res
-    } else {
-      val param = if(x_page_id == 254)
-      {
-        x_extend_params
-      } else if(page_type_id == 1 || page_type_id == 4 || page_type_id == 10) {
-        x_page_value
-      } else if(x_page_id == 250) {
-        // app端品牌页面id = 250, page_extends_param 格式：加密brandid_shopid_引流款id,或者 加密brandid_shopid
-        val goodsId = new GetGoodsId().evaluate(x_extend_params.split("_")(0))
-        goodsId
-      } else {
-        x_extend_params
       }
-      val res = new GetDwMbPageValue().evaluate(param, page_type_id.toString)
-      res
-    }
-    page_value
-  }
+      else
+      {
+        val param = if (x_page_id == 254) {
+          x_extend_params
+        } else if (page_type_id == 1 || page_type_id == 4 || page_type_id == 10) {
+          x_page_value
+        } else if (x_page_id == 250) {
+          // app端品牌页面id = 250, page_extends_param 格式：加密brandid_shopid_引流款id,或者 加密brandid_shopid
+          val goodsId = new GetGoodsId().evaluate(x_extend_params.split("_")(0))
+          goodsId
+        } else {
+          x_extend_params
+        }
 
+        val res = new GetDwMbPageValue().evaluate(param, page_type_id.toString)
+
+        res
+      }
+      page_value
+  }
 
   /**
     *

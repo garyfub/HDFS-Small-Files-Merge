@@ -1,5 +1,7 @@
 package com.juanpi.bi.transformer
 
+import com.juanpi.bi.sc_utils.DateUtils
+import com.juanpi.hive.udf.GetPageID
 import play.api.libs.json.Json
 
 /**
@@ -7,7 +9,7 @@ import play.api.libs.json.Json
   */
 object checkPage {
 
-  val line = "{\"app_name\":\"zhe\",\"app_version\":\"4.2.3\",\"c_label\":\"C2\",\"c_server\":\"{\\\"gid\\\":\\\"C2\\\",\\\"ugroup\\\":\\\"580_486_485_496_495_335_453_457_377_574_547_608_584_572_607_615_618_593\\\"}\",\"deviceid\":\"869949029295654\",\"endtime\":\"1484287265361\",\"endtime_origin\":\"1484287265191\",\"extend_params\":\"http://m.juanpi.com/faxian\",\"ip\":\"58.255.228.172\",\"jpid\":\"00000000-0000-0030-f7f1-c2bb00000030\",\"location\":\"广东省茂名市茂南区油城六路三巷靠近裕丰花园(油城六路三巷)\",\"os\":\"android\",\"os_version\":\"6.0\",\"pagename\":\"page_h5\",\"pre_extend_params\":\"all\",\"pre_page\":\"page_tab\",\"server_jsonstr\":\"{}\",\"session_id\":\"1472284730622_zhe_1484286985482\",\"source\":\"\",\"starttime\":\"1484287265209\",\"starttime_origin\":\"1484287265039\",\"ticks\":\"1472284730622\",\"to_switch\":\"0\",\"uid\":\"32346127\",\"utm\":\"101225\",\"wap_pre_url\":\"\",\"wap_url\":\"\"}"
+  val line = "{\"app_name\":\"jiu\",\"app_version\":\"4.2.1\",\"c_label\":\"C2\",\"c_server\":\"{\\\"gid\\\":\\\"C2\\\",\\\"ugroup\\\":\\\"580_643_486_644_485_631_496_630_453_491_492_457_622_377_627_572_517_629_602\\\"}\",\"deviceid\":\"359901057800191\",\"endtime\":\"1484813956731\",\"endtime_origin\":\"1484813956065\",\"extend_params\":\"32612735\",\"ip\":\"180.142.222.146\",\"jpid\":\"ffffffff-f9ba-487d-367f-8a000da939b3\",\"location\":\"广西壮族自治区玉林市兴业县玉贵路靠近兴业县妇幼保健院\",\"os\":\"android\",\"os_version\":\"4.3\",\"pagename\":\"page_temai_goods\",\"pre_extend_params\":\"all\",\"pre_page\":\"page_tab\",\"server_jsonstr\":\"{}\",\"session_id\":\"1475993842938_jiu_1484812874497\",\"source\":\"\",\"starttime\":\"1484813949434\",\"starttime_origin\":\"1484813948768\",\"ticks\":\"1475993842938\",\"to_switch\":\"1\",\"uid\":\"29932735\",\"utm\":\"101212\",\"wap_pre_url\":\"\",\"wap_url\":\"\"}"
 
   def testcid(server_jsonstr: String): Any = {
     if (server_jsonstr.contains("cid")) {
@@ -19,25 +21,39 @@ object checkPage {
 
   def main(args: Array[String]): Unit = {
 
-    val pageName = "page_h5"
-    val extendParams = ""
-    val server_jsonstr = ""
-    val fct_extendParams = pageAndEventParser.getExtendParams(pageName, extendParams)
-    val forPageId = pageParser.forPageId(pageName, fct_extendParams, server_jsonstr)
+//    val for_pageid="page_temai_goods"
+//    val page_type_id=8
+//    val page_level_id="0"
+//    val pageName="page_temai_goods"
+//    val page_value="null"
+//    val fct_extendParams="4497809"
+//    val d_page_id=158
+//    val d_page_value="goods_id"
+//    val res = pageParser.getPageValue(d_page_id, fct_extendParams, "", page_type_id, d_page_value)
+//
+//    println(res)
 
-    println(fct_extendParams, forPageId)
+    val pid = -999: java.lang.Integer
+    println(pid.toInt)
 
-//    val forLevelId = if(d_page_id == 254 && fct_extendParams.nonEmpty){fCate.get(fct_extendParams).getOrElse("0")} else "0"
 
-    val d_page_id = 289
-    val d_page_level_id = 0
-    val forLevelId = "0"
-    val page_level_id = pageAndEventParser.getPageLevelId(d_page_id, fct_extendParams, d_page_level_id, forLevelId)
-
-    val url = "https://mact.juanpi.com/liangfancs3?mobile=1&qmshareview=1"
-
-    val pageId = pageAndEventParser.getPageId(d_page_id, url)
-
+//    val row = Json.parse(line.replaceAll("null", """\\"\\""""))
+//    val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
+//
+//    if(starttime_origin.isEmpty) {
+//      println("", "", null)
+//    }
+//
+//    val originDateStr = DateUtils.dateStr(starttime_origin.toLong)
+//
+//    val sDate = DateUtils.getWeekAgoDateStr()
+//    val eDate = DateUtils.getWeekLaterDateStr()
+//
+//    val startTime = if(originDateStr > sDate && originDateStr < eDate) {
+//      starttime_origin
+//    } else {
+//      ""
+//    }
 
   }
 }

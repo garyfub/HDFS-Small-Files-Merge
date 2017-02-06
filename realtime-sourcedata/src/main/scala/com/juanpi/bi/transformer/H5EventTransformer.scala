@@ -243,10 +243,10 @@ class H5EventTransformer {
       eV
     }
 
-    val refPageId = new GetPageID().evaluate(baseUrlRef)
+    val refPageId = getPageIdFromUDF(baseUrlRef)
     val refPageValue = new GetDwPcPageValue().evaluate(baseUrlRef)
     val refSiteId = new GetSiteId().evaluate(baseUrlRef)
-    val pageId = new GetPageID().evaluate(baseUrl)
+    val pageId = getPageIdFromUDF(baseUrl)
     val pageValue = new GetDwPcPageValue().evaluate(baseUrl)
     val shopId = new GetShopId().evaluate(baseUrl)
     val refShopId = new GetShopId().evaluate(baseUrlRef)
@@ -294,11 +294,19 @@ class H5EventTransformer {
 
     val table_source = "h5_app_event"
     val user = User.apply(guId, userId.toString, utm, "", dwSessionId, dwTeminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
-    val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
+    val pe = PageAndEvent.apply(pageId, pageValue, refPageId, refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceId, to_switch)
     val event = Event.apply(eventId.toString(), eventValue, eventLevel2Value, rule_id, test_id, select_id, loadTime, ug_id)
 
     (user, pe, page, event)
+  }
+
+  def getPageIdFromUDF(param: String): Int = {
+    val pid = new GetPageID().evaluate(param)
+
+    val pageId = if(pid == null) {0} else javaToScalaInt(pid)
+
+    pageId
   }
 
 
@@ -334,12 +342,12 @@ class H5EventTransformer {
     val guId = ul_id
     val dwSessionId = getDwSessionId(sid, ul_id)
     val eventValue = getEventValue(event_type_id, baseLog.actionName, baseLog.eV)
-    val refPageId = new GetPageID().evaluate(baseUrlRef)
+    val refPageId = getPageIdFromUDF(baseUrlRef)
     val refPageValue = new GetDwPcPageValue().evaluate(baseUrlRef)
     val refSiteId = new GetSiteId().evaluate(baseUrlRef)
     // hive-udf Decoding函数 Decoding.(baseLog.s_uid)
     val userId = Decoding.evaluate(baseLog.s_uid)
-    val pageId = new GetPageID().evaluate(baseUrl)
+    val pageId = getPageIdFromUDF(baseUrl)
     val pageValue = new GetDwPcPageValue().evaluate(baseUrl)
     val shopId = new GetShopId().evaluate(baseUrl)
     val refShopId = new GetShopId().evaluate(baseUrlRef)
@@ -455,16 +463,6 @@ class H5EventTransformer {
       case 36 => ScalaConstants.T_IOS
       case _ => ScalaConstants.T_Unknow
     }
-  }
-
-  def getPageValue(urlPageId: Int, url: String): String = {
-    val upa = Array(12, 14, 25, 26, 28, 29)
-    val pageValue = urlPageId match {
-      case 33 => new GetKeyWord().evaluate(url)
-      case x if (upa.exists({ x: Int => x == urlPageId })) => new GetKeyWord().evaluate(url)
-      case _ => ""
-    }
-    pageValue
   }
 
   /**
