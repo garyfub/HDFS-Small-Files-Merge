@@ -177,6 +177,16 @@ class H5PageTransformer {
       click_url
     }
 
+    val pid = new GetPageID().evaluate(baseUrl)
+    val pageId = if(pid == null) {0} else javaToScalaInt(pid)
+
+    val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPage.get(pageId.toString).getOrElse(0, 0, "", 0)
+
+    // todo WATCHOUT! 数据与dim_page是通过join关联的，如果没有匹配上，返回null
+    if(d_page_id == 0) {
+      return null
+    }
+
     val baseUrlRef = if ("".equals(click_url)) {
       urlref
     } else {
@@ -189,7 +199,7 @@ class H5PageTransformer {
       click_action_name
     }
 
-    val utmId = if(jpk > 0) { jpk } else utmid
+    val utmId = if(jpk > 0) { jpk+"" } else utmid
 
     val ulQt = ul_idts * 1000
 
@@ -201,22 +211,20 @@ class H5PageTransformer {
     val refPid = new GetPageID().evaluate(baseUrlRef)
     val refUrlPageId = if(refPid == null) {0} else javaToScalaInt(refPid)
 
-    val pid = new GetPageID().evaluate(baseUrl)
-    val pageId = if(pid == null) {0} else javaToScalaInt(pid)
     val pageValue = new GetDwPcPageValue().evaluate(baseUrl)
     val refPageId = new GetPageID().evaluate(baseUrlRef)
     val refPageValue = new GetDwPcPageValue().evaluate(baseUrlRef)
 
-    val siteId = if(baseSiteId == null || baseSiteId == 0 || baseSiteId == "null") -999 else baseSiteId
+    val dwSiteId = if(baseSiteId == null || baseSiteId == 0 || baseSiteId == "null") -999 else javaToScalaInt(baseSiteId)
 
     val refSiteId = new GetSiteId().evaluate(baseUrlRef)
 
     val baseTerminalId = getTerminalIdFromBase(qm_device_id, baseUrl)
     val dwTerminalId = getTerminalIdForPC(baseTerminalId)
-    val app_version = ""
+    val appVersion = ""
     val guId = ul_id
 
-    val sessionId = if(sid == null || sid.length == 0 || sid == "null") ul_id else sid
+    val dwSessionId = if(sid == null || sid.length == 0 || sid == "null") ul_id else sid
 
     val shopId = new GetShopId().evaluate(baseUrl)
     val refShopId = new GetShopId().evaluate(baseUrlRef)
@@ -229,20 +237,41 @@ class H5PageTransformer {
 
     val gu_create_time = DateUtils.dateStr(timeStamp.toLong)
 
-    val deviceid = ""
+    val pit_type = 0
+    val sortdate = ""
+    val sorthour = "0"
+    val lplid = "0"
+    val ptplid = "0"
+    val gid = ""
+    val ugroup = ""
+    val source = ""
+    val hotGoodsId = ""
 
-//    val log = BaseLog(actName, utmId, goodid, baseUrl, baseUrlRef, ul_id, ul_idts,
+    val deviceId = ""
+    val to_switch = ""
+    val (date, hour) = TimeUtils.dateHourFormat(timeStamp)
+
+    val pageLevelId = d_page_level_id
+
+    val startTime, endTime = timeStamp
+
+    val eventId, eventValue, eventLevel2Vlue, rule_id, test_id, select_id = ""
+    val loadTime = "0"
+    val ug_id = ""
+
+    val table_source = "h5_page"
+
+    //    val log = BaseLog(actName, utmId, goodid, baseUrl, baseUrlRef, ul_id, ul_idts,
 //      ul_ref, s_uid, timeStamp, sessionid, click_action_name, click_url,
 //      qm_device_id, actionType, action_name, ip, qm_session_id, qm_jpid)
 
-    val res = if (qm_device_id.length <= 6 || baseTerminalId != 2) {
-      // m.域名且带有设备号的为APP H5页面
-//      parseAppH5(dimEvent, dimPage, log, eventJoinKey)
-      null
-    } else {
-      null
-    }
-    res
+//    val res = if (qm_device_id.length <= 6 || baseTerminalId != 2) {
+
+    val user = User.apply(guId, userId.toString, utmId, "", dwSessionId, dwTerminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
+    val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
+    val page = Page.apply(source, ip, "", "", deviceId, to_switch)
+    val event = Event.apply(eventId, eventValue, eventLevel2Vlue, rule_id, test_id, select_id, loadTime, ug_id)
+    (user, pe, page, event)
   }
 }
 
