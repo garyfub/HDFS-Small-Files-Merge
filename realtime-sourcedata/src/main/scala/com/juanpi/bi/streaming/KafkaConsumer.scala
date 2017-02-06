@@ -148,6 +148,35 @@ class KafkaConsumer(topic: String,
     }
   }
 
+  def h5PageProcess(dataDStream: DStream[((Long, Long), String)],
+                     ssc: StreamingContext,
+                     km: KafkaManager) = {
+
+    val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
+    val data = sourceLog.map(_._2.replace("\0",""))
+      .map(msg => parseH5Message(msg))
+      .filter(_._1.nonEmpty)
+
+    // 解析后的数据写HDFS
+    data.foreachRDD((rdd, time) =>
+    {
+      val mills = time.milliseconds
+      // 保存数据至hdfs
+      rdd.map(v => ((v._1, mills), v._3))
+        .repartition(1)
+        .saveAsHadoopFile(Config.baseDir + "/" + topic,
+          classOf[String],
+          classOf[String],
+          classOf[RDDMultipleTextOutputFormat])
+    })
+
+    // 更新kafka offset
+    sourceLog.foreachRDD { rdd =>
+      km.updateOffsets(rdd)
+    }
+  }
+
   def parseH5Message(message:String):(String, String, Any) = {
     val h5LogTransformer = new H5EventTransformer()
     h5LogTransformer.logParser(message, dimPage, dimH5EVENT)
@@ -335,7 +364,12 @@ object KafkaConsumer{
       val DimH5Event = InitConfig.initH5Dim()._2
       val consumer = new KafkaConsumer(topic, DimH5Page, null, null, DimH5Event, zkQuorum)
       consumer.h5EventProcess(message, ssc, km)
-    } else {
+    } else if(topic.equals("jp_hash3")) {
+      val DimH5Page = InitConfig.initH5Dim()._1
+      val consumer = new KafkaConsumer(topic, DimH5Page, null, null, null, zkQuorum)
+      consumer.h5PageProcess(message, ssc, km)
+    }
+    else {
       println("请指定需要解析的kafka Topic！！")
       System.exit(1)
     }

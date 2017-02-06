@@ -465,16 +465,6 @@ class H5EventTransformer {
     }
   }
 
-  def getPageValue(urlPageId: Int, url: String): String = {
-    val upa = Array(12, 14, 25, 26, 28, 29)
-    val pageValue = urlPageId match {
-      case 33 => new GetKeyWord().evaluate(url)
-      case x if (upa.exists({ x: Int => x == urlPageId })) => new GetKeyWord().evaluate(url)
-      case _ => ""
-    }
-    pageValue
-  }
-
   /**
     * WHEN b.event_type_id = 10 THEN concat(action_name,'::',getdwpcpagevalue(split(a.event_value,'::')[1]),'::',split(a.event_value,'::')[0])
     * @param event_type_id
