@@ -201,18 +201,6 @@ class H5PageTransformer {
     val refPid = new GetPageID().evaluate(baseUrlRef)
     val refUrlPageId = if(refPid == null) {0} else javaToScalaInt(refPid)
 
-//    val urlPageValue = urlPageId match {
-//      case 33 => new GetKeyWord().evaluate(baseUrl)
-//      case 12|14|25|26 => new GetGoodsId().evaluate(baseUrl, urlPageId)
-//      case _ => null
-//    }
-//
-//    val refUrlPageId = refUrlPageId match {
-//      case 33 => new GetKeyWord().evaluate(baseUrl)
-//      case 12|14|25|26 => new GetGoodsId().evaluate(baseUrl, urlPageId)
-//      case _ => null
-//    }
-
     val pid = new GetPageID().evaluate(baseUrl)
     val pageId = if(pid == null) {0} else javaToScalaInt(pid)
     val pageValue = new GetDwPcPageValue().evaluate(baseUrl)
