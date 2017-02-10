@@ -73,7 +73,7 @@ class H5PageTransformer {
 
           // 创建分区，格式：date=2016-12-27/gu_hash=a
           val partitionStr = DateUtils.dateGuidPartitions(timeStamp, gu_id)
-          (partitionStr, "h5_event", res_str)
+          (partitionStr, "h5_page", res_str)
         }
       }
       catch {
@@ -81,11 +81,11 @@ class H5PageTransformer {
         case ex: Exception => {
           println(ex.getStackTraceString)
         }
-          println("=======>> h5_event: getGuid Exception!!" + "======>>异常数据:" + row)
+          println("=======>> h5_page: getGuid Exception!!" + "======>>异常数据:" + row)
           ("", "", None)
       }
     } else {
-      println("=======>> PcEvent: getGuid Exception!!" + "======>>异常数据:" + row)
+      println("=======>> PcPage: getGuid Exception!!" + "======>>异常数据:" + row)
       ("", "", None)
     }
     ret
@@ -145,7 +145,7 @@ class H5PageTransformer {
             dimPage: mutable.HashMap[String, (Int, Int, String, Int)]
            ): (User, PageAndEvent, Page, Event) = {
 
-    // ---------------------------------------------------------------- mb_event ----------------------------------------------------------------
+    // ---------------------------------------------------------------- mb_page ----------------------------------------------------------------
     val action_name = (row \ "action_name").asOpt[String].getOrElse("")
     val url = (row \ "url").asOpt[String].getOrElse("")
     val utmid = (row \ "utmid").asOpt[String].getOrElse("")

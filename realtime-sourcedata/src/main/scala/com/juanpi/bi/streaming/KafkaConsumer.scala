@@ -154,8 +154,8 @@ class KafkaConsumer(topic: String,
 
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
-    val data = sourceLog.map(_._2.replace("\0",""))
-      .map(msg => parseH5Message(msg))
+    val data = sourceLog.map(_._2.replaceAll("(\0|\r|\n)", ""))
+      .map(msg => parseH5Page(msg))
       .filter(_._1.nonEmpty)
 
     // 解析后的数据写HDFS
@@ -175,6 +175,11 @@ class KafkaConsumer(topic: String,
     sourceLog.foreachRDD { rdd =>
       km.updateOffsets(rdd)
     }
+  }
+
+  def parseH5Page(message:String):(String, String, Any) = {
+    val h5LogTransformer = new H5PageTransformer()
+    h5LogTransformer.logParser(message, dimPage)
   }
 
   def parseH5Message(message:String):(String, String, Any) = {
