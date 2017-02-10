@@ -433,16 +433,16 @@ class H5EventTransformer {
     **/
   def getTerminalIdFromBase(qm_device_id: String, url: String): Int = {
     import scala.util.matching._
-    val reg = new Regex("""http(s?)://(tuan|wx).*""")
+    val reg = new Regex("""http(s?)://(tuan|kan).*""")
     val terminalId = if ("MicroMessenger".equals(qm_device_id)) {
       val res = url match {
         case reg(x, y) => 6
         case _ => 1
       }
       res
-    } else if(url matches("http(s)?://(wx|kan).juanpi.com.*")) {
+    } else if(url matches("http(s)?://wx.juanpi.com.*")) {
       6
-    } else if(url matches("http(s)?://(mact|tuan|m).juanpi.com.*")) {
+    } else if(url matches("http(s)?://(mact|tuan|m|mapi|kan).juanpi.com.*")) {
       2
     } else 1
     terminalId

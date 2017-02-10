@@ -4,12 +4,7 @@ import java.io.Serializable
 
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.InitConfig
-<<<<<<< HEAD
-import com.juanpi.bi.transformer.{H5EventTransformer, ITransformer, pageAndEventParser}
-//import com.juanpi.bi.transformer.{H5EventTransformer}
-=======
 import com.juanpi.bi.transformer._
->>>>>>> e864ce6468823eefdd30d33c2c662cfa1a94185b
 import kafka.serializer.StringDecoder
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, _}
 import org.apache.hadoop.hbase.util.Bytes
@@ -48,7 +43,7 @@ class KafkaConsumer(topic: String,
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 数据块中的每一条记录需要处理
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
-    val data = sourceLog.map(_._2.replace("\0",""))
+    val data = sourceLog.map(_._2.replaceAll("(\0|\r|\n)", ""))
       .filter(eventParser.filterFunc)
       .map(msg => parseMBEventMessage(msg))
       .filter(_._1.nonEmpty)
@@ -81,7 +76,7 @@ class KafkaConsumer(topic: String,
                   ssc: StreamingContext,
                   km: KafkaManager) = {
 
-    val data = dataDStream.map(_._2.replace("\0",""))
+    val data = dataDStream.map(_._2.replaceAll("(\0|\r|\n)", ""))
         .map(msg => parseMBPageMessage(msg))
         .filter(_._1.nonEmpty)
 
@@ -130,7 +125,7 @@ class KafkaConsumer(topic: String,
 
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
-    val data = sourceLog.map(_._2.replace("\0",""))
+    val data = sourceLog.map(_._2.replaceAll("(\0|\r|\n)", ""))
       .map(msg => parseH5Message(msg))
       .filter(_._1.nonEmpty)
 
