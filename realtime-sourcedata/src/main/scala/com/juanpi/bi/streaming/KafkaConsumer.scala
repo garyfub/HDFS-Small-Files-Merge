@@ -314,8 +314,6 @@ object KafkaConsumer{
       }
     )
 
-    println("约定的groupId是：bi_gongzi_mb_pageinfo_real_direct_by_dw 或者 bi_gongzi_mb_event_real_direct_by_dw")
-
     if(!Config.kafkaTopicMap.contains(topic)){
       System.err.println(s"没有找到表:${topic}配置信息")
       System.exit(1)
