@@ -40,7 +40,7 @@ object pageAndEventParser {
   }
 
   /**
-    *
+    * 如果jpid为空，就取设备号；否则取jpid
     * @param jpid
     * @param deviceid (ios)
     * @param os
@@ -135,7 +135,7 @@ object pageAndEventParser {
 
   /**
     * for page and event
-    *
+    * 如果扩展参数是商祥页，需要解析商品id
     * @param pagename
     * @param extend_params
     * @return
