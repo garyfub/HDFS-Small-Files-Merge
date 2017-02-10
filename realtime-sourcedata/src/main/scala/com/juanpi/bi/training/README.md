@@ -1,1 +1,0 @@
-#### Spark Training Center STC

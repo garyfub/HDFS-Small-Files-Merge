@@ -4,7 +4,12 @@ import java.io.Serializable
 
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.InitConfig
+<<<<<<< HEAD
+import com.juanpi.bi.transformer.{H5EventTransformer, ITransformer, pageAndEventParser}
+//import com.juanpi.bi.transformer.{H5EventTransformer}
+=======
 import com.juanpi.bi.transformer._
+>>>>>>> e864ce6468823eefdd30d33c2c662cfa1a94185b
 import kafka.serializer.StringDecoder
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, _}
 import org.apache.hadoop.hbase.util.Bytes

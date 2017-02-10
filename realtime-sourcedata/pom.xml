@@ -177,7 +177,6 @@
             <artifactId>hive-udf</artifactId>
             <version>${hive-udf.version}</version>
         </dependency>
-
     </dependencies>
 
     <build>
