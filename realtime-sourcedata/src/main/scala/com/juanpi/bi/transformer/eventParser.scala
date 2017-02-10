@@ -298,7 +298,7 @@ object eventParser {
   def filterFunc(line: String): Boolean = {
     val row = Json.parse(line)
     val activityName = (row \ "activityname").asOpt[String].getOrElse("").toLowerCase()
-    val blackArray = Array("click_navigation", "exposure_temai_pic", "collect_mainpage_loadtime", "exposure_ad_welt", "collect_popup_unlock", "crash_exception_info", "exposure_ad_inscreen", "exposure_ad_popup_sec", "exposure_ad_popup", "show_temai_pay_applepay", "collect_api_responsetime", "collect_page_h5", "collect_data_performance", "collect_page_performance")
+    val blackArray = Array("exposure_temai_pic", "collect_mainpage_loadtime", "exposure_ad_welt", "collect_popup_unlock", "crash_exception_info", "exposure_ad_inscreen", "exposure_ad_popup_sec", "exposure_ad_popup", "show_temai_pay_applepay", "collect_api_responsetime", "collect_page_h5", "collect_data_performance", "collect_page_performance")
     val isKeep =
       if(activityName.contains("_performance")) {
         false
