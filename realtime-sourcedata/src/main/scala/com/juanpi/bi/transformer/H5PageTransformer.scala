@@ -100,16 +100,16 @@ class H5PageTransformer {
     **/
   def getTerminalIdFromBase(qm_device_id: String, url: String): Int = {
     import scala.util.matching._
-    val reg = new Regex("""http(s?)://(tuan|wx).*""")
+    val reg = new Regex("""http(s?)://(tuan|kan).*""")
     val terminalId = if ("MicroMessenger".equals(qm_device_id)) {
       val res = url match {
         case reg(x, y) => 6
         case _ => 1
       }
       res
-    } else if(url matches("http(s)?://(wx|kan).juanpi.com.*")) {
+    } else if(url matches("http(s)?://wx.juanpi.com.*")) {
       6
-    } else if(url matches("http(s)?://(mact|tuan|m).juanpi.com.*")) {
+    } else if(url matches("http(s)?://(mact|tuan|m|mapi|kan).juanpi.com.*")) {
       2
     } else 1
     terminalId
@@ -278,8 +278,11 @@ class H5PageTransformer {
 object H5PageTransformer {
   def main(args: Array[String]): Unit = {
     val url = "http://tuan.juanpi.com/pintuan?id=367&pt_src=ggmk_1"
+    val url2 = "https://mapi.juanpi.com/h5/attr?id=42928995&goods_id=35774050 "
     val h5 = new H5PageTransformer()
     val res = h5.getPageLevel2Value(url)
+    val res1= h5.getTerminalIdFromBase("M",url2)
     println(res)
+    println(res1)
   }
 }
