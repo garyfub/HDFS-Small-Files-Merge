@@ -276,7 +276,7 @@ class MbEventTransformer {
       println("page_id=-1 ==> 原始数据为：" + row)
     }
 
-    if (-1 == event_id) {
+    if (-1 == event_id && "click_temai_inpage_joinbag".equals(activityname)) {
       println("for_pageid:" + forPageId,
         "page_id:" + page_id,
         " ,page_type_id:" + page_type_id,
