@@ -60,11 +60,11 @@ class H5PageTransformer {
 
       try {
         val res = parse(row, dimPage)
+
         // 过滤异常的数据，具体见解析函数 eventParser.filterOutlierPageId
         if (res == null) {
           ("", "", None)
-        }
-        else {
+        } else {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = res
           val res_str = pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x => x match {
             case y if y == null || y.toString.isEmpty => "\\N"
@@ -81,7 +81,7 @@ class H5PageTransformer {
         case ex: Exception => {
           println(ex.getStackTraceString)
         }
-          println("=======>> h5_page: getGuid Exception!!" + "======>>异常数据:" + row)
+          println("=======>> h5_page: parse Exception!!" + "======>>异常数据:" + row)
           ("", "", None)
       }
     } else {
@@ -149,21 +149,14 @@ class H5PageTransformer {
     val action_name = (row \ "action_name").asOpt[String].getOrElse("")
     val url = (row \ "url").asOpt[String].getOrElse("")
     val utmid = (row \ "utmid").asOpt[String].getOrElse("")
-    val dutmid = (row \ "dutmid").asOpt[String].getOrElse("")
-    val goodid = (row \ "goodid").asOpt[String].getOrElse("")
-    val dgoodid = (row \ "dgoodid").asOpt[String].getOrElse("")
     val urlref = (row \ "urlref").asOpt[String].getOrElse("")
-    val keyword = (row \ "keyword").asOpt[String].getOrElse("")
     val ul_id = (row \ "ul_id").asOpt[String].getOrElse("")
     val ul_idts = (row \ "ul_idts").asOpt[Int].getOrElse(0)
     val jpk = (row \ "jpk").asOpt[Int].getOrElse(0)
-    val ul_ref = (row \ "ul_ref").asOpt[String].getOrElse("")
-    val ul_qt = (row \ "ul_qt").asOpt[String].getOrElse("")
     val s_uid = (row \ "s_uid").asOpt[String].getOrElse("")
     val sid = (row \ "sid").asOpt[String].getOrElse("")
     val utm = (row \ "utm").asOpt[String].getOrElse("")
     val timeStamp = (row \ "timestamp").asOpt[String].getOrElse("0")
-    val sessionid = (row \ "sessionid").asOpt[String].getOrElse("")
     val click_action_name = (row \ "click_action_name").asOpt[String].getOrElse("")
     val click_url = (row \ "click_url").asOpt[String].getOrElse("")
     val qm_device_id = (row \ "qm_device_id").asOpt[String].getOrElse("")
@@ -260,12 +253,6 @@ class H5PageTransformer {
     val ug_id = ""
 
     val table_source = "h5_page"
-
-    //    val log = BaseLog(actName, utmId, goodid, baseUrl, baseUrlRef, ul_id, ul_idts,
-//      ul_ref, s_uid, timeStamp, sessionid, click_action_name, click_url,
-//      qm_device_id, actionType, action_name, ip, qm_session_id, qm_jpid)
-
-//    val res = if (qm_device_id.length <= 6 || baseTerminalId != 2) {
 
     val user = User.apply(guId, userId.toString, utmId, "", dwSessionId, dwTerminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
