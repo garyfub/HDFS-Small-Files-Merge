@@ -305,6 +305,7 @@ object KafkaConsumer{
     println("com.juanpi.bi.streaming.KafkaConsumer 开始运行。。。。。。传入参数如下：")
     args.foreach(
       arg => {
+        println(arg)
         val k = arg.split("=")(0)
         val v = arg.split("=")(1)
         k match {
