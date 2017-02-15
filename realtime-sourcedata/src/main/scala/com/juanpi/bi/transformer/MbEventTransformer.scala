@@ -254,27 +254,27 @@ class MbEventTransformer {
     val event = Event.apply(event_id.toString, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime, ug_id)
 
     // TODO 测试代码，测试后需要删掉
-//    if (-1 == page_id) {
-//      println("for_pageid:" + forPageId,
-//        " ,page_type_id:" + page_type_id,
-//        " ,page_level_id:" + page_level_id,
-//        " ,cid" + cid,
-//        " ,f_page_extend_params:" + f_page_extend_params,
-//        " ,pagename:" + pagename,
-//        " ,page_value:" + page_value,
-//        " ,f_page_extend_params:" + f_page_extend_params,
-//        " ,d_page_id:" + d_page_id,
-//        " ,d_page_value:" + d_page_value,
-//        " ,for_eventid:" + forEventId,
-//        " ,event_id:" + event_id,
-//        " ,d_event_id:" + d_event_id,
-//        " ,event_type_id:" + event_type_id,
-//        " ,cid:" + cid,
-//        " ,activityname:" + activityname,
-//        " ,t_extend_params:" + t_extend_params,
-//        " ,event_value:" + event_value)
-//      println("page_id=-1 ==> 原始数据为：" + row)
-//    }
+    if (-1 == page_id && "click_temai_inpage_joinbag".equals(activityname)) {
+      println("for_pageid:" + forPageId,
+        " ,page_type_id:" + page_type_id,
+        " ,page_level_id:" + page_level_id,
+        " ,cid" + cid,
+        " ,f_page_extend_params:" + f_page_extend_params,
+        " ,pagename:" + pagename,
+        " ,page_value:" + page_value,
+        " ,f_page_extend_params:" + f_page_extend_params,
+        " ,d_page_id:" + d_page_id,
+        " ,d_page_value:" + d_page_value,
+        " ,for_eventid:" + forEventId,
+        " ,event_id:" + event_id,
+        " ,d_event_id:" + d_event_id,
+        " ,event_type_id:" + event_type_id,
+        " ,cid:" + cid,
+        " ,activityname:" + activityname,
+        " ,t_extend_params:" + t_extend_params,
+        " ,event_value:" + event_value)
+      println("page_id=-1 ==> 原始数据为：" + row)
+    }
 
     if (-1 == event_id && "click_temai_inpage_joinbag".equals(activityname)) {
       println("for_pageid:" + forPageId,

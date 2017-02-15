@@ -19,7 +19,7 @@ import org.apache.spark.streaming.kafka.KafkaManager
 
 import scala.collection.mutable
 
-class KafkaConsumer(topic: String,
+class KafkaConsumer(groupId: String,
                     dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                     dimEvent: mutable.HashMap[String, (Int, Int, Int)],
                     fCate: mutable.HashMap[String, String],
@@ -54,7 +54,7 @@ class KafkaConsumer(topic: String,
       // 保存数据至hdfs
       rdd.map(v => ((v._1, mills), v._3))
         .repartition(1)
-        .saveAsHadoopFile(Config.baseDir + "/" + topic,
+        .saveAsHadoopFile(Config.baseDir + "/" + groupId,
           classOf[String],
           classOf[String],
           classOf[RDDMultipleTextOutputFormat])
@@ -98,7 +98,7 @@ class KafkaConsumer(topic: String,
         // 保存数据至hdfs: /user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/
         // /user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-28/gu_hash=0
         newRdd.repartition(1)
-          .saveAsHadoopFile(Config.baseDir + "/" + topic,
+          .saveAsHadoopFile(Config.baseDir + "/" + groupId,
             classOf[String],
             classOf[String],
             classOf[RDDMultipleTextOutputFormat])
@@ -136,7 +136,7 @@ class KafkaConsumer(topic: String,
       // 保存数据至hdfs
       rdd.map(v => ((v._1, mills), v._3))
         .repartition(1)
-        .saveAsHadoopFile(Config.baseDir + "/" + topic,
+        .saveAsHadoopFile(Config.baseDir + "/" + groupId,
           classOf[String],
           classOf[String],
           classOf[RDDMultipleTextOutputFormat])
@@ -165,7 +165,7 @@ class KafkaConsumer(topic: String,
       // 保存数据至hdfs
       rdd.map(v => ((v._1, mills), v._3))
         .repartition(1)
-        .saveAsHadoopFile(Config.baseDir + "/" + topic,
+        .saveAsHadoopFile(Config.baseDir + "/" + groupId,
           classOf[String],
           classOf[String],
           classOf[RDDMultipleTextOutputFormat])
