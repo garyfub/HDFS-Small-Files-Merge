@@ -354,22 +354,22 @@ object KafkaConsumer{
       val DimPage = InitConfig.initMBDim()._1
       val DimEvent = InitConfig.initMBDim()._2
       val DimFrontCate = InitConfig.initMBDim()._3
-      val consumer = new KafkaConsumer(topic, DimPage, DimEvent, DimFrontCate, null, zkQuorum)
+      val consumer = new KafkaConsumer(groupId, DimPage, DimEvent, DimFrontCate, null, zkQuorum)
       consumer.pageProcess(message, ssc, km)
     } else if(topic.equals("mb_event_hash2")) {
       val DimPage = InitConfig.initMBDim()._1
       val DimEvent = InitConfig.initMBDim()._2
       val DimFrontCate = InitConfig.initMBDim()._3
-      val consumer = new KafkaConsumer(topic, DimPage, DimEvent, DimFrontCate, null, zkQuorum)
+      val consumer = new KafkaConsumer(groupId, DimPage, DimEvent, DimFrontCate, null, zkQuorum)
       consumer.eventProcess(message, ssc, km)
     } else if(topic.equals("pc_events_hash3")) {
       val DimH5Page = InitConfig.initH5Dim()._1
       val DimH5Event = InitConfig.initH5Dim()._2
-      val consumer = new KafkaConsumer(topic, DimH5Page, null, null, DimH5Event, zkQuorum)
+      val consumer = new KafkaConsumer(groupId, DimH5Page, null, null, DimH5Event, zkQuorum)
       consumer.h5EventProcess(message, ssc, km)
     } else if(topic.equals("jp_hash3")) {
       val DimH5Page = InitConfig.initH5Dim()._1
-      val consumer = new KafkaConsumer(topic, DimH5Page, null, null, null, zkQuorum)
+      val consumer = new KafkaConsumer(groupId, DimH5Page, null, null, null, zkQuorum)
       consumer.h5PageProcess(message, ssc, km)
     }
     else {
