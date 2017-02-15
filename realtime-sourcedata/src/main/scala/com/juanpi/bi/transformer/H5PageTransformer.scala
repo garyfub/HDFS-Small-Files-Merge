@@ -53,6 +53,10 @@ class H5PageTransformer {
     } else {
       ul_id
     }
+    // 查看gu_id为空的数据
+    if(gu_id.isEmpty()) {
+      println("gu_id为空的数据为"+gu_id+ul_id+qm_jpid+row)
+    }
 
     val ret = if (gu_id.nonEmpty && !gu_id.equalsIgnoreCase("null")) {
       val endtime = (row \ "endtime").asOpt[String].getOrElse("")
