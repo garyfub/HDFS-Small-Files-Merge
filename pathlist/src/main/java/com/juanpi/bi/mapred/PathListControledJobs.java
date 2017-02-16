@@ -168,42 +168,32 @@ public class PathListControledJobs {
         // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
 //        job.setJar("pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar");
         job.setJarByClass(PathListControledJobs.class);
-
-        //1.1 指定输入文件路径
-        FileInputFormat.setInputPaths(job, inputPath);
-
-        job.setInputFormatClass(TextInputFormat.class);//指定哪个类用来格式化输入文件
-
-        //1.2指定自定义的Mapper类
+        // 1.2指定自定义的 Mapper 类
         job.setMapperClass(PathListControledJobs.MyMapper.class);
-
-        //指定输出<k2,v2>的类型
-        job.setMapOutputKeyClass(PathListControledJobs.NewK2.class);
-
-        job.setMapOutputValueClass(PathListControledJobs.TextArrayWritable.class);
-
-        //job.setPartitionerClass(HashPartitioner.class);
-        //job.setNumReduceTasks(1);
-        //job.setGroupingComparatorClass(PathListControledJobs.MyGroupingComparator.class);
-
-        //1.3 指定分区类
-        job.setPartitionerClass(FirstPartitioner.class);
-
-        //分组函数
-        job.setGroupingComparatorClass(PathListControledJobs.GroupingComparator.class);
-
         //2.2 指定自定义的reduce类
         job.setReducerClass(PathListControledJobs.MyReducer.class);
 
-        //指定输出<k3,v3>的类型
+        // group and partition by the first int in the pair
+        job.setPartitionerClass(FirstPartitioner.class);
+        job.setGroupingComparatorClass(PathListControledJobs.GroupingComparator.class);
+
+        // the map output is NewK2, TextArrayWritable
+        job.setMapOutputKeyClass(PathListControledJobs.NewK2.class);
+        job.setMapOutputValueClass(PathListControledJobs.TextArrayWritable.class);
+
+        // the reduce output is Text, Text
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
 
-        //2.3 指定输出到哪里
-        FileOutputFormat.setOutputPath(job, new Path(outputPath));
-
-        //设定输出文件的格式化类
+        // 指定哪个类用来格式化输入文件.默认就是 TextInputFormat，因此这两行可以省略
+        job.setInputFormatClass(TextInputFormat.class);
+        // 设定输出文件的格式化类
         job.setOutputFormatClass(TextOutputFormat.class);
+
+        // 指定输入文件路径
+        FileInputFormat.setInputPaths(job, inputPath);
+        // 指定输出到哪里
+        FileOutputFormat.setOutputPath(job, new Path(outputPath));
 
         return job;
     }
@@ -223,9 +213,6 @@ public class PathListControledJobs {
 
                     String tsStr = splited[22];
                     long ts = Long.parseLong(tsStr);
-//                    if("self_f7e0ac3b-ab6c-4d00-9a09-531edd8fda30".equals(gu_id)){
-//                        System.out.println("==>>gu_id=" + gu_id + ", tsStr=" + tsStr + ", ts=" + ts);
-//                    }
 
                     final PathListControledJobs.NewK2 k2 = new PathListControledJobs.NewK2(splited[0], Long.parseLong(splited[22]));
 
@@ -302,7 +289,9 @@ public class PathListControledJobs {
         }
     }
 
-    //static class NewValue
+    /**
+     *
+     */
     static class MyReducer extends Reducer<PathListControledJobs.NewK2, PathListControledJobs.TextArrayWritable, Text, Text> {
 
         protected void reduce(PathListControledJobs.NewK2 k2, Iterable<PathListControledJobs.TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
@@ -372,10 +361,9 @@ public class PathListControledJobs {
     }
 
     /**
-     原来的v2不能参与排序，把原来的k2和v2封装到一个类中，作为新的k2
-     *
+     * 原来的v2不能参与排序，把原来的k2和v2封装到一个类中，作为新的k2
      */
-    static class  NewK2 implements WritableComparable<PathListControledJobs.NewK2> {
+    static class NewK2 implements WritableComparable<PathListControledJobs.NewK2> {
         private String first;
         private Long second;
 
@@ -399,7 +387,7 @@ public class PathListControledJobs {
         }
 
         /**
-         * 当k2进行排序时，会调用该方法.
+         * 当 NewK2 进行排序时，会调用该方法.
          * 当第一列不同时，升序；当第一列相同时，第二列升序
          */
         @Override
@@ -465,6 +453,9 @@ public class PathListControledJobs {
         }
     }
 
+    /**
+     * 根据gu_id来分组
+     */
     public static class GroupingComparator extends WritableComparator
     {
         protected GroupingComparator()
@@ -477,8 +468,15 @@ public class PathListControledJobs {
         {
             NewK2 ip1 = (NewK2) w1;
             NewK2 ip2 = (NewK2) w2;
+            // 根据gu_id来分组
             String left = ip1.first;
             String right = ip2.first;
+            /**
+             * len1 - len2
+             * 0 相等
+             * < 0 left < right
+             * > 0 left > right
+             */
             return left.compareTo(right);
         }
     }
