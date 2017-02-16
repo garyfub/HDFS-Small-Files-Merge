@@ -211,11 +211,10 @@ public class PathListControledJobs {
                 String gu_id = splited[0];
                 if(!gu_id.isEmpty() && !gu_id.equals("0"))
                 {
+                    String timeStr = (splited[22] == null) ? "\\N":splited[22];
+                    long startTime = Long.parseLong(timeStr);
 
-                    String tsStr = splited[22];
-                    long ts = Long.parseLong(tsStr);
-
-                    final PathListControledJobs.NewK2 k2 = new PathListControledJobs.NewK2(splited[0], Long.parseLong(splited[22]));
+                    final PathListControledJobs.NewK2 k2 = new PathListControledJobs.NewK2(gu_id, startTime);
 
                     String pageLevelId = (splited[21] == null)? "\\N":splited[21];
                     String pageId = (splited[15] == null) ? "\\N":splited[15];
@@ -224,7 +223,7 @@ public class PathListControledJobs {
                     String eventId = (splited[40] == null) ? "\\N":splited[40];
                     String event_value = (splited[41] == null) ? "\\N":splited[41];
                     String event_lvl2_value = (splited[42] == null) ? "\\N":splited[42];
-                    String startTime = (splited[22] == null) ? "\\N":splited[22];
+
                     String loadTime = (splited[46] == null) ? "\\N":splited[46];
 
                     String testId = (splited[44] == null) ? "\\N":splited[44];
@@ -247,7 +246,7 @@ public class PathListControledJobs {
                             + "\t" + eventId
                             + "\t" + event_value
                             + "\t" + event_lvl2_value
-                            + "\t" + startTime
+                            + "\t" + timeStr
                             + "\t" + loadTime
                             + "\t" + testId
                             + "\t" + selectId
