@@ -43,7 +43,8 @@ class H5PageTransformer {
 
     // web 端 gu_id 从ul_id来，H5页面的gu_id通过cookie中捕获APP的gu_id获取
     val qm_jpid = (row \ "qm_jpid").asOpt[String].getOrElse("")
-    val ul_id = (row \ "ul_id").asOpt[String].getOrElse("")
+    // ul_id在源数据里面对应的key 为"_id"
+    val ul_id = (row \ "_id").asOpt[String].getOrElse("")
     val timeStamp = (row \ "timestamp").as[String].toLong
 
     // pc上的页面直接取的ul_id
@@ -150,14 +151,14 @@ class H5PageTransformer {
     val url = (row \ "url").asOpt[String].getOrElse("")
     val utmid = (row \ "utmid").asOpt[String].getOrElse("")
     val urlref = (row \ "urlref").asOpt[String].getOrElse("")
-    val ul_id = (row \ "ul_id").asOpt[String].getOrElse("")
-    val ul_idts = (row \ "ul_idts").asOpt[Int].getOrElse(0)
+    val ul_id = (row \ "_id").asOpt[String].getOrElse("")
+    val ul_idts = (row \ "_idts").asOpt[Int].getOrElse(0)
     val jpk = (row \ "jpk").asOpt[Int].getOrElse(0)
     val s_uid = (row \ "s_uid").asOpt[String].getOrElse("")
     val sid = (row \ "sid").asOpt[String].getOrElse("")
     val utm = (row \ "utm").asOpt[String].getOrElse("")
     val timeStamp = (row \ "timestamp").asOpt[String].getOrElse("0")
-    val click_action_name = (row \ "click_action_name").asOpt[String].getOrElse("")
+    val click_action_name = (row \ "action_name").asOpt[String].getOrElse("")
     val click_url = (row \ "click_url").asOpt[String].getOrElse("")
     val qm_device_id = (row \ "qm_device_id").asOpt[String].getOrElse("")
     val ip = (row \ "ip").asOpt[String].getOrElse("")
