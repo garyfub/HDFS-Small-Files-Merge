@@ -46,13 +46,16 @@ class H5PageTransformer {
     val ul_id = (row \ "ul_id").asOpt[String].getOrElse("")
     val timeStamp = (row \ "timestamp").as[String].toLong
 
-    val gu_id = if(ul_id.isEmpty() && qm_jpid.isEmpty) {
-      ""
-    } else if(ul_id.isEmpty) {
-      qm_jpid
-    } else {
-      ul_id
-    }
+//    val gu_id = if(ul_id.isEmpty() && qm_jpid.isEmpty) {
+//      ""
+//    } else if(ul_id.isEmpty) {
+//      qm_jpid
+//    } else {
+//      ul_id
+//    }
+    // pc上的页面和点击的gu_id直接取的ul_id
+    val gu_id=ul_id
+
     // 查看gu_id为空的数据
     if(gu_id.isEmpty()) {
       println("gu_id为空的数据为"+gu_id+ul_id+qm_jpid+row)

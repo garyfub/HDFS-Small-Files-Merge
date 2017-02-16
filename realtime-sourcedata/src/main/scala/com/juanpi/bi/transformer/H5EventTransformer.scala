@@ -36,6 +36,7 @@ class H5EventTransformer {
                      qm_session_id: String,
                      qm_jpid: String)
 
+
   def logParser(line: String,
                 dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                 dimEvent: mutable.HashMap[String, (Int, Int, Int)]
@@ -48,12 +49,16 @@ class H5EventTransformer {
     val ul_id = (row \ "ul_id").asOpt[String].getOrElse("")
     val timeStamp = (row \ "timestamp").as[String].toLong
 
-    val gu_id = if(ul_id.isEmpty() && qm_jpid.isEmpty) {
-      ""
-    } else if(ul_id.isEmpty) {
-      qm_jpid
-    } else {
+// pc端wap数据 APP端H5点击
+    val qm_device_id=(row \ "qm_device_id").asOpt[String].getOrElse("")
+    val baseUrl=(row \ "baseUrl").asOpt[String].getOrElse("")
+    val baseterminal=getTerminalIdFromBase(qm_device_id, baseUrl)
+    val gu_id = if(qm_device_id.length<=6 || baseterminal != 2) {
       ul_id
+    } else if(qm_device_id.length>6 && baseterminal==2 && qm_jpid.isEmpty) {
+      ul_id
+    } else {
+      qm_jpid
     }
 
     val ret = if (gu_id.nonEmpty && !gu_id.equalsIgnoreCase("null")) {
@@ -201,6 +206,7 @@ class H5EventTransformer {
 
   /**
     * 解析app端 h5 端数据
+    *
     * @param dimEvent
     * @param dimPage
     * @param baseLog
@@ -312,6 +318,7 @@ class H5EventTransformer {
 
   /**
     *  解析pc wap wx 端数据
+    *
     * @param dimEvent
     * @param dimPage
     * @param baseLog
@@ -406,6 +413,7 @@ class H5EventTransformer {
 
   /**
     * -- H5页面的session_id通过cookie中捕获APP的session_id获取
+    *
     * @param sId
     * @param guId
     * @return
@@ -467,6 +475,7 @@ class H5EventTransformer {
 
   /**
     * WHEN b.event_type_id = 10 THEN concat(action_name,'::',getdwpcpagevalue(split(a.event_value,'::')[1]),'::',split(a.event_value,'::')[0])
+    *
     * @param event_type_id
     * @param actionName
     * @param e_v
