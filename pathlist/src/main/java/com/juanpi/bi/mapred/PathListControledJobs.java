@@ -185,10 +185,11 @@ public class PathListControledJobs {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
 
-        // 指定哪个类用来格式化输入文件.默认就是 TextInputFormat，因此这两行可以省略
-        job.setInputFormatClass(TextInputFormat.class);
+        // 指定输入、输出格式.默认就是 TextInputFormat，因此这两行可以省略。
+        // TextInputFormat 把输入文件的每一行作为单独的记录，但不做解析处理。
+//        job.setInputFormatClass(TextInputFormat.class);
         // 设定输出文件的格式化类
-        job.setOutputFormatClass(TextOutputFormat.class);
+//        job.setOutputFormatClass(TextOutputFormat.class);
 
         // 指定输入文件路径
         FileInputFormat.setInputPaths(job, inputPath);
