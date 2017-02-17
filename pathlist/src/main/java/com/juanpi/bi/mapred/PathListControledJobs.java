@@ -482,7 +482,7 @@ public class PathListControledJobs {
     public static Job jobConstructor(String inputPath, String outputPath, String guHash)
             throws Exception {
 
-        Job job = Job.getInstance(conf, "PathListReal_" + guHash);
+        Job job = Job.getInstance(conf, "PathListReal_test_" + guHash);
 
         // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
         //        job.setJar("pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar");
@@ -524,12 +524,12 @@ public class PathListControledJobs {
     public static void main(String[] args) {
         String dateStr = args[0];
         if (dateStr == null || dateStr.isEmpty()) {
-            JobsControl("", 0x0, 0x0, "PathListControledJobs01");
+            JobsControl("", 0x0, 0x3, "PathListControledJobs01");
             JobsControl("", 0x4, 0x7, "PathListControledJobs04");
             JobsControl("", 0x8, 0xb, "PathListControledJobs08");
             JobsControl("", 0xc, 0xf, "PathListControledJobs0c");
         } else {
-            JobsControl(dateStr, 0x0, 0x0, "PathListControledJobs01");
+            JobsControl(dateStr, 0x0, 0x3, "PathListControledJobs01");
             JobsControl(dateStr, 0x4, 0x7, "PathListControledJobs04");
             JobsControl(dateStr, 0x8, 0xb, "PathListControledJobs08");
             JobsControl(dateStr, 0xc, 0xf, "PathListControledJobs0c");
