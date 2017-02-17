@@ -20,6 +20,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.hadoop.io.WritableComparator.readVLong;
@@ -175,7 +176,6 @@ public class OfflinePathList {
 
         // TODO 排序、分区
         job.setGroupingComparatorClass(OfflinePathList.MyGroupingComparator.class);
-        //1.5  TODO （可选）合并
 
         //2.2 指定自定义的reduce类
         job.setReducerClass(OfflinePathList.MyReducer.class);
@@ -292,7 +292,12 @@ public class OfflinePathList {
 
     //static class NewValue
     static class MyReducer extends Reducer<OfflinePathList.NewK2, OfflinePathList.TextArrayWritable, Text, Text> {
-        protected void reduce(OfflinePathList.NewK2 k2, Iterable<OfflinePathList.TextArrayWritable> v2s, Context context) throws IOException ,InterruptedException {
+
+        protected void reduce(OfflinePathList.NewK2 k2,
+                              Iterable<OfflinePathList.TextArrayWritable> v2s,
+                              Context context) throws IOException,
+                InterruptedException
+        {
             String[] initStrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N","\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
             String initStr = Joiner.on("\t").join(initStrArray);
 
@@ -360,7 +365,6 @@ public class OfflinePathList {
             this.second = second;
         }
 
-
         @Override
         public void readFields(DataInput in) throws IOException {
             this.first = in.readUTF();
@@ -397,7 +401,7 @@ public class OfflinePathList {
                 return false;
             }
             OfflinePathList.NewK2 oK2 = (OfflinePathList.NewK2)obj;
-            return (this.first.equals(oK2.first))&&(this.second == oK2.second);
+            return (this.first.equals(oK2.first)) && (this.second == oK2.second);
         }
     }
 
@@ -405,9 +409,14 @@ public class OfflinePathList {
 
         @Override
         public int compare(OfflinePathList.NewK2 o1, OfflinePathList.NewK2 o2) {
+            // lexicographically 即按照字典序排序
             return (int)(o1.first.compareTo(o2.first));
         }
 
+        /*
+        * 其中b1为第一个对象所在的字节数组，s1为该对象在b1中的起始位置，l1为对象在b1中的长度，
+        * b2为第一个对象所在的字节数组，s2为该对象在b2中的起始位置，l2为对象在b2中的长度。
+         */
         @Override
         public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
 
