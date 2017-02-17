@@ -31,12 +31,13 @@ import static org.apache.hadoop.io.WritableComparator.readVLong;
  */
 public class PathListControledJobs {
 
+    // TODO 配置文件可以通过zk管理
     static String base = "hdfs://nameservice1/user/hadoop/dw_realtime";
 
     static final String INPUT_PATH_BASE =
             "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
 
-    static final String PATH_JOBS = "dw_real_path_list_jobs_test";
+    static final String PATH_JOBS = "dw_real_path_list_jobs";
 
     static Configuration conf = new Configuration();
 
