@@ -19,11 +19,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.List;
-
-import static org.apache.hadoop.io.WritableComparator.readVLong;
 
 /**
  * 烈烈
@@ -242,24 +238,6 @@ public class PathListControledJobs {
         }
     }
 
-    // TODO for test
-    static List<String> guIds = Arrays.asList
-            (
-                    "00000000-0000-0030-0ef0-e7dc7a2b1381",
-                    "00000000-0000-0030-1167-b68234953b71",
-                    "00000000-0000-0030-188f-01141f3cbd41",
-                    "00000000-0000-0030-193c-dbc66443dc41",
-                    "00000000-0000-0030-1bca-8fb4593918f2",
-                    "00000000-0000-0030-215e-dc53669b5632",
-                    "00000000-0000-0030-2332-8161271002f3",
-                    "00000000-0000-0030-24cb-55d111d84ca3",
-                    "00000000-0000-0030-2930-c5912a6e2cb2",
-                    "00000000-0000-0030-3116-9ad20ccba4f1",
-                    "00000000-0000-0030-36a7-22734d9b0112",
-                    "00000000-0000-0030-409f-98e2669c70d3",
-                    "00000000-0000-0030-3ed2-40ff6f6119a1"
-            );
-
     static class MyReducer extends
             Reducer<PathListControledJobs.NewK2, PathListControledJobs.TextArrayWritable, Text, Text> {
 
@@ -311,10 +289,6 @@ public class PathListControledJobs {
 
                     String keyStr =
                             level1 + "\t" + level2 + "\t" + level3 + "\t" + level4 + "\t" + level5;
-
-                    if(guIds.contains(guId)) {
-                        System.out.println(guId + "::" + k2.second + "::" +keyStr + "::" + va.toStrings()[2]);
-                    }
 
                     // 5 个级别
                     Text key2 = new Text(keyStr);
@@ -397,48 +371,13 @@ public class PathListControledJobs {
         }
     }
 
-    static class MyGroupingComparator implements RawComparator<PathListControledJobs.NewK2> {
-
-        @Override
-        public int compare(PathListControledJobs.NewK2 o1, PathListControledJobs.NewK2 o2) {
-            return o1.first.compareTo(o2.first);
-        }
-
-        @Override
-        public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
-
-            int cmp = 1;
-            //determine how many bytes the first VLong takes
-            int n1 = WritableUtils.decodeVIntSize(b1[s1]);
-            int n2 = WritableUtils.decodeVIntSize(b2[s2]);
-
-            try {
-                //read value from VLongWritable byte array
-                long l11 = readVLong(b1, s1);
-                long l21 = readVLong(b2, s2);
-
-                cmp = l11 > l21 ? 1 : (l11 == l21 ? 0 : -1);
-                if (cmp != 0) {
-                    return cmp;
-                } else {
-
-                    long l12 = readVLong(b1, s1 + n1);
-                    long l22 = readVLong(b2, s2 + n2);
-                    cmp = l12 > l22 ? 1 : (l12 == l22 ? 0 : -1);
-                    return cmp;
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
     /**
      * 根据gu_id来分组
      */
     public static class GroupingComparator extends WritableComparator {
         /**
-         * key1,key2,buffer是记录hashmap对应的key值，用于WritableComparator的构造函数，但由其构造函数中我们可以看出WritableComparator根据creaeteInstance来判断是否实例化key1，key2，和buffer
+         * key1,key2,buffer是记录hashmap对应的key值，用于WritableComparator的构造函数，
+         * 但由其构造函数中我们可以看出WritableComparator根据creaeteInstance来判断是否实例化key1，key2，和buffer
          */
         protected GroupingComparator() {
             super(NewK2.class, true);
@@ -483,7 +422,7 @@ public class PathListControledJobs {
     public static Job jobConstructor(String inputPath, String outputPath, String guHash)
             throws Exception {
 
-        Job job = Job.getInstance(conf, "PathListReal_test_" + guHash);
+        Job job = Job.getInstance(conf, "PathListReal_" + guHash);
 
         // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
         //        job.setJar("pathlist-1.0-SNAPSHOT-jar-with-dependencies.jar");
