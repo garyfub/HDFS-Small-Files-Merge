@@ -463,6 +463,7 @@ public class PathListControledJobs {
      */
     public static void main(String[] args) {
         String dateStr = args[0];
+        System.out.println("===========>> PathListControledJobs start !<<===========");
         if (dateStr == null || dateStr.isEmpty()) {
             JobsControl("", 0x0, 0x3, "PathListControledJobs01");
             JobsControl("", 0x4, 0x7, "PathListControledJobs04");
