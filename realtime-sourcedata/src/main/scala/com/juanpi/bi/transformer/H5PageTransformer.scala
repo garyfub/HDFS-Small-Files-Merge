@@ -171,6 +171,10 @@ class H5PageTransformer {
       click_url
     }
 
+    if(baseUrl.isEmpty()) {
+      println("url为空的数据为"+"click的值为"+click_url+"url的值为"+url+"原始数据为"+row)
+    }
+
     val pid = new GetPageID().evaluate(baseUrl)
     val pageId = if(pid == null) {0} else javaToScalaInt(pid)
 
