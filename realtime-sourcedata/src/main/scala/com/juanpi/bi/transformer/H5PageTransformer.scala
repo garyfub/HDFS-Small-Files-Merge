@@ -173,6 +173,8 @@ class H5PageTransformer {
 
     if(baseUrl.isEmpty()) {
       println("url为空的数据为"+"click的值为"+click_url+"url的值为"+url+"原始数据为"+row)
+    } else {
+      println("baseUrl均有值")
     }
 
     val pid = new GetPageID().evaluate(baseUrl)
