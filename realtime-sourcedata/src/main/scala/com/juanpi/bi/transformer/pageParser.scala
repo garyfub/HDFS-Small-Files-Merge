@@ -1,7 +1,9 @@
 package com.juanpi.bi.transformer
 
+import java.util.regex.Pattern
+
 import com.juanpi.hive.udf._
-import play.api.libs.json.JsNull
+import play.api.libs.json.{JsNull, Json}
 
 /**
   * Created by gongzi on 2016/9/30.
@@ -11,6 +13,7 @@ object pageParser {
 
   /**
     * 二级页面值(品牌页：引流款ID；商品skc、分享回流标识)
+    *
     * @param x_page_id
     * @param x_extend_params
     * @param server_jsonstr
@@ -123,5 +126,57 @@ object pageParser {
       case _ => (pageName+extendParams).toLowerCase()
     }
     forPageId
+  }
+
+  def getAbInfo(abkey: String, serverjsongStr: String): Any = {
+    // 从sever_jsonstr里面获取select_id,test_id,rule_id
+    val SJsonstr = Json.parse(serverjsongStr)
+//      val SJsonstr = Json.parse(serverjsongStr.replaceAll("null", """\\"\\""""))
+    val ab_info = (SJsonstr \ "ab_info").asOpt[String].getOrElse("")
+    val pattern: Pattern = Pattern.compile("^-?[1-9]\\\\d*$")
+    // 判断解的是哪个的值
+    val abvalue = if (abkey.contains("rule_id")) {
+        val rule_id=if (ab_info.isEmpty) {
+          ""
+        } else if (pattern.matcher(ab_info.toString.split("_")(2)).matches()) {
+          ab_info.toString.split("_")(2)
+        } else {
+          ""
+        }
+    } else if (abkey.contains("test_id")) {
+      //test_id
+      val test_id = if (ab_info.isEmpty) {
+        ""
+      } else if (pattern.matcher(ab_info.toString.split("_")(0)).matches()) {
+        ab_info.toString.split("_")(0)
+      } else {
+        ""
+      }
+    } else if (abkey.contains("select_id")) {
+      // select_id
+      val select_id = if (ab_info.isEmpty) {
+        ""
+      } else if (pattern.matcher(ab_info.toString.split("_")(1)).matches()) {
+        ab_info.toString.split("_")(1)
+      } else {
+        ""
+      }
+    } else {
+      ""
+    }
+      abvalue
+  }
+
+
+  // 测试test_id,select_id和rule_id是否能解出
+    def main(args: Array[String]): Unit = {
+    val abkey1 = "select_id"
+    val abkey2 = "test_id"
+    val abkey3 = "rule_id"
+    val serverjsonstr ="{\"ab_info\":\"39_10_104\"}"
+    val strValue = pageAndEventParser.getParsedJson(serverjsonstr)
+    println(strValue)
+    val select_id = pageParser.getAbInfo(abkey1,serverjsonstr)
+    println("selelct_id为"+select_id)
   }
 }

@@ -1,5 +1,7 @@
 package com.juanpi.bi.transformer
 
+import java.util.regex.Pattern
+
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.hive.udf.GetGoodsId
@@ -28,7 +30,7 @@ class PageinfoTransformer {
 
       val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
 
-      if(starttime_origin.isEmpty) {
+      if (starttime_origin.isEmpty) {
         return ("", "", null)
       }
 
@@ -37,33 +39,34 @@ class PageinfoTransformer {
       val sDate = DateUtils.getWeekAgoDateStr()
       val eDate = DateUtils.getWeekLaterDateStr()
 
-      val startTime = if(originDateStr > sDate && originDateStr < eDate) {
+      val startTime = if (originDateStr > sDate && originDateStr < eDate) {
         starttime_origin
       } else {
         ""
       }
 
-      if(startTime.isEmpty) {
+      if (startTime.isEmpty) {
         return ("", "", null)
       }
 
       val partitionTime = startTime
 
-      try
-      {
+      try {
         gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
       } catch {
-        case ex:Exception => { println(ex.getStackTraceString)}
+        case ex: Exception => {
+          println(ex.getStackTraceString)
+        }
           println("=======>> Event: getGuid Exception 0000 ======>>异常数据:" + row)
       }
 
-      val ret = if(gu_id.nonEmpty) {
+      val ret = if (gu_id.nonEmpty) {
         try {
           val res = parse(partitionTime, row, dimPage, fCate)
           val partitionStr = DateUtils.dateGuidPartitions(partitionTime.toLong, gu_id)
           (partitionStr, "page", res)
         } catch {
-          case ex:Exception => {
+          case ex: Exception => {
             println("=======>> parse Exception" + ex.getStackTraceString)
             ex.printStackTrace()
           }
@@ -129,8 +132,7 @@ class PageinfoTransformer {
     var uGroup = ""
 
     val c_server = (row \ "c_server").asOpt[String].getOrElse("")
-    if(c_server.nonEmpty)
-    {
+    if (c_server.nonEmpty) {
       val js_c_server = Json.parse(c_server)
       gid = (js_c_server \ "gid").asOpt[String].getOrElse("0")
       uGroup = (js_c_server \ "ugroup").asOpt[String].getOrElse("0")
@@ -142,7 +144,9 @@ class PageinfoTransformer {
     val forPageId = pageParser.forPageId(pageName, fct_extendParams, server_jsonstr)
 
     // 154 289 活动页，如果url为空，就直接过滤
-    if((forPageId == 154 | forPageId == 289) && url.isEmpty) { return null }
+    if ((forPageId == 154 | forPageId == 289) && url.isEmpty) {
+      return null
+    }
 
     val forPrePageid = pageParser.forPageId(prePage, fct_preExtendParams, server_jsonstr)
 
@@ -160,12 +164,13 @@ class PageinfoTransformer {
     val shop_id = pageAndEventParser.getShopId(d_page_id, fct_extendParams)
     val ref_shop_id = pageAndEventParser.getShopId(d_pre_page_id, fct_preExtendParams)
 
-    val forLevelId = if(d_page_id == 254 && fct_extendParams.nonEmpty){fCate.get(fct_extendParams).getOrElse("0")} else "0"
+    val forLevelId = if (d_page_id == 254 && fct_extendParams.nonEmpty) {
+      fCate.get(fct_extendParams).getOrElse("0")
+    } else "0"
 
     val page_level_id = pageAndEventParser.getEventPageLevelId(0, d_page_id, url, d_page_level_id, forLevelId)
 
-    val hot_goods_id = if(d_page_id == 250 && fct_extendParams.nonEmpty && fct_extendParams.contains("_") && fct_extendParams.split("_").length > 2)
-    {
+    val hot_goods_id = if (d_page_id == 250 && fct_extendParams.nonEmpty && fct_extendParams.contains("_") && fct_extendParams.split("_").length > 2) {
       new GetGoodsId().evaluate(fct_extendParams.split("_")(2))
     }
     else {
@@ -181,8 +186,35 @@ class PageinfoTransformer {
 
     val jpk = 0
     val table_source = "mb_page"
-    // 最终返回值
-    val event_id, event_value, rule_id, test_id, select_id, event_lvl2_value, loadTime, ug_id = ""
+    // 从sever_jsonstr里面获取select_id,test_id,rule_id
+    val Server_jsonstr = Json.parse(server_jsonstr.replaceAll("null", """\\"\\""""))
+    val ab_info = (Server_jsonstr \ "ab_info").asOpt[String].getOrElse("")
+    val pattern: Pattern = Pattern.compile("^-?[1-9]\\\\d*$")
+    // rule_id
+    val rule_id = if (ab_info.isEmpty) {
+      ""
+    } else if (pattern.matcher(ab_info.toString.split("_")(2)).matches()) {
+      ab_info.toString.split("_")(2)
+    } else {
+      ""
+    }
+    //test_id
+    val test_id = if (ab_info.isEmpty) {
+      ""
+    } else if (pattern.matcher(ab_info.toString.split("_")(0)).matches()) {
+      ab_info.toString.split("_")(0)
+    } else {
+      ""
+    }
+    // select_id
+    val select_id = if (ab_info.isEmpty) {
+      ""
+    } else if (pattern.matcher(ab_info.toString.split("_")(1)).matches()) {
+      ab_info.toString.split("_")(1)
+    } else {
+      ""
+    }
+    val event_id, event_value, event_lvl2_value, loadTime, ug_id = ""
 
     // 根据分区时间来确定
     val (date, hour) = DateUtils.dateHourStr(partitionTime.toLong)
@@ -202,4 +234,6 @@ class PageinfoTransformer {
 
     (user, pe, page, event)
   }
+
+
 }
