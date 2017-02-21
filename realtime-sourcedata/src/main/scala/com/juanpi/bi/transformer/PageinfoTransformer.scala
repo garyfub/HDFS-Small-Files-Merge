@@ -187,33 +187,9 @@ class PageinfoTransformer {
     val jpk = 0
     val table_source = "mb_page"
     // 从sever_jsonstr里面获取select_id,test_id,rule_id
-    val Server_jsonstr = Json.parse(server_jsonstr.replaceAll("null", """\\"\\""""))
-    val ab_info = (Server_jsonstr \ "ab_info").asOpt[String].getOrElse("")
-    val pattern: Pattern = Pattern.compile("^-?[1-9]\\\\d*$")
-    // rule_id
-    val rule_id = if (ab_info.isEmpty) {
-      ""
-    } else if (pattern.matcher(ab_info.toString.split("_")(2)).matches()) {
-      ab_info.toString.split("_")(2)
-    } else {
-      ""
-    }
-    //test_id
-    val test_id = if (ab_info.isEmpty) {
-      ""
-    } else if (pattern.matcher(ab_info.toString.split("_")(0)).matches()) {
-      ab_info.toString.split("_")(0)
-    } else {
-      ""
-    }
-    // select_id
-    val select_id = if (ab_info.isEmpty) {
-      ""
-    } else if (pattern.matcher(ab_info.toString.split("_")(1)).matches()) {
-      ab_info.toString.split("_")(1)
-    } else {
-      ""
-    }
+    val rule_id= pageParser.getAbInfo(server_jsonstr)._1
+    val test_id= pageParser.getAbInfo(server_jsonstr)._2
+    val select_id= pageParser.getAbInfo(server_jsonstr)._3
     val event_id, event_value, event_lvl2_value, loadTime, ug_id = ""
 
     // 根据分区时间来确定
