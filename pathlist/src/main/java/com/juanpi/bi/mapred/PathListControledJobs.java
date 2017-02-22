@@ -66,8 +66,10 @@ public class PathListControledJobs {
                 MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, guStr);
         String strh5Event =
                 MessageFormat.format(str, INPUT_PATH_BASE, "pc_events_hash3", dateStr, guStr);
+        String strh5Page=
+                MessageFormat.format(str, INPUT_PATH_BASE, "bi_gongzi_jp_hash3_real_by_dw", dateStr, guStr);
         // 文件输入路径
-        String inputPath = strEvent + "," + strPage + "," + strh5Event;
+        String inputPath = strEvent + "," + strPage + "," + strh5Event+","+strh5Page;
         return inputPath;
     }
 
