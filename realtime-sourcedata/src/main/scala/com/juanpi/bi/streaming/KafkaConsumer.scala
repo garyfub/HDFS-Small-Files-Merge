@@ -374,7 +374,7 @@ object KafkaConsumer{
       consumer.h5PageProcess(message, ssc, km)
     }
     else {
-      println("请指定需要解析的kafka Topic！！")
+      println("请指定需要解析的kafka Topic-Group！")
       System.exit(1)
     }
 

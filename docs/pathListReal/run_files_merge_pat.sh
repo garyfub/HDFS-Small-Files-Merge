@@ -1,5 +1,6 @@
 #!/bin/sh
 
+## 5 1,5-22 * * *
 . /etc/profile
 . ~/.bash_profile
 
@@ -15,6 +16,7 @@ THIS="$0"
 THIS_DIR=`dirname "$THIS"`
 cd ${THIS_DIR}
 
+TimeFlag="01"
 DB="dw"
 TABLE="path_list_real"
 
@@ -29,7 +31,7 @@ if [ $curhour == "11" ]; then
 fi
 
 ## 零点，处理前一天的数据, 比如，2016-09-27 00:01:00, 刚刚到这一天，需要处理 2016-09-26 23点~00点的数据
-if [ $curhour == "00" ]; then
+if [ $curhour == $TimeFlag ]; then
     today=`date -d -1days '+%Y-%m-%d'`
     echo "当前时间: $curdt ，处理 $today 23点~0点 的数据"
 fi
@@ -37,7 +39,7 @@ fi
 echo "当前时间为=> $curdt, 处理数据开始..."
 
 fm_tbegin=$(date +%s)
-yarn jar ./hdfs-files-merge-1.0.jar com.juanpi.bi.merge.TaskManager "$today"
+yarn jar ./hdfs-files-merge-1.0.jar com.juanpi.bi.merge.TaskManager "$today" $TimeFlag
 
 fm_tend=$(date +%s)
 echo "当前时间: $curdt, 合并小文件完毕. 处理日期为：$today, total耗时: $(($fm_tend-$fm_tbegin)) 秒!!!"
