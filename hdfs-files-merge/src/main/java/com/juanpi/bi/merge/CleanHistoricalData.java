@@ -86,9 +86,7 @@ public class CleanHistoricalData {
 
         ArrayList matchPath = new ArrayList();
         for (Path matchDir : matchDirs) {
-//            System.out.println("find matchDir:" + matchDir);
 
-            // date=2017-01-01
             String name = matchDir.getName();
             String uriDtStr = name.substring(5);
             // 从uri中解析出来的时间
