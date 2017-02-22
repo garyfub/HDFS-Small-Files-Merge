@@ -171,6 +171,12 @@ class H5PageTransformer {
       click_url
     }
 
+    if(baseUrl.isEmpty()) {
+      println("url为空的数据为"+"click的值为"+click_url+"url的值为"+url+"原始数据为"+row)
+    } else {
+      println("baseUrl均有值"+"click的值为"+click_url+"url的值为"+url+"原始数据为"+row)
+    }
+
     val pid = new GetPageID().evaluate(baseUrl)
     val pageId = if(pid == null) {0} else javaToScalaInt(pid)
 
@@ -257,7 +263,7 @@ class H5PageTransformer {
 
     val user = User.apply(guId, userId.toString, utmId, "", dwSessionId, dwTerminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
-    val page = Page.apply(source, ip, "", "", deviceId, to_switch)
+    val page = Page.apply(source, ip, baseUrl,baseUrlRef, deviceId, to_switch)
     val event = Event.apply(eventId, eventValue, eventLevel2Vlue, rule_id, test_id, select_id, loadTime, ug_id)
     (user, pe, page, event)
   }
