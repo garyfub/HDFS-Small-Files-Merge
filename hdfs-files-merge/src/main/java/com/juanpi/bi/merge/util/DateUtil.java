@@ -11,7 +11,6 @@ import java.util.Date;
  */
 public class DateUtil {
 
-    static String AM0 = "00";
     static String AM0_FMT = "yyyy-MM-dd 23:59:59";
 
     /**
@@ -23,6 +22,7 @@ public class DateUtil {
     public static String getHourIntervalDate(int hourInterval, String fmt) {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.HOUR, hourInterval);
+        cal.getTimeInMillis();
         String hourIntervalDate = new SimpleDateFormat(fmt).format(cal.getTime());
 
         return hourIntervalDate;
@@ -123,25 +123,27 @@ public class DateUtil {
     }
 
     /**
-     * 返回一个小时前的日期的毫秒值
-     * 如果是零点的日期，依然处理上一个小时的数据
+     * 返回interval个小时前的日期的毫秒值
+     *
      * @return
      */
-    public static long getHoursAgoMillis()
+    public static long getHoursAgoMillis(int interval, String timeFlag)
     {
         Calendar cal = Calendar.getInstance();
-        long milis = cal.getTimeInMillis();
-        String fmt = "yyyy-MM-dd HH:00:00";
-        String dt = DateUtil.getHourIntervalDate(0, fmt);
-        String hourStr = dt.substring(11, 11+2);
 
-        if(AM0.equals(hourStr))
+        String fmt = "yyyy-MM-dd HH:00:00";
+        int hour = cal.get(Calendar.HOUR_OF_DAY);
+
+        String dt = "";
+
+        if(timeFlag.equals(hour+""))
         {
             // 当前天减一
-            dt = getDateIntervalDate(-1, AM0_FMT);
+            dt = DateUtil.getDateIntervalDate(-1, AM0_FMT);
             fmt = "yyyy-MM-dd HH:mm:ss";
         }
 
+        long milis = 0;
         try {
             milis = DateUtil.dateToMillis(dt, fmt);
         } catch (ParseException e) {

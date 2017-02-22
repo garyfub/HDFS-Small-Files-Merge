@@ -12,7 +12,7 @@ import org.apache.hadoop.fs.*;
 import com.juanpi.bi.merge.util.HdfsUtil;
 import org.apache.hadoop.io.IOUtils;
 
-import static com.juanpi.bi.merge.TaskManager.oneHourAgoMillis;
+//import static com.juanpi.bi.merge.TaskManager.oneHourAgoMillis;
 
 /**
  * 
@@ -27,21 +27,23 @@ public class MergeTask {
 	private String srcDirRegex = null;
 	private String dstFileName = null;
 	private boolean deleteSource = false;
+    private long oneHourAgoMillis = 0;
 	
 	private FileSystem fs = null;
 
     /**
-	 * 
-	 * @param srcDirRegex 目录通配符
-	 * @param dstFileName 目标文件名
-	 * @param deleteSource 是否删除原始文件
-	 * @throws IOException
-	 */
-	public MergeTask(String srcDirRegex, String dstFileName, boolean deleteSource) throws IOException {
+     *
+     * @param srcDirRegex 目录通配符
+     * @param dstFileName 目标文件名
+     * @param deleteSource 是否删除原始文件
+     * @param oneHourAgoMillis
+     * @throws IOException
+     */
+	public MergeTask(String srcDirRegex, String dstFileName, boolean deleteSource, long oneHourAgoMillis) throws IOException {
 		this.srcDirRegex = srcDirRegex;
 		this.dstFileName = dstFileName;
 		this.deleteSource = deleteSource;
-		
+		this.oneHourAgoMillis = oneHourAgoMillis;
 		this.fs = FileSystem.get(configuration);
 	}
 	
@@ -67,7 +69,7 @@ public class MergeTask {
      * @param conf hadoop配置文件
      * @throws IOException
      */
-	public static void copyLogMerge(FileSystem srcFS, Path srcDir, boolean deleteSource, Configuration conf) throws IOException {
+	private void copyLogMerge(FileSystem srcFS, Path srcDir, boolean deleteSource, Configuration conf) throws IOException {
 
 		FileStatus[] fileStatus = srcFS.listStatus(srcDir);
 
@@ -156,8 +158,6 @@ public class MergeTask {
             System.out.println("srcDir is not directory");
         }
 
-//        HdfsUtil.copyMerge(fs, srcDir, fs, dstFile, deleteSource, configuration, null);
-
 		copyLogMerge(fs, srcDir, deleteSource, configuration);
     }
 	
@@ -175,7 +175,7 @@ public class MergeTask {
 		
 		for (Path matchDir : matchDirs) {
             System.out.println("matchDir is:" + matchDir);
-            merge(matchDir, true);
+            merge(matchDir,true);
 		}
 	}
 }

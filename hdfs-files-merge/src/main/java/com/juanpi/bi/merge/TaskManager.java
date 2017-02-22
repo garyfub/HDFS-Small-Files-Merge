@@ -12,13 +12,14 @@ import com.juanpi.bi.merge.util.DateUtil;
  */
 public class TaskManager {
 
-	private String baseDir = null;
+	private String baseDir = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
+    private static int interval = 1;
+    private static String timeFlag = "01";
 
-	public TaskManager(String baseDir) {
-		this.baseDir = baseDir;
-	}
-
-    public static long oneHourAgoMillis = DateUtil.getHoursAgoMillis();
+	public TaskManager(String timeFlag, int interval) {
+	    this.timeFlag = timeFlag;
+	    this.interval = interval;
+    }
 
     // 路径正则
 	private String getDirRegex(String dateStr) {
@@ -32,7 +33,8 @@ public class TaskManager {
 	public void start(String dateStr) throws IOException {
         System.out.println("开始任务======>>....");
         String srcDirRegex = getDirRegex(dateStr);
-		MergeTask mergeTask = new MergeTask(srcDirRegex, null, true);
+        long oneHourAgoMillis = DateUtil.getHoursAgoMillis(interval, timeFlag);
+		MergeTask mergeTask = new MergeTask(srcDirRegex, null, true, oneHourAgoMillis);
 		mergeTask.doMerge();
 	}
 	
@@ -42,7 +44,7 @@ public class TaskManager {
         // 传入 hdfs 目录
 
         String dateStr = "";
-        String dir = "";
+        String intervalStr = "01";
 
         System.out.println("args 参数个数：" + args.length);
 
@@ -54,18 +56,14 @@ public class TaskManager {
         if(args.length == 2)
         {
             dateStr = args[0];
-            dir = args[1];
-        }
-
-        if(null == dir || dir.isEmpty())
-        {
-            dir = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
+            intervalStr = args[1];
         }
 
         System.out.println("======>>main_date:" + dateStr);
-        System.out.println("======>>main_dir :" + dir);
+        System.out.println("======>>timeFlag :" + Integer.parseInt(intervalStr));
 
-		TaskManager manager = new TaskManager(dir);
+		TaskManager manager = new TaskManager(intervalStr, Integer.parseInt(intervalStr));
+
 		try {
 			manager.start(dateStr);
 		} catch (Exception e) {
