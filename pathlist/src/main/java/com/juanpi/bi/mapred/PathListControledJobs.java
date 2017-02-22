@@ -61,18 +61,17 @@ public class PathListControledJobs {
     private static String getInputPath(String dateStr, String guStr) {
         String str = "{0}/{1}/date={2}/gu_hash={3}/merged/";
         String strEvent =
-                MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, guStr);
+                MessageFormat.format(str, INPUT_PATH_BASE, "bi_gongzi_mb_event_real_direct_by_dw", dateStr, guStr);
         String strPage =
-                MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, guStr);
+                MessageFormat.format(str, INPUT_PATH_BASE, "bi_gongzi_mb_pageinfo_real_direct_by_dw", dateStr, guStr);
         String strh5Event =
-                MessageFormat.format(str, INPUT_PATH_BASE, "pc_events_hash3", dateStr, guStr);
+                MessageFormat.format(str, INPUT_PATH_BASE, "bi_gongzi_pc_events_hash3_real_by_dw", dateStr, guStr);
         String strh5Page=
                 MessageFormat.format(str, INPUT_PATH_BASE, "bi_gongzi_jp_hash3_real_by_dw", dateStr, guStr);
         // 文件输入路径
         String inputPath = strEvent + "," + strPage + "," + strh5Event+","+strh5Page;
         return inputPath;
     }
-
     /**
      * eg. hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_path_list_jobs_test/gu_hash=a/
      */
