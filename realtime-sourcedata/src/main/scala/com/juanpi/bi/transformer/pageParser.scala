@@ -128,10 +128,14 @@ object pageParser {
     forPageId
   }
 
+  /**
+    * 从sever_jsonstr解析得到select_id,test_id,rule_id
+    * @param serverjsongStr
+    * @return
+    */
   def getAbInfo(serverjsongStr: String):(String, String, String) = {
-    // 从sever_jsonstr里面获取select_id,test_id,rule_id
-    val SJsonstr = Json.parse(serverjsongStr)
-    val ab_info = (SJsonstr \ "ab_info").asOpt[String].getOrElse("")
+    val sJsonStr = Json.parse(serverjsongStr)
+    val ab_info = (sJsonStr \ "ab_info").asOpt[String].getOrElse("")
     val pattern: Pattern = Pattern.compile("^-?[1-9]\\d*$")
         val (rule_id,test_id,select_id)=if (ab_info.isEmpty) {
           ("","","")
