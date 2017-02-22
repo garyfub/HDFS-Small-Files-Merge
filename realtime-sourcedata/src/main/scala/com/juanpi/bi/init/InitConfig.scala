@@ -255,7 +255,7 @@ class InitConfig() {
   def initDimFrontCate(sqlContext: HiveContext): mutable.HashMap[String, String] =
   {
     var dimValues = new mutable.HashMap[String, String]
-    val sql = s"""select front_cate_id, case when (pid in (490,1235,1236,1237,1238) or front_cate_id in (490,1235,1236,1237,1238)) then level_id +1 when (front_cate_id=488 or pid =488) then level_id+2 else level_id end level_id
+    val sql = s"""select front_cate_id, case when (pid in (490,1236,1237,1238) or front_cate_id in (490,1236,1237,1238)) then level_id +1 when (front_cate_id=488 or pid =488) then level_id+2 else level_id end level_id
                           | from dw.dim_front_cate
                           | order by front_cate_id""".stripMargin
 

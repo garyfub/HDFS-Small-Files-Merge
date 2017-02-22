@@ -132,7 +132,7 @@ object pageParser {
     // 从sever_jsonstr里面获取select_id,test_id,rule_id
     val SJsonstr = Json.parse(serverjsongStr)
     val ab_info = (SJsonstr \ "ab_info").asOpt[String].getOrElse("")
-    val pattern: Pattern = Pattern.compile("^-?[1-9]\\\\d*$")
+    val pattern: Pattern = Pattern.compile("^-?[1-9]\\d*$")
         val (rule_id,test_id,select_id)=if (ab_info.isEmpty) {
           ("","","")
         } else if (pattern.matcher(ab_info.toString.split("_")(2)).matches() && pattern.matcher(ab_info.toString.split("_")(1)).matches() && pattern.matcher(ab_info.toString.split("_")(0)).matches()) {
@@ -147,9 +147,10 @@ object pageParser {
   // 测试test_id,select_id和rule_id是否能解出
     def main(args: Array[String]): Unit = {
     val serverjsonstr ="{\"ab_info\":\"39_10_104\"}"
-    val strValue = pageAndEventParser.getParsedJson(serverjsonstr)
-    println(strValue)
     val abinfo = pageParser.getAbInfo(serverjsonstr)
-    println("selelct_id为"+abinfo._3)
+    println(abinfo)
+    println("rule_id为"+abinfo._1)
+    println("test_id为"+abinfo._2)
+    println("select_id为"+abinfo._3)
   }
 }
