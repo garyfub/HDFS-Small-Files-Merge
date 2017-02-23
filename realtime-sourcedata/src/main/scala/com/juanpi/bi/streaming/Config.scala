@@ -10,7 +10,7 @@ object Config {
 
   val dirPrefix = "/user/hadoop/dw_realtime/"
 
-  val checkpoindDir= dirPrefix + "sparkstreaming/checkpoint"
+//  val checkpoindDir= dirPrefix + "sparkstreaming/checkpoint"
 
   // todo 配置 baseDir
   val baseDir = System.getProperty("spark.juanpi.bi.realtime.basedir", dirPrefix + "dw_real_for_path_list")

@@ -139,14 +139,14 @@ public class MergeTask {
                 }
 
                 // 合并后，删除小文件
-//                if (deleteSource) {
-//                    if(mergingFiles.size() > 0)
-//                    {
-//                        // 强制类型转换
-////                        System.out.println("删除小文件：" + dateHourStr + ",目录：" + mergingFiles.get(0).getParent());
-//                        delete(mergingFiles);
-//                    }
-//                }
+                if (deleteSource) {
+                    if(mergingFiles.size() > 0)
+                    {
+                        // 强制类型转换
+//                        System.out.println("删除小文件：" + dateHourStr + ",目录：" + mergingFiles.get(0).getParent());
+                        delete(mergingFiles);
+                    }
+                }
             }
         }
 	}
