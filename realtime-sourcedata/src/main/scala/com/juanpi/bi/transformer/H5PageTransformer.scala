@@ -206,7 +206,7 @@ class H5PageTransformer {
     val refPageId = new GetPageID().evaluate(baseUrlRef)
     val refPageValue = new GetDwPcPageValue().evaluate(baseUrlRef)
 
-    val dwSiteId = if(baseSiteId == null || baseSiteId == 0 || baseSiteId == "null") -999 else javaToScalaInt(baseSiteId)
+    val dwSiteId = if(baseSiteId == null || baseSiteId == 0) -999 else javaToScalaInt(baseSiteId)
 
     val refSiteId = new GetSiteId().evaluate(baseUrlRef)
 
