@@ -22,7 +22,7 @@ public class CleanHistoricalData {
     String baseDir = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
     // 路径正则
     private String getDirRegex(String dateStr) {
-        return baseDir + "/{bi_gongzi_mb_event_real_direct_by_dw,bi_gongzi_mb_pageinfo_real_direct_by_dw,bi_gongzi_pc_events_hash3_real_by_dw,bi_gongzi_jp_hash3_real_by_dw}/date=*";
+        return baseDir + "/{mb_event_hash2,mb_pageinfo_hash2,pc_events_hash3,jp_hash3}/date=*";
     }
 
     // 获取匹配HDFS路径
@@ -36,7 +36,7 @@ public class CleanHistoricalData {
     private static void delete(List<Path> files) throws IOException {
         for (Path file : files) {
             System.out.println(file);
-//            HdfsUtil.delete(file);
+            HdfsUtil.delete(file);
         }
     }
 
@@ -80,6 +80,7 @@ public class CleanHistoricalData {
 
         // 传入时间
         String ds = DateUtil.getSpecifiedDayAgo(dateStr, 7);
+
         long curMs = dateFormatString(ds);
 
         ArrayList matchPath = new ArrayList();
@@ -106,15 +107,12 @@ public class CleanHistoricalData {
         {
             dateStr = args[0];
         }
+        else {
+            System.exit(1);
+            System.out.println("CleanHistoricalData 参数错误！");
+        }
 
         CleanHistoricalData chd = new CleanHistoricalData();
-
-//        String path = new Path("hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list/pc_events_hash3/date=2017-01-12").getName();
-//        System.out.println(path);
-//
-//        long time = chd.dateFormatString(path.substring(5));
-//        System.out.println(time);
-//        System.exit(11);
 
         try {
             chd.clean(dateStr);

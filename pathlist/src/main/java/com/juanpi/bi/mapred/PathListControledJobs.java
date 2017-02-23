@@ -56,7 +56,10 @@ public class PathListControledJobs {
     }
 
     /**
-     * eg. hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr/gu_hash=a/
+     *
+     * @param dateStr
+     * @param guStr
+     * @return
      */
     private static String getInputPath(String dateStr, String guStr) {
         String str = "{0}/{1}/date={2}/gu_hash={3}/merged/";
