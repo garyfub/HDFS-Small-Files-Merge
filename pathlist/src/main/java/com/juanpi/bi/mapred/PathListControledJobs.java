@@ -60,18 +60,20 @@ public class PathListControledJobs {
      */
     private static String getInputPath(String dateStr, String guStr) {
         String str = "{0}/{1}/date={2}/gu_hash={3}/merged/";
+//        for_pathList.topicIds=mb_event_hash2,mb_pageinfo_hash2,pc_events_hash3,jp_hash3
         String strEvent =
-                MessageFormat.format(str, INPUT_PATH_BASE, "bi_gongzi_mb_event_real_direct_by_dw", dateStr, guStr);
+                MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, guStr);
         String strPage =
-                MessageFormat.format(str, INPUT_PATH_BASE, "bi_gongzi_mb_pageinfo_real_direct_by_dw", dateStr, guStr);
+                MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, guStr);
         String strh5Event =
-                MessageFormat.format(str, INPUT_PATH_BASE, "bi_gongzi_pc_events_hash3_real_by_dw", dateStr, guStr);
+                MessageFormat.format(str, INPUT_PATH_BASE, "pc_events_hash3", dateStr, guStr);
         String strh5Page=
-                MessageFormat.format(str, INPUT_PATH_BASE, "bi_gongzi_jp_hash3_real_by_dw", dateStr, guStr);
+                MessageFormat.format(str, INPUT_PATH_BASE, "jp_hash3", dateStr, guStr);
         // 文件输入路径
         String inputPath = strEvent + "," + strPage + "," + strh5Event+","+strh5Page;
         return inputPath;
     }
+
     /**
      * eg. hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_path_list_jobs_test/gu_hash=a/
      */
@@ -445,12 +447,6 @@ public class PathListControledJobs {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
 
-        // 指定输入、输出格式.默认就是 TextInputFormat，因此这两行可以省略。
-        // TextInputFormat 把输入文件的每一行作为单独的记录，但不做解析处理。
-        //        job.setInputFormatClass(TextInputFormat.class);
-        // 设定输出文件的格式化类
-        //        job.setOutputFormatClass(TextOutputFormat.class);
-
         // 指定输入文件路径
         FileInputFormat.setInputPaths(job, inputPath);
         // 指定输出到哪里
@@ -464,7 +460,7 @@ public class PathListControledJobs {
      */
     public static void main(String[] args) {
         String dateStr = args[0];
-        System.out.println("===========>> PathListControledJobs start !<<===========");
+        System.out.println("===========>> PathListControledJobs start 2017-02-23 !<<===========");
         if (dateStr == null || dateStr.isEmpty()) {
             JobsControl("", 0x0, 0x3, "PathListControledJobs01");
             JobsControl("", 0x4, 0x7, "PathListControledJobs04");
