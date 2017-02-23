@@ -70,23 +70,6 @@
     <build>
         <finalName>${pom.artifactId}-${pom.version}</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
-
-        <!--<plugins>-->
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-jar-plugin</artifactId>-->
-                <!--<configuration>-->
-                    <!--<archive>-->
-                        <!--<manifest>-->
-                            <!--<addClasspath>true</addClasspath>-->
-                            <!--<classpathPrefix>lib/</classpathPrefix>-->
-                            <!--<mainClass>com.juanpi.bi.merge.TaskManager</mainClass>-->
-                        <!--</manifest>-->
-                    <!--</archive>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
-
-        <!--</plugins>-->
     </build>
 
 </project>

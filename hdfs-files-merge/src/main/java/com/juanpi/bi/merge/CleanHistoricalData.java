@@ -2,7 +2,6 @@ package com.juanpi.bi.merge;
 
 import com.juanpi.bi.merge.util.DateUtil;
 import com.juanpi.bi.merge.util.HdfsUtil;
-import org.apache.avro.generic.GenericData;
 import org.apache.hadoop.fs.Path;
 
 import java.io.IOException;
@@ -36,7 +35,6 @@ public class CleanHistoricalData {
     // 删除指定文件
     private static void delete(List<Path> files) throws IOException {
         for (Path file : files) {
-
             System.out.println(file);
 //            HdfsUtil.delete(file);
         }
