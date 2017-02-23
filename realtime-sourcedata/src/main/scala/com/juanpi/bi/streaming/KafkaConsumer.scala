@@ -20,6 +20,7 @@ import org.apache.spark.streaming.kafka.KafkaManager
 import scala.collection.mutable
 
 class KafkaConsumer(topic: String,
+                    dataBaseDir: String,
                     dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                     dimEvent: mutable.HashMap[String, (Int, Int, Int)],
                     fCate: mutable.HashMap[String, String],
@@ -54,7 +55,7 @@ class KafkaConsumer(topic: String,
       // 保存数据至hdfs
       rdd.map(v => ((v._1, mills), v._3))
         .repartition(1)
-        .saveAsHadoopFile(Config.baseDir + "/" + topic,
+        .saveAsHadoopFile(dataBaseDir + "/" + topic,
           classOf[String],
           classOf[String],
           classOf[RDDMultipleTextOutputFormat])
@@ -98,7 +99,7 @@ class KafkaConsumer(topic: String,
         // 保存数据至hdfs: /user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/
         // /user/hadoop/gongzi/dw_real_for_path_list/mb_pageinfo_hash2/date=2016-08-28/gu_hash=0
         newRdd.repartition(1)
-          .saveAsHadoopFile(Config.baseDir + "/" + topic,
+          .saveAsHadoopFile(dataBaseDir + "/" + topic,
             classOf[String],
             classOf[String],
             classOf[RDDMultipleTextOutputFormat])
@@ -136,7 +137,7 @@ class KafkaConsumer(topic: String,
       // 保存数据至hdfs
       rdd.map(v => ((v._1, mills), v._3))
         .repartition(1)
-        .saveAsHadoopFile(Config.baseDir + "/" + topic,
+        .saveAsHadoopFile(dataBaseDir + "/" + topic,
           classOf[String],
           classOf[String],
           classOf[RDDMultipleTextOutputFormat])
@@ -165,7 +166,7 @@ class KafkaConsumer(topic: String,
       // 保存数据至hdfs
       rdd.map(v => ((v._1, mills), v._3))
         .repartition(1)
-        .saveAsHadoopFile(Config.baseDir + "/" + topic,
+        .saveAsHadoopFile(dataBaseDir + "/" + topic,
           classOf[String],
           classOf[String],
           classOf[RDDMultipleTextOutputFormat])
@@ -329,6 +330,9 @@ object KafkaConsumer{
     val ic = InitConfig
     // 时间间隔采用的是写死的，目前是 60 s
     ic.initParam(groupId, Config.interval, maxRecords)
+
+    val (dataBaseDir, kafkaTopicIds) = ic.loadProperties
+
     val ssc = ic.getStreamingContext()
 
     // 连接Kafka参数设置
@@ -355,22 +359,22 @@ object KafkaConsumer{
       val DimPage = InitConfig.initMBDim()._1
       val DimEvent = InitConfig.initMBDim()._2
       val DimFrontCate = InitConfig.initMBDim()._3
-      val consumer = new KafkaConsumer(topic, DimPage, DimEvent, DimFrontCate, null, zkQuorum)
+      val consumer = new KafkaConsumer(topic, dataBaseDir, DimPage, DimEvent, DimFrontCate, null, zkQuorum)
       consumer.pageProcess(message, ssc, km)
     } else if(topic.equals("mb_event_hash2")) {
       val DimPage = InitConfig.initMBDim()._1
       val DimEvent = InitConfig.initMBDim()._2
       val DimFrontCate = InitConfig.initMBDim()._3
-      val consumer = new KafkaConsumer(topic, DimPage, DimEvent, DimFrontCate, null, zkQuorum)
+      val consumer = new KafkaConsumer(topic, dataBaseDir, DimPage, DimEvent, DimFrontCate, null, zkQuorum)
       consumer.eventProcess(message, ssc, km)
     } else if(topic.equals("pc_events_hash3")) {
       val DimH5Page = InitConfig.initH5Dim()._1
       val DimH5Event = InitConfig.initH5Dim()._2
-      val consumer = new KafkaConsumer(topic, DimH5Page, null, null, DimH5Event, zkQuorum)
+      val consumer = new KafkaConsumer(topic, dataBaseDir, DimH5Page, null, null, DimH5Event, zkQuorum)
       consumer.h5EventProcess(message, ssc, km)
     } else if(topic.equals("jp_hash3")) {
       val DimH5Page = InitConfig.initH5Dim()._1
-      val consumer = new KafkaConsumer(topic, DimH5Page, null, null, null, zkQuorum)
+      val consumer = new KafkaConsumer(topic, dataBaseDir, DimH5Page, null, null, null, zkQuorum)
       consumer.h5PageProcess(message, ssc, km)
     }
     else {

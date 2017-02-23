@@ -1,5 +1,6 @@
 package com.juanpi.bi.init
 
+import com.typesafe.config.ConfigFactory
 import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Row}
@@ -280,14 +281,22 @@ class InitConfig() {
   }
 }
 
+
 object InitConfig {
 
-  // 主构造器
   val ic = new InitConfig()
-//  var DIMPAGE = new mutable.HashMap[String, (Int, Int, String, Int)]
-//  var DIMENT = new mutable.HashMap[String, (Int, Int)]
-//  var FCATE = new mutable.HashMap[String, String]
 
+  /**
+    * 加载配置文件
+    */
+  def loadProperties():(String, String) = {
+    val con = ConfigFactory.load("config.properties")
+    val dataBaseDir = con.getString("dataBaseDir")
+    val kafkaTopicIds = con.getString("kafkaTopicIds")
+    (dataBaseDir, kafkaTopicIds)
+  }
+
+  // 主构造器
   def initH5Dim() = {
     val dp = ic.initDimH5Tables()._1
     val de = ic.initDimH5Tables()._2
@@ -313,16 +322,13 @@ object InitConfig {
     ic.initSparkConfig(appName, maxRecords)
 
     ic.setStreamingContext()
-
-    // 初始化 page and event
-//    val initDimTables = ic.initDimTables()
-//
-//    DIMPAGE = initDimTables._1
-//    DIMENT  = initDimTables._2
-//    FCATE   = initDimTables._3
   }
 
   def getStreamingContext(): StreamingContext = {
     ic.getSsc()
+  }
+
+  def main(args: Array[String]): Unit = {
+    loadProperties
   }
 }
