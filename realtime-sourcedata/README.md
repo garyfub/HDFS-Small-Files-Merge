@@ -2,5 +2,5 @@
 
 ### 打包
 ``` sh
-mvn clean package -P prod -pl realtime-sourcedata
+mvn clean package -DskipTests -P prod -pl realtime-sourcedata
 ```

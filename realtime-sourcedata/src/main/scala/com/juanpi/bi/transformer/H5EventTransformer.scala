@@ -63,7 +63,6 @@ class H5EventTransformer {
 
     val ret = if (gu_id.nonEmpty && !gu_id.equalsIgnoreCase("null")) {
       val endtime = (row \ "endtime").asOpt[String].getOrElse("")
-      val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
 
       try {
         val res = parse(row, dimPage, dimEvent)
