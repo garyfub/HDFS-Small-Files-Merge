@@ -150,11 +150,10 @@ object pageParser {
 
   // 测试test_id,select_id和rule_id是否能解出
     def main(args: Array[String]): Unit = {
-    val serverjsonstr ="{\"ab_info\":\"39_10_104\"}"
-    val abinfo = pageParser.getAbInfo(serverjsonstr)
-    println(abinfo)
-    println("rule_id为"+abinfo._1)
-    println("test_id为"+abinfo._2)
-    println("select_id为"+abinfo._3)
+    val line = """{"app_name":"jiu","app_version":"3.4.0","c_label":"C3","deviceid":"169295010136651","endtime":"1487898864185","endtime_origin":"1487898847025","extend_params":"33455065","gj_ext_params":"","gj_page_names":"","ip":"123.125.143.26","jpid":"00000000-1e6f-68fa-ffff-ffffd96c88f3","location":"北京市","os":"android","os_version":"4.2.2","pagename":"","pre_extend_params":"33455065","pre_page":"","session_id":"1487898830604_jiu_1487898821800","source":"","starttime":"1487898863497","starttime_origin":"1487898846337","ticks":"1487898830604","to_switch":"2","uid":0,"utm":"101214","wap_pre_url":"https://mapi.juanpi.com/h5/detail?id=33455065&brand_id=1457592_2591064&app_version=4.0.0","wap_url":"https://mapi.juanpi.com/h5/attr?id=44917685&goods_id=33455065"}"""
+    val row = Json.parse(line)
+    val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
+    val abinfo = pageParser.getAbInfo(server_jsonstr)
+
   }
 }
