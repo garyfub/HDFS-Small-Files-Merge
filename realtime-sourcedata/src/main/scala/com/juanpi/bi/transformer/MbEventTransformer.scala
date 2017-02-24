@@ -193,8 +193,12 @@ class MbEventTransformer {
 
     val forEventId = eventParser.getForEventId(cid, activityname, t_extend_params)
 
-    val rule_id = ""
-    val (test_id,select_id) = eventParser.getAbinfo(server_jsonstr)
+//    val rule_id = ""
+//    val (test_id,select_id) = eventParser.getAbinfo(server_jsonstr)
+
+    val rule_id= pageParser.getAbInfo(server_jsonstr)._1
+    val test_id= pageParser.getAbInfo(server_jsonstr)._2
+    val select_id= pageParser.getAbInfo(server_jsonstr)._3
 
     val (pit_type, gsort_key) = eventParser.getGsortPit(server_jsonstr)
 
