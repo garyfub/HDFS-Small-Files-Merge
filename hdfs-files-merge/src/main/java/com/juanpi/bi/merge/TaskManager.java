@@ -2,6 +2,7 @@ package com.juanpi.bi.merge;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import com.juanpi.bi.merge.util.DateUtil;
@@ -19,7 +20,7 @@ public class TaskManager {
     private static int interval = 1;
     private static String timeFlag = "01";
 
-    static String AM0_FMT = "yyyy-MM-dd 23:59:59";
+    static String AM0_FMT = "yyyy-MM-dd 00:00:00";
 
 	public TaskManager(String timeFlag, int interval) {
 	    this.timeFlag = timeFlag;
@@ -36,7 +37,7 @@ public class TaskManager {
      *
      * @return
      */
-    private static long getHoursAgoMillis(String timeFlag)
+    private long getHoursAgoMillis(String timeFlag)
     {
         Calendar cal = Calendar.getInstance();
 
@@ -47,16 +48,18 @@ public class TaskManager {
 
         if(timeFlag.equals(hour+""))
         {
-            // 当前天减一
-            dt = DateUtil.getDateIntervalDate(-1, AM0_FMT);
+            // 如果是凌晨1点，取当天0点
+            dt = DateUtil.getDateIntervalDate(cal, AM0_FMT);
             fmt = "yyyy-MM-dd HH:mm:ss";
         } else {
+            // 转化为特定的日期
             dt = DateUtil.getHourIntervalDate(cal,0, fmt);
         }
 
         long milis = 0;
 
         try {
+            // 将给定的日期转为毫秒
             milis = DateUtil.dateToMillis(dt, fmt);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -82,6 +85,8 @@ public class TaskManager {
         // 传入 hdfs 目录
 
         String dateStr = "";
+
+        // 现在的文件合并逻辑是凌晨1点的时候合并前一天的小文件。5点~22点处理当天的文件
         String intervalStr = "01";
 
         System.out.println("args 参数个数：" + args.length);
@@ -98,7 +103,7 @@ public class TaskManager {
         }
 
         System.out.println("======>>main_date:" + dateStr);
-        System.out.println("======>>timeFlag :" + Integer.parseInt(intervalStr));
+        System.out.println("======>>timeFlag :" + intervalStr);
 
 		TaskManager manager = new TaskManager(intervalStr, Integer.parseInt(intervalStr));
 

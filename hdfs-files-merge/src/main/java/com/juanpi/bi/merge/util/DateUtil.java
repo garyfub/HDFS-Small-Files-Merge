@@ -47,6 +47,16 @@ public class DateUtil {
      * 传入日期时间间隔，返回指定的呵合乎规则的日期
      * @return
      */
+    public static String getDateIntervalDate(Calendar cal, String fmt) {
+        String dateIntervalDate = new SimpleDateFormat(fmt).format(cal.getTime());
+
+        return dateIntervalDate;
+    }
+
+    /**
+     * 传入日期时间间隔，返回指定的呵合乎规则的日期
+     * @return
+     */
     public static String getDateIntervalDate(int dateInterval, String fmt) {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DATE, dateInterval);
