@@ -5,7 +5,7 @@ mvn install:install-file -Dfile=E:\dev_git\hiveUDF\hive-udf\target\hive-udf-1.0.
 <dependency>
     <groupId>com.juanpi.bi</groupId>
     <artifactId>hive-udf</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.7</version>
 </dependency>
 ```
 ##### jar包上传
