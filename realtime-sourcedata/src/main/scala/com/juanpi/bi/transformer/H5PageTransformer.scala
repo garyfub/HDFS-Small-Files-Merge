@@ -138,8 +138,8 @@ class H5PageTransformer {
     val click_url = (row \ "click_url").asOpt[String].getOrElse("")
     val qm_device_id = (row \ "qm_device_id").asOpt[String].getOrElse("")
     val ip = (row \ "ip").asOpt[String].getOrElse("")
-    val qm_session_id = (row \ "qm_session_id").asOpt[String].getOrElse("")
-    val qm_jpid = (row \ "qm_jpid").asOpt[String].getOrElse("")
+//    val qm_session_id = (row \ "qm_session_id").asOpt[String].getOrElse("")
+//    val qm_jpid = (row \ "qm_jpid").asOpt[String].getOrElse("")
 
     val baseUrl = if ("".equals(click_url)) {
       url
