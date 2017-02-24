@@ -46,16 +46,18 @@ class H5EventTransformer {
 
     // web 端 gu_id 从ul_id来，H5页面的gu_id通过cookie中捕获APP的gu_id获取
     val qm_jpid = (row \ "qm_jpid").asOpt[String].getOrElse("")
-    val ul_id = (row \ "ul_id").asOpt[String].getOrElse("")
+    val ul_id = (row \ "_id").asOpt[String].getOrElse("")
     val timeStamp = (row \ "timestamp").as[String].toLong
 
 // pc端wap数据 APP端H5点击
     val qm_device_id=(row \ "qm_device_id").asOpt[String].getOrElse("")
-    val baseUrl=(row \ "baseUrl").asOpt[String].getOrElse("")
-    val baseterminal=getTerminalIdFromBase(qm_device_id, baseUrl)
-    val gu_id = if(qm_device_id.length<=6 || baseterminal != 2) {
+    val url = (row \ "url").asOpt[String].getOrElse("")
+    val baseTerminal = pageAndEventParser.getTerminalIdFromBase(qm_device_id, url)
+
+    // qm_device_id
+    val gu_id = if(qm_device_id.length<=6 || baseTerminal != 2) {
       ul_id
-    } else if(qm_device_id.length>6 && baseterminal==2 && qm_jpid.isEmpty) {
+    } else if(qm_device_id.length>6 && baseTerminal == 2 && qm_jpid.isEmpty) {
       ul_id
     } else {
       qm_jpid
@@ -106,8 +108,10 @@ class H5EventTransformer {
     val goodid = (row \ "goodid").asOpt[String].getOrElse("")
     val url = (row \ "url").asOpt[String].getOrElse("")
     val urlref = (row \ "urlref").asOpt[String].getOrElse("")
-    val ul_id = (row \ "ul_id").asOpt[String].getOrElse("")
-    val ul_idts = (row \ "ul_idts").asOpt[Int].getOrElse(0)
+    // 源数据中是 _id
+    val ul_id = (row \ "_id").asOpt[String].getOrElse("")
+    // 源数据中是 _idts
+    val ul_idts = (row \ "_idts").asOpt[Int].getOrElse(0)
     val ul_ref = (row \ "ul_ref").asOpt[String].getOrElse("")
     val s_uid = (row \ "s_uid").asOpt[String].getOrElse("")
     val utmId = (row \ "utm").asOpt[String].getOrElse("")
@@ -136,7 +140,7 @@ class H5EventTransformer {
       url
     }
 
-    val baseTerminalId = getTerminalIdFromBase(qm_device_id, baseUrl)
+    val baseTerminalId = pageAndEventParser.getTerminalIdFromBase(qm_device_id, baseUrl)
 
     val eventJoinKey = action_name + ScalaConstants.JoinDelimiter + actionType
 
@@ -335,7 +339,7 @@ class H5EventTransformer {
     val baseUrl = baseLog.baseUrl
     val qm_device_id = baseLog.qm_device_id
 
-    val baseTerminalId = getTerminalIdFromBase(qm_device_id, baseUrl)
+    val baseTerminalId = pageAndEventParser.getTerminalIdFromBase(qm_device_id, baseUrl)
     val dwTerminalId = getTerminalIdForPC(baseTerminalId)
     val (d_event_id: Int, event_type_id: Int, event_level_id) = dimEvent.get(eventJoinKey).getOrElse(0, 0, 0)
     val eventId = d_event_id match {
@@ -429,30 +433,6 @@ class H5EventTransformer {
       guId
     }
     dwSessionId
-  }
-
-  /**
-    *
-    * @param qm_device_id
-    * @param url
-    * @return 6:微信端；2: m站 ; 1: pc
-    *
-    **/
-  def getTerminalIdFromBase(qm_device_id: String, url: String): Int = {
-    import scala.util.matching._
-    val reg = new Regex("""http(s?)://(tuan|kan).*""")
-    val terminalId = if ("MicroMessenger".equals(qm_device_id)) {
-      val res = url match {
-        case reg(x, y) => 6
-        case _ => 1
-      }
-      res
-    } else if(url matches("http(s)?://wx.juanpi.com.*")) {
-      6
-    } else if(url matches("http(s)?://(mact|tuan|m|mapi|kan).juanpi.com.*")) {
-      2
-    } else 1
-    terminalId
   }
 
   def getTerminalIdForPC(terminalId: Int): Int = {

@@ -316,6 +316,30 @@ object pageAndEventParser {
     s
   }
 
+  /**
+    * for h5/weixin/pc/m
+    * @param qm_device_id
+    * @param url
+    * @return 6:微信端；2: m站 ; 1: pc
+    *
+    **/
+  def getTerminalIdFromBase(qm_device_id: String, url: String): Int = {
+    import scala.util.matching._
+    val reg = new Regex("""http(s?)://(tuan|kan).*""")
+    val terminalId = if ("MicroMessenger".equals(qm_device_id)) {
+      val res = url match {
+        case reg(x, y) => 6
+        case _ => 1
+      }
+      res
+    } else if(url matches("http(s)?://wx.juanpi.com.*")) {
+      6
+    } else if(url matches("http(s)?://(mact|tuan|m|mapi|kan).juanpi.com.*")) {
+      2
+    } else 1
+    terminalId
+  }
+
   def main(args: Array[String]) {
 
     val pageId = new GetPageID().evaluate("https://tuan.juanpi.com/pintuan/shop/1051782")
