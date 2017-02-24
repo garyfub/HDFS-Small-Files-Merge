@@ -46,12 +46,12 @@ class H5EventTransformer {
 
     // web 端 gu_id 从ul_id来，H5页面的gu_id通过cookie中捕获APP的gu_id获取
     val qm_jpid = (row \ "qm_jpid").asOpt[String].getOrElse("")
-    val ul_id = (row \ "ul_id").asOpt[String].getOrElse("")
+    val ul_id = (row \ "_id").asOpt[String].getOrElse("")
     val timeStamp = (row \ "timestamp").as[String].toLong
 
 // pc端wap数据 APP端H5点击
     val qm_device_id=(row \ "qm_device_id").asOpt[String].getOrElse("")
-    val baseUrl=(row \ "baseUrl").asOpt[String].getOrElse("")
+    val baseUrl=(row \ "url").asOpt[String].getOrElse("")
     val baseterminal=getTerminalIdFromBase(qm_device_id, baseUrl)
     val gu_id = if(qm_device_id.length<=6 || baseterminal != 2) {
       ul_id
@@ -106,8 +106,8 @@ class H5EventTransformer {
     val goodid = (row \ "goodid").asOpt[String].getOrElse("")
     val url = (row \ "url").asOpt[String].getOrElse("")
     val urlref = (row \ "urlref").asOpt[String].getOrElse("")
-    val ul_id = (row \ "ul_id").asOpt[String].getOrElse("")
-    val ul_idts = (row \ "ul_idts").asOpt[Int].getOrElse(0)
+    val ul_id = (row \ "_id").asOpt[String].getOrElse("")
+    val ul_idts = (row \ "_idts").asOpt[Int].getOrElse(0)
     val ul_ref = (row \ "ul_ref").asOpt[String].getOrElse("")
     val s_uid = (row \ "s_uid").asOpt[String].getOrElse("")
     val utmId = (row \ "utm").asOpt[String].getOrElse("")
