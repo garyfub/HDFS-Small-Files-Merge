@@ -11,7 +11,13 @@ import java.util.Date;
  */
 public class DateUtil {
 
-    static String AM0_FMT = "yyyy-MM-dd 23:59:59";
+    public static String getHourIntervalDate(Calendar cal, int hourInterval, String fmt) {
+        cal.add(Calendar.HOUR, hourInterval);
+        cal.getTimeInMillis();
+        String hourIntervalDate = new SimpleDateFormat(fmt).format(cal.getTime());
+
+        return hourIntervalDate;
+    }
 
     /**
      * 传入Hour时间间隔，返回指定的呵合乎规则的日期
@@ -123,36 +129,10 @@ public class DateUtil {
     }
 
     /**
-     * 返回interval个小时前的日期的毫秒值
-     *
+     * test code
      * @return
      */
-    public static long getHoursAgoMillis(int interval, String timeFlag)
-    {
-        Calendar cal = Calendar.getInstance();
-
-        String fmt = "yyyy-MM-dd HH:00:00";
-        int hour = cal.get(Calendar.HOUR_OF_DAY);
-
-        String dt = "";
-
-        if(timeFlag.equals(hour+""))
-        {
-            // 当前天减一
-            dt = DateUtil.getDateIntervalDate(-1, AM0_FMT);
-            fmt = "yyyy-MM-dd HH:mm:ss";
-        }
-
-        long milis = 0;
-        try {
-            milis = DateUtil.dateToMillis(dt, fmt);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return milis;
-    }
-
-    private static long dddddd()
+    private static long test()
     {
         Calendar cal = Calendar.getInstance();
 //        Month value is 0-based. e.g., 0 for January.
@@ -166,7 +146,7 @@ public class DateUtil {
         if("00".equals(hourStr))
         {
             // 当前天减一
-            dt = getDateIntervalDate(-1, AM0_FMT);
+            dt = getDateIntervalDate(-1, "yyyy-MM-dd 23:59:59");
             fmt = "yyyy-MM-dd HH:mm:ss";
         }
 
@@ -226,5 +206,9 @@ public class DateUtil {
         String d2 = getSpecifiedDayAgo("2017-01-11", 7);
         System.out.println(d1);
         System.out.println(d2);
+
+        String fmt = "yyyy-MM-dd HH:00:00";
+        String res = getHourIntervalDate(0, fmt);
+        System.out.println(res);
     }
 }
