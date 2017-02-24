@@ -134,26 +134,34 @@ object pageParser {
     * @return
     */
   def getAbInfo(serverjsongStr: String):(String, String, String) = {
-    val sJsonStr = Json.parse(serverjsongStr)
-    val ab_info = (sJsonStr \ "ab_info").asOpt[String].getOrElse("")
-    val pattern: Pattern = Pattern.compile("^-?[1-9]\\d*$")
-        val (rule_id,test_id,select_id)=if (ab_info.isEmpty) {
-          ("","","")
-        } else if (pattern.matcher(ab_info.toString.split("_")(2)).matches() && pattern.matcher(ab_info.toString.split("_")(1)).matches() && pattern.matcher(ab_info.toString.split("_")(0)).matches()) {
-          (ab_info.toString.split("_")(2),ab_info.toString.split("_")(0),ab_info.toString.split("_")(1))
-        } else {
-          ("","","")
-        }
-    (rule_id,test_id,select_id)
+    val (rule_id, test_id, select_id) = if(serverjsongStr.contains("ab_info")) {
+      val sJsonStr = Json.parse(serverjsongStr)
+      val ab_info = (sJsonStr \ "ab_info").asOpt[String].getOrElse("")
+      val pattern: Pattern = Pattern.compile("^-?[1-9]\\d*$")
+      if (ab_info.isEmpty) {
+        ("","","")
+      } else if (pattern.matcher(ab_info.toString.split("_")(2)).matches() && pattern.matcher(ab_info.toString.split("_")(1)).matches() && pattern.matcher(ab_info.toString.split("_")(0)).matches()) {
+        (ab_info.toString.split("_")(2),ab_info.toString.split("_")(0),ab_info.toString.split("_")(1))
+      } else {
+        ("","","")
+      }
+    } else {
+      ("","","")
+    }
+
+    (rule_id, test_id, select_id)
   }
 
 
   // 测试test_id,select_id和rule_id是否能解出
     def main(args: Array[String]): Unit = {
-    val line = """{"app_name":"jiu","app_version":"3.4.0","c_label":"C3","deviceid":"169295010136651","endtime":"1487898864185","endtime_origin":"1487898847025","extend_params":"33455065","gj_ext_params":"","gj_page_names":"","ip":"123.125.143.26","jpid":"00000000-1e6f-68fa-ffff-ffffd96c88f3","location":"北京市","os":"android","os_version":"4.2.2","pagename":"","pre_extend_params":"33455065","pre_page":"","session_id":"1487898830604_jiu_1487898821800","source":"","starttime":"1487898863497","starttime_origin":"1487898846337","ticks":"1487898830604","to_switch":"2","uid":0,"utm":"101214","wap_pre_url":"https://mapi.juanpi.com/h5/detail?id=33455065&brand_id=1457592_2591064&app_version=4.0.0","wap_url":"https://mapi.juanpi.com/h5/attr?id=44917685&goods_id=33455065"}"""
-    val row = Json.parse(line)
-    val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
-    val abinfo = pageParser.getAbInfo(server_jsonstr)
-
+      val line = """{"app_name":"zhe","app_version":"4.2.4","c_label":"C2","c_server":"{\"gid\":\"C2\",\"ugroup\":\"668_649_684_486_485_453_574_573_518_605_516_603_696_695_581_652_478_496_653_523_494_544_377_614_584_711_616_618_449_593\"}","deviceid":"869411025179622","endtime":"1487898778265","endtime_origin":"1487898777452","extend_params":"2","ip":"175.20.230.7","jpid":"00000000-011c-d810-9b17-c31d00a46c2d","location":"吉林省吉林市蛟河市005乡道靠近白石山信用社","os":"android","os_version":"4.4.4","pagename":"page_message_content","pre_extend_params":"","pre_page":"page_message","server_jsonstr":"{\"ab_info\":\"1_2_3\"}","session_id":"1461916191529_zhe_1487898757041","source":"","starttime":"1487898768991","starttime_origin":"1487898768178","ticks":"1461916191529","to_switch":"0","uid":"36541281","utm":"101221","wap_pre_url":"","wap_url":""}"""
+      val row = Json.parse(line)
+      val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
+      val abinfo = pageParser.getAbInfo(server_jsonstr)
+    println(abinfo)
+    println("rule_id为"+abinfo._1)
+    println("test_id为"+abinfo._2)
+    println("select_id为"+abinfo._3)
   }
 }
