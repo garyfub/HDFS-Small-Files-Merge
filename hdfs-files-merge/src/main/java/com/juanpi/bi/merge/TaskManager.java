@@ -107,8 +107,6 @@ public class TaskManager {
 
 		TaskManager manager = new TaskManager(intervalStr, Integer.parseInt(intervalStr));
 
-//		manager.getHoursAgoMillis(""+Integer.parseInt(intervalStr));
-
 		try {
 			manager.start(dateStr);
 		} catch (Exception e) {
