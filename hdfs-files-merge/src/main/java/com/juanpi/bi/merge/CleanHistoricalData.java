@@ -83,19 +83,22 @@ public class CleanHistoricalData {
         Arrays.sort(matchDirs);
 
         // 传入时间
-        String ds = DateUtil.getSpecifiedDayAgo(dateStr, 10);
+        String ds = DateUtil.getSpecifiedDayAgo(dateStr, 7);
 
         long curMs = dateFormatString(ds);
 
         ArrayList matchPath = new ArrayList();
         for (Path matchDir : matchDirs) {
 
+            System.out.println("all path:" + matchDir.toUri());
+
             String name = matchDir.getName();
-            System.out.println("name" + name);
+            System.out.println("name:" + name);
             String uriDtStr = name.substring(5);
             // 从uri中解析出来的时间
             long uriMs = dateFormatString(uriDtStr);
             if(uriMs < curMs) {
+                System.out.println("time matched path:" + matchDir.toUri());
                 matchPath.add(matchDir);
             }
         }
