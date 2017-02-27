@@ -32,7 +32,11 @@ public class CleanHistoricalData {
         return matchPaths;
     }
 
-    // 删除指定文件
+    /**
+     * 删除指定文件
+     * @param files
+     * @throws IOException
+     */
     private static void delete(List<Path> files) throws IOException {
         for (Path file : files) {
             System.out.println("delete small files:" + file.toString());
@@ -87,6 +91,7 @@ public class CleanHistoricalData {
         for (Path matchDir : matchDirs) {
 
             String name = matchDir.getName();
+            System.out.println("name" + name);
             String uriDtStr = name.substring(5);
             // 从uri中解析出来的时间
             long uriMs = dateFormatString(uriDtStr);
