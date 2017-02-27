@@ -36,7 +36,7 @@ public class CleanHistoricalData {
     private static void delete(List<Path> files) throws IOException {
         for (Path file : files) {
             System.out.println(file);
-            HdfsUtil.delete(file);
+//            HdfsUtil.delete(file);
         }
     }
 
@@ -79,7 +79,7 @@ public class CleanHistoricalData {
         Arrays.sort(matchDirs);
 
         // 传入时间
-        String ds = DateUtil.getSpecifiedDayAgo(dateStr, 7);
+        String ds = DateUtil.getSpecifiedDayAgo(dateStr, 10);
 
         long curMs = dateFormatString(ds);
 
