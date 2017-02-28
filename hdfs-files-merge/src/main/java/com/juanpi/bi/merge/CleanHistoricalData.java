@@ -1,17 +1,11 @@
 package com.juanpi.bi.merge;
 
-import com.juanpi.bi.merge.util.DateUtil;
 import com.juanpi.bi.merge.util.HdfsUtil;
 import org.apache.hadoop.fs.Path;
+import org.joda.time.DateTime;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 清理实时数据
@@ -40,28 +34,8 @@ public class CleanHistoricalData {
     private static void delete(List<Path> files) throws IOException {
         for (Path file : files) {
             System.out.println("delete small files:" + file.toString());
-            HdfsUtil.delete(file);
+//            HdfsUtil.delete(file);
         }
-    }
-
-    /**
-     * 返回时间对应的毫秒
-     * @param dateStr
-     * @return
-     */
-    private long dateFormatString(String dateStr) {
-        DateFormat df = new SimpleDateFormat("yyyyMMdd");
-
-        Date dt;
-        long miliSeconds = 0;
-        try {
-            dt = df.parse(dateStr);
-            miliSeconds = dt.getTime();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        return miliSeconds;
     }
 
     /**
@@ -82,22 +56,28 @@ public class CleanHistoricalData {
         // 排序
         Arrays.sort(matchDirs);
 
-        // 传入时间
-        String ds = DateUtil.getSpecifiedDayAgo(dateStr, 7);
+        // 指定日期的第7天之前
+        DateTime startDate = new DateTime(dateStr).minusDays(10);
 
-        long curMs = dateFormatString(ds);
+        // 明天
+//            DateTime endDate = new DateTime().plusDays(1);
+
+        // 今天
+        DateTime curentDate = new DateTime();
+
+        long startMillis = startDate.getMillis();
+
+        // 当前的
+        long curentMillis = curentDate.getMillis();
 
         ArrayList matchPath = new ArrayList();
         for (Path matchDir : matchDirs) {
-
-            System.out.println("all path:" + matchDir.toUri());
-
+            // hdfs 文件目录
             String name = matchDir.getName();
-            System.out.println("name:" + name);
             String uriDtStr = name.substring(5);
-            // 从uri中解析出来的时间
-            long uriMs = dateFormatString(uriDtStr);
-            if(uriMs < curMs) {
+            DateTime uriDate = new DateTime(uriDtStr);
+            long uriMs = uriDate.getMillis();
+            if(uriMs < startMillis || uriMs > curentMillis) {
                 System.out.println("time matched path:" + matchDir.toUri());
                 matchPath.add(matchDir);
             }
