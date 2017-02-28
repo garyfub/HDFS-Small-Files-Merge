@@ -275,7 +275,7 @@ class KafkaManager(val kafkaParams: Map[String, String],
       val zc = new ZooKeeper(zkQum, 30000, this)
       if (zc.exists(nodePath, false) == null) {
         val ret = zc.create(nodePath, "".getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT)
-        println("create path:" + nodePath)
+        println("create zk path:" + nodePath)
       }
 
       if (zc.exists(createPath, false) == null) {
