@@ -374,7 +374,7 @@ object KafkaConsumer{
     // 时间间隔采用的是写死的，目前是 60 s
     ic.initParam(groupId, Config.interval, maxRecords)
 
-    val (dataBaseDir, kafkaTopicIds) = ic.loadProperties
+    val dataBaseDir = ic.loadProperties._1
 
     val ssc = ic.getStreamingContext()
 
@@ -419,8 +419,7 @@ object KafkaConsumer{
       val DimH5Page = InitConfig.initH5Dim()._1
       val consumer = new KafkaConsumer(topic, dataBaseDir, DimH5Page, null, null, null, zkQuorum)
       consumer.h5PageProcess(message, ssc, km)
-    }
-    else {
+    } else {
       println("请指定需要解析的kafka Topic-Group！")
       System.exit(1)
     }
