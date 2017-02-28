@@ -34,7 +34,7 @@ public class CleanHistoricalData {
     private static void delete(List<Path> files) throws IOException {
         for (Path file : files) {
             System.out.println("delete small files:" + file.toString());
-//            HdfsUtil.delete(file);
+            HdfsUtil.delete(file);
         }
     }
 
