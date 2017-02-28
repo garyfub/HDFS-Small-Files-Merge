@@ -11,6 +11,17 @@ import java.util.Date;
  */
 public class DateUtil {
 
+    /**
+     * 返回当天日期的seconds
+     * @return
+     */
+    public static int getDate() {
+        Calendar cal = Calendar.getInstance();
+        System.out.println(cal.get(Calendar.YEAR));
+
+        return cal.get(Calendar.DAY_OF_MONTH);
+    }
+
     public static String getHourIntervalDate(Calendar cal, int hourInterval, String fmt) {
         cal.add(Calendar.HOUR, hourInterval);
         cal.getTimeInMillis();
@@ -220,5 +231,6 @@ public class DateUtil {
         String fmt = "yyyy-MM-dd HH:00:00";
         String res = getHourIntervalDate(0, fmt);
         System.out.println(res);
+        System.out.println("dddddddd==" + getDate());
     }
 }

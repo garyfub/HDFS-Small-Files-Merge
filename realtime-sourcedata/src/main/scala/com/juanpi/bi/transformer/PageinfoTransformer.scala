@@ -1,7 +1,5 @@
 package com.juanpi.bi.transformer
 
-import java.util.regex.Pattern
-
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.hive.udf.GetGoodsId
@@ -17,29 +15,25 @@ class PageinfoTransformer {
   def logParser(line: String,
                 dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                 dimEvent: mutable.HashMap[String, (Int, Int, Int)],
-                fCate: mutable.HashMap[String, String]): (String, String, Any) = {
+                fCate: mutable.HashMap[String, String],
+                dateNowStr: String): (String, String, Any) = {
 
     val row = Json.parse(line.replaceAll("null", """\\"\\""""))
 
     if (row != null) {
       var gu_id = ""
-      val ticks = (row \ "ticks").asOpt[String].getOrElse("")
       val jpid = (row \ "jpid").asOpt[String].getOrElse("")
       val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
       val os = (row \ "os").asOpt[String].getOrElse("")
-
       val starttime_origin = (row \ "starttime_origin").asOpt[String].getOrElse("")
 
       if (starttime_origin.isEmpty) {
         return ("", "", null)
       }
 
-      val originDateStr = DateUtils.dateStr(starttime_origin.toLong)
-
-      val sDate = DateUtils.getWeekAgoDateStr()
-      val eDate = DateUtils.getWeekLaterDateStr()
-
-      val startTime = if (originDateStr > sDate && originDateStr < eDate) {
+      // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
+      val dateStr = DateUtils.dateStr(starttime_origin.toLong)
+      val startTime = if(dateNowStr.equals(dateStr)) {
         starttime_origin
       } else {
         ""
