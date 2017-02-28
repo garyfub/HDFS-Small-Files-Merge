@@ -39,7 +39,8 @@ class H5EventTransformer {
 
   def logParser(line: String,
                 dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
-                dimEvent: mutable.HashMap[String, (Int, Int, Int)]
+                dimEvent: mutable.HashMap[String, (Int, Int, Int)],
+                dateNowStr: String
                ): (String, String, Any) = {
 
     val row = Json.parse(line)
@@ -47,25 +48,33 @@ class H5EventTransformer {
     // web 端 gu_id 从ul_id来，H5页面的gu_id通过cookie中捕获APP的gu_id获取
     val qm_jpid = (row \ "qm_jpid").asOpt[String].getOrElse("")
     val ul_id = (row \ "_id").asOpt[String].getOrElse("")
-    val timeStamp = (row \ "timestamp").as[String].toLong
+    val timeStamp = (row \ "timestamp").as[String]
+
+    if(timeStamp.isEmpty) {
+      return ("", "", null)
+    }
 
 // pc端wap数据 APP端H5点击
     val qm_device_id=(row \ "qm_device_id").asOpt[String].getOrElse("")
     val url = (row \ "url").asOpt[String].getOrElse("")
     val baseTerminal = pageAndEventParser.getTerminalIdFromBase(qm_device_id, url)
 
+    val dateStr = DateUtils.dateStr(timeStamp.toLong)
+
     // qm_device_id
-    val gu_id = if(qm_device_id.length<=6 || baseTerminal != 2) {
-      ul_id
-    } else if(qm_device_id.length>6 && baseTerminal == 2 && qm_jpid.isEmpty) {
-      ul_id
-    } else {
-      qm_jpid
+    val gu_id = if(!dateNowStr.equals(dateStr)) {
+      // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
+        ""
+      } else if(qm_device_id.length<=6 || baseTerminal != 2) {
+        ul_id
+      } else if(qm_device_id.length>6 && baseTerminal == 2 && qm_jpid.isEmpty) {
+        ul_id
+      } else {
+        qm_jpid
     }
 
     val ret = if (gu_id.nonEmpty && !gu_id.equalsIgnoreCase("null")) {
-      val endtime = (row \ "endtime").asOpt[String].getOrElse("")
-
+      val partitionStr = DateUtils.dateGuidPartitions(timeStamp.toLong, gu_id)
       try {
         val res = parse(row, dimPage, dimEvent)
         // 过滤异常的数据，具体见解析函数 eventParser.filterOutlierPageId
@@ -80,7 +89,7 @@ class H5EventTransformer {
           }).mkString("\001")
 
           // 创建分区，格式：date=2016-12-27/gu_hash=a
-          val partitionStr = DateUtils.dateGuidPartitions(timeStamp, gu_id)
+//          val partitionStr = DateUtils.dateGuidPartitions(timeStamp, gu_id)
           (partitionStr, "h5_event", res_str)
         }
       }

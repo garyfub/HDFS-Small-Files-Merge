@@ -4,6 +4,7 @@ import java.io.Serializable
 
 import com.juanpi.bi.bean.{Event, Page, PageAndEvent, User}
 import com.juanpi.bi.init.InitConfig
+import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.bi.transformer._
 import kafka.serializer.StringDecoder
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, _}
@@ -44,9 +45,11 @@ class KafkaConsumer(topic: String,
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 数据块中的每一条记录需要处理
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    val dateNowStr = DateUtils.getDateNow()
+
     val data = sourceLog.map(_._2.replaceAll("(\0|\r|\n)", ""))
       .filter(eventParser.filterFunc)
-      .map(msg => parseMBEventMessage(msg))
+      .map(msg => parseMBEventMessage(msg, dateNowStr))
       .filter(_._1.nonEmpty)
 
     data.foreachRDD((rdd, time) =>
@@ -77,14 +80,16 @@ class KafkaConsumer(topic: String,
                   ssc: StreamingContext,
                   km: KafkaManager) = {
 
+    val dateNowStr = DateUtils.getDateNow()
+
     val data = dataDStream.map(_._2.replaceAll("(\0|\r|\n)", ""))
-        .map(msg => parseMBPageMessage(msg))
+        .map(msg => parseMBPageMessage(msg, dateNowStr))
         .filter(_._1.nonEmpty)
 
      data.foreachRDD((rdd, time) => {
 
        val mills = time.milliseconds
-        //  需要从 hbase 查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
+        //  TODO 需要从 hbase 查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
         val newRdd = rdd.map(record => {
           val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = record._3
 
@@ -125,9 +130,12 @@ class KafkaConsumer(topic: String,
                      km: KafkaManager) = {
 
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
+
+    val dateNowStr = DateUtils.getDateNow()
+
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     val data = sourceLog.map(_._2.replaceAll("(\0|\r|\n)", ""))
-      .map(msg => parseH5Message(msg))
+      .map(msg => parseH5Event(msg, dateNowStr))
       .filter(_._1.nonEmpty)
 
     // 解析后的数据写HDFS
@@ -154,9 +162,12 @@ class KafkaConsumer(topic: String,
                      km: KafkaManager) = {
 
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
+
+    val dateNowStr = DateUtils.getDateNow()
+
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     val data = sourceLog.map(_._2.replaceAll("(\0|\r|\n)", ""))
-      .map(msg => parseH5Page(msg))
+      .map(msg => parseH5Page(msg, dateNowStr))
       .filter(_._1.nonEmpty)
 
     // 解析后的数据写HDFS
@@ -178,27 +189,54 @@ class KafkaConsumer(topic: String,
     }
   }
 
-  def parseH5Page(message:String):(String, String, Any) = {
+  /**
+    * 解析h5 页面浏览数据，包括pc weixin wap 以及 h5
+    * @param message
+    * @param dateNowStr
+    * @return
+    */
+  def parseH5Page(message:String, dateNowStr: String):(String, String, Any) = {
     val h5LogTransformer = new H5PageTransformer()
-    h5LogTransformer.logParser(message, dimPage)
+    h5LogTransformer.logParser(message, dimPage, dateNowStr)
   }
 
-  def parseH5Message(message:String):(String, String, Any) = {
+  /**
+    * 解析h5 埋点点击数据，包括pc weixin wap 以及 h5
+    * @param message
+    * @param dateNowStr
+    * @return
+    */
+  def parseH5Event(message:String, dateNowStr: String):(String, String, Any) = {
     val h5LogTransformer = new H5EventTransformer()
-    h5LogTransformer.logParser(message, dimPage, dimH5EVENT)
+    h5LogTransformer.logParser(message, dimPage, dimH5EVENT, dateNowStr)
   }
 
-  def parseMBEventMessage(message:String):(String, String, Any) = {
+  /**
+    * 解析app端埋点点击数据
+    * @param message
+    * @param dateNowStr
+    * @return
+    */
+  def parseMBEventMessage(message:String, dateNowStr: String):(String, String, Any) = {
     val mbEventTransformer = new MbEventTransformer()
-    mbEventTransformer.logParser(message, dimPage, dimEvent, fCate)
+    mbEventTransformer.logParser(message, dimPage, dimEvent, fCate, dateNowStr: String)
   }
 
-  def parseMBPageMessage(message:String):(String, String, Any) = {
+  /**
+    * 解析app端页面浏览数据
+    * @param message
+    * @param dateNowStr
+    * @return
+    */
+  def parseMBPageMessage(message:String, dateNowStr: String):(String, String, Any) = {
     val pageTransformer = new PageinfoTransformer()
-    pageTransformer.logParser(message, dimPage, dimEvent, fCate)
+    pageTransformer.logParser(message, dimPage, dimEvent, fCate, dateNowStr)
   }
 }
 
+/**
+  * hBase 暂时不会用到你，那我等下把你删了
+  */
 object HBaseHandler {
   val HbaseFamily = "dw"
   var conn: Connection = null
@@ -274,8 +312,13 @@ object KafkaConsumer{
   }
 
   /**
-    * "zkQuorum":"GZ-JSQ-JP-BI-KAFKA-001.jp:2181,GZ-JSQ-JP-BI-KAFKA-002.jp:2181,GZ-JSQ-JP-BI-KAFKA-003.jp:2181,GZ-JSQ-JP-BI-KAFKA-004.jp:2181,GZ-JSQ-JP-BI-KAFKA-005.jp:2181" "brokerList":"kafka-broker-000.jp:9082,kafka-broker-001.jp:9083,kafka-broker-002.jp:9084,kafka-broker-003.jp:9085,kafka-broker-004.jp:9086,kafka-broker-005.jp:9087,kafka-broker-006.jp:9092,kafka-broker-007.jp:9093,kafka-broker-008.jp:9094,kafka-broker-009.jp:9095,kafka-broker-010.jp:9096,kafka-broker-011.jp:9097" "topic":"mb_pageinfo_hash2" "groupId":"pageinfo_direct_dw" "consumerType":1 "consumerTime":5
-    *
+    * Laa shay'a waqi'un mutlaq bale kouloun mumkin
+    * 当其他人盲目的追寻真相(业务)和真实(绩效)的时候，记住
+    **  万物皆虚。
+    * 当其他人受到法律(需求)和道德(测试)的束缚的时候，记住。
+    **  万事皆允。
+    * 我们服侍光明(用户)却耕耘于黑暗(?)。
+    **  我们是攻城狮。
     * @param args
     */
   def main(args: Array[String]) {

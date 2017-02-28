@@ -36,8 +36,8 @@ class H5PageTransformer {
                      qm_jpid: String)
 
   def logParser(line: String,
-                dimPage: mutable.HashMap[String, (Int, Int, String, Int)]
-               ): (String, String, Any) = {
+                dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
+                dateNowStr: String): (String, String, Any) = {
 
     val row = Json.parse(line)
 
@@ -45,10 +45,17 @@ class H5PageTransformer {
     val qm_jpid = (row \ "qm_jpid").asOpt[String].getOrElse("")
     // ul_id在源数据里面对应的key 为"_id"
     val ul_id = (row \ "_id").asOpt[String].getOrElse("")
-    val timeStamp = (row \ "timestamp").as[String].toLong
+    val timeStamp = (row \ "timestamp").as[String]
 
-    // pc上的页面直接取的ul_id
-    val gu_id=ul_id
+    val dateStr = DateUtils.dateStr(timeStamp.toLong)
+
+    val gu_id= if(!dateNowStr.equals(dateStr)) {
+        // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
+        ""
+      } else {
+        // pc上的页面直接取的ul_id
+        ul_id
+      }
 
 
     val ret = if (gu_id.nonEmpty && !gu_id.equalsIgnoreCase("null")) {
@@ -68,7 +75,7 @@ class H5PageTransformer {
           }).mkString("\001")
 
           // 创建分区，格式：date=2016-12-27/gu_hash=a
-          val partitionStr = DateUtils.dateGuidPartitions(timeStamp, gu_id)
+          val partitionStr = DateUtils.dateGuidPartitions(timeStamp.toLong, gu_id)
           (partitionStr, "h5_page", res_str)
         }
       }
@@ -242,12 +249,16 @@ class H5PageTransformer {
 
 object H5PageTransformer {
   def main(args: Array[String]): Unit = {
-    val url = "http://tuan.juanpi.com/pintuan?id=367&pt_src=ggmk_1"
-    val url2 = "https://mapi.juanpi.com/h5/attr?id=42928995&goods_id=35774050 "
-    val h5 = new H5PageTransformer()
-    val res = h5.getPageLevel2Value(url)
-    val res1= pageAndEventParser.getTerminalIdFromBase("M",url2)
-    println(res)
-    println(res1)
+//    val url = "http://tuan.juanpi.com/pintuan?id=367&pt_src=ggmk_1"
+//    val url2 = "https://mapi.juanpi.com/h5/attr?id=42928995&goods_id=35774050 "
+//    val h5 = new H5PageTransformer()
+//    val res = h5.getPageLevel2Value(url)
+//    val res1= pageAndEventParser.getTerminalIdFromBase("M",url2)
+//    println(res)
+//    println(res1)
+
+    if("1".equals("1")) {
+      println("sdfffff")
+    }
   }
 }
