@@ -376,6 +376,8 @@ object KafkaConsumer{
 
     val dataBaseDir = ic.loadProperties._1
 
+    println(s"数据落地目录：${dataBaseDir}")
+
     val ssc = ic.getStreamingContext()
 
     // 连接Kafka参数设置
