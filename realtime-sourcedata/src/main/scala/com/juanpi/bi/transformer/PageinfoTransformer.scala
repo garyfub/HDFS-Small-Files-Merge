@@ -33,11 +33,14 @@ class PageinfoTransformer {
 
       // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
       val dateStr = DateUtils.dateStr(starttime_origin.toLong)
-      val startTime = if(dateNowStr.equals(dateStr)) {
-        starttime_origin
-      } else {
-        ""
-      }
+
+      val startTime = starttime_origin
+
+      //      val startTime = if(dateNowStr.equals(dateStr)) {
+//        starttime_origin
+//      } else {
+//        ""
+//      }
 
       if (startTime.isEmpty) {
         return ("", "", null)

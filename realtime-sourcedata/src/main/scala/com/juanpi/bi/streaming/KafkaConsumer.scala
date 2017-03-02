@@ -371,6 +371,7 @@ object KafkaConsumer{
 
     // 初始化 SparkConfig StreamingContext HiveContext
     val ic = InitConfig
+
     // 时间间隔采用的是写死的，目前是 60 s
     ic.initParam(groupId, Config.interval, maxRecords)
 
@@ -384,21 +385,15 @@ object KafkaConsumer{
     val kafkaParams : Map[String, String] = Map(
       "metadata.broker.list" -> brokerList,
       if(consumerType.equals("2")) {
-        "auto.offset.reset" -> "largest"
+        // 从最早的地方开始刷数
+        "auto.offset.reset" -> "smallest"
       } else {
         "auto.offset.reset" -> "largest"
       },
       "group.id" -> groupId)
 
-
     // init beginning offset number, it could consumer which data with config file
     val km = new KafkaManager(kafkaParams, zkQuorum)
-
-    // consumerType = "2", 用于当解析数据出错后，手动刷数据之用，需要手动指定offset
-    if (consumerType.equals("2")) {
-      // 此时的consumerTime是日期格式：2017030200，表示记录的是2017-03-02 00 点的kafka消费offset
-      km.setConfigOffset(Set(topic), groupId, consumerTime, ssc)
-    }
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
 
