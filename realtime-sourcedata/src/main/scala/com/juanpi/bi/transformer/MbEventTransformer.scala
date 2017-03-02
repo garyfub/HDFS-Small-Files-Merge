@@ -22,7 +22,8 @@ class MbEventTransformer {
   def logParser(line: String,
                 dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
                 dimevent: mutable.HashMap[String, (Int, Int, Int)],
-                fCate: mutable.HashMap[String, String]): (String, String, Any) = {
+                fCate: mutable.HashMap[String, String],
+                dateNowStr: String): (String, String, Any) = {
 
     val row = Json.parse(line)
     val ticks = (row \ "ticks").asOpt[String].getOrElse("")
@@ -51,9 +52,14 @@ class MbEventTransformer {
       return ("", "", null)
     }
 
+    // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
+    val dateStr = DateUtils.dateStr(startTime.toLong)
+    if(!dateNowStr.equals(dateStr)){
+      return ("", "", null)
+    }
+
     val partitionTime = startTime
 
-    // TODO 逻辑待优化
     if (ticks.length() >= 13) {
       var gu_id = ""
       try {
