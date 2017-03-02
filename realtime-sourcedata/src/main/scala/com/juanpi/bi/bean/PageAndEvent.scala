@@ -122,5 +122,7 @@ case class Event(
                   test_id: String,
                   select_id: String,
                   loadtime: String,
-                  ug_id: String
+                  ug_id: String,
+                  x_page_value: String,
+                  x_ref_value: String
                 )

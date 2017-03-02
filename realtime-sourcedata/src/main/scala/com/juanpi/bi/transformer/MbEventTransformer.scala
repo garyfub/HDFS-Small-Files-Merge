@@ -230,6 +230,8 @@ class MbEventTransformer {
     val page_value = eventParser.getPageValue(d_page_id, f_page_extend_params, cid, page_type_id, d_page_value)
 
     val shop_id = pageAndEventParser.getShopId(d_page_id, f_page_extend_params)
+    val xpageValue = f_page_extend_params
+    val refxpageValue = f_pre_extend_params
     val ref_shop_id = pageAndEventParser.getShopId(ref_page_id, f_pre_extend_params)
 
     val page_level_id = pageAndEventParser.getEventPageLevelId(event_level_id, d_page_id, f_page_extend_params, d_page_level_id, forLevelId)
@@ -261,7 +263,7 @@ class MbEventTransformer {
     val user = User.apply(gu_id, uid, utm, "", session_id, terminal_id, app_version, site_id, ref_site_id, ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, starttime_origin, endTime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceid, to_switch)
-    val event = Event.apply(event_id.toString, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime, ug_id)
+    val event = Event.apply(event_id.toString, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime, ug_id, xpageValue, refxpageValue)
 
     // TODO 测试代码，测试后需要删掉
     if (-1 == page_id && "click_temai_inpage_joinbag".equals(activityname)) {
