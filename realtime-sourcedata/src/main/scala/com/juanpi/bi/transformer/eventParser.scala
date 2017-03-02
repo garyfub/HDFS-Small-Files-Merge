@@ -118,10 +118,8 @@ object eventParser {
       "click_orderdetails_recommendation"
     } else if ("-102".equals(cid)) {
       "click_detail_recommendation"
-    } else if (!"click_navigation".equalsIgnoreCase(activityname)) {
-      activityname
     } else {
-      (activityname + t_extend_params).toLowerCase
+      activityname.toLowerCase
     }
     forEventId
   }

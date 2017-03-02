@@ -266,6 +266,9 @@ class H5EventTransformer {
     val refSiteId = new GetSiteId().evaluate(baseUrlRef)
     val pageId = getPageIdFromUDF(baseUrl)
     val pageValue = new GetDwPcPageValue().evaluate(baseUrl)
+    // 新增xpagevalue和pagevalue
+    val xpageValue=baseUrl
+    val refxpagevalue=baseUrlRef
     val shopId = new GetShopId().evaluate(baseUrl)
     val refShopId = new GetShopId().evaluate(baseUrlRef)
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPage.get(pageId.toString).getOrElse(0, 0, "", 0)
@@ -314,7 +317,7 @@ class H5EventTransformer {
     val user = User.apply(guId, userId.toString, utm, "", dwSessionId, dwTeminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(pageId, pageValue, refPageId, refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceId, to_switch)
-    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Value, rule_id, test_id, select_id, loadTime, ug_id)
+    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Value, rule_id, test_id, select_id, loadTime, ug_id,xpageValue,refxpagevalue)
 
     (user, pe, page, event)
   }
@@ -369,6 +372,9 @@ class H5EventTransformer {
     val pageId = getPageIdFromUDF(baseUrl)
     val pageValue = new GetDwPcPageValue().evaluate(baseUrl)
     val shopId = new GetShopId().evaluate(baseUrl)
+    // 新增xpagevalue和pagevalue
+    val xpageValue=baseUrl
+    val refxpagevalue=baseUrlRef
     val refShopId = new GetShopId().evaluate(baseUrlRef)
     val startTime = baseLog.timeStamp
     val endTime = baseLog.timeStamp
@@ -418,7 +424,7 @@ class H5EventTransformer {
     val user = User.apply(guId, userId.toString, baseLog.utmId, "", dwSessionId, dwTerminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceId, to_switch)
-    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Vlue, rule_id, test_id, select_id, loadTime, ug_id)
+    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Vlue, rule_id, test_id, select_id, loadTime, ug_id, xpageValue,refxpagevalue)
 
     (user, pe, page, event)
   }
