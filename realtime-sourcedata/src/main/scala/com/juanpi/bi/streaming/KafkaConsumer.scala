@@ -383,17 +383,20 @@ object KafkaConsumer{
     // 连接Kafka参数设置
     val kafkaParams : Map[String, String] = Map(
       "metadata.broker.list" -> brokerList,
-      "auto.offset.reset" -> "largest",
+      if(consumerType.equals("2")) {
+        "auto.offset.reset" -> "largest"
+      } else {
+        "auto.offset.reset" -> "largest"
+      },
       "group.id" -> groupId)
+
 
     // init beginning offset number, it could consumer which data with config file
     val km = new KafkaManager(kafkaParams, zkQuorum)
 
-    /**
-      * consumerType = "2", 用于当解析数据出错后，手动刷数据之用，需要手动指定offset
-      * ！运行之前需要跟架构沟通
-     */
+    // consumerType = "2", 用于当解析数据出错后，手动刷数据之用，需要手动指定offset
     if (consumerType.equals("2")) {
+      // 此时的consumerTime是日期格式：2017030200，表示记录的是2017-03-02 00 点的kafka消费offset
       km.setConfigOffset(Set(topic), groupId, consumerTime, ssc)
     }
 
