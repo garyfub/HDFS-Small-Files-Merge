@@ -124,30 +124,19 @@ object eventParser {
     forEventId
   }
 
-  def getForExtendParams(activityname: String, t_extend_params: String, cube_position: String, server_jsonstr: String): String = {
-    val f_extend_params =
-      if ("click_cube_banner".equals(activityname)) {
-        if (t_extend_params.contains("ads_id")) {
-          val ads_id = pageAndEventParser.getJsonValueByKey(t_extend_params, "ads_id")
-          "banner" + "::" + ads_id + "::" + cube_position
-        } else {
-          "banner" + "::" + t_extend_params + "::" + cube_position
-        }
-      }
-      else if (server_jsonstr.contains("pit_info")) {
-        pageAndEventParser.getJsonValueByKey(server_jsonstr, "pit_info")
-      } else if (t_extend_params.contains("pit_info")) {
-        pageAndEventParser.getJsonValueByKey(t_extend_params, "pit_info")
-      }
-      else if ("click_cube_block".equals(activityname) && !"{}".equals(server_jsonstr)) {
-        // 有部分 click_cube_block 的数据格式错误，cube_position 与 server_jsonstr 的值传递反了
-        server_jsonstr
-      } else if (server_jsonstr.contains("pit_info")) {
-        pageAndEventParser.getJsonValueByKey(server_jsonstr, "pit_info")
-      } else if (t_extend_params.contains("pit_info")) {
-        pageAndEventParser.getJsonValueByKey(t_extend_params, "pit_info")
+  def getForExtendParams(activityname: String, t_extend_params: String,server_jsonstr: String): String = {
+    val severJsonstr = Json.parse(server_jsonstr)
+    val tExtendparams =Json.parse(t_extend_params)
+    val f_extend_params = if (server_jsonstr.contains("pit_info") && (severJsonstr \ "pit_info").asOpt[String].getOrElse("").nonEmpty) {
+      (severJsonstr \ "pit_info").asOpt[String].getOrElse("")
+      } else if (t_extend_params.contains("pit_info") && (tExtendparams \ "pit_info").asOpt[String].getOrElse("").nonEmpty){
+      (tExtendparams \ "pit_info").asOpt[String].getOrElse("")
+    } else if (server_jsonstr.contains("ads_id") && (severJsonstr \ "ads_id").asOpt[String].getOrElse("").nonEmpty){
+      (severJsonstr \ "ads_id").asOpt[String].getOrElse("")
+      } else if (activityname.equals("click_cube_block") && !server_jsonstr.equals("{}")) {
+      server_jsonstr
       } else {
-        t_extend_params
+      t_extend_params
       }
     f_extend_params
   }
@@ -334,5 +323,16 @@ object eventParser {
       0
     }
     resInt
+  }
+
+  def main(args: Array[String]): Unit = {
+    val line = """{"app_name":"zhe","app_version":"4.2.4","c_label":"C2","c_server":"{\"gid\":\"C2\",\"ugroup\":\"668_649_684_486_485_453_574_573_518_605_516_603_696_695_581_652_478_496_653_523_494_544_377_614_584_711_616_618_449_593\"}","deviceid":"869411025179622","endtime":"1487898778265","endtime_origin":"1487898777452","extend_params":"2","ip":"175.20.230.7","jpid":"00000000-011c-d810-9b17-c31d00a46c2d","location":"吉林省吉林市蛟河市005乡道靠近白石山信用社","os":"android","os_version":"4.4.4","pagename":"page_message_content","pre_extend_params":"","pre_page":"page_message","server_jsonstr":"{\"ab_info\":\"1_2_3\"}","session_id":"1461916191529_zhe_1487898757041","source":"","starttime":"1487898768991","starttime_origin":"1487898768178","ticks":"1461916191529","to_switch":"0","uid":"36541281","utm":"101221","wap_pre_url":"","wap_url":""}"""
+    val row = Json.parse(line)
+    val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
+    val abinfo = pageParser.getAbInfo(server_jsonstr)
+    println(abinfo)
+    println("rule_id为"+abinfo._1)
+    println("test_id为"+abinfo._2)
+    println("select_id为"+abinfo._3)
   }
 }
