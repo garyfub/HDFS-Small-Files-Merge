@@ -30,6 +30,19 @@ class KafkaConsumer(topic: String,
   extends Logging with Serializable {
   import KafkaConsumer._
 
+  def getDateFilter(groupId: String): (String, String) ={
+    val endDateStr = DateUtils.getDateMinusDays(0)
+
+    val startDateStr = if(groupId.startsWith("re")) {
+      // 重新消费的话，groupID必定是re开头
+      DateUtils.getDateMinusDays(6)
+    } else {
+      // 否则就是当下的日期
+      endDateStr
+    }
+    (startDateStr, endDateStr)
+  }
+
   /**
     * 解析 app 端原生页面点击数据
     * event 过滤 collect_api_responsetime
@@ -39,17 +52,19 @@ class KafkaConsumer(topic: String,
     * @param ssc
     * @param km
     */
-  def eventProcess(dataDStream: DStream[((Long, Long), String)],
+  def eventProcess(groupId: String,
+                    dataDStream: DStream[((Long, Long), String)],
                    ssc: StreamingContext,
                    km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 数据块中的每一条记录需要处理
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
-    val dateNowStr = DateUtils.getDateNow()
+
+    val (startDateStr, endDateStr) = getDateFilter(groupId)
 
     val data = sourceLog.map(_._2.replaceAll("(\0|\r|\n)", ""))
       .filter(eventParser.filterFunc)
-      .map(msg => parseMBEventMessage(msg, dateNowStr))
+      .map(msg => parseMBEventMessage(msg, startDateStr, endDateStr))
       .filter(_._1.nonEmpty)
 
     data.foreachRDD((rdd, time) =>
@@ -214,12 +229,13 @@ class KafkaConsumer(topic: String,
   /**
     * 解析app端埋点点击数据
     * @param message
-    * @param dateNowStr
+    * @param startDateStr
+    * @param endDateStr
     * @return
     */
-  def parseMBEventMessage(message:String, dateNowStr: String):(String, String, Any) = {
+  def parseMBEventMessage(message:String, startDateStr: String, endDateStr: String):(String, String, Any) = {
     val mbEventTransformer = new MbEventTransformer()
-    mbEventTransformer.logParser(message, dimPage, dimEvent, fCate, dateNowStr: String)
+    mbEventTransformer.logParser(message, dimPage, dimEvent, fCate, startDateStr, endDateStr)
   }
 
   /**
@@ -409,7 +425,7 @@ object KafkaConsumer{
       val DimEvent = InitConfig.initMBDim()._2
       val DimFrontCate = InitConfig.initMBDim()._3
       val consumer = new KafkaConsumer(topic, dataBaseDir, DimPage, DimEvent, DimFrontCate, null, zkQuorum)
-      consumer.eventProcess(message, ssc, km)
+      consumer.eventProcess(groupId, message, ssc, km)
     } else if(topic.equals("pc_events_hash3")) {
       val DimH5Page = InitConfig.initH5Dim()._1
       val DimH5Event = InitConfig.initH5Dim()._2

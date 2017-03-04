@@ -25,7 +25,6 @@ if [ $# == 1 ]; then
     topic=$1
     groupId="prod_bi_realtime_by_dw_${topic}"
     echo "=======>>group id is: $groupId"
-    exit 22
 else
     echo "args failed!"
     exit 2
@@ -87,4 +86,3 @@ hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list/
 hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list/jp_hash3/date=2017-02-25/gu_hash=4/logs
 
 ```
-

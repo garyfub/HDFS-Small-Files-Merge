@@ -25,7 +25,6 @@ if [ $# == 1 ]; then
     topic=$1
     groupId="reprod_bi_realtime_by_dw_${topic}"
     echo "=======>>group id is: $groupId"
-    exit 22
 else
     echo "args failed!"
     exit 2
