@@ -40,8 +40,7 @@ class H5EventTransformer {
   def logParser(line: String,
                 dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                 dimEvent: mutable.HashMap[String, (Int, Int, Int)],
-                dateNowStr: String
-               ): (String, String, Any) = {
+                startDateStr: String, endDateStr: String): (String, String, Any) = {
 
     val row = Json.parse(line)
 
@@ -54,18 +53,20 @@ class H5EventTransformer {
       return ("", "", null)
     }
 
-// pc端wap数据 APP端H5点击
+    // pc端wap数据 APP端H5点击
     val qm_device_id=(row \ "qm_device_id").asOpt[String].getOrElse("")
     val url = (row \ "url").asOpt[String].getOrElse("")
     val baseTerminal = pageAndEventParser.getTerminalIdFromBase(qm_device_id, url)
 
+    // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
     val dateStr = DateUtils.dateStr(timeStamp.toLong)
+    // 如果日志时间超出了范围，就过滤掉
+    if(dateStr < startDateStr || dateStr > endDateStr){
+      return ("", "", null)
+    }
 
     // qm_device_id
-    val gu_id = if(!dateNowStr.equals(dateStr)) {
-      // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
-        ""
-      } else if(qm_device_id.length<=6 || baseTerminal != 2) {
+    val gu_id = if(qm_device_id.length<=6 || baseTerminal != 2) {
         ul_id
       } else if(qm_device_id.length>6 && baseTerminal == 2 && qm_jpid.isEmpty) {
         ul_id

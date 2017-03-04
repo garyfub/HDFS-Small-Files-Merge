@@ -2,28 +2,28 @@
 
 ## 准备Jar
 ```
-scp /data/jenkins_workspace/workspace/bi_gongzi_mb_event_real_direct_by_dw/realtime-sourcedata/target/realtime-souredata-1.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/spark_prod/
+scp /data/jenkins_workspace/workspace/mb_pageinfo_real_direct_by_dw/realtime-sourcedata/target/realtime-souredata-1.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/spark_reprod/
 ```
 
-## spark-prod-topic.sh
+## spark-reprod-topic.sh
 ``` sh
 #!/usr/bin/env bash
 
-## shell name spark-prod-topic.sh
+## shell name spark-reprod-topic.sh
 ## topic="mb_event_hash2"
 ## topic="mb_pageinfo_hash2"
 ## topic="pc_events_hash3"
 ## topic="jp_hash3"
 
 ### 对应的groupid：
-## prod_bi_realtime_by_dw_mb_event_hash2
-## prod_bi_realtime_by_dw_mb_pageinfo_hash2
-## prod_bi_realtime_by_dw_pc_events_hash3
-## prod_bi_realtime_by_dw_jp_hash3
+## reprod_bi_realtime_by_dw_mb_event_hash2
+## reprod_bi_realtime_by_dw_mb_pageinfo_hash2
+## reprod_bi_realtime_by_dw_pc_events_hash3
+## reprod_bi_realtime_by_dw_jp_hash3
 
 if [ $# == 1 ]; then
     topic=$1
-    groupId="prod_bi_realtime_by_dw_${topic}"
+    groupId="reprod_bi_realtime_by_dw_${topic}"
     echo "=======>>group id is: $groupId"
 else
     echo "args failed!"
@@ -36,7 +36,7 @@ fi
 
 jarPath="./realtime-souredata-1.0.jar"
 
-echo "prod com.juanpi.bi.streaming.KafkaConsumer $groupId start..."
+echo "reprod com.juanpi.bi.streaming.KafkaConsumer $groupId start..."
 
 /data/apache_projects/spark-hadoop-2.4.0/bin/spark-submit \
     --class com.juanpi.bi.streaming.KafkaConsumer \
@@ -57,32 +57,36 @@ fi
 
 ```
 
-## prod Topics
+## reprod Topics
 ```
-# 输出日志
-nohup sh ./spark-prod-topic.sh "mb_event_hash2" > ./mb_event_hash2.log 2>&1 &
-nohup sh ./spark-prod-topic.sh "mb_pageinfo_hash2" > ./mb_pageinfo_hash2.log 2>&1 &
-nohup sh ./spark-prod-topic.sh "pc_events_hash3" > ./pc_events_hash3.log 2>&1 &
-nohup sh ./spark-prod-topic.sh "jp_hash3" > ./jp_hash3.log 2>&1 &
+cd /home/hadoop/users/gongzi/spark_reprod
 
 # 输出日志
-nohup sh ./spark-prod-topic.sh "mb_event_hash2" > /dev/null 2>&1 &
-nohup sh ./spark-prod-topic.sh "mb_pageinfo_hash2" > /dev/null 2>&1 &
-nohup sh ./spark-prod-topic.sh "pc_events_hash3" > /dev/null 2>&1 &
-nohup sh ./spark-prod-topic.sh "jp_hash3" > /dev/null 2>&1 &
+nohup sh ./spark-reprod-topic.sh "mb_event_hash2" > ./mb_event_hash2.log 2>&1 &
+nohup sh ./spark-reprod-topic.sh "mb_pageinfo_hash2" > ./mb_pageinfo_hash2.log 2>&1 &
+nohup sh ./spark-reprod-topic.sh "pc_events_hash3" > ./pc_events_hash3.log 2>&1 &
+nohup sh ./spark-reprod-topic.sh "jp_hash3" > ./jp_hash3.log 2>&1 &
+
+# 输出日志
+nohup sh ./spark-reprod-topic.sh "mb_event_hash2" > /dev/null 2>&1 &
+nohup sh ./spark-reprod-topic.sh "mb_pageinfo_hash2" > /dev/null 2>&1 &
+nohup sh ./spark-reprod-topic.sh "pc_events_hash3" > /dev/null 2>&1 &
+nohup sh ./spark-reprod-topic.sh "jp_hash3" > /dev/null 2>&1 &
 ```
 
 ## 查看数据目录
 ```
 # mb_event_hash2
-hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list/mb_event_hash2/date=2017-02-25/gu_hash=4/logs
+hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/reprod/mb_event_hash2/date=2017-02-25/gu_hash=4/logs
 
 # mb_pageinfo_hash2
-hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list/mb_pageinfo_hash2/date=2017-02-25/gu_hash=4/logs
+hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/reprod/mb_pageinfo_hash2/date=2017-02-25/gu_hash=4/logs
+
 # pc_events_hash3
-hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list/pc_events_hash3/date=2017-02-25/gu_hash=4/logs
+hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/reprod/pc_events_hash3/date=2017-02-25/gu_hash=4/logs
 
 # jp_hash3
-hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list/jp_hash3/date=2017-02-25/gu_hash=4/logs
+hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/reprod/jp_hash3/date=2017-02-25/gu_hash=4/logs
 
 ```
+
