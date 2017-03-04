@@ -57,7 +57,6 @@ object DateUtils {
     */
   def getDateNow():String={
     val dateTime = new DateTime()
-    dateTime.minusDays(7)
     val dt = dateTime.toString("yyyy-MM-dd")
     dt
   }
