@@ -168,7 +168,7 @@ class MbEventTransformer {
     val f_pre_extend_params = pageAndEventParser.getExtendParams(pagename, pre_extends_param)
 
     val t_extend_params = eventParser.getExtendParamsFromBase(activityname, extend_params, app_version)
-    val f_extend_params = eventParser.getForExtendParams(activityname, t_extend_params, cube_position, server_jsonstr)
+    val f_extend_params = eventParser.getForExtendParams(activityname, t_extend_params, server_jsonstr)
 
     val cid = pageAndEventParser.getJsonValueByKey(server_jsonstr, "cid")
 
