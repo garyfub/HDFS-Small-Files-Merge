@@ -37,7 +37,7 @@ class H5PageTransformer {
 
   def logParser(line: String,
                 dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
-                dateNowStr: String): (String, String, Any) = {
+                startDateStr: String, endDateStr: String): (String, String, Any) = {
 
     val row = Json.parse(line)
 
@@ -47,16 +47,14 @@ class H5PageTransformer {
     val ul_id = (row \ "_id").asOpt[String].getOrElse("")
     val timeStamp = (row \ "timestamp").as[String]
 
+    // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
     val dateStr = DateUtils.dateStr(timeStamp.toLong)
+    // 如果日志时间超出了范围，就过滤掉
+    if(dateStr < startDateStr || dateStr > endDateStr){
+      return ("", "", null)
+    }
 
-    val gu_id= if(!dateNowStr.equals(dateStr)) {
-        // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
-        ""
-      } else {
-        // pc上的页面直接取的ul_id
-        ul_id
-      }
-
+    val gu_id= ul_id
 
     val ret = if (gu_id.nonEmpty && !gu_id.equalsIgnoreCase("null")) {
       val endtime = (row \ "endtime").asOpt[String].getOrElse("")
