@@ -2,7 +2,7 @@
 
 ## 准备Jar
 ```
-scp /data/jenkins_workspace/workspace/mb_pageinfo_real_direct_by_dw/realtime-sourcedata/target/realtime-souredata-1.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/spark_reprod/
+scp /data/jenkins_workspace/workspace/reprod_bi_realtime_by_dw_mb_pageinfo_hash2/realtime-sourcedata/target/realtime-souredata-1.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/spark_reprod/
 ```
 
 ## spark-reprod-topic.sh
@@ -77,16 +77,16 @@ nohup sh ./spark-reprod-topic.sh "jp_hash3" > /dev/null 2>&1 &
 ## 查看数据目录
 ```
 # mb_event_hash2
-hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/reprod/mb_event_hash2/date=2017-02-25/gu_hash=4/logs
+hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/reprod/mb_event_hash2/date=2017-03-03/gu_hash=4/logs
 
 # mb_pageinfo_hash2
-hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/reprod/mb_pageinfo_hash2/date=2017-02-25/gu_hash=4/logs
+hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/reprod/mb_pageinfo_hash2/date=2017-03-03/gu_hash=4/logs
 
 # pc_events_hash3
-hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/reprod/pc_events_hash3/date=2017-02-25/gu_hash=4/logs
+hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/reprod/pc_events_hash3/date=22017-03-03/gu_hash=4/logs
 
 # jp_hash3
-hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/reprod/jp_hash3/date=2017-02-25/gu_hash=4/logs
+hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/reprod/jp_hash3/date=2017-03-03/gu_hash=4/logs
 
 ```
 
