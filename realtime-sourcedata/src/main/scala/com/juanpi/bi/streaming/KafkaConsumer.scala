@@ -352,16 +352,19 @@ object KafkaConsumer{
     // 连接Kafka参数设置
     val kafkaParams : Map[String, String] = Map(
       "metadata.broker.list" -> brokerList,
-      if(consumerType.equals("2")) {
-        // 从最早的地方开始刷数
-        "auto.offset.reset" -> "smallest"
-      } else {
-        "auto.offset.reset" -> "largest"
-      },
+      "auto.offset.reset" -> "largest",
       "group.id" -> groupId)
 
     // init beginning offset number, it could consumer which data with config file
     val km = new KafkaManager(kafkaParams, zkQuorum)
+
+    /**
+      * consumerType = "2", 用于当解析数据出错后，手动刷数据之用，需要手动指定offset
+      * ！运行之前需要跟架构沟通
+      */
+    if (consumerType.equals("2")) {
+      km.setConfigOffset(Set(topic), groupId, consumerTime, ssc)
+    }
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
 
