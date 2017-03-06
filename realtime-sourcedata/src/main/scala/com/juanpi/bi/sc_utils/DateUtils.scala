@@ -62,6 +62,16 @@ object DateUtils {
   }
 
   /**
+    * use joda, getDateMinusDays， return format yyyy-MM-dd
+    * @param interval
+    * @return
+    */
+  def getDateMinusDays(interval : Int): String = {
+    val dateTime = new DateTime()
+    dateTime.minusDays(interval).toString("yyyy-MM-dd")
+  }
+
+  /**
     * 指定日期和间隔天数，返回指定日期前N天的日期 date - N days
     * @param dt
     * @param interval
@@ -188,10 +198,26 @@ object DateUtils {
   }
 
   def main(args: Array[String]) {
-    val d1 = getWeekAgoDateStr
-    val d7 = getWeekLaterDateStr
-    if(d7 > d1) {
-      println("1111111")
+    val startDateStr = getDateMinusDays(6)
+    val endDateStr = getDateMinusDays(0)
+    println(startDateStr,endDateStr)
+    val dateStr = "2017-02-20"
+    if(dateStr < startDateStr || dateStr > endDateStr){
+      println("filter!")
     }
+
+    val groupId = "prod_dsfsdfasdf"
+    val ss = if(groupId.startsWith("re")) {
+      // 重新消费的话，groupID必定是re开头
+      "1111"
+    } else {
+      // 否则就是当下的日期
+      "2222"
+    }
+    println(ss)
+
+
+
+
   }
 }

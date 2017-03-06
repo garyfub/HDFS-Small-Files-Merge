@@ -2,22 +2,28 @@
 
 ## 准备Jar
 ```
-scp /data/jenkins_workspace/workspace/bi_gongzi_mb_event_real_direct_by_dw/realtime-sourcedata/target/realtime-souredata-1.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/spark_test/
+scp /data/jenkins_workspace/workspace/bi_gongzi_pc_events_hash3_real_by_dw/realtime-sourcedata/target/realtime-souredata-1.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/spark_test/
 ```
 
-## Test mb_event_hash2 shell
+## Test mb_event_hash2
 ``` sh
 #!/usr/bin/env bash
 
-## shell name spark-test-topic.sh
+## shell_name: spark-test-topic.sh
 ## topic="mb_event_hash2"
 ## topic="mb_pageinfo_hash2"
 ## topic="pc_events_hash3"
 ## topic="jp_hash3"
 
+### 对应的groupid：
+## test_bi_realtime_by_dw_mb_event_hash2
+## test_bi_realtime_by_dw_mb_pageinfo_hash2
+## test_bi_realtime_by_dw_pc_events_hash3
+## test_bi_realtime_by_dw_jp_hash3
+
 if [ $# == 1 ]; then
     topic=$1
-    groupId="test_bi_gongzi_${topic}_by_dw"
+    groupId="test_bi_realtime_by_dw_${topic}"
     echo "=======>>group id is: $groupId"
 else
     echo "args failed!"
@@ -59,12 +65,16 @@ sh ./spark-test-topic.sh "mb_pageinfo_hash2"
 sh ./spark-test-topic.sh "pc_events_hash3"
 sh ./spark-test-topic.sh "jp_hash3"
 ```
-
+## zk path
+```
+## jp_hash3
+zk path:/jp_hash3_test_bi_gongzi_jp_hash3_by_dw
+```
 ## 查看数据目录
 ```
-hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list/mb_event_hash2/date=2017-02-25/gu_hash=4/logs
-
 hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/test/mb_event_hash2/date=2017-02-25/gu_hash=4/logs
+
+hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/test/jp_hash3/date=2017-03-01/gu_hash=4/logs
 
 ```
 

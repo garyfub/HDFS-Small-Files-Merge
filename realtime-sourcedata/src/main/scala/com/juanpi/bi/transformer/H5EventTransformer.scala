@@ -40,8 +40,7 @@ class H5EventTransformer {
   def logParser(line: String,
                 dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                 dimEvent: mutable.HashMap[String, (Int, Int, Int)],
-                dateNowStr: String
-               ): (String, String, Any) = {
+                startDateStr: String, endDateStr: String): (String, String, Any) = {
 
     val row = Json.parse(line)
 
@@ -54,18 +53,20 @@ class H5EventTransformer {
       return ("", "", null)
     }
 
-// pc端wap数据 APP端H5点击
+    // pc端wap数据 APP端H5点击
     val qm_device_id=(row \ "qm_device_id").asOpt[String].getOrElse("")
     val url = (row \ "url").asOpt[String].getOrElse("")
     val baseTerminal = pageAndEventParser.getTerminalIdFromBase(qm_device_id, url)
 
+    // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
     val dateStr = DateUtils.dateStr(timeStamp.toLong)
+    // 如果日志时间超出了范围，就过滤掉
+    if(dateStr < startDateStr || dateStr > endDateStr){
+      return ("", "", null)
+    }
 
     // qm_device_id
-    val gu_id = if(!dateNowStr.equals(dateStr)) {
-      // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
-        ""
-      } else if(qm_device_id.length<=6 || baseTerminal != 2) {
+    val gu_id = if(qm_device_id.length<=6 || baseTerminal != 2) {
         ul_id
       } else if(qm_device_id.length>6 && baseTerminal == 2 && qm_jpid.isEmpty) {
         ul_id
@@ -266,6 +267,9 @@ class H5EventTransformer {
     val refSiteId = new GetSiteId().evaluate(baseUrlRef)
     val pageId = getPageIdFromUDF(baseUrl)
     val pageValue = new GetDwPcPageValue().evaluate(baseUrl)
+    // 新增xpagevalue和pagevalue
+    val xpageValue=baseUrl
+    val refxpagevalue=baseUrlRef
     val shopId = new GetShopId().evaluate(baseUrl)
     val refShopId = new GetShopId().evaluate(baseUrlRef)
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPage.get(pageId.toString).getOrElse(0, 0, "", 0)
@@ -314,7 +318,7 @@ class H5EventTransformer {
     val user = User.apply(guId, userId.toString, utm, "", dwSessionId, dwTeminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(pageId, pageValue, refPageId, refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceId, to_switch)
-    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Value, rule_id, test_id, select_id, loadTime, ug_id)
+    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Value, rule_id, test_id, select_id, loadTime, ug_id,xpageValue,refxpagevalue)
 
     (user, pe, page, event)
   }
@@ -369,6 +373,9 @@ class H5EventTransformer {
     val pageId = getPageIdFromUDF(baseUrl)
     val pageValue = new GetDwPcPageValue().evaluate(baseUrl)
     val shopId = new GetShopId().evaluate(baseUrl)
+    // 新增xpagevalue和pagevalue
+    val xpageValue=baseUrl
+    val refxpagevalue=baseUrlRef
     val refShopId = new GetShopId().evaluate(baseUrlRef)
     val startTime = baseLog.timeStamp
     val endTime = baseLog.timeStamp
@@ -418,7 +425,7 @@ class H5EventTransformer {
     val user = User.apply(guId, userId.toString, baseLog.utmId, "", dwSessionId, dwTerminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceId, to_switch)
-    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Vlue, rule_id, test_id, select_id, loadTime, ug_id)
+    val event = Event.apply(eventId.toString(), eventValue, eventLevel2Vlue, rule_id, test_id, select_id, loadTime, ug_id, xpageValue,refxpagevalue)
 
     (user, pe, page, event)
   }

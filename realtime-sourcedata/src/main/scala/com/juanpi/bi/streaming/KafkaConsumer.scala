@@ -31,6 +31,27 @@ class KafkaConsumer(topic: String,
   import KafkaConsumer._
 
   /**
+    * 重新消费的话，groupID必定是re开头，否则无法判断是重复消费还是正常的消费
+    * 1. 如果是重新消费Kafka，log的有效的时间范围是7天前至今
+    * 2. 如果是正常的实时消费，log的有效时间范围是今天
+    * @param groupId
+    * @return
+    */
+  def getDateFilter(groupId: String): (String, String) ={
+    // 当前日期
+    val endDateStr = DateUtils.getDateMinusDays(0)
+
+    val startDateStr = if(groupId.startsWith("re")) {
+      // 重新消费的话，groupID必定是re开头
+      DateUtils.getDateMinusDays(6)
+    } else {
+      // 否则就是当下的日期
+      endDateStr
+    }
+    (startDateStr, endDateStr)
+  }
+
+  /**
     * 解析 app 端原生页面点击数据
     * event 过滤 collect_api_responsetime
     * page 和 event 都需要过滤 gu_id 为空的数据，需要过滤 site_id 不为（2, 3）的数据
@@ -39,17 +60,19 @@ class KafkaConsumer(topic: String,
     * @param ssc
     * @param km
     */
-  def eventProcess(dataDStream: DStream[((Long, Long), String)],
+  def eventProcess(groupId: String,
+                    dataDStream: DStream[((Long, Long), String)],
                    ssc: StreamingContext,
                    km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 数据块中的每一条记录需要处理
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
-    val dateNowStr = DateUtils.getDateNow()
+
+    val (startDateStr, endDateStr) = getDateFilter(groupId)
 
     val data = sourceLog.map(_._2.replaceAll("(\0|\r|\n)", ""))
       .filter(eventParser.filterFunc)
-      .map(msg => parseMBEventMessage(msg, dateNowStr))
+      .map(msg => parseMBEventMessage(msg, startDateStr, endDateStr))
       .filter(_._1.nonEmpty)
 
     data.foreachRDD((rdd, time) =>
@@ -76,17 +99,18 @@ class KafkaConsumer(topic: String,
     * @param ssc
     * @param km
     */
-  def pageProcess(dataDStream: DStream[((Long, Long), String)],
+  def pageProcess(groupId: String,
+                  dataDStream: DStream[((Long, Long), String)],
                   ssc: StreamingContext,
                   km: KafkaManager) = {
 
-    val dateNowStr = DateUtils.getDateNow()
+    val (startDateStr, endDateStr) = getDateFilter(groupId)
 
     val data = dataDStream.map(_._2.replaceAll("(\0|\r|\n)", ""))
-        .map(msg => parseMBPageMessage(msg, dateNowStr))
+        .map(msg => parseMBPageMessage(msg, startDateStr, endDateStr))
         .filter(_._1.nonEmpty)
 
-     data.foreachRDD((rdd, time) => {
+    data.foreachRDD((rdd, time) => {
 
        val mills = time.milliseconds
         //  TODO 需要从 hbase 查 utm 和 gu_id 的值，存在就取出来，否则写 hbase
@@ -125,17 +149,49 @@ class KafkaConsumer(topic: String,
     * @param ssc
     * @param km
     */
-  def h5EventProcess(dataDStream: DStream[((Long, Long), String)],
+  def h5EventProcess(groupId: String,
+                     dataDStream: DStream[((Long, Long), String)],
                      ssc: StreamingContext,
                      km: KafkaManager) = {
 
+    val (startDateStr, endDateStr) = getDateFilter(groupId)
+
+    // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
+    val data = dataDStream.map(_._2.replaceAll("(\0|\r|\n)", ""))
+      .map(msg => parseH5Event(msg, startDateStr, endDateStr))
+      .filter(_._1.nonEmpty)
+
+    // 解析后的数据写HDFS
+    data.foreachRDD((rdd, time) =>
+    {
+      val mills = time.milliseconds
+      // 保存数据至hdfs
+      rdd.map(v => ((v._1, mills), v._3))
+        .repartition(1)
+        .saveAsHadoopFile(dataBaseDir + "/" + topic,
+          classOf[String],
+          classOf[String],
+          classOf[RDDMultipleTextOutputFormat])
+    })
+
+    // 更新kafka offset
+    dataDStream.foreachRDD { rdd =>
+      km.updateOffsets(rdd)
+    }
+  }
+
+  def h5PageProcess(groupId: String,
+                    dataDStream: DStream[((Long, Long), String)],
+                    ssc: StreamingContext,
+                    km: KafkaManager) = {
+
     val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
 
-    val dateNowStr = DateUtils.getDateNow()
+    val (startDateStr, endDateStr) = getDateFilter(groupId)
 
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     val data = sourceLog.map(_._2.replaceAll("(\0|\r|\n)", ""))
-      .map(msg => parseH5Event(msg, dateNowStr))
+      .map(msg => parseH5Page(msg, startDateStr, endDateStr))
       .filter(_._1.nonEmpty)
 
     // 解析后的数据写HDFS
@@ -155,145 +211,57 @@ class KafkaConsumer(topic: String,
     sourceLog.foreachRDD { rdd =>
       km.updateOffsets(rdd)
     }
-  }
-
-  def h5PageProcess(dataDStream: DStream[((Long, Long), String)],
-                     ssc: StreamingContext,
-                     km: KafkaManager) = {
-
-    val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
-
-    val dateNowStr = DateUtils.getDateNow()
-
-    // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
-    val data = sourceLog.map(_._2.replaceAll("(\0|\r|\n)", ""))
-      .map(msg => parseH5Page(msg, dateNowStr))
-      .filter(_._1.nonEmpty)
-
-    // 解析后的数据写HDFS
-    data.foreachRDD((rdd, time) =>
-    {
-      val mills = time.milliseconds
-      // 保存数据至hdfs
-      rdd.map(v => ((v._1, mills), v._3))
-        .repartition(1)
-        .saveAsHadoopFile(dataBaseDir + "/" + topic,
-          classOf[String],
-          classOf[String],
-          classOf[RDDMultipleTextOutputFormat])
-    })
-
-    // 更新kafka offset
-    sourceLog.foreachRDD { rdd =>
-      km.updateOffsets(rdd)
-    }
-  }
-
-  /**
-    * 解析h5 页面浏览数据，包括pc weixin wap 以及 h5
-    * @param message
-    * @param dateNowStr
-    * @return
-    */
-  def parseH5Page(message:String, dateNowStr: String):(String, String, Any) = {
-    val h5LogTransformer = new H5PageTransformer()
-    h5LogTransformer.logParser(message, dimPage, dateNowStr)
-  }
-
-  /**
-    * 解析h5 埋点点击数据，包括pc weixin wap 以及 h5
-    * @param message
-    * @param dateNowStr
-    * @return
-    */
-  def parseH5Event(message:String, dateNowStr: String):(String, String, Any) = {
-    val h5LogTransformer = new H5EventTransformer()
-    h5LogTransformer.logParser(message, dimPage, dimH5EVENT, dateNowStr)
   }
 
   /**
     * 解析app端埋点点击数据
     * @param message
-    * @param dateNowStr
+    * @param startDateStr
+    * @param endDateStr
     * @return
     */
-  def parseMBEventMessage(message:String, dateNowStr: String):(String, String, Any) = {
+  def parseMBEventMessage(message:String, startDateStr: String, endDateStr: String):(String, String, Any) = {
     val mbEventTransformer = new MbEventTransformer()
-    mbEventTransformer.logParser(message, dimPage, dimEvent, fCate, dateNowStr: String)
+    mbEventTransformer.logParser(message, dimPage, dimEvent, fCate, startDateStr, endDateStr)
   }
 
   /**
     * 解析app端页面浏览数据
     * @param message
-    * @param dateNowStr
+    * @param startDateStr
+    * @param endDateStr
     * @return
     */
-  def parseMBPageMessage(message:String, dateNowStr: String):(String, String, Any) = {
+  def parseMBPageMessage(message:String, startDateStr: String, endDateStr: String):(String, String, Any) = {
     val pageTransformer = new PageinfoTransformer()
-    pageTransformer.logParser(message, dimPage, dimEvent, fCate, dateNowStr)
-  }
-}
-
-/**
-  * hBase 暂时不会用到你，那我等下把你删了
-  */
-object HBaseHandler {
-  val HbaseFamily = "dw"
-  var conn: Connection = null
-
-  /**
-    * @param zkQuorum
-    * @return
-    */
-  private def getHBaseConnection(zkQuorum: String): Connection = {
-    // TODO 需要优化
-    if(conn == null) {
-      val hbaseConf = HBaseConfiguration.create()
-      hbaseConf.set("hbase.zookeeper.quorum", zkQuorum)
-      hbaseConf.setInt("timeout", 120000)
-
-      // Connection 的创建是个重量级的工作，线程安全，是操作hbase的入口
-      conn = ConnectionFactory.createConnection(hbaseConf)
-    }
-    conn
+    pageTransformer.logParser(message, dimPage, dimEvent, fCate, startDateStr, endDateStr)
   }
 
   /**
-    * 查hbase 从 ticks_history 中查找 ticks 存在的记录
-    *
-    * @param zkQuorum
-    * @param id
+    * 解析h5 页面浏览数据，包括pc weixin wap 以及 h5
+    * @param message
+    * @param startDateStr
+    * @param endDateStr
     * @return
     */
-  def getGuIdUtmInitDate(zkQuorum: String, id: String): (String, String) = {
+  def parseH5Page(message:String, startDateStr: String, endDateStr: String):(String, String, Any) = {
+    val h5LogTransformer = new H5PageTransformer()
+    h5LogTransformer.logParser(message, dimPage, startDateStr, endDateStr)
+  }
 
-    val table_ticks_history = TableName.valueOf("ticks_history")
-    val conn = getHBaseConnection(zkQuorum)
-    val ticks_history = conn.getTable(table_ticks_history)
-
-    var utm = ""
-    var gu_create_time = ""
-    val key = new Get(Bytes.toBytes(id))
-    println("=======> ticks_history.get:" + key)
-    val ticks_res = ticks_history.get(key)
-
-    if (!ticks_res.isEmpty) {
-      utm = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "utm".getBytes))
-      gu_create_time = Bytes.toString(ticks_res.getValue(HbaseFamily.getBytes, "gu_create_time".getBytes))
-      (utm, gu_create_time)
-    }
-    else {
-      // 如果不存在就写入 hbase
-      val p = new Put(id.getBytes)
-      // 为put操作指定 column 和 value （以前的 put.add 方法被弃用了）
-      p.addColumn(HbaseFamily.getBytes, "utm".getBytes, utm.getBytes)
-      p.addColumn(HbaseFamily.getBytes, "gu_create_time".getBytes, gu_create_time.getBytes)
-      //提交
-      ticks_history.put(p)
-      (utm, gu_create_time)
-    }
+  /**
+    * 解析h5 埋点点击数据，包括pc weixin wap 以及 h5
+    * @param message
+    * @param startDateStr
+    * @param endDateStr
+    * @return
+    */
+  def parseH5Event(message:String, startDateStr: String, endDateStr: String):(String, String, Any) = {
+    val h5LogTransformer = new H5EventTransformer()
+    h5LogTransformer.logParser(message, dimPage, dimH5EVENT, startDateStr, endDateStr)
   }
 }
+
 
 object KafkaConsumer{
 
@@ -371,6 +339,7 @@ object KafkaConsumer{
 
     // 初始化 SparkConfig StreamingContext HiveContext
     val ic = InitConfig
+
     // 时间间隔采用的是写死的，目前是 60 s
     ic.initParam(groupId, Config.interval, maxRecords)
 
@@ -383,19 +352,16 @@ object KafkaConsumer{
     // 连接Kafka参数设置
     val kafkaParams : Map[String, String] = Map(
       "metadata.broker.list" -> brokerList,
-      "auto.offset.reset" -> "largest",
+      if(consumerType.equals("2")) {
+        // 从最早的地方开始刷数
+        "auto.offset.reset" -> "smallest"
+      } else {
+        "auto.offset.reset" -> "largest"
+      },
       "group.id" -> groupId)
 
     // init beginning offset number, it could consumer which data with config file
     val km = new KafkaManager(kafkaParams, zkQuorum)
-
-    /**
-      * consumerType = "2", 用于当解析数据出错后，手动刷数据之用，需要手动指定offset
-      * ！运行之前需要跟架构沟通
-     */
-    if (consumerType.equals("2")) {
-      km.setConfigOffset(Set(topic), groupId, consumerTime, ssc)
-    }
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
 
@@ -405,22 +371,22 @@ object KafkaConsumer{
       val DimEvent = InitConfig.initMBDim()._2
       val DimFrontCate = InitConfig.initMBDim()._3
       val consumer = new KafkaConsumer(topic, dataBaseDir, DimPage, DimEvent, DimFrontCate, null, zkQuorum)
-      consumer.pageProcess(message, ssc, km)
+      consumer.pageProcess(groupId, message, ssc, km)
     } else if(topic.equals("mb_event_hash2")) {
       val DimPage = InitConfig.initMBDim()._1
       val DimEvent = InitConfig.initMBDim()._2
       val DimFrontCate = InitConfig.initMBDim()._3
       val consumer = new KafkaConsumer(topic, dataBaseDir, DimPage, DimEvent, DimFrontCate, null, zkQuorum)
-      consumer.eventProcess(message, ssc, km)
+      consumer.eventProcess(groupId, message, ssc, km)
     } else if(topic.equals("pc_events_hash3")) {
       val DimH5Page = InitConfig.initH5Dim()._1
       val DimH5Event = InitConfig.initH5Dim()._2
       val consumer = new KafkaConsumer(topic, dataBaseDir, DimH5Page, null, null, DimH5Event, zkQuorum)
-      consumer.h5EventProcess(message, ssc, km)
+      consumer.h5EventProcess(groupId, message, ssc, km)
     } else if(topic.equals("jp_hash3")) {
       val DimH5Page = InitConfig.initH5Dim()._1
       val consumer = new KafkaConsumer(topic, dataBaseDir, DimH5Page, null, null, null, zkQuorum)
-      consumer.h5PageProcess(message, ssc, km)
+      consumer.h5PageProcess(groupId, message, ssc, km)
     } else {
       println("请指定需要解析的kafka Topic-Group！")
       System.exit(1)

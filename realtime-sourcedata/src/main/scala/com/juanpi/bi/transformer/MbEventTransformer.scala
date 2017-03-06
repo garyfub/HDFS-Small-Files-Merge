@@ -15,15 +15,15 @@ class MbEventTransformer {
   /**
     *
     * @param line
-    * @param dimpage
-    * @param dimevent
+    * @param dimPage
+    * @param dimEvent
     * @return
     */
   def logParser(line: String,
-                dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
-                dimevent: mutable.HashMap[String, (Int, Int, Int)],
+                dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
+                dimEvent: mutable.HashMap[String, (Int, Int, Int)],
                 fCate: mutable.HashMap[String, String],
-                dateNowStr: String): (String, String, Any) = {
+                startDateStr: String, endDateStr: String): (String, String, Any) = {
 
     val row = Json.parse(line)
     val ticks = (row \ "ticks").asOpt[String].getOrElse("")
@@ -37,28 +37,14 @@ class MbEventTransformer {
       return ("", "", null)
     }
 
-    val originDateStr = DateUtils.dateStr(starttime_origin.toLong)
-
-    val sDate = DateUtils.getWeekAgoDateStr()
-    val eDate = DateUtils.getWeekLaterDateStr()
-
-    val startTime = if(originDateStr > sDate && originDateStr < eDate) {
-      starttime_origin
-    } else {
-      ""
-    }
-
-    if(startTime.isEmpty) {
-      return ("", "", null)
-    }
-
     // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
-    val dateStr = DateUtils.dateStr(startTime.toLong)
-    if(!dateNowStr.equals(dateStr)){
+    val dateStr = DateUtils.dateStr(starttime_origin.toLong)
+    // 如果日志时间超出了范围，就过滤掉
+    if(dateStr < startDateStr || dateStr > endDateStr){
       return ("", "", null)
     }
 
-    val partitionTime = startTime
+    val partitionTime = starttime_origin
 
     if (ticks.length() >= 13) {
       var gu_id = ""
@@ -80,7 +66,7 @@ class MbEventTransformer {
         }
         else {
           try {
-            val res = parse(partitionTime, row, dimpage, dimevent, fCate)
+            val res = parse(partitionTime, row, dimPage, dimEvent, fCate)
             if (res == null) {
               ("", "", None)
             }
@@ -182,7 +168,7 @@ class MbEventTransformer {
     val f_pre_extend_params = pageAndEventParser.getExtendParams(pagename, pre_extends_param)
 
     val t_extend_params = eventParser.getExtendParamsFromBase(activityname, extend_params, app_version)
-    val f_extend_params = eventParser.getForExtendParams(activityname, t_extend_params, cube_position, server_jsonstr)
+    val f_extend_params = eventParser.getForExtendParams(activityname, t_extend_params, server_jsonstr)
 
     val cid = pageAndEventParser.getJsonValueByKey(server_jsonstr, "cid")
 
@@ -230,6 +216,8 @@ class MbEventTransformer {
     val page_value = eventParser.getPageValue(d_page_id, f_page_extend_params, cid, page_type_id, d_page_value)
 
     val shop_id = pageAndEventParser.getShopId(d_page_id, f_page_extend_params)
+    val xpageValue = f_page_extend_params
+    val refxpageValue = f_pre_extend_params
     val ref_shop_id = pageAndEventParser.getShopId(ref_page_id, f_pre_extend_params)
 
     val page_level_id = pageAndEventParser.getEventPageLevelId(event_level_id, d_page_id, f_page_extend_params, d_page_level_id, forLevelId)
@@ -261,7 +249,7 @@ class MbEventTransformer {
     val user = User.apply(gu_id, uid, utm, "", session_id, terminal_id, app_version, site_id, ref_site_id, ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(page_id, page_value, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, starttime_origin, endTime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, "", "", deviceid, to_switch)
-    val event = Event.apply(event_id.toString, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime, ug_id)
+    val event = Event.apply(event_id.toString, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime, ug_id, xpageValue, refxpageValue)
 
     // TODO 测试代码，测试后需要删掉
     if (-1 == page_id && "click_temai_inpage_joinbag".equals(activityname)) {

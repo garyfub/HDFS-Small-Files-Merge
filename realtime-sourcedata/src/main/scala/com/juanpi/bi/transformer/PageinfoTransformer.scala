@@ -16,7 +16,7 @@ class PageinfoTransformer {
                 dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
                 dimEvent: mutable.HashMap[String, (Int, Int, Int)],
                 fCate: mutable.HashMap[String, String],
-                dateNowStr: String): (String, String, Any) = {
+                startDateStr: String, endDateStr: String): (String, String, Any) = {
 
     val row = Json.parse(line.replaceAll("null", """\\"\\""""))
 
@@ -33,17 +33,12 @@ class PageinfoTransformer {
 
       // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
       val dateStr = DateUtils.dateStr(starttime_origin.toLong)
-      val startTime = if(dateNowStr.equals(dateStr)) {
-        starttime_origin
-      } else {
-        ""
-      }
-
-      if (startTime.isEmpty) {
+      // 如果日志时间超出了范围，就过滤掉
+      if(dateStr < startDateStr || dateStr > endDateStr){
         return ("", "", null)
       }
 
-      val partitionTime = startTime
+      val partitionTime = starttime_origin
 
       try {
         gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
@@ -157,7 +152,9 @@ class PageinfoTransformer {
     val parsed_source = pageAndEventParser.getSource(source)
     val shop_id = pageAndEventParser.getShopId(d_page_id, fct_extendParams)
     val ref_shop_id = pageAndEventParser.getShopId(d_pre_page_id, fct_preExtendParams)
-
+    // 新增xpagevalue和pagevalue
+    val xpageValue=fct_extendParams
+    val refxpagevalue=fct_preExtendParams
     val forLevelId = if (d_page_id == 254 && fct_extendParams.nonEmpty) {
       fCate.get(fct_extendParams).getOrElse("0")
     } else "0"
@@ -192,7 +189,7 @@ class PageinfoTransformer {
     val user = User.apply(gu_id, uid, utm, gu_create_time, session_id, terminal_id, appVersion, site_id, ref_site_id, ctag, location, jpk, uGroup, date, hour)
     val pe = PageAndEvent.apply(pageId, pageValue, ref_page_id, ref_page_value, shop_id, ref_shop_id, page_level_id, starttime_origin, endTime, hot_goods_id, page_lvl2_value, ref_page_lvl2_value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(parsed_source, ip, url, urlref, deviceid, to_switch)
-    val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime, ug_id)
+    val event = Event.apply(event_id, event_value, event_lvl2_value, rule_id, test_id, select_id, loadTime, ug_id, xpageValue, refxpagevalue)
 
     if (-1 == pageId) {
       println("for_pageid:" + forPageId, " ,page_type_id:" + page_type_id, "url:" + url,

@@ -37,7 +37,7 @@ class H5PageTransformer {
 
   def logParser(line: String,
                 dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
-                dateNowStr: String): (String, String, Any) = {
+                startDateStr: String, endDateStr: String): (String, String, Any) = {
 
     val row = Json.parse(line)
 
@@ -47,16 +47,14 @@ class H5PageTransformer {
     val ul_id = (row \ "_id").asOpt[String].getOrElse("")
     val timeStamp = (row \ "timestamp").as[String]
 
+    // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
     val dateStr = DateUtils.dateStr(timeStamp.toLong)
+    // 如果日志时间超出了范围，就过滤掉
+    if(dateStr < startDateStr || dateStr > endDateStr){
+      return ("", "", null)
+    }
 
-    val gu_id= if(!dateNowStr.equals(dateStr)) {
-        // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
-        ""
-      } else {
-        // pc上的页面直接取的ul_id
-        ul_id
-      }
-
+    val gu_id= ul_id
 
     val ret = if (gu_id.nonEmpty && !gu_id.equalsIgnoreCase("null")) {
       val endtime = (row \ "endtime").asOpt[String].getOrElse("")
@@ -206,7 +204,9 @@ class H5PageTransformer {
 
     val shopId = new GetShopId().evaluate(baseUrl)
     val refShopId = new GetShopId().evaluate(baseUrlRef)
-
+    // 新增xpagevalue和pagevalue
+    val xpageValue=baseUrl
+    val refxpagevalue=baseUrlRef
     val location = ""
     val ctag = ""
 
@@ -242,7 +242,7 @@ class H5PageTransformer {
     val user = User.apply(guId, userId.toString, utmId, "", dwSessionId, dwTerminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, baseUrl,baseUrlRef, deviceId, to_switch)
-    val event = Event.apply(eventId, eventValue, eventLevel2Vlue, rule_id, test_id, select_id, loadTime, ug_id)
+    val event = Event.apply(eventId, eventValue, eventLevel2Vlue, rule_id, test_id, select_id, loadTime, ug_id,xpageValue,refxpagevalue)
     (user, pe, page, event)
   }
 }
