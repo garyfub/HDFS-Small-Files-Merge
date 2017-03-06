@@ -127,7 +127,6 @@ class KafkaManager(val kafkaParams: Map[String, String],
     /*if consumer type is 2, it could consumer everytime's offset in kafka*/
     /*consumer type is 1, means it consumer the lastest/beginning offset in kafka with config*/
 
-
     useTopics = topics
     /*check offset status to use it.*/
     setOrUpdateOffsets(topics, groupId)
