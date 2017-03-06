@@ -15,15 +15,15 @@ class MbEventTransformer {
   /**
     *
     * @param line
-    * @param dimpage
-    * @param dimevent
+    * @param dimPage
+    * @param dimEvent
     * @return
     */
   def logParser(line: String,
-                dimpage: mutable.HashMap[String, (Int, Int, String, Int)],
-                dimevent: mutable.HashMap[String, (Int, Int, Int)],
+                dimPage: mutable.HashMap[String, (Int, Int, String, Int)],
+                dimEvent: mutable.HashMap[String, (Int, Int, Int)],
                 fCate: mutable.HashMap[String, String],
-                dateNowStr: String): (String, String, Any) = {
+                startDateStr: String, endDateStr: String): (String, String, Any) = {
 
     val row = Json.parse(line)
     val ticks = (row \ "ticks").asOpt[String].getOrElse("")
@@ -37,28 +37,14 @@ class MbEventTransformer {
       return ("", "", null)
     }
 
-    val originDateStr = DateUtils.dateStr(starttime_origin.toLong)
-
-    val sDate = DateUtils.getWeekAgoDateStr()
-    val eDate = DateUtils.getWeekLaterDateStr()
-
-    val startTime = if(originDateStr > sDate && originDateStr < eDate) {
-      starttime_origin
-    } else {
-      ""
-    }
-
-    if(startTime.isEmpty) {
-      return ("", "", null)
-    }
-
     // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
-    val dateStr = DateUtils.dateStr(startTime.toLong)
-    if(!dateNowStr.equals(dateStr)){
+    val dateStr = DateUtils.dateStr(starttime_origin.toLong)
+    // 如果日志时间超出了范围，就过滤掉
+    if(dateStr < startDateStr || dateStr > endDateStr){
       return ("", "", null)
     }
 
-    val partitionTime = startTime
+    val partitionTime = starttime_origin
 
     if (ticks.length() >= 13) {
       var gu_id = ""
@@ -80,7 +66,7 @@ class MbEventTransformer {
         }
         else {
           try {
-            val res = parse(partitionTime, row, dimpage, dimevent, fCate)
+            val res = parse(partitionTime, row, dimPage, dimEvent, fCate)
             if (res == null) {
               ("", "", None)
             }
