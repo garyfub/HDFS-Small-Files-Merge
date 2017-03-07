@@ -34,12 +34,12 @@ public class WordCount {
     }
 
     private static String getInputPath(String dateStr) {
-        String inputPath = "hdfs://nameservice1/user/hive/warehouse/dw.db/fct_page_ref/date=" +dateStr;
+        String inputPath = "hdfs://nameservice1/user/dianmao/wordcount/input/";
         return inputPath;
     }
 
     private static String getOutputPath(String dateStr) {
-        String outputPath = "hdfs://nameservice1/user/dianmao/wordcount/"+dateStr;
+        String outputPath = "hdfs://nameservice1/user/dianmao/wordcount/output";
         return outputPath;
     }
 
