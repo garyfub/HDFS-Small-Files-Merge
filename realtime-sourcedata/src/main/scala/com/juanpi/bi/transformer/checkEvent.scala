@@ -22,6 +22,29 @@ object checkEvent {
     }
   }
 
+  def getDateFilter(groupId: String) ={
+    // 当前日期
+    val endDateStr = DateUtils.getDateMinusDays(0)
+
+    val startDateStr = if(groupId.startsWith("re")) {
+      // 重新消费的话，groupID必定是re开头
+      DateUtils.getDateMinusDays(6)
+    } else {
+      // 否则就是当下的日期
+      endDateStr
+    }
+
+    val starttime_origin = "1488230401592"
+
+    // 如果从日志解析得到的时间不是当前消费的日期，就将该数据过滤掉
+    val dateStr = DateUtils.dateStr(starttime_origin.toLong)
+    println(dateStr)
+    // 如果日志时间超出了范围，就过滤掉
+    if(dateStr < startDateStr || dateStr > endDateStr){
+      println("log时间不在合理区间")
+    }
+  }
+
   def eventParse(): Unit = {
     val pp = new GetDwPcPageValue()
     val url = "https://m.juanpi.com/zhuanti/lstop?mobile=1&qminkview=1&qmshareview=1"
@@ -112,6 +135,6 @@ object checkEvent {
 
   def main(args: Array[String]): Unit = {
 //    testDateGuidPartitions()
-    checkLinePage
+    getDateFilter("reprod_test_bi_realtime_by_dw_mb_event_hash2")
   }
 }
