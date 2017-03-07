@@ -188,6 +188,8 @@ public class PathListControledJobs {
                     String lplid = (splited[30] == null) ? "\\N" : splited[30];
                     String ptplid = (splited[31] == null) ? "\\N" : splited[31];
                     String ug_id = (splited[47] == null) ? "\\N" : splited[47];
+                    String x_page_value = (splited[48] == null) ? "\\N" : splited[48];
+                    String ref_x_page_value = (splited[49] == null) ? "\\N" : splited[49];
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
                     String pageLvlId = pageLevelId;
@@ -209,7 +211,9 @@ public class PathListControledJobs {
                                     + "\t" + sortHour
                                     + "\t" + lplid
                                     + "\t" + ptplid
-                                    + "\t" + ug_id,
+                                    + "\t" + ug_id
+                                    + "\t" + x_page_value
+                                    + "\t" + ref_x_page_value,
                             value.toString().replace("\001", "\t")
                     };
 
