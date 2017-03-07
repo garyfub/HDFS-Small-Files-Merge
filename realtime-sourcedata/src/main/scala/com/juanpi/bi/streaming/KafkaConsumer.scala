@@ -62,13 +62,10 @@ class KafkaConsumer(topic: String,
                    km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 数据块中的每一条记录需要处理
-    val (startDateStr, endDateStr) = getDateFilter(groupId)
-
-    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
 
     val data = dataDStream.map(_._2.replaceAll("(\0|\r|\n)", ""))
       .filter(eventParser.filterFunc)
-      .map(msg => parseMBEventMessage(msg, startDateStr, endDateStr))
+      .map(msg => parseMBEventMessage(msg, groupId))
       .filter(_._1.nonEmpty)
 
     data.foreachRDD((rdd, time) =>
@@ -100,11 +97,8 @@ class KafkaConsumer(topic: String,
                   ssc: StreamingContext,
                   km: KafkaManager) = {
 
-    val (startDateStr, endDateStr) = getDateFilter(groupId)
-    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
-
     val data = dataDStream.map(_._2.replaceAll("(\0|\r|\n)", ""))
-        .map(msg => parseMBPageMessage(msg, startDateStr, endDateStr))
+        .map(msg => parseMBPageMessage(msg, groupId))
         .filter(_._1.nonEmpty)
 
     data.foreachRDD((rdd, time) => {
@@ -151,12 +145,9 @@ class KafkaConsumer(topic: String,
                      ssc: StreamingContext,
                      km: KafkaManager) = {
 
-    val (startDateStr, endDateStr) = getDateFilter(groupId)
-    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
-
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     val data = dataDStream.map(_._2.replaceAll("(\0|\r|\n)", ""))
-      .map(msg => parseH5Event(msg, startDateStr, endDateStr))
+      .map(msg => parseH5Event(msg, groupId))
       .filter(_._1.nonEmpty)
 
     // 解析后的数据写HDFS
@@ -183,12 +174,9 @@ class KafkaConsumer(topic: String,
                     ssc: StreamingContext,
                     km: KafkaManager) = {
 
-    val (startDateStr, endDateStr) = getDateFilter(groupId)
-    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
-
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     val data = dataDStream.map(_._2.replaceAll("(\0|\r|\n)", ""))
-      .map(msg => parseH5Page(msg, startDateStr, endDateStr))
+      .map(msg => parseH5Page(msg, groupId))
       .filter(_._1.nonEmpty)
 
     // 解析后的数据写HDFS
@@ -213,48 +201,52 @@ class KafkaConsumer(topic: String,
   /**
     * 解析app端埋点点击数据
     * @param message
-    * @param startDateStr
-    * @param endDateStr
+    * @param groupId
     * @return
     */
-  def parseMBEventMessage(message:String, startDateStr: String, endDateStr: String):(String, String, Any) = {
+  def parseMBEventMessage(message:String, groupId: String):(String, String, Any) = {
     val mbEventTransformer = new MbEventTransformer()
+    val (startDateStr, endDateStr) = getDateFilter(groupId)
+    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     mbEventTransformer.logParser(message, dimPage, dimEvent, fCate, startDateStr, endDateStr)
   }
 
   /**
     * 解析app端页面浏览数据
     * @param message
-    * @param startDateStr
-    * @param endDateStr
+    * @param groupId
     * @return
     */
-  def parseMBPageMessage(message:String, startDateStr: String, endDateStr: String):(String, String, Any) = {
+  def parseMBPageMessage(message:String, groupId: String):(String, String, Any) = {
     val pageTransformer = new PageinfoTransformer()
+    val (startDateStr, endDateStr) = getDateFilter(groupId)
+    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     pageTransformer.logParser(message, dimPage, dimEvent, fCate, startDateStr, endDateStr)
   }
 
   /**
     * 解析h5 页面浏览数据，包括pc weixin wap 以及 h5
     * @param message
-    * @param startDateStr
-    * @param endDateStr
+    * @param groupId
     * @return
     */
-  def parseH5Page(message:String, startDateStr: String, endDateStr: String):(String, String, Any) = {
+  def parseH5Page(message:String, groupId: String):(String, String, Any) = {
     val h5LogTransformer = new H5PageTransformer()
+    val (startDateStr, endDateStr) = getDateFilter(groupId)
+    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     h5LogTransformer.logParser(message, dimPage, startDateStr, endDateStr)
   }
 
   /**
     * 解析h5 埋点点击数据，包括pc weixin wap 以及 h5
     * @param message
-    * @param startDateStr
-    * @param endDateStr
+    * @param groupId
     * @return
     */
-  def parseH5Event(message:String, startDateStr: String, endDateStr: String):(String, String, Any) = {
+  def parseH5Event(message:String, groupId: String):(String, String, Any) = {
     val h5LogTransformer = new H5EventTransformer()
+    val (startDateStr, endDateStr) = getDateFilter(groupId)
+    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     h5LogTransformer.logParser(message, dimPage, dimH5EVENT, startDateStr, endDateStr)
   }
 }
