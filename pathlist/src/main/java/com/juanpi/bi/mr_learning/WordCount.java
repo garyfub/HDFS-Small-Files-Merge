@@ -26,7 +26,7 @@ public class WordCount {
     }
 
     private static String getOutputPath(String dateStr) {
-        String outputPath = "hdfs://nameservice1/user/dianmao/wordcount/";
+        String outputPath = "hdfs://nameservice1/user/dianmao/wordcount/"+dateStr;
         return outputPath;
     }
 
