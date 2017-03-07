@@ -207,7 +207,7 @@ class KafkaConsumer(topic: String,
   def parseMBEventMessage(message:String, groupId: String):(String, String, Any) = {
     val mbEventTransformer = new MbEventTransformer()
     val (startDateStr, endDateStr) = getDateFilter(groupId)
-    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
+//    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     mbEventTransformer.logParser(message, dimPage, dimEvent, fCate, startDateStr, endDateStr)
   }
 
@@ -220,7 +220,7 @@ class KafkaConsumer(topic: String,
   def parseMBPageMessage(message:String, groupId: String):(String, String, Any) = {
     val pageTransformer = new PageinfoTransformer()
     val (startDateStr, endDateStr) = getDateFilter(groupId)
-    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
+//    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     pageTransformer.logParser(message, dimPage, dimEvent, fCate, startDateStr, endDateStr)
   }
 
@@ -233,7 +233,7 @@ class KafkaConsumer(topic: String,
   def parseH5Page(message:String, groupId: String):(String, String, Any) = {
     val h5LogTransformer = new H5PageTransformer()
     val (startDateStr, endDateStr) = getDateFilter(groupId)
-    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
+//    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     h5LogTransformer.logParser(message, dimPage, startDateStr, endDateStr)
   }
 
@@ -246,7 +246,7 @@ class KafkaConsumer(topic: String,
   def parseH5Event(message:String, groupId: String):(String, String, Any) = {
     val h5LogTransformer = new H5EventTransformer()
     val (startDateStr, endDateStr) = getDateFilter(groupId)
-    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
+//    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     h5LogTransformer.logParser(message, dimPage, dimH5EVENT, startDateStr, endDateStr)
   }
 }
@@ -341,17 +341,22 @@ object KafkaConsumer{
     // 连接Kafka参数设置
     val kafkaParams : Map[String, String] = Map(
       "metadata.broker.list" -> brokerList,
-      "auto.offset.reset" -> "largest",
+      if (consumerType.equals("2")) {
+        // consumerType = "2", 用于当解析数据出错后，手动刷数据之用，需要手动指定offset
+        "auto.offset.reset" -> "smallest"
+      } else {
+        "auto.offset.reset" -> "largest"
+      },
       "group.id" -> groupId)
 
     // init beginning offset number, it could consumer which data with config file
     val km = new KafkaManager(kafkaParams, zkQuorum)
 
     // consumerType = "2", 用于当解析数据出错后，手动刷数据之用，需要手动指定offset
-    if (consumerType.equals("2")) {
-      println(s"=======>>consumerType=2,重复刷数据开始,consumerTime=${consumerTime}")
-      km.setConfigOffset(Set(topic), groupId, consumerTime, ssc)
-    }
+//    if (consumerType.equals("2")) {
+//      println(s"=======>>consumerType=2,重复刷数据开始,consumerTime=${consumerTime}")
+//      km.setConfigOffset(Set(topic), groupId, consumerTime, ssc)
+//    }
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
 
