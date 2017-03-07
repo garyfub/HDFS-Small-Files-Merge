@@ -124,20 +124,26 @@ object eventParser {
     forEventId
   }
 
+  /**
+    *
+    * @param activityname
+    * @param t_extend_params
+    * @param server_jsonstr
+    * @return
+    */
   def getForExtendParams(activityname: String, t_extend_params: String,server_jsonstr: String): String = {
-    val severJsonstr = Json.parse(server_jsonstr)
-    val tExtendparams =Json.parse(t_extend_params)
-    val f_extend_params = if (server_jsonstr.contains("pit_info") && (severJsonstr \ "pit_info").asOpt[String].getOrElse("").nonEmpty) {
-      (severJsonstr \ "pit_info").asOpt[String].getOrElse("")
-      } else if (t_extend_params.contains("pit_info") && (tExtendparams \ "pit_info").asOpt[String].getOrElse("").nonEmpty){
-      (tExtendparams \ "pit_info").asOpt[String].getOrElse("")
-    } else if (server_jsonstr.contains("ads_id") && (severJsonstr \ "ads_id").asOpt[String].getOrElse("").nonEmpty){
-      (severJsonstr \ "ads_id").asOpt[String].getOrElse("")
-      } else if (activityname.equals("click_cube_block") && !server_jsonstr.equals("{}")) {
+
+    val f_extend_params = if(server_jsonstr.contains("pit_info") && pageAndEventParser.getJsonValueByKey(server_jsonstr, "pit_info").nonEmpty) {
+      pageAndEventParser.getJsonValueByKey(server_jsonstr, "pit_info")
+    } else if(t_extend_params.contains("pit_info") && pageAndEventParser.getJsonValueByKey(t_extend_params, "pit_info").nonEmpty){
+      pageAndEventParser.getJsonValueByKey(t_extend_params, "pit_info")
+    } else if(server_jsonstr.contains("ads_id") && pageAndEventParser.getJsonValueByKey(server_jsonstr, "ads_id").nonEmpty) {
+      pageAndEventParser.getJsonValueByKey(server_jsonstr, "ads_id")
+    } else if (activityname.equals("click_cube_block") && !server_jsonstr.equals("{}")) {
       server_jsonstr
-      } else {
+    } else {
       t_extend_params
-      }
+    }
     f_extend_params
   }
 
