@@ -344,13 +344,7 @@ object pageAndEventParser {
 
     val pageId = new GetPageID().evaluate("https://tuan.juanpi.com/pintuan/shop/1051782")
     if(pageId == 10084) {
-        println("10084")
-    }
-
-    val res = pageId.toInt match {
-      case 34|65 => 3
-      case 10069 => 4
-      case _ => 0
+      println("10084")
     }
 
   }

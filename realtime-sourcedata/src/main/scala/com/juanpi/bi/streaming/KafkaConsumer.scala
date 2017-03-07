@@ -7,13 +7,9 @@ import com.juanpi.bi.init.InitConfig
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.bi.transformer._
 import kafka.serializer.StringDecoder
-import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, _}
-import org.apache.hadoop.hbase.util.Bytes
-import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
 import org.apache.hadoop.io.NullWritable
 import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat
 import org.apache.spark.Logging
-import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaManager
@@ -66,13 +62,10 @@ class KafkaConsumer(topic: String,
                    km: KafkaManager) = {
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     // 数据块中的每一条记录需要处理
-    val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
 
-    val (startDateStr, endDateStr) = getDateFilter(groupId)
-
-    val data = sourceLog.map(_._2.replaceAll("(\0|\r|\n)", ""))
+    val data = dataDStream.map(_._2.replaceAll("(\0|\r|\n)", ""))
       .filter(eventParser.filterFunc)
-      .map(msg => parseMBEventMessage(msg, startDateStr, endDateStr))
+      .map(msg => parseMBEventMessage(msg, groupId))
       .filter(_._1.nonEmpty)
 
     data.foreachRDD((rdd, time) =>
@@ -88,7 +81,7 @@ class KafkaConsumer(topic: String,
     })
 
     // 更新kafka offset
-    sourceLog.foreachRDD { rdd =>
+    dataDStream.foreachRDD { rdd =>
       km.updateOffsets(rdd)
     }
   }
@@ -104,10 +97,8 @@ class KafkaConsumer(topic: String,
                   ssc: StreamingContext,
                   km: KafkaManager) = {
 
-    val (startDateStr, endDateStr) = getDateFilter(groupId)
-
     val data = dataDStream.map(_._2.replaceAll("(\0|\r|\n)", ""))
-        .map(msg => parseMBPageMessage(msg, startDateStr, endDateStr))
+        .map(msg => parseMBPageMessage(msg, groupId))
         .filter(_._1.nonEmpty)
 
     data.foreachRDD((rdd, time) => {
@@ -154,11 +145,9 @@ class KafkaConsumer(topic: String,
                      ssc: StreamingContext,
                      km: KafkaManager) = {
 
-    val (startDateStr, endDateStr) = getDateFilter(groupId)
-
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
     val data = dataDStream.map(_._2.replaceAll("(\0|\r|\n)", ""))
-      .map(msg => parseH5Event(msg, startDateStr, endDateStr))
+      .map(msg => parseH5Event(msg, groupId))
       .filter(_._1.nonEmpty)
 
     // 解析后的数据写HDFS
@@ -185,13 +174,9 @@ class KafkaConsumer(topic: String,
                     ssc: StreamingContext,
                     km: KafkaManager) = {
 
-    val sourceLog = dataDStream.persist(StorageLevel.MEMORY_AND_DISK_SER)
-
-    val (startDateStr, endDateStr) = getDateFilter(groupId)
-
     // event 中直接顾虑掉 activityname = "collect_api_responsetime" 的数据
-    val data = sourceLog.map(_._2.replaceAll("(\0|\r|\n)", ""))
-      .map(msg => parseH5Page(msg, startDateStr, endDateStr))
+    val data = dataDStream.map(_._2.replaceAll("(\0|\r|\n)", ""))
+      .map(msg => parseH5Page(msg, groupId))
       .filter(_._1.nonEmpty)
 
     // 解析后的数据写HDFS
@@ -208,7 +193,7 @@ class KafkaConsumer(topic: String,
     })
 
     // 更新kafka offset
-    sourceLog.foreachRDD { rdd =>
+    dataDStream.foreachRDD { rdd =>
       km.updateOffsets(rdd)
     }
   }
@@ -216,48 +201,52 @@ class KafkaConsumer(topic: String,
   /**
     * 解析app端埋点点击数据
     * @param message
-    * @param startDateStr
-    * @param endDateStr
+    * @param groupId
     * @return
     */
-  def parseMBEventMessage(message:String, startDateStr: String, endDateStr: String):(String, String, Any) = {
+  def parseMBEventMessage(message:String, groupId: String):(String, String, Any) = {
     val mbEventTransformer = new MbEventTransformer()
+    val (startDateStr, endDateStr) = getDateFilter(groupId)
+    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     mbEventTransformer.logParser(message, dimPage, dimEvent, fCate, startDateStr, endDateStr)
   }
 
   /**
     * 解析app端页面浏览数据
     * @param message
-    * @param startDateStr
-    * @param endDateStr
+    * @param groupId
     * @return
     */
-  def parseMBPageMessage(message:String, startDateStr: String, endDateStr: String):(String, String, Any) = {
+  def parseMBPageMessage(message:String, groupId: String):(String, String, Any) = {
     val pageTransformer = new PageinfoTransformer()
+    val (startDateStr, endDateStr) = getDateFilter(groupId)
+    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     pageTransformer.logParser(message, dimPage, dimEvent, fCate, startDateStr, endDateStr)
   }
 
   /**
     * 解析h5 页面浏览数据，包括pc weixin wap 以及 h5
     * @param message
-    * @param startDateStr
-    * @param endDateStr
+    * @param groupId
     * @return
     */
-  def parseH5Page(message:String, startDateStr: String, endDateStr: String):(String, String, Any) = {
+  def parseH5Page(message:String, groupId: String):(String, String, Any) = {
     val h5LogTransformer = new H5PageTransformer()
+    val (startDateStr, endDateStr) = getDateFilter(groupId)
+    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     h5LogTransformer.logParser(message, dimPage, startDateStr, endDateStr)
   }
 
   /**
     * 解析h5 埋点点击数据，包括pc weixin wap 以及 h5
     * @param message
-    * @param startDateStr
-    * @param endDateStr
+    * @param groupId
     * @return
     */
-  def parseH5Event(message:String, startDateStr: String, endDateStr: String):(String, String, Any) = {
+  def parseH5Event(message:String, groupId: String):(String, String, Any) = {
     val h5LogTransformer = new H5EventTransformer()
+    val (startDateStr, endDateStr) = getDateFilter(groupId)
+    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     h5LogTransformer.logParser(message, dimPage, dimH5EVENT, startDateStr, endDateStr)
   }
 }
@@ -352,16 +341,17 @@ object KafkaConsumer{
     // 连接Kafka参数设置
     val kafkaParams : Map[String, String] = Map(
       "metadata.broker.list" -> brokerList,
-      if(consumerType.equals("2")) {
-        // 从最早的地方开始刷数
-        "auto.offset.reset" -> "smallest"
-      } else {
-        "auto.offset.reset" -> "largest"
-      },
+      "auto.offset.reset" -> "largest",
       "group.id" -> groupId)
 
     // init beginning offset number, it could consumer which data with config file
     val km = new KafkaManager(kafkaParams, zkQuorum)
+
+    // consumerType = "2", 用于当解析数据出错后，手动刷数据之用，需要手动指定offset
+    if (consumerType.equals("2")) {
+      println(s"=======>>consumerType=2,重复刷数据开始,consumerTime=${consumerTime}")
+      km.setConfigOffset(Set(topic), groupId, consumerTime, ssc)
+    }
 
     val message = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, Set(topic))
 
