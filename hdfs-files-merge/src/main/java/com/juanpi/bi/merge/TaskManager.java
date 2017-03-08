@@ -2,7 +2,6 @@ package com.juanpi.bi.merge;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import com.juanpi.bi.merge.util.DateUtil;
@@ -16,20 +15,18 @@ import com.juanpi.bi.merge.util.DateUtil;
  */
 public class TaskManager {
 
-	private String baseDir = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
-    private static int interval = 1;
+	private String baseDir = "hdfs://nameservice1/user/hadoop/dw_realtime/reprod";
     private static String timeFlag = "01";
 
     static String AM0_FMT = "yyyy-MM-dd 00:00:00";
 
-	public TaskManager(String timeFlag, int interval) {
+	public TaskManager(String timeFlag) {
 	    this.timeFlag = timeFlag;
-	    this.interval = interval;
     }
 
     // 路径正则
 	private String getDirRegex(String dateStr) {
-		return baseDir + "/{mb_event_hash2,mb_pageinfo_hash2,pc_events_hash3,jp_hash3}/date=" + dateStr + "/gu_hash=*/logs/";
+		return baseDir + "/{mb_event_hash2,mb_pageinfo_hash2}/date=" + dateStr + "/gu_hash=*/logs/";
 	}
 
     /**
@@ -82,7 +79,6 @@ public class TaskManager {
 	public static void main(String[] args) {
 
 		// 传入 date 格式 yyyy-MM-dd
-        // 传入 hdfs 目录
 
         String dateStr = "";
 
@@ -105,7 +101,8 @@ public class TaskManager {
         System.out.println("======>>main_date:" + dateStr);
         System.out.println("======>>timeFlag :" + intervalStr);
 
-		TaskManager manager = new TaskManager(intervalStr, Integer.parseInt(intervalStr));
+        // , Integer.parseInt(intervalStr)
+		TaskManager manager = new TaskManager(intervalStr);
 
 		try {
 			manager.start(dateStr);
