@@ -211,9 +211,9 @@ public class PathListControledJobs {
                                     + "\t" + sortHour
                                     + "\t" + lplid
                                     + "\t" + ptplid
-                                    + "\t" + ug_id
-                                    + "\t" + x_page_value
-                                    + "\t" + ref_x_page_value,
+                                    + "\t" + ug_id,
+//                                    + "\t" + x_page_value
+//                                    + "\t" + ref_x_page_value,
                             value.toString().replace("\001", "\t")
                     };
 
