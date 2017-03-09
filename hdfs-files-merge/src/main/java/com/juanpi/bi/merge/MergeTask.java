@@ -12,8 +12,6 @@ import org.apache.hadoop.fs.*;
 import com.juanpi.bi.merge.util.HdfsUtil;
 import org.apache.hadoop.io.IOUtils;
 
-//import static com.juanpi.bi.merge.TaskManager.oneHourAgoMillis;
-
 /**
  * 
  * @author yunduan  
@@ -59,6 +57,16 @@ public class MergeTask {
         for (Path file : files) {
             HdfsUtil.delete(file);
         }
+    }
+
+    private String getSmallFilePath(String source) {
+	    String path = "";
+	    return path;
+    }
+
+    private String getOutPutPath() {
+	    String path = "";
+	    return path;
     }
 
     /**
@@ -118,7 +126,9 @@ public class MergeTask {
                 Path fileParnt = mergingFiles.get(0).getParent();
                 dstFileBuf.append(fileParnt.getParent().toString());
                 dstFileBuf.append("/merged/merged_" + dateHourStr);
-                Path dstPath = new Path(dstFileBuf.toString());
+                String path = dstFileBuf.toString();
+                String targetPath = path.replace("reprod", "dw_real_for_path_list");
+                Path dstPath = new Path(targetPath);
 
                 OutputStream out = srcFS.create(dstPath);
                 try
@@ -127,6 +137,10 @@ public class MergeTask {
                     for (Path logfile : mergingFiles) {
                         InputStream in = srcFS.open(logfile);
                         try {
+                            //* @param in InputStream to read from
+                            //* @param out OutputStream to write to
+                            //* @param conf the Configuration object
+                            //* @param close whether or not close the InputStream and
                             IOUtils.copyBytes(in, out, conf, false);
                         } finally {
                             in.close();
@@ -139,19 +153,24 @@ public class MergeTask {
                 }
 
                 // 合并后，删除小文件
-                if (deleteSource) {
-                    if(mergingFiles.size() > 0)
-                    {
-                        // 强制类型转换
-//                        System.out.println("删除小文件：" + dateHourStr + ",目录：" + mergingFiles.get(0).getParent());
-                        delete(mergingFiles);
-                    }
-                }
+//                if (deleteSource) {
+//                    if(mergingFiles.size() > 0)
+//                    {
+//                        // 强制类型转换
+////                        System.out.println("删除小文件：" + dateHourStr + ",目录：" + mergingFiles.get(0).getParent());
+//                        delete(mergingFiles);
+//                    }
+//                }
             }
         }
 	}
-	
-	// merge小文件
+
+    /**
+     *
+     * @param srcDir
+     * @param deleteSource
+     * @throws IOException
+     */
 	private void merge(Path srcDir, boolean deleteSource) throws IOException {
 
         if(!fs.getFileStatus(srcDir).isDirectory()) {
@@ -160,7 +179,11 @@ public class MergeTask {
 
 		copyLogMerge(fs, srcDir, deleteSource, configuration);
     }
-	
+
+    /**
+     *
+     * @throws IOException
+     */
 	public void doMerge() throws IOException {
 
         System.out.println("doMerge start======>>....");
@@ -175,7 +198,7 @@ public class MergeTask {
 		
 		for (Path matchDir : matchDirs) {
             System.out.println("matchDir is:" + matchDir);
-            merge(matchDir,true);
+            merge(matchDir,false);
 		}
 	}
 }
