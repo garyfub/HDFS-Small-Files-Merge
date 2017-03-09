@@ -126,9 +126,12 @@ public class MergeTask {
                 Path fileParnt = mergingFiles.get(0).getParent();
                 dstFileBuf.append(fileParnt.getParent().toString());
                 dstFileBuf.append("/merged/merged_" + dateHourStr);
-                String path = dstFileBuf.toString();
-                String targetPath = path.replace("reprod", "dw_real_for_path_list");
-                Path dstPath = new Path(targetPath);
+//                String path = dstFileBuf.toString();
+                // 重复消费时用到
+//                String targetPath = path.replace("reprod", "dw_real_for_path_list");
+//                Path dstPath = new Path(targetPath);
+
+                Path dstPath = new Path(dstFileBuf.toString());
 
                 OutputStream out = srcFS.create(dstPath);
                 try
@@ -153,14 +156,14 @@ public class MergeTask {
                 }
 
                 // 合并后，删除小文件
-//                if (deleteSource) {
-//                    if(mergingFiles.size() > 0)
-//                    {
-//                        // 强制类型转换
-////                        System.out.println("删除小文件：" + dateHourStr + ",目录：" + mergingFiles.get(0).getParent());
-//                        delete(mergingFiles);
-//                    }
-//                }
+                if (deleteSource) {
+                    if(mergingFiles.size() > 0)
+                    {
+                        // 强制类型转换
+//                        System.out.println("删除小文件：" + dateHourStr + ",目录：" + mergingFiles.get(0).getParent());
+                        delete(mergingFiles);
+                    }
+                }
             }
         }
 	}
@@ -198,7 +201,7 @@ public class MergeTask {
 		
 		for (Path matchDir : matchDirs) {
             System.out.println("matchDir is:" + matchDir);
-            merge(matchDir,false);
+            merge(matchDir,true);
 		}
 	}
 }
