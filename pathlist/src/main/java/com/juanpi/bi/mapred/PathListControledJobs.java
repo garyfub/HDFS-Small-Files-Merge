@@ -264,8 +264,6 @@ public class PathListControledJobs {
             String level4 = initStr;
             String level5 = initStr;
 
-            String guId = k2.first;
-
             for (PathListControledJobs.TextArrayWritable va : valueArray) {
 
                 try {
