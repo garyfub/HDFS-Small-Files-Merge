@@ -15,7 +15,7 @@ import com.juanpi.bi.merge.util.DateUtil;
  */
 public class TaskManager {
 
-	private String baseDir = "hdfs://nameservice1/user/hadoop/dw_realtime/reprod";
+	private String baseDir = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
     private static String timeFlag = "01";
 
     static String AM0_FMT = "yyyy-MM-dd 00:00:00";
@@ -26,7 +26,7 @@ public class TaskManager {
 
     // 路径正则
 	private String getDirRegex(String dateStr) {
-		return baseDir + "/{mb_event_hash2,mb_pageinfo_hash2}/date=" + dateStr + "/gu_hash=*/logs/";
+		return baseDir + "/{mb_event_hash2,mb_pageinfo_hash2,pc_events_hash3,jp_hash3}/date=" + dateStr + "/gu_hash=*/logs/";
 	}
 
     /**
