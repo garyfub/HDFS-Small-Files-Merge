@@ -207,7 +207,6 @@ class KafkaConsumer(topic: String,
   def parseMBEventMessage(message:String, groupId: String):(String, String, Any) = {
     val mbEventTransformer = new MbEventTransformer()
     val (startDateStr, endDateStr) = getDateFilter(groupId)
-//    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     mbEventTransformer.logParser(message, dimPage, dimEvent, fCate, startDateStr, endDateStr)
   }
 
@@ -220,7 +219,6 @@ class KafkaConsumer(topic: String,
   def parseMBPageMessage(message:String, groupId: String):(String, String, Any) = {
     val pageTransformer = new PageinfoTransformer()
     val (startDateStr, endDateStr) = getDateFilter(groupId)
-//    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     pageTransformer.logParser(message, dimPage, dimEvent, fCate, startDateStr, endDateStr)
   }
 
@@ -233,7 +231,6 @@ class KafkaConsumer(topic: String,
   def parseH5Page(message:String, groupId: String):(String, String, Any) = {
     val h5LogTransformer = new H5PageTransformer()
     val (startDateStr, endDateStr) = getDateFilter(groupId)
-//    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     h5LogTransformer.logParser(message, dimPage, startDateStr, endDateStr)
   }
 
@@ -246,7 +243,6 @@ class KafkaConsumer(topic: String,
   def parseH5Event(message:String, groupId: String):(String, String, Any) = {
     val h5LogTransformer = new H5EventTransformer()
     val (startDateStr, endDateStr) = getDateFilter(groupId)
-//    println(s"=======>>正确的数据范围${startDateStr} ~ ${endDateStr}")
     h5LogTransformer.logParser(message, dimPage, dimH5EVENT, startDateStr, endDateStr)
   }
 }
