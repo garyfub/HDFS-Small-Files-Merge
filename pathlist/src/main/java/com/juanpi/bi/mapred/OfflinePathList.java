@@ -290,7 +290,7 @@ public class OfflinePathList {
         }
     }
 
-    //static class NewValue
+    // static class NewValue
     static class MyReducer extends Reducer<OfflinePathList.NewK2, OfflinePathList.TextArrayWritable, Text, Text> {
 
         protected void reduce(OfflinePathList.NewK2 k2,
