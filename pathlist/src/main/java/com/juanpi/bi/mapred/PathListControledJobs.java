@@ -33,7 +33,7 @@ public class PathListControledJobs {
     static final String INPUT_PATH_BASE =
             "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
 
-    static final String PATH_JOBS = "dw_real_path_list_jobs";
+    static final String PATH_JOBS = "test";
 
     static Configuration conf = new Configuration();
 
@@ -188,8 +188,9 @@ public class PathListControledJobs {
                     String lplid = (splited[30] == null) ? "\\N" : splited[30];
                     String ptplid = (splited[31] == null) ? "\\N" : splited[31];
                     String ug_id = (splited[47] == null) ? "\\N" : splited[47];
-//                    String x_page_value = (splited[48] == null) ? "\\N" : splited[48];
-//                    String ref_x_page_value = (splited[49] == null) ? "\\N" : splited[49];
+                    String rule_id = "";
+                    String x_page_value = "";// (splited[48] == null) ? "\\N" : splited[48];
+                    String ref_x_page_value = ""; // (splited[49] == null) ? "\\N" : splited[49];
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
                     String pageLvlId = pageLevelId;
@@ -211,9 +212,10 @@ public class PathListControledJobs {
                                     + "\t" + sortHour
                                     + "\t" + lplid
                                     + "\t" + ptplid
-                                    + "\t" + ug_id,
-//                                    + "\t" + x_page_value
-//                                    + "\t" + ref_x_page_value,
+                                    + "\t" + ug_id
+                                    + "\t" + rule_id
+                                    + "\t" + x_page_value
+                                    + "\t" + ref_x_page_value,
                             value.toString().replace("\001", "\t")
                     };
 
@@ -254,9 +256,11 @@ public class PathListControledJobs {
         protected void reduce(PathListControledJobs.NewK2 k2,
                               Iterable<PathListControledJobs.TextArrayWritable> valueArray, Context context)
                 throws IOException, InterruptedException {
+
             String[] initStrArray =
-                    {"\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N"};
-            String initStr = Joiner.on("\t").join(initStrArray);
+                {"\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N"};
+
+            String initStr = Joiner.on("#").join(initStrArray);
 
             String level1 = initStr;
             String level2 = initStr;
