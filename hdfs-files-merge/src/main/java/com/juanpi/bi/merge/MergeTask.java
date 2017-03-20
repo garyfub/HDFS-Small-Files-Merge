@@ -5,11 +5,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 
-import com.juanpi.bi.merge.util.DateUtil;
+import com.juanpi.bi.merge.utils.DateUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 
-import com.juanpi.bi.merge.util.HdfsUtil;
+import com.juanpi.bi.merge.utils.HdfsUtil;
 import org.apache.hadoop.io.IOUtils;
 
 /**

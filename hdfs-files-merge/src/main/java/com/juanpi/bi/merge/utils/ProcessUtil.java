@@ -1,4 +1,4 @@
-package com.juanpi.bi.merge.util;
+package com.juanpi.bi.merge.utils;
 
 import java.util.List;
 /**

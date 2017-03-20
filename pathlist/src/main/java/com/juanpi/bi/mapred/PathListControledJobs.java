@@ -28,12 +28,11 @@ import java.util.Calendar;
 public class PathListControledJobs {
 
     // TODO 配置文件可以通过zk管理
-    static String base = "hdfs://nameservice1/user/hadoop/dw_realtime";
+    static String HDFS_BASE = "hdfs://nameservice1/user/hadoop/dw_realtime";
 
-    static final String INPUT_PATH_BASE =
-            "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
+    static final String INPUT_DIR = "dw_real_for_path_list";
 
-    static final String PATH_JOBS = "test";
+    static final String OUTPUT_DIR = "test";
 
     static Configuration conf = new Configuration();
 
@@ -63,17 +62,21 @@ public class PathListControledJobs {
      */
     private static String getInputPath(String dateStr, String guStr) {
         String str = "{0}/{1}/date={2}/gu_hash={3}/merged/";
-//        for_pathList.topicIds=mb_event_hash2,mb_pageinfo_hash2,pc_events_hash3,jp_hash3
-        String strEvent =
-                MessageFormat.format(str, INPUT_PATH_BASE, "mb_event_hash2", dateStr, guStr);
-        String strPage =
-                MessageFormat.format(str, INPUT_PATH_BASE, "mb_pageinfo_hash2", dateStr, guStr);
+
+        String strEvent = MessageFormat.format(str, HDFS_BASE + "/" + INPUT_DIR,
+                "mb_event_hash2", dateStr, guStr);
+
+        String strPage = MessageFormat.format(str, HDFS_BASE + "/" + INPUT_DIR,
+                        "mb_pageinfo_hash2", dateStr, guStr);
+
 //        String strh5Event =
 //                MessageFormat.format(str, INPUT_PATH_BASE, "pc_events_hash3", dateStr, guStr);
 //        String strh5Page=
 //                MessageFormat.format(str, INPUT_PATH_BASE, "jp_hash3", dateStr, guStr);
+
         // 文件输入路径
-        String inputPath = strEvent + "," + strPage; //+ "," + strh5Event+","+strh5Page;
+        //+ "," + strh5Event+","+strh5Page;
+        String inputPath = strEvent + "," + strPage;
         return inputPath;
     }
 
@@ -83,7 +86,7 @@ public class PathListControledJobs {
     private static String getOutputPath(String dateStr, String guStr) {
         // PathList文件落地路径
         String patternStr = "{0}/{1}/date={2}/gu_hash={3}/";
-        String outPutPath = MessageFormat.format(patternStr, base, PATH_JOBS, dateStr, guStr);
+        String outPutPath = MessageFormat.format(patternStr, HDFS_BASE, OUTPUT_DIR, dateStr, guStr);
         return outPutPath;
     }
 
@@ -116,7 +119,7 @@ public class PathListControledJobs {
             // PathList文件落地路径
             String outputPath = getOutputPath(dateStr, guStr);
 
-            getFileSystem(base, outputPath);
+            getFileSystem(HDFS_BASE, outputPath);
 
             // 将受控作业添加到控制器中
             // 添加控制job
@@ -213,9 +216,10 @@ public class PathListControledJobs {
                                     + "\t" + lplid
                                     + "\t" + ptplid
                                     + "\t" + ug_id
-                                    + "\t" + rule_id
-                                    + "\t" + x_page_value
-                                    + "\t" + ref_x_page_value,
+//                                    + "\t" + rule_id
+//                                    + "\t" + x_page_value
+//                                    + "\t" + ref_x_page_value
+                            ,
                             value.toString().replace("\001", "\t")
                     };
 
@@ -257,9 +261,16 @@ public class PathListControledJobs {
                               Iterable<PathListControledJobs.TextArrayWritable> valueArray, Context context)
                 throws IOException, InterruptedException {
 
+            // , "\\N", "\\N", "\\N"
             String[] initStrArray =
-                {"\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N", "\\N"};
+            {
+                "\\N", "\\N", "\\N", "\\N",
+                "\\N", "\\N","\\N", "\\N",
+                "\\N","\\N", "\\N", "\\N",
+                "\\N", "\\N", "\\N","\\N"
+            };
 
+            // 将数据落地为hive struct 类型
             String initStr = Joiner.on("#").join(initStrArray);
 
             String level1 = initStr;

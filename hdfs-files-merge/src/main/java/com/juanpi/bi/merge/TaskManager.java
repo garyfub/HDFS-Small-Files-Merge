@@ -3,8 +3,10 @@ package com.juanpi.bi.merge;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Properties;
 
-import com.juanpi.bi.merge.util.DateUtil;
+import com.juanpi.bi.merge.utils.DateUtil;
+import com.juanpi.bi.merge.utils.LoadConfigFile;
 
 /**
  * 
@@ -96,6 +98,18 @@ public class TaskManager {
         {
             dateStr = args[0];
             intervalStr = args[1];
+        }
+
+        try {
+            Properties pro = LoadConfigFile.loadFileByClassLoader("config.properties");
+            String dataBaseDir= (String) pro.get("dataBaseDir");
+            String sourceDir= (String) pro.get("sourceDir");
+            String targetDir= (String) pro.get("targetDir");
+            String kafkaTopicIds= (String) pro.get("kafkaTopicIds");
+
+        } catch (IOException e) {
+		    System.exit(1);
+            e.printStackTrace();
         }
 
         System.out.println("======>>main_date:" + dateStr);
