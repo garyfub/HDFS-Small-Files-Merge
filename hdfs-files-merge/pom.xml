@@ -95,6 +95,28 @@
     <build>
         <finalName>${pom.artifactId}-${pom.version}</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
+        <filters>
+            <filter>profiles/${build.profile.id}_config.properties</filter>
+        </filters>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <configuration>
+                    <keepDependenciesWithProvidedScope>true</keepDependenciesWithProvidedScope>
+                </configuration>
+            </plugin>
+        </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources/</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
     </build>
+
 
 </project>
