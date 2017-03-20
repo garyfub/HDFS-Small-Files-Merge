@@ -191,9 +191,9 @@ public class PathListControledJobs {
                     String lplid = (splited[30] == null) ? "\\N" : splited[30];
                     String ptplid = (splited[31] == null) ? "\\N" : splited[31];
                     String ug_id = (splited[47] == null) ? "\\N" : splited[47];
-                    String rule_id = "";
-                    String x_page_value = "";// (splited[48] == null) ? "\\N" : splited[48];
-                    String ref_x_page_value = ""; // (splited[49] == null) ? "\\N" : splited[49];
+                    String rule_id = "rule_id1";
+                    String x_page_value = "x_page_value2";// (splited[48] == null) ? "\\N" : splited[48];
+                    String ref_x_page_value = "ref_x_page_value3"; // (splited[49] == null) ? "\\N" : splited[49];
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
                     String pageLvlId = pageLevelId;
@@ -201,24 +201,24 @@ public class PathListControledJobs {
                     String str[] = {
                             pageLvlId,
                             pageId
-                                    + "\t" + page_value
-                                    + "\t" + page_lvl2_value
-                                    + "\t" + eventId
-                                    + "\t" + event_value
-                                    + "\t" + event_lvl2_value
-                                    + "\t" + timeStr
-                                    + "\t" + loadTime
-                                    + "\t" + testId
-                                    + "\t" + selectId
-                                    + "\t" + pitType
-                                    + "\t" + sortDate
-                                    + "\t" + sortHour
-                                    + "\t" + lplid
-                                    + "\t" + ptplid
-                                    + "\t" + ug_id
-//                                    + "\t" + rule_id
-//                                    + "\t" + x_page_value
-//                                    + "\t" + ref_x_page_value
+                                    + "#" + page_value
+                                    + "#" + page_lvl2_value
+                                    + "#" + eventId
+                                    + "#" + event_value
+                                    + "#" + event_lvl2_value
+                                    + "#" + timeStr
+                                    + "#" + loadTime
+                                    + "#" + testId
+                                    + "#" + selectId
+                                    + "#" + pitType
+                                    + "#" + sortDate
+                                    + "#" + sortHour
+                                    + "#" + lplid
+                                    + "#" + ptplid
+                                    + "#" + ug_id
+//                                    + "\#" + rule_id
+//                                    + "\#" + x_page_value
+//                                    + "\#" + ref_x_page_value
                             ,
                             value.toString().replace("\001", "\t")
                     };
@@ -261,13 +261,14 @@ public class PathListControledJobs {
                               Iterable<PathListControledJobs.TextArrayWritable> valueArray, Context context)
                 throws IOException, InterruptedException {
 
-            // , "\\N", "\\N", "\\N"
+            //
             String[] initStrArray =
             {
                 "\\N", "\\N", "\\N", "\\N",
                 "\\N", "\\N","\\N", "\\N",
                 "\\N","\\N", "\\N", "\\N",
                 "\\N", "\\N", "\\N","\\N"
+//                ,"\\N", "\\N", "\\N"
             };
 
             // 将数据落地为hive struct 类型
@@ -480,7 +481,7 @@ public class PathListControledJobs {
      */
     public static void main(String[] args) {
         String dateStr = args[0];
-        System.out.println("===========>> PathListControledJobs start 2017-02-23 !<<===========");
+        System.out.println("===========>> PathListControledJobs start 2017-03-20 !<<===========");
         if (dateStr == null || dateStr.isEmpty()) {
             JobsControl("", 0x0, 0x3, "PathListControledJobs01");
             JobsControl("", 0x4, 0x7, "PathListControledJobs04");
@@ -488,9 +489,9 @@ public class PathListControledJobs {
             JobsControl("", 0xc, 0xf, "PathListControledJobs0c");
         } else {
             JobsControl(dateStr, 0x0, 0x3, "PathListControledJobs01");
-            JobsControl(dateStr, 0x4, 0x7, "PathListControledJobs04");
-            JobsControl(dateStr, 0x8, 0xb, "PathListControledJobs08");
-            JobsControl(dateStr, 0xc, 0xf, "PathListControledJobs0c");
+//            JobsControl(dateStr, 0x4, 0x7, "PathListControledJobs04");
+//            JobsControl(dateStr, 0x8, 0xb, "PathListControledJobs08");
+//            JobsControl(dateStr, 0xc, 0xf, "PathListControledJobs0c");
         }
     }
 }
