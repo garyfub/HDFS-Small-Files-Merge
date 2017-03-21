@@ -32,7 +32,7 @@ public class PathListControledJobs {
 
     static final String INPUT_DIR = "dw_real_for_path_list";
 
-    static final String OUTPUT_DIR = "test";
+    static final String OUTPUT_DIR = "dw_real_path_list_jobs";
 
     static Configuration conf = new Configuration();
 
@@ -69,14 +69,14 @@ public class PathListControledJobs {
         String strPage = MessageFormat.format(str, HDFS_BASE + "/" + INPUT_DIR,
                         "mb_pageinfo_hash2", dateStr, guStr);
 
-//        String strh5Event =
-//                MessageFormat.format(str, INPUT_PATH_BASE, "pc_events_hash3", dateStr, guStr);
-//        String strh5Page=
-//                MessageFormat.format(str, INPUT_PATH_BASE, "jp_hash3", dateStr, guStr);
+        String strh5Event = MessageFormat.format(str, HDFS_BASE + "/" + INPUT_DIR,
+                "pc_events_hash3", dateStr, guStr);
+
+        String strh5Page= MessageFormat.format(str, HDFS_BASE + "/" + INPUT_DIR,
+                "jp_hash3", dateStr, guStr);
 
         // 文件输入路径
-        //+ "," + strh5Event+","+strh5Page;
-        String inputPath = strEvent + "," + strPage;
+        String inputPath = strEvent + "," + strPage + "," + strh5Event +"," + strh5Page;
         return inputPath;
     }
 
@@ -495,10 +495,10 @@ public class PathListControledJobs {
             JobsControl("", 0x8, 0xb, "PathListControledJobs08");
             JobsControl("", 0xc, 0xf, "PathListControledJobs0c");
         } else {
-            JobsControl(dateStr, 0x0, 0x1, "PathListControledJobs01");
-//            JobsControl(dateStr, 0x4, 0x7, "PathListControledJobs04");
-//            JobsControl(dateStr, 0x8, 0xb, "PathListControledJobs08");
-//            JobsControl(dateStr, 0xc, 0xf, "PathListControledJobs0c");
+            JobsControl(dateStr, 0x0, 0x3, "PathListControledJobs01");
+            JobsControl(dateStr, 0x4, 0x7, "PathListControledJobs04");
+            JobsControl(dateStr, 0x8, 0xb, "PathListControledJobs08");
+            JobsControl(dateStr, 0xc, 0xf, "PathListControledJobs0c");
         }
     }
 }
