@@ -493,7 +493,7 @@ public class PathListControledJobs {
             JobsControl("", 0x8, 0xb, "PathListControledJobs08");
             JobsControl("", 0xc, 0xf, "PathListControledJobs0c");
         } else {
-            JobsControl(dateStr, 0x0, 0x3, "PathListControledJobs01");
+            JobsControl(dateStr, 0x0, 0x1, "PathListControledJobs01");
 //            JobsControl(dateStr, 0x4, 0x7, "PathListControledJobs04");
 //            JobsControl(dateStr, 0x8, 0xb, "PathListControledJobs08");
 //            JobsControl(dateStr, 0xc, 0xf, "PathListControledJobs0c");
