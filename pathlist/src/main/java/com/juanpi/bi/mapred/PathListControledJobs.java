@@ -191,9 +191,10 @@ public class PathListControledJobs {
                     String lplid = (splited[30] == null) ? "\\N" : splited[30];
                     String ptplid = (splited[31] == null) ? "\\N" : splited[31];
                     String ug_id = (splited[47] == null) ? "\\N" : splited[47];
-                    String rule_id = "rule_id1";
-                    String x_page_value = "x_page_value2";// (splited[48] == null) ? "\\N" : splited[48];
-                    String ref_x_page_value = "ref_x_page_value3"; // (splited[49] == null) ? "\\N" : splited[49];
+
+                    String rule_id = (splited[43] == null) ? "\\N" : splited[43];
+                    String x_page_value = (splited[48] == null) ? "\\N" : splited[48];
+                    String ref_x_page_value = (splited[49] == null) ? "\\N" : splited[49];
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
                     String pageLvlId = pageLevelId;
@@ -216,9 +217,9 @@ public class PathListControledJobs {
                                     + "#" + lplid
                                     + "#" + ptplid
                                     + "#" + ug_id
-//                                    + "\#" + rule_id
-//                                    + "\#" + x_page_value
-//                                    + "\#" + ref_x_page_value
+                                    + "#" + rule_id
+                                    + "#" + x_page_value
+                                    + "#" + ref_x_page_value
                             ,
                             value.toString().replace("\001", "\t")
                     };
@@ -261,6 +262,7 @@ public class PathListControledJobs {
                               Iterable<PathListControledJobs.TextArrayWritable> valueArray, Context context)
                 throws IOException, InterruptedException {
 
+
             //
             String[] initStrArray =
             {
@@ -268,7 +270,7 @@ public class PathListControledJobs {
                 "\\N", "\\N","\\N", "\\N",
                 "\\N","\\N", "\\N", "\\N",
                 "\\N", "\\N", "\\N","\\N"
-//                ,"\\N", "\\N", "\\N"
+                ,"\\N", "\\N", "\\N"
             };
 
             // 将数据落地为hive struct 类型
@@ -280,8 +282,11 @@ public class PathListControledJobs {
             String level4 = initStr;
             String level5 = initStr;
 
+            System.out.println("===>>key:" + k2.first + "++" + k2.second);
+
             for (PathListControledJobs.TextArrayWritable va : valueArray) {
 
+                System.out.println("===>>value:" + va.toString());
                 try {
                     // 0: page_level_id, 1: 层级, 2 最新的那条记录
                     String pageLvlIdStr = va.toStrings()[0];
