@@ -1,6 +1,6 @@
 package com.juanpi.bi.merge;
 
-import com.juanpi.bi.merge.util.HdfsUtil;
+import com.juanpi.bi.merge.utils.HdfsUtil;
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
 

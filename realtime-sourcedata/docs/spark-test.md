@@ -1,8 +1,19 @@
 [TOC]
 
+
+## jenkins
+> http://jenkins.juanpi.org/jenkins/
+创建自己的项目
+
 ## 准备Jar
 ```
 scp /data/jenkins_workspace/workspace/bi_gongzi_pc_events_hash3_real_by_dw/realtime-sourcedata/target/realtime-souredata-1.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/spark_test/
+
+或者 本地上传
+```
+## 创建自己的目录
+```
+mkdir -p path
 ```
 
 ## Test mb_event_hash2

@@ -3,8 +3,10 @@ package com.juanpi.bi.merge;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Properties;
 
-import com.juanpi.bi.merge.util.DateUtil;
+import com.juanpi.bi.merge.utils.DateUtil;
+import com.juanpi.bi.merge.utils.LoadConfigFile;
 
 /**
  * 
@@ -15,18 +17,27 @@ import com.juanpi.bi.merge.util.DateUtil;
  */
 public class TaskManager {
 
-	private String baseDir = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
+//	private String baseDir = "hdfs://nameservice1/user/hadoop/dw_realtime/dw_real_for_path_list";
     private static String timeFlag = "01";
 
     static String AM0_FMT = "yyyy-MM-dd 00:00:00";
 
-	public TaskManager(String timeFlag) {
+    private String dataBaseDir = "";
+    private String sourceDir = "";
+    private String targetDir = "";
+    private String kafkaTopicIds = "";
+
+	public TaskManager(String timeFlag, String dataBaseDir, String sourceDir, String targetDir, String kafkaTopicIds) {
 	    this.timeFlag = timeFlag;
+        this.dataBaseDir = dataBaseDir;
+        this.sourceDir = sourceDir;
+        this.targetDir = targetDir;
+        this.kafkaTopicIds = kafkaTopicIds;
     }
 
     // 路径正则
 	private String getDirRegex(String dateStr) {
-		return baseDir + "/{mb_event_hash2,mb_pageinfo_hash2,pc_events_hash3,jp_hash3}/date=" + dateStr + "/gu_hash=*/logs/";
+		return this.dataBaseDir + this.sourceDir + "/{" + this.kafkaTopicIds + "}/date=" + dateStr + "/gu_hash=*/logs/";
 	}
 
     /**
@@ -72,7 +83,7 @@ public class TaskManager {
         System.out.println("开始任务======>>....");
         String srcDirRegex = getDirRegex(dateStr);
         long oneHourAgoMillis = getHoursAgoMillis(timeFlag);
-		MergeTask mergeTask = new MergeTask(srcDirRegex, null, true, oneHourAgoMillis);
+		MergeTask mergeTask = new MergeTask(srcDirRegex, this.sourceDir, this.targetDir, true, oneHourAgoMillis);
 		mergeTask.doMerge();
 	}
 	
@@ -98,11 +109,28 @@ public class TaskManager {
             intervalStr = args[1];
         }
 
+        String dataBaseDir= "";
+        String sourceDir= "";
+        String targetDir= "";
+        String kafkaTopicIds= "";
+
+        try {
+            Properties pro = LoadConfigFile.loadFileByClassLoader("config.properties");
+            dataBaseDir= (String) pro.get("dataBaseDir");
+            sourceDir= (String) pro.get("sourceDir");
+            targetDir= (String) pro.get("targetDir");
+            kafkaTopicIds= (String) pro.get("kafkaTopicIds");
+
+        } catch (IOException e) {
+		    System.exit(1);
+            e.printStackTrace();
+        }
+
         System.out.println("======>>main_date:" + dateStr);
         System.out.println("======>>timeFlag :" + intervalStr);
 
         // , Integer.parseInt(intervalStr)
-		TaskManager manager = new TaskManager(intervalStr);
+		TaskManager manager = new TaskManager(intervalStr, dataBaseDir, sourceDir, targetDir, kafkaTopicIds);
 
 		try {
 			manager.start(dateStr);
