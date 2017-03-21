@@ -286,10 +286,12 @@ public class PathListControledJobs {
 
             for (PathListControledJobs.TextArrayWritable va : valueArray) {
 
-                System.out.println("===>>value:" + va.toString());
                 try {
                     // 0: page_level_id, 1: 层级, 2 最新的那条记录
                     String pageLvlIdStr = va.toStrings()[0];
+
+                    System.out.println("===>>value:" + pageLvlIdStr);
+
                     String pageLvl = va.toStrings()[1];
 
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
