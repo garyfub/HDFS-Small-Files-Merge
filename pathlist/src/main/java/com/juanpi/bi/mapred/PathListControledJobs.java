@@ -18,7 +18,6 @@ import org.joda.time.DateTime;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -201,7 +200,6 @@ public class PathListControledJobs {
                     String loadTimeStr;
                     if(loadTime.equals("\\N")) {
                         loadTimeStr = "\\N";
-
                     } else {
                         long loadTimeMillis = Long.parseLong(loadTime);
                         loadTimeStr = getDateTimeStr(loadTimeMillis, "yyyy-MM-dd HH:mm:ss");
@@ -255,10 +253,8 @@ public class PathListControledJobs {
                                     + "#" + eventId
                                     + "#" + event_value
                                     + "#" + event_lvl2_value
-                                    + "#" + timeStr
                                     + "#" + startTimeStr
-                                    + "#" + loadTime
-                                    + "" + loadTimeStr
+                                    + "#" + loadTimeStr
                                     + "#" + testId
                                     + "#" + selectId
                                     + "#" + pitType
@@ -266,10 +262,10 @@ public class PathListControledJobs {
                                     + "#" + sortHour
                                     + "#" + lplid
                                     + "#" + ptplid
+                                    + "#" + ug_id
                                     + "#" + pit_type
                                     + "#" + pit_value
                                     + "#" + pit_no
-                                    + "#" + ug_id
                                     + "#" + rule_id
                                     + "#" + x_page_value
                                     + "#" + ref_x_page_value
@@ -316,15 +312,14 @@ public class PathListControledJobs {
                 throws IOException, InterruptedException {
 
 
-            //
             String[] initStrArray =
             {
                 "\\N", "\\N", "\\N", "\\N"
-                ,"\\N", "\\N","\\N", "\\N"
-                ,"\\N","\\N", "\\N", "\\N"
-                ,"\\N", "\\N", "\\N","\\N"
-                ,"\\N", "\\N", "\\N","\\N"
-                ,"\\N", "\\N", "\\N","\\N"
+                ,"\\N", "\\N", "\\N", "\\N"
+                ,"\\N", "\\N", "\\N", "\\N"
+                ,"\\N", "\\N", "\\N", "\\N"
+                ,"\\N", "\\N", "\\N", "\\N"
+                ,"\\N", "\\N"
             };
 
             // 将数据落地为hive struct 类型
