@@ -282,7 +282,7 @@ public class PathListControledJobs {
             String level4 = initStr;
             String level5 = initStr;
 
-            System.out.println("===>>key:" + k2.first + "++" + k2.second);
+//            System.out.println("===>>key:" + k2.first + "++" + k2.second);
 
             for (PathListControledJobs.TextArrayWritable va : valueArray) {
 
@@ -290,7 +290,7 @@ public class PathListControledJobs {
                     // 0: page_level_id, 1: 层级, 2 最新的那条记录
                     String pageLvlIdStr = va.toStrings()[0];
 
-                    System.out.println("===>>value:" + pageLvlIdStr);
+//                    System.out.println("===>>value:" + pageLvlIdStr);
 
                     String pageLvl = va.toStrings()[1];
 
