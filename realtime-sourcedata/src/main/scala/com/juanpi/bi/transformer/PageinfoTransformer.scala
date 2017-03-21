@@ -177,6 +177,7 @@ class PageinfoTransformer {
 
     val jpk = 0
     val table_source = "mb_page"
+    
     // 从sever_jsonstr里面获取select_id,test_id,rule_id
     val rule_id= pageParser.getAbInfo(server_jsonstr)._1
     val test_id= pageParser.getAbInfo(server_jsonstr)._2
