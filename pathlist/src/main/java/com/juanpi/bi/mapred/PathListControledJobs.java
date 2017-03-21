@@ -13,13 +13,17 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.joda.time.DateTime;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * 烈烈
@@ -52,6 +56,12 @@ public class PathListControledJobs {
             System.out.println(("初始化FileSystem失败！"));
             System.out.println(e.getMessage());
         }
+    }
+
+    public static String getDateTimeStr(long millSeconds, String dateFormat) {
+        DateTime dt = new DateTime(millSeconds);
+//        System.out.println(dt.toString("yyyy-MM-dd HH:mm:ss"));
+        return dt.toString(dateFormat);
     }
 
     /**
@@ -163,6 +173,8 @@ public class PathListControledJobs {
 
             final String[] splited = value.toString().split("\001");
 
+            List<Integer> urls = Arrays.asList(349,350,351,352,433,479,480,481,482);
+
             try {
                 // gu_id 和starttime 作为联合主键
                 String gu_id = splited[0];
@@ -170,8 +182,11 @@ public class PathListControledJobs {
                     String timeStr = (splited[22] == null) ? "\\N" : splited[22];
                     long startTime = Long.parseLong(timeStr);
 
+
                     final PathListControledJobs.NewK2 k2 =
                             new PathListControledJobs.NewK2(gu_id, startTime);
+
+                    String startTimeStr = getDateTimeStr(startTime, "yyyy-MM-dd HH:mm:ss");
 
                     String pageLevelId = (splited[21] == null) ? "\\N" : splited[21];
                     String pageId = (splited[15] == null) ? "\\N" : splited[15];
@@ -182,6 +197,15 @@ public class PathListControledJobs {
                     String event_lvl2_value = (splited[42] == null) ? "\\N" : splited[42];
 
                     String loadTime = (splited[46] == null) ? "\\N" : splited[46];
+
+                    String loadTimeStr;
+                    if(loadTime.equals("\\N")) {
+                        loadTimeStr = "\\N";
+
+                    } else {
+                        long loadTimeMillis = Long.parseLong(loadTime);
+                        loadTimeStr = getDateTimeStr(loadTimeMillis, "yyyy-MM-dd HH:mm:ss");
+                    }
 
                     String testId = (splited[44] == null) ? "\\N" : splited[44];
                     String selectId = (splited[45] == null) ? "\\N" : splited[45];
@@ -196,6 +220,30 @@ public class PathListControledJobs {
                     String x_page_value = (splited[48] == null) ? "\\N" : splited[48];
                     String ref_x_page_value = (splited[49] == null) ? "\\N" : splited[49];
 
+                    String event_id = (splited[40] == null) ? "\\N" : splited[40];
+
+                    String pit_type = "\\N";
+                    String pit_value = "\\N";
+                    String pit_no = "\\N";
+
+                    if(urls.contains(event_id)) {
+                        if(event_value.contains("::")){
+                            pit_type = event_value.split("::")[0];
+                            if("goods".equals(pit_type)|| "brand".equals(pit_type)){
+                                pit_value = event_value.split("::")[1];
+                            }
+
+                            String pitInfo = event_value.split("::")[2];
+
+                            if(pitInfo.contains("_")){
+                                int i = Integer.parseInt(pitInfo.split("_")[1]);
+                                int j = Integer.parseInt(pitInfo.split("_")[0]);
+                                pit_no = String.valueOf(i + (j-1)*20);
+                            }
+
+                        }
+                    }
+
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
                     String pageLvlId = pageLevelId;
 
@@ -208,7 +256,9 @@ public class PathListControledJobs {
                                     + "#" + event_value
                                     + "#" + event_lvl2_value
                                     + "#" + timeStr
+                                    + "#" + startTimeStr
                                     + "#" + loadTime
+                                    + "" + loadTimeStr
                                     + "#" + testId
                                     + "#" + selectId
                                     + "#" + pitType
@@ -216,6 +266,9 @@ public class PathListControledJobs {
                                     + "#" + sortHour
                                     + "#" + lplid
                                     + "#" + ptplid
+                                    + "#" + pit_type
+                                    + "#" + pit_value
+                                    + "#" + pit_no
                                     + "#" + ug_id
                                     + "#" + rule_id
                                     + "#" + x_page_value
@@ -266,11 +319,12 @@ public class PathListControledJobs {
             //
             String[] initStrArray =
             {
-                "\\N", "\\N", "\\N", "\\N",
-                "\\N", "\\N","\\N", "\\N",
-                "\\N","\\N", "\\N", "\\N",
-                "\\N", "\\N", "\\N","\\N"
-                ,"\\N", "\\N", "\\N"
+                "\\N", "\\N", "\\N", "\\N"
+                ,"\\N", "\\N","\\N", "\\N"
+                ,"\\N","\\N", "\\N", "\\N"
+                ,"\\N", "\\N", "\\N","\\N"
+                ,"\\N", "\\N", "\\N","\\N"
+                ,"\\N", "\\N", "\\N","\\N"
             };
 
             // 将数据落地为hive struct 类型
