@@ -18,7 +18,7 @@ cd ${THIS_DIR}
 
 TimeFlag="01"
 DB="dw"
-TABLE="path_list_real"
+TABLE="fct_path_list_real"
 
 if [ $curhour == "11" ]; then
     newDay=`date -d +1days '+%Y-%m-%d'`
