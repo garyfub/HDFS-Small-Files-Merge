@@ -238,7 +238,6 @@ public class PathListControledJobs {
                                 int j = Integer.parseInt(pitInfo.split("_")[0]);
                                 pit_no = String.valueOf(i + (j-1)*20);
                             }
-
                         }
                     }
 

@@ -1,5 +1,7 @@
 package com.juanpi.bi.transformer
 
+import java.util
+
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.hive.udf.{GetDwPcPageValue, GetGoodsId, GetPageID}
 import play.api.libs.json.Json
@@ -135,6 +137,34 @@ object checkEvent {
 
   def main(args: Array[String]): Unit = {
 //    testDateGuidPartitions()
-    getDateFilter("reprod_test_bi_realtime_by_dw_mb_event_hash2")
-  }
+//    getDateFilter("reprod_test_bi_realtime_by_dw_mb_event_hash2")
+    val partitionTime = "1490073854324"
+    val timeLists = Array(
+      "1490059720242"
+      , "1490059736131"
+      , "1490059736324"
+      , "1490059738575"
+      , "1490059738777"
+      , "1490059768271"
+      , "1490059787437"
+      , "1490061925113"
+      , "1490061926295"
+      , "1490061954291"
+      , "1490061960501"
+      , "1490061960760"
+      , "1490061967524"
+      , "1490061968342"
+      , "1490061973338"
+      , "1490062002612"
+      , "1490062004020"
+      , "1490062004759"
+      , "1490073834340"
+      , "1490073854324"
+    )
+
+    timeLists.foreach(t => {
+      val (date, hour) = DateUtils.dateHourStr(t.toLong)
+      println(date, hour)
+    })
+    }
 }
