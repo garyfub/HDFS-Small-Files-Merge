@@ -40,20 +40,32 @@
             <scope>provided</scope>
         </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>org.apache.hadoop</groupId>-->
-            <!--<artifactId>hadoop-mapreduce-client-shuffle</artifactId>-->
-            <!--<version>${hadoop.version}</version>-->
-        <!--</dependency>-->
-
-        <!--         <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-auth</artifactId>
-            <version>${hadoop.version}</version>
-        </dependency> -->
-
-
     </dependencies>
+
+    <!--<profiles>-->
+        <!--<profile>-->
+            <!--<id>test</id>-->
+            <!--<activation>-->
+                <!--<activeByDefault>true</activeByDefault>-->
+            <!--</activation>-->
+            <!--<properties>-->
+                <!--<build.profile.id>test</build.profile.id>-->
+            <!--</properties>-->
+        <!--</profile>-->
+        <!--<profile>-->
+            <!--<id>prod</id>-->
+            <!--<properties>-->
+                <!--<build.profile.id>prod</build.profile.id>-->
+            <!--</properties>-->
+        <!--</profile>-->
+        <!--<profile>-->
+            <!--<id>reprod</id>-->
+            <!--<properties>-->
+                <!--&lt;!&ndash; 重新消费 Kafka tipics &ndash;&gt;-->
+                <!--<build.profile.id>reprod</build.profile.id>-->
+            <!--</properties>-->
+        <!--</profile>-->
+    <!--</profiles>-->
 
     <build>
         <finalName>${pom.artifactId}-${pom.version}</finalName>

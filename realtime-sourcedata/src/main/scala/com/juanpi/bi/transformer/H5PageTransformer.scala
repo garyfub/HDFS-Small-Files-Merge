@@ -242,7 +242,7 @@ class H5PageTransformer {
     val user = User.apply(guId, userId.toString, utmId, "", dwSessionId, dwTerminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
     val pe = PageAndEvent.apply(javaToScalaInt(pageId), pageValue, javaToScalaInt(refPageId), refPageValue, shopId, refShopId, pageLevelId, startTime, endTime, hotGoodsId, pageLevel2Value, refPageLevel2Value, pit_type, sortdate, sorthour, lplid, ptplid, gid, table_source)
     val page = Page.apply(source, ip, baseUrl,baseUrlRef, deviceId, to_switch)
-    val event = Event.apply(eventId, eventValue, eventLevel2Vlue, rule_id, test_id, select_id, loadTime, ug_id,xpageValue,refxpagevalue)
+    val event = Event.apply(eventId, eventValue, eventLevel2Vlue, rule_id, test_id, select_id, loadTime, ug_id, xpageValue, refxpagevalue)
     (user, pe, page, event)
   }
 }

@@ -1,5 +1,8 @@
 [TOC]
 
+## jenkins
+http://jenkins.juanpi.org/jenkins/
+
 ## 准备Jar
 ```
 scp /data/jenkins_workspace/workspace/reprod_bi_realtime_by_dw_mb_pageinfo_hash2/realtime-sourcedata/target/realtime-souredata-1.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/spark_reprod/
@@ -77,7 +80,9 @@ nohup sh ./spark-reprod-topic.sh "jp_hash3" > /dev/null 2>&1 &
 
 ## 查看数据目录
 ```
-hadoop fs -rm -r hdfs://nameservice1/user/hadoop/dw_realtime/reprod/mb_event_hash2/*
+##hadoop fs -rm -r hdfs://nameservice1/user/hadoop/dw_realtime/reprod/mb_event_hash2/*##
+
+hadoop fs -du -h hdfs://nameservice1/user/hadoop/dw_realtime/reprod/
 
 # mb_event_hash2
 hadoop fs -ls hdfs://nameservice1/user/hadoop/dw_realtime/reprod/mb_event_hash2/

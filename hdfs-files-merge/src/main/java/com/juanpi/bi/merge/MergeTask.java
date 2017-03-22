@@ -5,11 +5,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 
-import com.juanpi.bi.merge.util.DateUtil;
+import com.juanpi.bi.merge.utils.DateUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 
-import com.juanpi.bi.merge.util.HdfsUtil;
+import com.juanpi.bi.merge.utils.HdfsUtil;
 import org.apache.hadoop.io.IOUtils;
 
 /**
@@ -23,7 +23,8 @@ public class MergeTask {
 	private static Configuration configuration = new Configuration();
 	
 	private String srcDirRegex = null;
-	private String dstFileName = null;
+	private String sourceDir = "";
+	private String targetDir = "";
 	private boolean deleteSource = false;
     private long oneHourAgoMillis = 0;
 	
@@ -32,14 +33,16 @@ public class MergeTask {
     /**
      *
      * @param srcDirRegex 目录通配符
-     * @param dstFileName 目标文件名
+     * @param sourceDir 源目录名
+     * @param targetDir 目标文件名
      * @param deleteSource 是否删除原始文件
      * @param oneHourAgoMillis
      * @throws IOException
      */
-	public MergeTask(String srcDirRegex, String dstFileName, boolean deleteSource, long oneHourAgoMillis) throws IOException {
+	public MergeTask(String srcDirRegex, String sourceDir, String targetDir, boolean deleteSource, long oneHourAgoMillis) throws IOException {
 		this.srcDirRegex = srcDirRegex;
-		this.dstFileName = dstFileName;
+		this.sourceDir = sourceDir;
+		this.targetDir = targetDir;
 		this.deleteSource = deleteSource;
 		this.oneHourAgoMillis = oneHourAgoMillis;
 		this.fs = FileSystem.get(configuration);
@@ -111,6 +114,12 @@ public class MergeTask {
             }
         }
 
+        // 判断是否合并文件
+        boolean dirFlag = false;
+        if(this.sourceDir.equals(this.targetDir)) {
+            dirFlag = true;
+        }
+
         Iterator iter = filesMap.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry entry = (Map.Entry) iter.next();
@@ -126,12 +135,23 @@ public class MergeTask {
                 Path fileParnt = mergingFiles.get(0).getParent();
                 dstFileBuf.append(fileParnt.getParent().toString());
                 dstFileBuf.append("/merged/merged_" + dateHourStr);
-//                String path = dstFileBuf.toString();
-                // 重复消费时用到
-//                String targetPath = path.replace("reprod", "dw_real_for_path_list");
-//                Path dstPath = new Path(targetPath);
 
-                Path dstPath = new Path(dstFileBuf.toString());
+                Path dstPath;
+
+                // 重复消费时用到
+                if(dirFlag == true)
+                {
+                    String path = dstFileBuf.toString();
+                    // replace(CharSequence target, CharSequence replacement)
+                    // target The sequence of char values to be replaced
+                    // replacement The replacement sequence of char values
+                    // 将源数据合并后移动到新的目录
+                    String targetPath = path.replace(this.sourceDir, this.targetDir);
+                    dstPath = new Path(targetPath);
+                }
+                else {
+                    dstPath = new Path(dstFileBuf.toString());
+                }
 
                 OutputStream out = srcFS.create(dstPath);
                 try

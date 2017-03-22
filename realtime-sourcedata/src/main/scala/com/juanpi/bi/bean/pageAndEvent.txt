@@ -1,4 +1,5 @@
-gu_id: String,user_id: String,
+gu_id: String,
+user_id: String,
 var utm: String,
 var gu_create_time: String,
 session_id: String,

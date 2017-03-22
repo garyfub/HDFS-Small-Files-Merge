@@ -2,6 +2,7 @@
 
 ## 准备Jar
 ```
+## ops001 上执行
 scp /data/jenkins_workspace/workspace/bi_gongzi_mb_event_real_direct_by_dw/realtime-sourcedata/target/realtime-souredata-1.0.jar hadoop@spark001.jp:/home/hadoop/users/gongzi/spark_prod/
 ```
 
