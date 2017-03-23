@@ -1,7 +1,7 @@
 gu_id: String,
 user_id: String,
-var utm: String,
-var gu_create_time: String,
+utm: String,
+gu_create_time: String,
 session_id: String,
 terminal_id: Int,
 app_version: String,
@@ -46,3 +46,5 @@ test_id: String,
 select_id: String,
 loadtime: String,
 ug_id: String
+x_page_value
+ref_x_page_value
