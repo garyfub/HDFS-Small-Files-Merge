@@ -35,7 +35,15 @@ public class PathListControledJobs {
 
     static final String INPUT_DIR = "dw_real_for_path_list";
 
-    static final String OUTPUT_DIR = "dw_real_path_list_jobs";
+    public static String getOutputDir() {
+        return OUTPUT_DIR;
+    }
+
+    public static void setOutputDir(String outputDir) {
+        OUTPUT_DIR = outputDir;
+    }
+
+    static String OUTPUT_DIR = "dw_real_path_list_jobs";
 
     static Configuration conf = new Configuration();
 
@@ -125,8 +133,10 @@ public class PathListControledJobs {
 
             String inputPath = getInputPath(dateStr, guStr);
 
-            // PathList文件落地路径
+            // PathListReal 文件落地路径
             String outputPath = getOutputPath(dateStr, guStr);
+
+            System.out.println("PathListReal_DIR:" + outputPath);
 
             getFileSystem(HDFS_BASE, outputPath);
 
@@ -172,7 +182,7 @@ public class PathListControledJobs {
 
             final String[] splited = value.toString().split("\001");
 
-            List<Integer> urls = Arrays.asList(349,350,351,352,433,479,480,481,482);
+            List<String> urls = Arrays.asList("349","350","351","352","433","479","480","481","482");
 
             try {
                 // gu_id 和starttime 作为联合主键
@@ -207,11 +217,12 @@ public class PathListControledJobs {
 
                     String testId = (splited[44] == null) ? "\\N" : splited[44];
                     String selectId = (splited[45] == null) ? "\\N" : splited[45];
-                    String pitType = (splited[27] == null) ? "\\N" : splited[27];
+//                    String pitType = (splited[27] == null) ? "\\N" : splited[27];
                     String sortDate = (splited[28] == null) ? "\\N" : splited[28];
                     String sortHour = (splited[29] == null) ? "\\N" : splited[29];
                     String lplid = (splited[30] == null) ? "\\N" : splited[30];
                     String ptplid = (splited[31] == null) ? "\\N" : splited[31];
+                    String gid = (splited[32] == null) ? "\\N" : splited[32];
                     String ug_id = (splited[47] == null) ? "\\N" : splited[47];
 
                     String rule_id = (splited[43] == null) ? "\\N" : splited[43];
@@ -254,17 +265,17 @@ public class PathListControledJobs {
                                     + "#" + event_lvl2_value
                                     + "#" + startTimeStr
                                     + "#" + loadTimeStr
-                                    + "#" + testId
-                                    + "#" + selectId
-                                    + "#" + pitType
+                                    + "#" + pit_type
+                                    + "#" + pit_value
+                                    + "#" + pit_no
                                     + "#" + sortDate
                                     + "#" + sortHour
                                     + "#" + lplid
                                     + "#" + ptplid
+                                    + "#" + gid
+                                    + "#" + testId
+                                    + "#" + selectId
                                     + "#" + ug_id
-                                    + "#" + pit_type
-                                    + "#" + pit_value
-                                    + "#" + pit_no
                                     + "#" + rule_id
                                     + "#" + x_page_value
                                     + "#" + ref_x_page_value
@@ -330,15 +341,11 @@ public class PathListControledJobs {
             String level4 = initStr;
             String level5 = initStr;
 
-//            System.out.println("===>>key:" + k2.first + "++" + k2.second);
-
             for (PathListControledJobs.TextArrayWritable va : valueArray) {
 
                 try {
                     // 0: page_level_id, 1: 层级, 2 最新的那条记录
                     String pageLvlIdStr = va.toStrings()[0];
-
-//                    System.out.println("===>>value:" + pageLvlIdStr);
 
                     String pageLvl = va.toStrings()[1];
 
@@ -536,6 +543,16 @@ public class PathListControledJobs {
      */
     public static void main(String[] args) {
         String dateStr = args[0];
+        String outPutPath = "dw_real_path_list_jobs";
+
+        if(args.length > 1) {
+//            outPutPath = "dw_real_path_test";
+            outPutPath = args[1];
+        }
+
+        PathListControledJobs pathJobs = new PathListControledJobs();
+        pathJobs.OUTPUT_DIR = outPutPath;
+
         System.out.println("===========>> PathListControledJobs start 2017-03-20 !<<===========");
         if (dateStr == null || dateStr.isEmpty()) {
             JobsControl("", 0x0, 0x3, "PathListControledJobs01");

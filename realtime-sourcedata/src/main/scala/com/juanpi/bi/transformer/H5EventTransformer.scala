@@ -286,9 +286,6 @@ class H5EventTransformer {
     val eventLevel2Value = ""
     val location = ""
     val ctag = ""
-    val rule_id = ""
-    val test_id = ""
-    val select_id = ""
     val jpk = 0
     val pit_type = 0
     val sortdate = ""
@@ -313,6 +310,11 @@ class H5EventTransformer {
     val userId = Decoding.evaluate(baseLog.s_uid)
     val dwSiteId = getDwSiteId(baseUrl)
     val dwSessionId = getDwSessionId(baseLog.qm_session_id, baseLog.qm_jpid)
+
+    val (rule_id: String, test_id: String, select_id: String) = if(eventValue.contains("_")){
+      val v1 = eventValue.split("_")
+      (v1(3), v1(2), v1(1))
+    }
 
     val table_source = "h5_app_event"
     val user = User.apply(guId, userId.toString, utm, "", dwSessionId, dwTeminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
