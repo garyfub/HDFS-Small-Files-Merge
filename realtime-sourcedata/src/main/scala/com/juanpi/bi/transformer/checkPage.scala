@@ -1,7 +1,4 @@
 package com.juanpi.bi.transformer
-
-import com.juanpi.bi.sc_utils.DateUtils
-import com.juanpi.hive.udf.GetPageID
 import play.api.libs.json.Json
 
 /**

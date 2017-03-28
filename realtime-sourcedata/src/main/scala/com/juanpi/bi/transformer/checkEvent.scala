@@ -1,7 +1,5 @@
 package com.juanpi.bi.transformer
 
-import java.util
-
 import com.juanpi.bi.sc_utils.DateUtils
 import com.juanpi.hive.udf.{GetDwPcPageValue, GetGoodsId, GetPageID}
 import play.api.libs.json.Json
