@@ -217,6 +217,20 @@ class H5EventTransformer {
     pageLevel2Value
   }
 
+  def getPageLevelId(eventValue: String, event_level_id: Int, d_page_level_id: Int): Int = {
+    val pageLevelId = if (List("app_index_pintuan_75.0", "m_index_pintuan_75.0", "wx_index_pintuan_75.0",
+      "app_index_pintuan_55.0", "m_index_pintuan_55.0", "wx_index_pintuan_55.0",
+      "app_index_pintuan_2107.0", "m_index_pintuan_2107.0", "wx_index_pintuan_2107.0").contains(eventValue)) {
+      5
+    } else if (event_level_id > 0) {
+      event_level_id
+    } else {
+      d_page_level_id
+    }
+
+    pageLevelId
+  }
+
   /**
     * 解析app端 h5 端数据
     *
@@ -274,11 +288,7 @@ class H5EventTransformer {
     val refShopId = new GetShopId().evaluate(baseUrlRef)
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPage.get(pageId.toString).getOrElse(0, 0, "", 0)
 
-    val pageLevelId = if(event_level_id > 0) {
-      event_level_id
-    } else {
-      d_page_level_id
-    }
+    val pageLevelId = getPageLevelId(eventValue, event_level_id, d_page_level_id)
 
     val pageLevel2Value = getPageLevel2Value(pageId.toString, shopId, baseUrl)
     val refPageLevel2Value = getPageLevel2Value(pageId.toString, shopId, baseUrlRef)
@@ -388,11 +398,7 @@ class H5EventTransformer {
 
     val (d_page_id: Int, page_type_id: Int, d_page_value: String, d_page_level_id: Int) = dimPage.get(pageId.toString).getOrElse(0, 0, "", 0)
 
-    val pageLevelId = if(event_level_id > 0) {
-      event_level_id
-    } else {
-      d_page_level_id
-    }
+    val pageLevelId = getPageLevelId(eventValue, event_level_id, d_page_level_id)
 
     val pageLevel2Value = getPageLevel2Value(pageId.toString, shopId, baseUrl)
     val refPageLevel2Value = getPageLevel2Value(pageId.toString, shopId, baseUrlRef)
@@ -419,9 +425,10 @@ class H5EventTransformer {
 
     val (date, hour) = TimeUtils.dateHourFormat(startTime)
 
-    val rule_id = ""
-    val test_id = ""
-    val select_id = ""
+    val (rule_id: String, test_id: String, select_id: String) = if(eventValue.contains("_")){
+      val v1 = eventValue.split("_")
+      (v1(3), v1(2), v1(1))
+    }
 
     //    (dwTeminalId, appVersion, eventId, dwSiteId, dwSessionId,)
     val user = User.apply(guId, userId.toString, baseLog.utmId, "", dwSessionId, dwTerminalId, appVersion, dwSiteId, javaToScalaInt(refSiteId), ctag, location, jpk, ugroup, date, hour)
