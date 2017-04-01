@@ -136,7 +136,7 @@ public class PathListControledJobs {
             // PathListReal 文件落地路径
             String outputPath = getOutputPath(dateStr, guStr);
 
-            System.out.println("PathListReal_DIR:" + outputPath);
+//            System.out.println("PathListReal_DIR:" + outputPath);
 
             getFileSystem(HDFS_BASE, outputPath);
 
@@ -553,7 +553,7 @@ public class PathListControledJobs {
         PathListControledJobs pathJobs = new PathListControledJobs();
         pathJobs.OUTPUT_DIR = outPutPath;
 
-        System.out.println("===========>> PathListControledJobs start 2017-03-20 !<<===========");
+        System.out.println("===========>> PathListControledJobs start 2017-04-01 !<<===========");
         if (dateStr == null || dateStr.isEmpty()) {
             JobsControl("", 0x0, 0x3, "PathListControledJobs01");
             JobsControl("", 0x4, 0x7, "PathListControledJobs04");
