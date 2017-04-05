@@ -347,8 +347,5 @@ object eventParser {
     val rows = Json.parse(l_server_jsonstr)
     val server_jsonstr = (rows \ "server_jsonstr").asOpt[String].getOrElse("")
     println(getForExtendParams("click_cube_block", "", server_jsonstr))
-
-
-    getEventValue(event_type_id, activityname, f_extend_params, server_jsonstr)
   }
 }
