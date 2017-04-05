@@ -332,13 +332,20 @@ object eventParser {
   }
 
   def main(args: Array[String]): Unit = {
-    val line = """{"app_name":"zhe","app_version":"4.2.4","c_label":"C2","c_server":"{\"gid\":\"C2\",\"ugroup\":\"668_649_684_486_485_453_574_573_518_605_516_603_696_695_581_652_478_496_653_523_494_544_377_614_584_711_616_618_449_593\"}","deviceid":"869411025179622","endtime":"1487898778265","endtime_origin":"1487898777452","extend_params":"2","ip":"175.20.230.7","jpid":"00000000-011c-d810-9b17-c31d00a46c2d","location":"吉林省吉林市蛟河市005乡道靠近白石山信用社","os":"android","os_version":"4.4.4","pagename":"page_message_content","pre_extend_params":"","pre_page":"page_message","server_jsonstr":"{\"ab_info\":\"1_2_3\"}","session_id":"1461916191529_zhe_1487898757041","source":"","starttime":"1487898768991","starttime_origin":"1487898768178","ticks":"1461916191529","to_switch":"0","uid":"36541281","utm":"101221","wap_pre_url":"","wap_url":""}"""
-    val row = Json.parse(line)
-    val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
-    val abinfo = pageParser.getAbInfo(server_jsonstr)
-    println(abinfo)
-    println("rule_id为"+abinfo._1)
-    println("test_id为"+abinfo._2)
-    println("select_id为"+abinfo._3)
+//    val line = """{"app_name":"zhe","app_version":"4.2.4","c_label":"C2","c_server":"{\"gid\":\"C2\",\"ugroup\":\"668_649_684_486_485_453_574_573_518_605_516_603_696_695_581_652_478_496_653_523_494_544_377_614_584_711_616_618_449_593\"}","deviceid":"869411025179622","endtime":"1487898778265","endtime_origin":"1487898777452","extend_params":"2","ip":"175.20.230.7","jpid":"00000000-011c-d810-9b17-c31d00a46c2d","location":"吉林省吉林市蛟河市005乡道靠近白石山信用社","os":"android","os_version":"4.4.4","pagename":"page_message_content","pre_extend_params":"","pre_page":"page_message","server_jsonstr":"{\"ab_info\":\"1_2_3\"}","session_id":"1461916191529_zhe_1487898757041","source":"","starttime":"1487898768991","starttime_origin":"1487898768178","ticks":"1461916191529","to_switch":"0","uid":"36541281","utm":"101221","wap_pre_url":"","wap_url":""}"""
+//    val row = Json.parse(line)
+//    println(row)
+//    val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
+//    val abinfo = pageParser.getAbInfo(server_jsonstr)
+//    println(abinfo)
+//    println("rule_id为"+abinfo._1)
+//    println("test_id为"+abinfo._2)
+//    println("select_id为"+abinfo._3)
+
+
+    val l_server_jsonstr = """{"activityname":"click_cube_block","app_name":"zhe","app_version":"4.2.2","c_label":"","c_server":"","cube_position":"1_4","deviceid":"868146027911231","endtime":"1491372673338","endtime_origin":"1491372672813","extend_params":"","ip":"111.58.146.136","jpid":"ffffffff-dc32-eec5-90b8-16f33882f5ca","location":"","os":"android","os_version":"5.1.1","page_extends_param":"312","pagename":"page_tab","pre_extends_param":"1246","pre_page":"page_tab","result":"1","server_jsonstr":"{\"pit_info\":\"ad_id::291::block_id::3199::img_id::9115::1_4\",\"cid\":\"312\",\"_t\":1491372137,\"_z\":\"5\",\"ab_info\":null}","session_id":"0_zhe_1491372092479","source":"","starttime":"1491372673338","starttime_origin":"1491372672813","ticks":"0","to_switch":"0","uid":"0","utm":"106872"}"""
+    val rows = Json.parse(l_server_jsonstr)
+    val server_jsonstr = (rows \ "server_jsonstr").asOpt[String].getOrElse("")
+    println(getForExtendParams("click_cube_block", "", server_jsonstr))
   }
 }

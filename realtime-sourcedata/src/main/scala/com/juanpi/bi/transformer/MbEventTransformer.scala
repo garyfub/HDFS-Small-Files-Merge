@@ -26,7 +26,6 @@ class MbEventTransformer {
                 startDateStr: String, endDateStr: String): (String, String, Any) = {
 
     val row = Json.parse(line)
-    val ticks = (row \ "ticks").asOpt[String].getOrElse("")
     val jpid = (row \ "jpid").asOpt[String].getOrElse("")
     val deviceId = (row \ "deviceid").asOpt[String].getOrElse("")
     val os = (row \ "os").asOpt[String].getOrElse("")
@@ -46,60 +45,55 @@ class MbEventTransformer {
 
     val partitionTime = starttime_origin
 
-    if (ticks.length() >= 13) {
-      var gu_id = ""
-      try {
-        gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
-      } catch {
-        case ex: Exception => { println("=========>>pageAndEventParser.getGuid: " + ex.getStackTraceString) }
-        println("=======>> Event: getGuid Exception 0000 ======>>异常数据:" + row)
-      }
+    var gu_id = ""
+    try {
+      gu_id = pageAndEventParser.getGuid(jpid, deviceId, os)
+    } catch {
+      case ex: Exception => { println("=========>>pageAndEventParser.getGuid: " + ex.getStackTraceString) }
+      println("=======>> Event: getGuid Exception 0000 ======>>异常数据:" + row)
+    }
 
-      val ret = if (gu_id.nonEmpty && !gu_id.equalsIgnoreCase("null")) {
-        val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
-        val loadTime = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_t")
+    val ret = if (gu_id.nonEmpty && !gu_id.equalsIgnoreCase("null")) {
+      val server_jsonstr = (row \ "server_jsonstr").asOpt[String].getOrElse("")
+      val loadTime = pageAndEventParser.getJsonValueByKey(server_jsonstr, "_t")
 
-        // 如果loadTime非空，就需要判断是否是当天的数据，如果不是，需要过滤掉,因此不需要处理
-        if (loadTime.nonEmpty &&
-          DateUtils.dateStr(partitionTime.toLong) != DateUtils.dateStr(loadTime.toLong * 1000)) {
-          ("", "", None)
-        }
-        else {
-          try {
-            val res = parse(partitionTime, row, dimPage, dimEvent, fCate)
-            if (res == null) {
-              ("", "", None)
-            }
-            else {
-              val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = res
-
-              val res_str = pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x => x match {
-                case y if y == null || y.toString.isEmpty => "\\N"
-                case _ => x
-              }).mkString("\001")
-
-              val partitionStr = DateUtils.dateGuidPartitions(partitionTime.toLong, gu_id)
-              (partitionStr, "event", res_str)
-            }
-          }
-          catch {
-            //使用模式匹配来处理异常
-            case ex:Exception => {
-              println("=======>> parse Exception: " + ex.getStackTraceString)
-            }
-              println("=======>> Event: parse Exception!!" + "======>>异常数据:" + row)
-            ("", "", None)
-          }
-        }
-      } else {
-        println("=======>> Event: GU_ID IS NULL 1111!! ======>>异常数据:" + row)
+      // 如果loadTime非空，就需要判断是否是当天的数据，如果不是，需要过滤掉,因此不需要处理
+      if (loadTime.nonEmpty &&
+        DateUtils.dateStr(partitionTime.toLong) != DateUtils.dateStr(loadTime.toLong * 1000)) {
         ("", "", None)
       }
-      ret
+      else {
+        try {
+          val res = parse(partitionTime, row, dimPage, dimEvent, fCate)
+          if (res == null) {
+            ("", "", None)
+          }
+          else {
+            val (user: User, pageAndEvent: PageAndEvent, page: Page, event: Event) = res
+
+            val res_str = pageAndEventParser.combineTuple(user, pageAndEvent, page, event).map(x => x match {
+              case y if y == null || y.toString.isEmpty => "\\N"
+              case _ => x
+            }).mkString("\001")
+
+            val partitionStr = DateUtils.dateGuidPartitions(partitionTime.toLong, gu_id)
+            (partitionStr, "event", res_str)
+          }
+        }
+        catch {
+          //使用模式匹配来处理异常
+          case ex:Exception => {
+            println("=======>> parse Exception: " + ex.getStackTraceString)
+          }
+            println("=======>> Event: parse Exception!!" + "======>>异常数据:" + row)
+          ("", "", None)
+        }
+      }
     } else {
-      println("=======>> Event: ROW IS NULL 22222 ======>>异常数据:" + row)
+      println("=======>> Event: GU_ID IS NULL 1111!! ======>>异常数据:" + row)
       ("", "", None)
     }
+      ret
   }
 
   def parse(partitionTime: String,
@@ -271,7 +265,8 @@ class MbEventTransformer {
       println("page_id=-1 ==> 原始数据为：" + row)
     }
 
-    if (-1 == event_id && "click_temai_inpage_joinbag".equals(activityname)) {
+    if (433 == event_id) {
+//      if (-1 == event_id && "click_temai_inpage_joinbag".equals(activityname)) {
       println("for_pageid:" + forPageId,
         "page_id:" + page_id,
         " ,page_type_id:" + page_type_id,
