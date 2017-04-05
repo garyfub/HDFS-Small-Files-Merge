@@ -1,8 +1,8 @@
-use dw;
+use test;
 
-drop table fct_path_list_real;
+drop table test_fct_path_list_real;
 
-CREATE EXTERNAL TABLE fct_path_list_real(
+CREATE EXTERNAL TABLE test_fct_path_list_real(
 entrance struct<page_id:int,page_value:string,page_lvl2_value:string,event_id:int,event_value:string,event_lvl2_value:string,starttime:string,loadtime:string,pit_type:string,pit_value:string,pit_no:string,sortdate:string,sorthour:string,lplid:string,ptplid:string,gid:string,testid:string,selectid:string,ug_id:string,rule_id:string,x_page_value:string,ref_x_page_value:string>,
 entrance2 struct<page_id:int,page_value:string,page_lvl2_value:string,event_id:int,event_value:string,event_lvl2_value:string,starttime:string,loadtime:string,pit_type:string,pit_value:string,pit_no:string,sortdate:string,sorthour:string,lplid:string,ptplid:string,gid:string,testid:string,selectid:string,ug_id:string,rule_id:string,x_page_value:string,ref_x_page_value:string>,
 guide struct<page_id:int,page_value:string,page_lvl2_value:string,event_id:int,event_value:string,event_lvl2_value:string,starttime:string,loadtime:string,pit_type:string,pit_value:string,pit_no:string,sortdate:string,sorthour:string,lplid:string,ptplid:string,gid:string,testid:string,selectid:string,ug_id:string,rule_id:string,x_page_value:string,ref_x_page_value:string>,
