@@ -67,7 +67,6 @@ public class PathListControledJobs {
 
     public static String getDateTimeStr(long millSeconds, String dateFormat) {
         DateTime dt = new DateTime(millSeconds);
-//        System.out.println(dt.toString("yyyy-MM-dd HH:mm:ss"));
         return dt.toString(dateFormat);
     }
 
@@ -204,6 +203,10 @@ public class PathListControledJobs {
                     String eventId = (splited[40] == null) ? "\\N" : splited[40];
                     String event_value = (splited[41] == null) ? "\\N" : splited[41];
                     String event_lvl2_value = (splited[42] == null) ? "\\N" : splited[42];
+
+                    if("433".equals(eventId)) {
+                        System.out.println("=======>>event_value=" + event_value);
+                    }
 
                     String loadTime = (splited[46] == null) ? "\\N" : splited[46];
 
