@@ -204,10 +204,6 @@ public class PathListControledJobs {
                     String event_value = (splited[41] == null) ? "\\N" : splited[41];
                     String event_lvl2_value = (splited[42] == null) ? "\\N" : splited[42];
 
-                    if("433".equals(eventId)) {
-                        System.out.println("=======>>event_value=" + event_value);
-                    }
-
                     String loadTime = (splited[46] == null) ? "\\N" : splited[46];
 
                     String loadTimeStr;
@@ -237,8 +233,6 @@ public class PathListControledJobs {
                     String pit_value = "\\N";
                     String pit_no = "\\N";
 
-
-//                    List<String> ids = Arrays.asList("349","350","351","352","433","479","480","481","482");
                     if(ids.contains(event_id)) {
                         if(event_value.contains("::")){
                             pit_type = event_value.split("::")[0];
@@ -246,7 +240,8 @@ public class PathListControledJobs {
                                 pit_value = event_value.split("::")[1];
                             }
 
-                            String pitInfo = event_value.split("::")[2];
+                            int len = event_value.split("::").length;
+                            String pitInfo = event_value.split("::")[len-1];
 
                             if(pitInfo.contains("_")){
                                 int i = Integer.parseInt(pitInfo.split("_")[1]);
