@@ -65,20 +65,15 @@ lines terminated by '\n';
 
 -- stored as orc tblproperties ("orc.compress"="SNAPPY")
 
-use temp;
-ALTER TABLE path_list_real CHANGE entrance entrance struct<
-page_id:int,page_value:string,page_lvl2_value:string,event_id:int,event_value:string,event_lvl2_value:string,starttime:string,loadtime:string,testid:string,selectid:string,pittype:string,sortdate:string,sorthour:string,lplid:string,ptplid:string,ug_id:string,rule_id:string,x_page_value:string,ref_x_page_value:string>;
+use test;
+ALTER TABLE test_fct_path_list_real CHANGE entrance entrance struct<page_id:int,page_value:string,page_lvl2_value:string,event_id:int,event_value:string,event_lvl2_value:string,starttime:string,loadtime:string,pit_type:string,pit_value:string,pit_no:int,sortdate:string,sorthour:string,lplid:string,ptplid:string,gid:string,testid:string,selectid:string,ug_id:string,rule_id:string,x_page_value:string,ref_x_page_value:string>;
 
-ALTER TABLE path_list_real CHANGE entrance2 entrance struct<
-page_id:int,page_value:string,page_lvl2_value:string,event_id:int,event_value:string,event_lvl2_value:string,starttime:string,loadtime:string,testid:string,selectid:string,pittype:string,sortdate:string,sorthour:string,lplid:string,ptplid:string,ug_id:string,rule_id:string,x_page_value:string,ref_x_page_value:string>;
+ALTER TABLE test_fct_path_list_real CHANGE entrance2 entrance struct<page_id:int,page_value:string,page_lvl2_value:string,event_id:int,event_value:string,event_lvl2_value:string,starttime:string,loadtime:string,pit_type:string,pit_value:string,pit_no:int,sortdate:string,sorthour:string,lplid:string,ptplid:string,gid:string,testid:string,selectid:string,ug_id:string,rule_id:string,x_page_value:string,ref_x_page_value:string>;
 
-ALTER TABLE path_list_real CHANGE guide guide struct<
-page_id:int,page_value:string,page_lvl2_value:string,event_id:int,event_value:string,event_lvl2_value:string,starttime:string,loadtime:string,testid:string,selectid:string,pittype:string,sortdate:string,sorthour:string,lplid:string,ptplid:string,ug_id:string,rule_id:string,x_page_value:string,ref_x_page_value:string>;
+ALTER TABLE test_fct_path_list_real CHANGE guide guide struct<page_id:int,page_value:string,page_lvl2_value:string,event_id:int,event_value:string,event_lvl2_value:string,starttime:string,loadtime:string,pit_type:string,pit_value:string,pit_no:int,sortdate:string,sorthour:string,lplid:string,ptplid:string,gid:string,testid:string,selectid:string,ug_id:string,rule_id:string,x_page_value:string,ref_x_page_value:string>;
 
-ALTER TABLE path_list_real CHANGE guide2 guide2 struct<
-page_id:int,page_value:string,page_lvl2_value:string,event_id:int,event_value:string,event_lvl2_value:string,starttime:string,loadtime:string,testid:string,selectid:string,pittype:string,sortdate:string,sorthour:string,lplid:string,ptplid:string,ug_id:string,rule_id:string,x_page_value:string,ref_x_page_value:string>;
+ALTER TABLE test_fct_path_list_real CHANGE guide2 guide2 struct<page_id:int,page_value:string,page_lvl2_value:string,event_id:int,event_value:string,event_lvl2_value:string,starttime:string,loadtime:string,pit_type:string,pit_value:string,pit_no:int,sortdate:string,sorthour:string,lplid:string,ptplid:string,gid:string,testid:string,selectid:string,ug_id:string,rule_id:string,x_page_value:string,ref_x_page_value:string>;
 
-ALTER TABLE path_list_real CHANGE before before struct<
-page_id:int,page_value:string,page_lvl2_value:string,event_id:int,event_value:string,event_lvl2_value:string,starttime:string,loadtime:string,testid:string,selectid:string,pittype:string,sortdate:string,sorthour:string,lplid:string,ptplid:string,ug_id:string,rule_id:string,x_page_value:string,ref_x_page_value:string>;
+ALTER TABLE test_fct_path_list_real CHANGE before before struct<page_id:int,page_value:string,page_lvl2_value:string,event_id:int,event_value:string,event_lvl2_value:string,starttime:string,loadtime:string,pit_type:string,pit_value:string,pit_no:int,sortdate:string,sorthour:string,lplid:string,ptplid:string,gid:string,testid:string,selectid:string,ug_id:string,rule_id:string,x_page_value:string,ref_x_page_value:string>;
 
 
