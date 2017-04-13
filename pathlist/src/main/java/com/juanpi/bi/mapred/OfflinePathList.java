@@ -188,7 +188,9 @@ public class OfflinePathList {
         FileOutputFormat.setOutputPath(job, new Path(outputPath));
 
         //设定输出文件的格式化类
-        job.setOutputFormatClass(TextOutputFormat.class);
+        // job.setOutputFormatClass(TextOutputFormat.class);
+        job.setOutputFormatClass(OrcNewOutputFormat.class);
+
 
         return job;
     }
@@ -210,22 +212,22 @@ public class OfflinePathList {
                 {
                     final OfflinePathList.NewK2 k2 = new OfflinePathList.NewK2(splited[1], Long.parseLong(splited[11]));
 
-                    String pageLevelId = (splited[0] == null) ? "\\N":splited[0];
-                    String pageId = (splited[2] == null) ? "\\N":splited[2];
-                    String page_value = (splited[3] == null) ? "\\N":splited[3];
-                    String page_lvl2_value = (splited[4] == null) ? "\\N":splited[4];
-                    String eventId = (splited[5] == null) ? "\\N":splited[5];
-                    String event_value = (splited[6] == null) ? "\\N":splited[6];
-                    String event_lvl2_value = (splited[7] == null) ? "\\N":splited[7];
-                    String test_id = (splited[9] == null) ? "\\N":splited[9];
-                    String select_id = (splited[10] == null) ? "\\N":splited[10];
-                    String starttime = (splited[11] == null) ? "\\N":splited[11];
-                    String pit_type = (splited[12] == null) ? "\\N":splited[12];
-                    String sortdate = (splited[13] == null) ? "\\N":splited[13];
-                    String sorthour = (splited[14] == null) ? "\\N":splited[14];
-                    String lplid = (splited[15] == null) ? "\\N":splited[15];
-                    String ptplid = (splited[16] == null) ? "\\N":splited[16];
-                    String ug_id  = (splited[17] == null) ? "\\N":splited[17];
+                    String pageLevelId = (splited[0] == null) ? "0":splited[0];
+                    String pageId = (splited[2] == null) ? "0":splited[2];
+                    String page_value = (splited[3] == null) ? "0":splited[3];
+                    String page_lvl2_value = (splited[4] == null) ? "0":splited[4];
+                    String eventId = (splited[5] == null) ? "0":splited[5];
+                    String event_value = (splited[6] == null) ? "0":splited[6];
+                    String event_lvl2_value = (splited[7] == null) ? "0":splited[7];
+                    String test_id = (splited[9] == null) ? "0":splited[9];
+                    String select_id = (splited[10] == null) ? "0":splited[10];
+                    String starttime = (splited[11] == null) ? "0":splited[11];
+                    String pit_type = (splited[12] == null) ? "0":splited[12];
+                    String sortdate = (splited[13] == null) ? "0":splited[13];
+                    String sorthour = (splited[14] == null) ? "0":splited[14];
+                    String lplid = (splited[15] == null) ? "0":splited[15];
+                    String ptplid = (splited[16] == null) ? "0":splited[16];
+                    String ug_id  = (splited[17] == null) ? "0":splited[17];
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
                     String pageLvlId = pageLevelId;
@@ -293,12 +295,14 @@ public class OfflinePathList {
     // static class NewValue
     static class MyReducer extends Reducer<OfflinePathList.NewK2, OfflinePathList.TextArrayWritable, Text, Text> {
 
+        private final OrcSerde serde = new OrcSerde();
+
         protected void reduce(OfflinePathList.NewK2 k2,
                               Iterable<OfflinePathList.TextArrayWritable> v2s,
                               Context context) throws IOException,
                 InterruptedException
         {
-            String[] initStrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N","\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
+            String[] initStrArray = {"0" ,"0" ,"0" ,"0" ,"0" ,"0" ,"0" ,"0","0" ,"0" ,"0" ,"0" ,"0" ,"0" ,"0"};
             String initStr = Joiner.on("\t").join(initStrArray);
 
             String level1 = initStr;
@@ -314,14 +318,9 @@ public class OfflinePathList {
                     String pageLvl = v2.toStrings()[1];
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
 
-                    if(pageLvlId == 1){
+                    if(pageLvlId == 1 || pageLvlId == 2)
                         level1= pageLvl;
                         level2 = initStr;
-                        level3 = initStr;
-                        level4 = initStr;
-                        level5 = initStr;
-                    } else if(pageLvlId == 2){
-                        level2= pageLvl;
                         level3 = initStr;
                         level4 = initStr;
                         level5 = initStr;
@@ -340,8 +339,9 @@ public class OfflinePathList {
 
                     // 5 个级别
                     Text key2 = new Text(keyStr);
-                    Text value2 = new Text(v2.toStrings()[2]);
-                    context.write(key2, value2);
+                    // Text value2 = new Text(v2.toStrings()[2]);
+                    row = serde.serialize(v2.toStrings()[2]);
+                    context.write(key2, row);
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.out.println("======>>Exception: " +  Joiner.on("#").join(v2.toStrings()));
@@ -351,7 +351,7 @@ public class OfflinePathList {
     }
 
     /**
-     原来的v2不能参与排序，把原来的k2和v2封装到一个类中，作为新的k2
+     * 原来的v2不能参与排序，把原来的k2和v2封装到一个类中，作为新的k2
      *
      */
     static class  NewK2 implements WritableComparable<OfflinePathList.NewK2> {
