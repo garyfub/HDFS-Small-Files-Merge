@@ -48,7 +48,7 @@ public class OfflinePathList {
     static String base = "hdfs://nameservice1/user/hive";
     static final String SOURCE_DIR = "fct_path_list_mapr";
 //    static final String TARGET_DIR = "fct_for_path_list_offline";
-    static final String TARGET_DIR = "test";
+    static final String TARGET_DIR = "test/path_list_offline";
     static Configuration conf = new Configuration();
 
     static FileSystem fs;
@@ -417,10 +417,11 @@ public class OfflinePathList {
 
                     // 5 个级别
                     Text key = new Text(keyStr);
-                     Text val = new Text(v2.toStrings()[2]);
+                    Text val = new Text(v2.toStrings()[2]);
 //                    String[] result = {keyStr, v2.toStrings()[2]};
 //                    row = serde.serialize(new Row(result), inspector);
 //                    context.write(NullWritable.get(), row);
+                    System.out.println("======");
 
                     pair.setFieldValue(0, key);
                     pair.setFieldValue(1, val);
@@ -579,8 +580,8 @@ public class OfflinePathList {
      * run this
      */
     private static void run(String dateStr) {
-        JobsControl(0x0, 0x8, "OfflinePathList08");
-        JobsControl(0x9, 0xf, "OfflinePathList0f");
+        JobsControl(0x0, 0x0, "OfflinePathList08");
+//        JobsControl(0x9, 0xf, "OfflinePathList0f");
     }
 
     /**
