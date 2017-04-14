@@ -577,8 +577,8 @@ public class OfflinePathList {
      * @param args
      */
     public static void main(String[] args){
-//        run("");
-    testORC();
+        run("");
+//    testORC();
 
     }
 }
