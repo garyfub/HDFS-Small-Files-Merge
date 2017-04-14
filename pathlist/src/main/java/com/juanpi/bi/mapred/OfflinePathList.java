@@ -5,7 +5,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import org.apache.hadoop.hive.ql.io.orc.OrcNewOutputFormat;
 import org.apache.hadoop.hive.ql.io.orc.OrcSerde;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorFactory;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
@@ -26,6 +25,7 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
 import org.apache.orc.TypeDescription;
 import org.apache.orc.mapred.OrcList;
 import org.apache.orc.mapred.OrcStruct;
+import org.apache.orc.mapreduce.OrcOutputFormat;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -200,7 +200,7 @@ public class OfflinePathList {
 
         //设定输出文件的格式化类
         // job.setOutputFormatClass(TextOutputFormat.class);
-        job.setOutputFormatClass(OrcNewOutputFormat.class);
+        job.setOutputFormatClass(OrcOutputFormat.class);
 
 
         return job;
@@ -362,11 +362,18 @@ public class OfflinePathList {
 //
 //        private Writable row;
 
-        OrcSerde serde = new OrcSerde();
-        Writable row;
-        StructObjectInspector inspector = (StructObjectInspector) ObjectInspectorFactory
-                .getReflectionObjectInspector(Row.class,
-                        ObjectInspectorFactory.ObjectInspectorOptions.JAVA);
+//        OrcSerde serde = new OrcSerde();
+//        Writable row;
+//        StructObjectInspector inspector = (StructObjectInspector) ObjectInspectorFactory
+//                .getReflectionObjectInspector(Row.class,
+//                        ObjectInspectorFactory.ObjectInspectorOptions.JAVA);
+
+
+        private TypeDescription schema = TypeDescription.fromString("struct<key:string,value:string>");
+
+        private OrcStruct pair = (OrcStruct) OrcStruct.createValue(schema);
+
+        private final NullWritable nw = NullWritable.get();
 
         protected void reduce(NewK2 k2,
                               Iterable<TextArrayWritable> v2s,
@@ -409,12 +416,16 @@ public class OfflinePathList {
                     String keyStr = level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5;
 
                     // 5 个级别
-                    Text key2 = new Text(keyStr);
-                     Text value2 = new Text(v2.toStrings()[2]);
-                    String[] result = {keyStr, v2.toStrings()[2]};
-                    row = serde.serialize(new Row(result), inspector);
-//                    row = serde.serialize(v2.toStrings()[2], inspector);
-                    context.write(NullWritable.get(), row);
+                    Text key = new Text(keyStr);
+                     Text val = new Text(v2.toStrings()[2]);
+//                    String[] result = {keyStr, v2.toStrings()[2]};
+//                    row = serde.serialize(new Row(result), inspector);
+//                    context.write(NullWritable.get(), row);
+
+                    pair.setFieldValue(0, key);
+                    pair.setFieldValue(1, val);
+                    context.write(nw, pair);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.out.println("======>>Exception: " +  Joiner.on("#").join(v2.toStrings()));
