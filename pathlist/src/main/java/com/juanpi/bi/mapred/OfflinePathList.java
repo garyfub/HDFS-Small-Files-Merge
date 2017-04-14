@@ -368,6 +368,7 @@ public class OfflinePathList {
 //                .getReflectionObjectInspector(Row.class,
 //                        ObjectInspectorFactory.ObjectInspectorOptions.JAVA);
 
+        System.out.println("======");
 
         private TypeDescription schema = TypeDescription.fromString("struct<key:string,value:string>");
 
