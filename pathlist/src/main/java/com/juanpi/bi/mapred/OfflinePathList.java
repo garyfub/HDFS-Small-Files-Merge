@@ -352,23 +352,6 @@ public class OfflinePathList {
     static class MyReducer extends Reducer<NewK2, TextArrayWritable, NullWritable, Writable>
     {
 
-//        private static final String SCHEMA = "<gu_id:string, endtime:bigint, last_entrance_page_id:int, last_guide_page_id:int, last_before_goods_page_id:int, last_entrance_page_value:string, last_guide_page_value:string, last_before_goods_page_value:string, last_entrance_event_id:int, last_guide_event_id:int, last_before_goods_event_id:int, last_entrance_event_value:string, last_guide_event_value:string, last_before_goods_event_value:string, last_entrance_timestamp:bigint, last_guide_timestamp:bigint, last_before_goods_timestamp:bigint, guide_lvl2_page_id:int, guide_lvl2_page_value:string, guide_lvl2_event_id:int, guide_lvl2_event_value:string, guide_lvl2_timestamp:bigint, guide_is_del:int, guide_lvl2_is_del:int, before_goods_is_del:int, entrance_page_lvl2_value:string, guide_page_lvl2_value:string, guide_lvl2_page_lvl2_value:string, before_goods_page_lvl2_value:string, entrance_event_lvl2_value:string, guide_event_lvl2_value:string, guide_lvl2_event_lvl2_value:string, before_goods_event_lvl2_value:string, rule_id:string, test_id:string, select_id:string, last_entrance_pit_type:int, last_entrance_sortdate:string, last_entrance_sorthour:int, last_entrance_lplid:int, last_entrance_ptplid:int, last_entrance_ug_id:int>";
-//
-//        private final TypeInfo typeInfo = TypeInfoUtils.getTypeInfoFromTypeString(SCHEMA);
-//
-//        private final OrcSerde serde = new OrcSerde();
-//
-//        private final ObjectInspector inspector = TypeInfoUtils.getStandardJavaObjectInspectorFromTypeInfo(typeInfo);
-//
-//        private Writable row;
-
-//        OrcSerde serde = new OrcSerde();
-//        Writable row;
-//        StructObjectInspector inspector = (StructObjectInspector) ObjectInspectorFactory
-//                .getReflectionObjectInspector(Row.class,
-//                        ObjectInspectorFactory.ObjectInspectorOptions.JAVA);
-
-        System.out.println("======");
 
         private TypeDescription schema = TypeDescription.fromString("struct<key:string,value:string>");
 
@@ -381,6 +364,8 @@ public class OfflinePathList {
                               Context context) throws IOException,
                 InterruptedException
         {
+            System.out.println("======");
+
             String[] initStrArray = {"0" ,"0" ,"0" ,"0" ,"0" ,"0" ,"0" ,"0","0" ,"0" ,"0" ,"0" ,"0" ,"0" ,"0"};
             String initStr = Joiner.on("\t").join(initStrArray);
 
