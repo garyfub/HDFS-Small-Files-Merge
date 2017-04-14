@@ -12,7 +12,7 @@ import org.joda.time.DateTime
 object DateUtils {
   def dateHour(milliseconds: Long):DateHour = {
     val dateTime = new DateTime(milliseconds)
-    DateHour(dateTime.toString("yyyy-MM-dd"), dateTime.toString("H"))
+    DateHour(dateTime.toString("yyyy-MM-dd"), dateTime.toString("HH"))
   }
 
   /**
@@ -48,7 +48,7 @@ object DateUtils {
     */
   def dateHourStr(milliseconds: Long): (String, String) = {
     val dateTime = new DateTime(milliseconds)
-    (dateTime.toString("yyyy-MM-dd"), dateTime.toString("H"))
+    (dateTime.toString("yyyy-MM-dd"), dateTime.toString("HH"))
   }
 
   /**
@@ -216,7 +216,9 @@ object DateUtils {
     }
     println(ss)
 
+    val (date, hour) = DateUtils.dateHourStr("1492018162000".toLong)
 
+println(date, hour)
 
 
   }

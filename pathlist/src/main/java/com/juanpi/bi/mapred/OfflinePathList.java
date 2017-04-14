@@ -361,10 +361,9 @@ public class OfflinePathList {
 
         protected void reduce(NewK2 k2,
                               Iterable<TextArrayWritable> v2s,
-                              Context context) throws IOException,
-                InterruptedException
+                              Context context) throws IOException, InterruptedException
         {
-            System.out.println("======");
+            System.out.println("====================================");
 
             String[] initStrArray = {"0" ,"0" ,"0" ,"0" ,"0" ,"0" ,"0" ,"0","0" ,"0" ,"0" ,"0" ,"0" ,"0" ,"0"};
             String initStr = Joiner.on("\t").join(initStrArray);
