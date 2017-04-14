@@ -349,7 +349,7 @@ public class OfflinePathList {
     }
 
     // static class NewValue
-    static class MyReducer extends Reducer<NewK2, TextArrayWritable, NullWritable, Writable>
+    static class MyReducer extends Reducer<NewK2, TextArrayWritable, NullWritable, OrcStruct>
     {
 
 
