@@ -4,6 +4,12 @@ import com.google.common.base.Joiner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+
+import org.apache.hadoop.hive.ql.io.orc.OrcNewOutputFormat;
+import org.apache.hadoop.hive.ql.io.orc.OrcSerde;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorFactory;
+import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -13,14 +19,18 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
+
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
+import org.apache.orc.TypeDescription;
+import org.apache.orc.mapred.OrcList;
+import org.apache.orc.mapred.OrcStruct;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.hadoop.io.WritableComparator.readVLong;
@@ -37,7 +47,8 @@ public class OfflinePathList {
     // hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr
     static String base = "hdfs://nameservice1/user/hive";
     static final String SOURCE_DIR = "fct_path_list_mapr";
-    static final String TARGET_DIR = "fct_for_path_list_offline";
+//    static final String TARGET_DIR = "fct_for_path_list_offline";
+    static final String TARGET_DIR = "test";
     static Configuration conf = new Configuration();
 
     static FileSystem fs;
@@ -162,12 +173,12 @@ public class OfflinePathList {
         job.setInputFormatClass(TextInputFormat.class);//指定哪个类用来格式化输入文件
 
         // 指定自定义的Mapper类
-        job.setMapperClass(OfflinePathList.MyMapper.class);
+        job.setMapperClass(MyMapper.class);
 
         // 指定输出<k2,v2>的类型
-        job.setMapOutputKeyClass(OfflinePathList.NewK2.class);
+        job.setMapOutputKeyClass(NewK2.class);
 
-        job.setMapOutputValueClass(OfflinePathList.TextArrayWritable.class);
+        job.setMapOutputValueClass(TextArrayWritable.class);
 
         // 指定分区类
         job.setPartitionerClass(HashPartitioner.class);
@@ -175,14 +186,14 @@ public class OfflinePathList {
         job.setNumReduceTasks(1);
 
         // TODO 排序、分区
-        job.setGroupingComparatorClass(OfflinePathList.MyGroupingComparator.class);
+        job.setGroupingComparatorClass(MyGroupingComparator.class);
 
         //2.2 指定自定义的reduce类
-        job.setReducerClass(OfflinePathList.MyReducer.class);
+        job.setReducerClass(MyReducer.class);
 
-        //指定输出<k3,v3>的类型
-        job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(Text.class);
+        //设置最终输出结果<key,value>类型；
+        job.setOutputKeyClass(NullWritable.class);
+        job.setOutputValueClass(Writable.class);
 
         //2.3 指定输出到哪里
         FileOutputFormat.setOutputPath(job, new Path(outputPath));
@@ -198,7 +209,7 @@ public class OfflinePathList {
     /**
      * 计算层级
      */
-    static class MyMapper extends Mapper<LongWritable, Text, OfflinePathList.NewK2, OfflinePathList.TextArrayWritable> {
+    static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
         int xx = 0;
 
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException, ArrayIndexOutOfBoundsException, NumberFormatException {
@@ -210,7 +221,7 @@ public class OfflinePathList {
                 String gu_id = splited[1];
                 if(!gu_id.isEmpty() && !gu_id.equals("0"))
                 {
-                    final OfflinePathList.NewK2 k2 = new OfflinePathList.NewK2(splited[1], Long.parseLong(splited[11]));
+                    final NewK2 k2 = new NewK2(splited[1], Long.parseLong(splited[11]));
 
                     String pageLevelId = (splited[0] == null) ? "0":splited[0];
                     String pageId = (splited[2] == null) ? "0":splited[2];
@@ -271,7 +282,7 @@ public class OfflinePathList {
                             value.toString().replace("\001", "\t")
                     };
 
-                    final OfflinePathList.TextArrayWritable v2 = new OfflinePathList.TextArrayWritable(str);
+                    final TextArrayWritable v2 = new TextArrayWritable(str);
 
                     xx++;
 
@@ -292,13 +303,73 @@ public class OfflinePathList {
         }
     }
 
+    public static class MyORCReducer
+            extends Reducer<Text,IntWritable,NullWritable,OrcStruct> {
+
+        private TypeDescription schema =
+                TypeDescription.fromString("struct<key:string,ints:array<int>>");
+
+        // createValue creates the correct value type for the schema
+        private OrcStruct pair = (OrcStruct) OrcStruct.createValue(schema);
+
+        // get a handle to the list of ints
+        private OrcList<IntWritable> valueList =
+                (OrcList<IntWritable>) pair.getFieldValue(1);
+
+        private final NullWritable nada = NullWritable.get();
+
+        public void reduce(Text key, Iterable<IntWritable> values,
+                           Context output) throws IOException, InterruptedException
+        {
+            pair.setFieldValue(0, key);
+            valueList.clear();
+            for(IntWritable val: values) {
+                valueList.add(new IntWritable(val.get()));
+            }
+            output.write(nada, pair);
+        }
+    }
+
+    public static class ORCReducer extends
+            Reducer<NewK2, TextArrayWritable, NullWritable, OrcStruct> {
+        private TypeDescription schema = TypeDescription.fromString("struct<key:string,value:string>");
+
+        private OrcStruct pair = (OrcStruct) OrcStruct.createValue(schema);
+
+        private final NullWritable nw = NullWritable.get();
+
+        public void reduce(Text key, Iterable<Text> values, Context output)
+                throws IOException, InterruptedException {
+            for (Text val : values) {
+                pair.setFieldValue(0, key);
+                pair.setFieldValue(1, val);
+                output.write(nw, pair);
+            }
+        }
+    }
+
     // static class NewValue
-    static class MyReducer extends Reducer<OfflinePathList.NewK2, OfflinePathList.TextArrayWritable, Text, Text> {
+    static class MyReducer extends Reducer<NewK2, TextArrayWritable, NullWritable, Writable>
+    {
 
-        private final OrcSerde serde = new OrcSerde();
+//        private static final String SCHEMA = "<gu_id:string, endtime:bigint, last_entrance_page_id:int, last_guide_page_id:int, last_before_goods_page_id:int, last_entrance_page_value:string, last_guide_page_value:string, last_before_goods_page_value:string, last_entrance_event_id:int, last_guide_event_id:int, last_before_goods_event_id:int, last_entrance_event_value:string, last_guide_event_value:string, last_before_goods_event_value:string, last_entrance_timestamp:bigint, last_guide_timestamp:bigint, last_before_goods_timestamp:bigint, guide_lvl2_page_id:int, guide_lvl2_page_value:string, guide_lvl2_event_id:int, guide_lvl2_event_value:string, guide_lvl2_timestamp:bigint, guide_is_del:int, guide_lvl2_is_del:int, before_goods_is_del:int, entrance_page_lvl2_value:string, guide_page_lvl2_value:string, guide_lvl2_page_lvl2_value:string, before_goods_page_lvl2_value:string, entrance_event_lvl2_value:string, guide_event_lvl2_value:string, guide_lvl2_event_lvl2_value:string, before_goods_event_lvl2_value:string, rule_id:string, test_id:string, select_id:string, last_entrance_pit_type:int, last_entrance_sortdate:string, last_entrance_sorthour:int, last_entrance_lplid:int, last_entrance_ptplid:int, last_entrance_ug_id:int>";
+//
+//        private final TypeInfo typeInfo = TypeInfoUtils.getTypeInfoFromTypeString(SCHEMA);
+//
+//        private final OrcSerde serde = new OrcSerde();
+//
+//        private final ObjectInspector inspector = TypeInfoUtils.getStandardJavaObjectInspectorFromTypeInfo(typeInfo);
+//
+//        private Writable row;
 
-        protected void reduce(OfflinePathList.NewK2 k2,
-                              Iterable<OfflinePathList.TextArrayWritable> v2s,
+        OrcSerde serde = new OrcSerde();
+        Writable row;
+        StructObjectInspector inspector = (StructObjectInspector) ObjectInspectorFactory
+                .getReflectionObjectInspector(Row.class,
+                        ObjectInspectorFactory.ObjectInspectorOptions.JAVA);
+
+        protected void reduce(NewK2 k2,
+                              Iterable<TextArrayWritable> v2s,
                               Context context) throws IOException,
                 InterruptedException
         {
@@ -311,14 +382,14 @@ public class OfflinePathList {
             String level4 = initStr;
             String level5 = initStr;
 
-            for (OfflinePathList.TextArrayWritable v2 : v2s) {
+            for (TextArrayWritable v2 : v2s) {
 
                 try {
                     String pageLvlIdStr = v2.toStrings()[0];
                     String pageLvl = v2.toStrings()[1];
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
 
-                    if(pageLvlId == 1 || pageLvlId == 2)
+                    if(pageLvlId == 1 || pageLvlId == 2){
                         level1= pageLvl;
                         level2 = initStr;
                         level3 = initStr;
@@ -339,9 +410,11 @@ public class OfflinePathList {
 
                     // 5 个级别
                     Text key2 = new Text(keyStr);
-                    // Text value2 = new Text(v2.toStrings()[2]);
-                    row = serde.serialize(v2.toStrings()[2]);
-                    context.write(key2, row);
+                     Text value2 = new Text(v2.toStrings()[2]);
+                    String[] result = {keyStr, v2.toStrings()[2]};
+                    row = serde.serialize(new Row(result), inspector);
+//                    row = serde.serialize(v2.toStrings()[2], inspector);
+                    context.write(NullWritable.get(), row);
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.out.println("======>>Exception: " +  Joiner.on("#").join(v2.toStrings()));
@@ -350,11 +423,29 @@ public class OfflinePathList {
         }
     }
 
+    static class Row implements Writable {
+        String key;
+        String value;
+
+        Row(String[] val){
+            this.key = val[0];
+            this.value = val[1];
+        }
+        @Override
+        public void readFields(DataInput arg0) throws IOException {
+            throw new UnsupportedOperationException("no write");
+        }
+        @Override
+        public void write(DataOutput arg0) throws IOException {
+            throw new UnsupportedOperationException("no read");
+        }
+    }
+
     /**
      * 原来的v2不能参与排序，把原来的k2和v2封装到一个类中，作为新的k2
      *
      */
-    static class  NewK2 implements WritableComparable<OfflinePathList.NewK2> {
+    static class  NewK2 implements WritableComparable<NewK2> {
         String first;
         Long second;
 
@@ -382,7 +473,7 @@ public class OfflinePathList {
          * 当第一列不同时，升序；当第一列相同时，第二列升序
          */
         @Override
-        public int compareTo(OfflinePathList.NewK2 o) {
+        public int compareTo(NewK2 o) {
             final long minus = this.first.compareTo(o.first);
             if(minus !=0){
                 return (int)minus;
@@ -397,18 +488,18 @@ public class OfflinePathList {
 
         @Override
         public boolean equals(Object obj) {
-            if(!(obj instanceof OfflinePathList.NewK2)){
+            if(!(obj instanceof NewK2)){
                 return false;
             }
-            OfflinePathList.NewK2 oK2 = (OfflinePathList.NewK2)obj;
+            NewK2 oK2 = (NewK2)obj;
             return (this.first.equals(oK2.first)) && (this.second == oK2.second);
         }
     }
 
-    static class MyGroupingComparator implements RawComparator<OfflinePathList.NewK2> {
+    static class MyGroupingComparator implements RawComparator<NewK2> {
 
         @Override
-        public int compare(OfflinePathList.NewK2 o1, OfflinePathList.NewK2 o2) {
+        public int compare(NewK2 o1, NewK2 o2) {
             // lexicographically 即按照字典序排序
             return (int)(o1.first.compareTo(o2.first));
         }
@@ -463,6 +554,16 @@ public class OfflinePathList {
         }
     }
 
+    private static void testORC() {
+         final TypeInfo typeInfo = TypeInfoUtils
+                .getTypeInfoFromTypeString("struct<fromip:string,request_time:timestamp,request_method:string,request_api:string,param:map<string,string>,http_version:string," +
+                        "request_url:string,return_code:int,http_body_length:int,respone_time:decimal(19,4),respone_body_length:int,http_refer:string,user_agent:string,server_addr:string,upstream_addr:string,host:string,cacheflg:string>");
+
+        System.out.println(typeInfo.toString());
+        final ObjectInspector inspector = TypeInfoUtils.getStandardJavaObjectInspectorFromTypeInfo(typeInfo);
+        System.out.println(inspector);
+    }
+
     /**
      * run this
      */
@@ -476,11 +577,8 @@ public class OfflinePathList {
      * @param args
      */
     public static void main(String[] args){
-        run("");
+//        run("");
+    testORC();
 
-//        {
-//            System.out.println(getInputPath("a"));
-//            System.out.println(getOutputPath("a"));
-//        }
     }
 }
