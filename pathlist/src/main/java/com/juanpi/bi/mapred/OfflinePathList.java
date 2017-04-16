@@ -339,23 +339,58 @@ public class OfflinePathList {
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
 
                     if(pageLvlId == 1 || pageLvlId == 2){
-                        level1= pageLvl;
-                        level2 = initStr;
+//                        level1= pageLvl;
+                        String[] lvls = pageLvl.split("\t");
+                        pair.setFieldValue("last_entrance_page_id", new Text(lvls[2]));
+                        pair.setFieldValue("last_entrance_page_value", new Text(lvls[5]));
+                        pair.setFieldValue("last_entrance_event_id", new Text(lvls[8]));
+                        pair.setFieldValue("last_entrance_event_value", new Text(lvls[11]));
+                        pair.setFieldValue("last_entrance_timestamp", new Text(lvls[14]));
+                        pair.setFieldValue("last_entrance_pit_type", new Text(lvls[36]));
+                        pair.setFieldValue("last_entrance_sortdate", new Text(lvls[37]));
+                        pair.setFieldValue("last_entrance_sorthour", new Text(lvls[38]));
+                        pair.setFieldValue("last_entrance_lplid", new Text(lvls[39]));
+                        pair.setFieldValue("last_entrance_ptplid", new Text(lvls[40]));
+                        pair.setFieldValue("last_entrance_ug_id", new Text(lvls[41]));
+//                        level2 = initStr
+
                         level3 = initStr;
                         level4 = initStr;
                         level5 = initStr;
                     } else if(pageLvlId == 3){
-                        level3 = pageLvl;
+//                        level3 = pageLvl;
+                        String[] lvls = pageLvl.split("\t");
+                        pair.setFieldValue("last_guide_page_id", new Text(lvls[3]));
+                        pair.setFieldValue("last_guide_page_value", new Text(lvls[6]));
+                        pair.setFieldValue("last_guide_event_id", new Text(lvls[9]));
+                        pair.setFieldValue("last_guide_event_value", new Text(lvls[12]));
+                        pair.setFieldValue("last_guide_timestamp", new Text(lvls[15]));
+
                         level4 = initStr;
                         level5 = initStr;
                     } else if(pageLvlId == 4){
-                        level4 = pageLvl;
+//                        level4 = pageLvl;
+                        String[] lvls = pageLvl.split("\t");
+                        pair.setFieldValue("guide2_page_id", new Text(lvls[4));
+                        pair.setFieldValue("guide2_page_value", new Text(lvls[7]));
+                        pair.setFieldValue("guide2_event_id", new Text(lvls[10]));
+                        pair.setFieldValue("guide2_event_value", new Text(lvls[13]));
+                        pair.setFieldValue("guide2_timestamp", new Text(lvls[16]));
                         level5 = initStr;
                     } else if(pageLvlId == 5){
-                        level5 = pageLvl;
+//                        level5 = pageLvl;
+                        String[] lvls = pageLvl.split("\t");
+                        pair.setFieldValue("last_before_page_id", new Text(lvls[4));
+                        pair.setFieldValue("last_before_page_value", new Text(lvls[7]));
+                        pair.setFieldValue("last_before_event_id", new Text(lvls[10]));
+                        pair.setFieldValue("last_before_event_value", new Text(lvls[13]));
+                        pair.setFieldValue("last_before_timestamp", new Text(lvls[16]));
                     }
 
-                    String keyStr = level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5;
+
+//                    String keyStr = level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5;
+
+                    String keyStr = level1 + "\t" + level3+ "\t" + level4 + "\t" + level5;
 
                     // 5 个级别
                     Text key = new Text(keyStr);
@@ -363,10 +398,16 @@ public class OfflinePathList {
 //                    String[] result = {keyStr, v2.toStrings()[2]};
 //                    row = serde.serialize(new Row(result), inspector);
 //                    context.write(NullWritable.get(), row);
-                    System.out.println("======");
 
                     pair.setFieldValue(0, key);
                     pair.setFieldValue(1, val);
+
+
+
+
+
+
+
                     context.write(nw, pair);
 
                 } catch (Exception e) {
