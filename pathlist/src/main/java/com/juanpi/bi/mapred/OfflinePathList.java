@@ -5,27 +5,26 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import org.apache.hadoop.hive.ql.io.orc.OrcSerde;
-import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorFactory;
-import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
-import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
-import org.apache.hadoop.io.*;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.orc.TypeDescription;
+import org.apache.orc.mapred.OrcStruct;
+import org.apache.orc.mapreduce.OrcOutputFormat;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
+import org.apache.hadoop.io.*;
+
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
 
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
-import org.apache.orc.TypeDescription;
-import org.apache.orc.mapred.OrcList;
-import org.apache.orc.mapred.OrcStruct;
-import org.apache.orc.mapreduce.OrcOutputFormat;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -303,58 +302,15 @@ public class OfflinePathList {
         }
     }
 
-    public static class MyORCReducer
-            extends Reducer<Text,IntWritable,NullWritable,OrcStruct> {
-
-        private TypeDescription schema =
-                TypeDescription.fromString("struct<key:string,ints:array<int>>");
-
-        // createValue creates the correct value type for the schema
-        private OrcStruct pair = (OrcStruct) OrcStruct.createValue(schema);
-
-        // get a handle to the list of ints
-        private OrcList<IntWritable> valueList =
-                (OrcList<IntWritable>) pair.getFieldValue(1);
-
-        private final NullWritable nada = NullWritable.get();
-
-        public void reduce(Text key, Iterable<IntWritable> values,
-                           Context output) throws IOException, InterruptedException
-        {
-            pair.setFieldValue(0, key);
-            valueList.clear();
-            for(IntWritable val: values) {
-                valueList.add(new IntWritable(val.get()));
-            }
-            output.write(nada, pair);
-        }
-    }
-
-    public static class ORCReducer extends
-            Reducer<NewK2, TextArrayWritable, NullWritable, OrcStruct> {
-        private TypeDescription schema = TypeDescription.fromString("struct<key:string,value:string>");
-
-        private OrcStruct pair = (OrcStruct) OrcStruct.createValue(schema);
-
-        private final NullWritable nw = NullWritable.get();
-
-        public void reduce(Text key, Iterable<Text> values, Context output)
-                throws IOException, InterruptedException {
-            for (Text val : values) {
-                pair.setFieldValue(0, key);
-                pair.setFieldValue(1, val);
-                output.write(nw, pair);
-            }
-        }
-    }
 
     // static class NewValue
     static class MyReducer extends Reducer<NewK2, TextArrayWritable, NullWritable, OrcStruct>
     {
 
-
         private TypeDescription schema = TypeDescription.fromString("struct<key:string,value:string>");
 
+
+        // createValue creates the correct value type for the schema
         private OrcStruct pair = (OrcStruct) OrcStruct.createValue(schema);
 
         private final NullWritable nw = NullWritable.get();
