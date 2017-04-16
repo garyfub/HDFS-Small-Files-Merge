@@ -23,9 +23,6 @@ import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
 
-import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
-import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -162,6 +159,10 @@ public class OfflinePathList {
      */
     public static Job jobConstructor(String inputPath, String outputPath, String guStr) throws Exception {
 
+        System.out.println("job start...");
+
+        conf.set("orc.mapred.output.schema", "struct<key:string,value:string>");
+
         Job job = Job.getInstance(conf, "OfflinePathList_Partition_" + guStr);
 
         // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
@@ -192,7 +193,7 @@ public class OfflinePathList {
 
         //设置最终输出结果<key,value>类型；
         job.setOutputKeyClass(NullWritable.class);
-        job.setOutputValueClass(Writable.class);
+        job.setOutputValueClass(OrcStruct.class);
 
         //2.3 指定输出到哪里
         FileOutputFormat.setOutputPath(job, new Path(outputPath));
@@ -306,6 +307,7 @@ public class OfflinePathList {
     // static class NewValue
     static class MyReducer extends Reducer<NewK2, TextArrayWritable, NullWritable, OrcStruct>
     {
+
 
         private TypeDescription schema = TypeDescription.fromString("struct<key:string,value:string>");
 
@@ -507,15 +509,6 @@ public class OfflinePathList {
         }
     }
 
-    private static void testORC() {
-         final TypeInfo typeInfo = TypeInfoUtils
-                .getTypeInfoFromTypeString("struct<fromip:string,request_time:timestamp,request_method:string,request_api:string,param:map<string,string>,http_version:string," +
-                        "request_url:string,return_code:int,http_body_length:int,respone_time:decimal(19,4),respone_body_length:int,http_refer:string,user_agent:string,server_addr:string,upstream_addr:string,host:string,cacheflg:string>");
-
-        System.out.println(typeInfo.toString());
-        final ObjectInspector inspector = TypeInfoUtils.getStandardJavaObjectInspectorFromTypeInfo(typeInfo);
-        System.out.println(inspector);
-    }
 
     /**
      * run this
@@ -531,7 +524,5 @@ public class OfflinePathList {
      */
     public static void main(String[] args){
         run("");
-//    testORC();
-
     }
 }
