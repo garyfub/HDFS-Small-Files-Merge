@@ -349,13 +349,14 @@ public class OfflinePathList {
                               Iterable<TextArrayWritable> v2s,
                               Context context) throws IOException, InterruptedException
         {
-            System.out.println("====================================");
 
             pair.setFieldValue("gu_id", new Text(k2.first));
             // 实际字段来源为starttime，只后来创建对应表时，字段名字写成了endtime
             pair.setFieldValue("endtime", new LongWritable(k2.second));
 
             for (TextArrayWritable v2 : v2s) {
+
+                System.out.println("====================================");
 
                 try {
                     String pageLvlIdStr = v2.toStrings()[0];
@@ -376,8 +377,8 @@ public class OfflinePathList {
 
                     if(pageLvlId == 1 || pageLvlId == 2){
 
-
                         pair.setFieldValue("last_entrance_page_id",     new IntWritable(Integer.valueOf(lvls[0])));
+                        System.out.println("last_entrance_page_id=" + pair.getFieldValue("last_entrance_page_id"));
                         pair.setFieldValue("last_entrance_page_value",  new Text(lvls[1]));
                         pair.setFieldValue("entrance_page_lvl2_value",  new Text(lvls[2]));
                         pair.setFieldValue("last_entrance_event_id",    new IntWritable(Integer.valueOf(lvls[3])));
@@ -418,6 +419,7 @@ public class OfflinePathList {
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
                     } else if(pageLvlId == 3){
 //                        String[] lvls = pageLvl.split("#");
+                        System.out.println("last_guide_page_id=" + pair.getFieldValue("last_guide_page_id"));
                         pair.setFieldValue("last_guide_page_id", new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("last_guide_page_value", new Text(lvls[1]));
                         pair.setFieldValue("guide_page_lvl2_value", new Text(lvls[2]));
@@ -443,6 +445,7 @@ public class OfflinePathList {
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
                     } else if(pageLvlId == 4){
 //                        String[] lvls = pageLvl.split("#");
+                        System.out.println("guide_lvl2_page_id=" + pair.getFieldValue("guide_lvl2_page_id"));
                         pair.setFieldValue("guide_lvl2_page_id", new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("guide_lvl2_page_value", new Text(lvls[1]));
                         pair.setFieldValue("guide_lvl2_page_lvl2_value", new Text(lvls[2]));
@@ -460,6 +463,7 @@ public class OfflinePathList {
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
                     } else if(pageLvlId == 5){
 //                        String[] lvls = pageLvl.split("#");
+                        System.out.println("last_before_goods_page_id=" + pair.getFieldValue("last_before_goods_page_id"));
                         pair.setFieldValue("last_before_goods_page_id", new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("last_before_goods_page_value", new Text(lvls[1]));
                         pair.setFieldValue("before_goods_page_lvl2_value", new Text(lvls[2]));
@@ -468,6 +472,10 @@ public class OfflinePathList {
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text(lvls[5]));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(Long.valueOf(lvls[6])));
 
+                    }
+
+                    if(pair == null) {
+                        System.out.println("=====>> pair is null!");
                     }
 
                     context.write(nw, pair);
