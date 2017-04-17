@@ -42,7 +42,7 @@ public class OfflinePathList {
     // hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr
     static String base = "hdfs://nameservice1/user/hive";
     static final String SOURCE_DIR = "fct_path_list_mapr";
-//    static final String TARGET_DIR = "fct_for_path_list_offline";
+    //    static final String TARGET_DIR = "fct_for_path_list_offline";
     static final String TARGET_DIR = "test/path_list_offline";
     static Configuration conf = new Configuration();
 
@@ -368,99 +368,99 @@ public class OfflinePathList {
                     String pageLvl = v2.toStrings()[1];
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
 
-                    pair.setFieldValue("guide_is_del", new LongWritable(0));
-                    pair.setFieldValue("guide_lvl2_is_del", new LongWritable(0));
-                    pair.setFieldValue("before_goods_is_del", new LongWritable(0));
+                    pair.setFieldValue("guide_is_del", new IntWritable(0));
+                    pair.setFieldValue("guide_lvl2_is_del", new IntWritable(0));
+                    pair.setFieldValue("before_goods_is_del", new IntWritable(0));
 
                     if(pageLvlId == 1 || pageLvlId == 2){
                         String[] lvls = pageLvl.split("\t");
-                        pair.setFieldValue("last_entrance_page_id",     new LongWritable(Integer.valueOf(lvls[0])));
+                        pair.setFieldValue("last_entrance_page_id",     new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("last_entrance_page_value",  new Text(lvls[1]));
                         pair.setFieldValue("entrance_page_lvl2_value",  new Text(lvls[2]));
-                        pair.setFieldValue("last_entrance_event_id",    new LongWritable(Integer.valueOf(lvls[3])));
+                        pair.setFieldValue("last_entrance_event_id",    new IntWritable(Integer.valueOf(lvls[3])));
                         pair.setFieldValue("last_entrance_event_value", new Text(lvls[4]));
                         pair.setFieldValue("entrance_event_lvl2_value", new Text(lvls[5]));
                         pair.setFieldValue("last_entrance_timestamp",   new LongWritable(Long.valueOf(lvls[6])));
-                        pair.setFieldValue("last_entrance_pit_type",    new LongWritable(Integer.valueOf(lvls[7])));
+                        pair.setFieldValue("last_entrance_pit_type",    new IntWritable(Integer.valueOf(lvls[7])));
                         pair.setFieldValue("last_entrance_sortdate",    new Text(lvls[8]));
-                        pair.setFieldValue("last_entrance_sorthour",    new LongWritable(Integer.valueOf(lvls[9])));
-                        pair.setFieldValue("last_entrance_lplid",       new LongWritable(Integer.valueOf(lvls[10])));
-                        pair.setFieldValue("last_entrance_ptplid",      new LongWritable(Integer.valueOf(lvls[11])));
-                        pair.setFieldValue("select_id",                 new LongWritable(Integer.valueOf(lvls[12])));
-                        pair.setFieldValue("test_id",                   new LongWritable(Integer.valueOf(lvls[13])));
-                        pair.setFieldValue("last_entrance_ug_id",       new LongWritable(Integer.valueOf(lvls[14])));
+                        pair.setFieldValue("last_entrance_sorthour",    new IntWritable(Integer.valueOf(lvls[9])));
+                        pair.setFieldValue("last_entrance_lplid",       new IntWritable(Integer.valueOf(lvls[10])));
+                        pair.setFieldValue("last_entrance_ptplid",      new IntWritable(Integer.valueOf(lvls[11])));
+                        pair.setFieldValue("select_id",                 new IntWritable(Integer.valueOf(lvls[12])));
+                        pair.setFieldValue("test_id",                   new IntWritable(Integer.valueOf(lvls[13])));
+                        pair.setFieldValue("last_entrance_ug_id",       new IntWritable(Integer.valueOf(lvls[14])));
 
-                        pair.setFieldValue("last_guide_page_id", new LongWritable(0));
+                        pair.setFieldValue("last_guide_page_id", new IntWritable(0));
                         pair.setFieldValue("last_guide_page_value", new Text("0"));
                         pair.setFieldValue("guide_page_lvl2_value", new Text("0"));
-                        pair.setFieldValue("last_guide_event_id", new LongWritable(0));
+                        pair.setFieldValue("last_guide_event_id", new IntWritable(0));
                         pair.setFieldValue("last_guide_event_value", new Text("0"));
                         pair.setFieldValue("guide_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("last_guide_timestamp", new LongWritable(0));
 
-                        pair.setFieldValue("guide_lvl2_page_id", new LongWritable(0));
+                        pair.setFieldValue("guide_lvl2_page_id", new IntWritable(0));
                         pair.setFieldValue("guide_lvl2_page_value", new Text("0"));
                         pair.setFieldValue("guide_lvl2_page_lvl2_value", new Text("0"));
-                        pair.setFieldValue("guide_lvl2_event_id", new LongWritable(0));
+                        pair.setFieldValue("guide_lvl2_event_id", new IntWritable(0));
                         pair.setFieldValue("guide_lvl2_event_value", new Text("0"));
                         pair.setFieldValue("guide_lvl2_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("guide_lvl2_timestamp", new LongWritable(0));
 
-                        pair.setFieldValue("last_before_goods_page_id", new LongWritable(0));
+                        pair.setFieldValue("last_before_goods_page_id", new IntWritable(0));
                         pair.setFieldValue("last_before_goods_page_value", new Text("0"));
                         pair.setFieldValue("before_goods_page_lvl2_value", new Text("0"));
-                        pair.setFieldValue("last_before_goods_event_id", new LongWritable(0));
+                        pair.setFieldValue("last_before_goods_event_id", new IntWritable(0));
                         pair.setFieldValue("last_before_goods_event_value", new Text("0"));
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
                     } else if(pageLvlId == 3){
                         String[] lvls = pageLvl.split("\t");
-                        pair.setFieldValue("last_guide_page_id", new LongWritable(Integer.valueOf(lvls[0])));
+                        pair.setFieldValue("last_guide_page_id", new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("last_guide_page_value", new Text(lvls[1]));
                         pair.setFieldValue("guide_page_lvl2_value", new Text(lvls[2]));
-                        pair.setFieldValue("last_guide_event_id", new LongWritable(Integer.valueOf(lvls[3])));
+                        pair.setFieldValue("last_guide_event_id", new IntWritable(Integer.valueOf(lvls[3])));
                         pair.setFieldValue("last_guide_event_value", new Text(lvls[4]));
                         pair.setFieldValue("guide_event_lvl2_value", new Text(lvls[5]));
                         pair.setFieldValue("last_guide_timestamp", new LongWritable(Long.valueOf(lvls[6])));
 
-                        pair.setFieldValue("guide_lvl2_page_id", new LongWritable(0));
+                        pair.setFieldValue("guide_lvl2_page_id", new IntWritable(0));
                         pair.setFieldValue("guide_lvl2_page_value", new Text("0"));
                         pair.setFieldValue("guide_lvl2_page_lvl2_value", new Text("0"));
-                        pair.setFieldValue("guide_lvl2_event_id", new LongWritable(0));
+                        pair.setFieldValue("guide_lvl2_event_id", new IntWritable(0));
                         pair.setFieldValue("guide_lvl2_event_value", new Text("0"));
                         pair.setFieldValue("guide_lvl2_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("guide_lvl2_timestamp", new LongWritable(0));
 
-                        pair.setFieldValue("last_before_goods_page_id", new LongWritable(0));
+                        pair.setFieldValue("last_before_goods_page_id", new IntWritable(0));
                         pair.setFieldValue("last_before_goods_page_value", new Text("0"));
                         pair.setFieldValue("before_goods_page_lvl2_value", new Text("0"));
-                        pair.setFieldValue("last_before_goods_event_id", new LongWritable(0));
+                        pair.setFieldValue("last_before_goods_event_id", new IntWritable(0));
                         pair.setFieldValue("last_before_goods_event_value", new Text("0"));
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
                     } else if(pageLvlId == 4){
                         String[] lvls = pageLvl.split("\t");
-                        pair.setFieldValue("guide_lvl2_page_id", new LongWritable(Integer.valueOf(lvls[0])));
+                        pair.setFieldValue("guide_lvl2_page_id", new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("guide_lvl2_page_value", new Text(lvls[1]));
                         pair.setFieldValue("guide_lvl2_page_lvl2_value", new Text(lvls[2]));
-                        pair.setFieldValue("guide_lvl2_event_id", new LongWritable(Integer.valueOf(lvls[3])));
+                        pair.setFieldValue("guide_lvl2_event_id", new IntWritable(Integer.valueOf(lvls[3])));
                         pair.setFieldValue("guide_lvl2_event_value", new Text(lvls[4]));
                         pair.setFieldValue("guide_lvl2_event_lvl2_value", new Text(lvls[5]));
                         pair.setFieldValue("guide_lvl2_timestamp", new LongWritable(Long.valueOf(lvls[6])));
 
-                        pair.setFieldValue("last_before_goods_page_id", new LongWritable(0));
+                        pair.setFieldValue("last_before_goods_page_id", new IntWritable(0));
                         pair.setFieldValue("last_before_goods_page_value", new Text("0"));
                         pair.setFieldValue("before_goods_page_lvl2_value", new Text("0"));
-                        pair.setFieldValue("last_before_goods_event_id", new LongWritable(0));
+                        pair.setFieldValue("last_before_goods_event_id", new IntWritable(0));
                         pair.setFieldValue("last_before_goods_event_value", new Text("0"));
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
                     } else if(pageLvlId == 5){
                         String[] lvls = pageLvl.split("\t");
-                        pair.setFieldValue("last_before_goods_page_id", new LongWritable(Integer.valueOf(lvls[0])));
+                        pair.setFieldValue("last_before_goods_page_id", new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("last_before_goods_page_value", new Text(lvls[1]));
                         pair.setFieldValue("before_goods_page_lvl2_value", new Text(lvls[2]));
-                        pair.setFieldValue("last_before_goods_event_id", new LongWritable(Integer.valueOf(lvls[3])));
+                        pair.setFieldValue("last_before_goods_event_id", new IntWritable(Integer.valueOf(lvls[3])));
                         pair.setFieldValue("last_before_goods_event_value", new Text(lvls[4]));
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text(lvls[5]));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(Long.valueOf(lvls[6])));
@@ -469,6 +469,12 @@ public class OfflinePathList {
 
                     context.write(nw, pair);
 
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    System.out.println("======>>NumberFormatException: " + Joiner.on("#").join(v2.toStrings()));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                    System.out.println("======>>ClassCastException: " + Joiner.on("#").join(v2.toStrings()));
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.out.println("======>>Exception: " +  Joiner.on("#").join(v2.toStrings()));
@@ -571,7 +577,6 @@ public class OfflinePathList {
             int n2 = WritableUtils.decodeVIntSize(b2[s2]);
 
             try {
-                //read value from VLongWritable byte array
                 long l11 = readVLong(b1, s1);
                 long l21 = readVLong(b2, s2);
 
