@@ -297,23 +297,17 @@ public class OfflinePathList {
                     context.write(k2, v2);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("======>>IOException: " + value.toString());
+                System.out.println("======>>Exception: " + e.getClass() + "\n##"+ e.getMessage() + "\n##data=" +value.toString());
             } catch (InterruptedException e) {
-                e.printStackTrace();
-                System.out.println("======>>InterruptedException: " + value.toString());
+                System.out.println("======>>Exception: " + e.getClass() + "\n##"+ e.getMessage() + "\n##data=" +value.toString());
             } catch (ArrayIndexOutOfBoundsException e) {
-                e.printStackTrace();
-                System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
+                System.out.println("======>>Exception: " + e.getClass() + "\n##"+ e.getMessage() + "\n##data=" +value.toString());
             } catch (StringIndexOutOfBoundsException e) {
-                e.printStackTrace();
-                System.out.println("======>>StringIndexOutOfBoundsException: " + value.toString());
+                System.out.println("======>>Exception: " + e.getClass() + "\n##"+ e.getMessage() + "\n##data=" +value.toString());
             } catch (NumberFormatException e) {
-                e.printStackTrace();
-                System.out.println("======>>NumberFormatException: " + value.toString());
+                System.out.println("======>>Exception: " + e.getClass() + "\n##"+ e.getMessage() + "\n##data=" +value.toString());
             } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("======>>Exception: " + value.toString());
+                System.out.println("======>>Exception: " + e.getClass() + "\n##"+ e.getMessage() + "\n##data=" +value.toString());
             }
         }
     }
@@ -470,14 +464,11 @@ public class OfflinePathList {
                     context.write(nw, pair);
 
                 } catch (NullPointerException e) {
-                    e.printStackTrace();
-                    System.out.println("======>>NumberFormatException: " + Joiner.on("#").join(v2.toStrings()));
+                    System.out.println("======>>Exception: " + e.getClass() + "\n##" + e.getMessage() + "\n##data=" + Joiner.on("#").join(v2.toStrings()));
                 } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                    System.out.println("======>>ClassCastException: " + Joiner.on("#").join(v2.toStrings()));
+                    System.out.println("======>>Exception: " + e.getClass() + "\n##" + e.getMessage() + "\n##data=" + Joiner.on("#").join(v2.toStrings()));
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println("======>>Exception: " +  Joiner.on("#").join(v2.toStrings()));
+                    System.out.println("======>>Exception: " + e.getClass() + "\n##" + e.getMessage() + "\n##data=" + Joiner.on("#").join(v2.toStrings()));
                 }
             }
         }
