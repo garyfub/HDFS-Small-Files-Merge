@@ -484,9 +484,19 @@ public class OfflinePathList {
                         System.out.println("=====>> pair is null!");
                     }
 
-                    context.write(nw, pair);
+                    try {
+                        context.write(nw, pair);
+                    } catch (IOException ioe) {
+                        System.out.println("context.write 异常,IOException");
+                        ioe.printStackTrace();
+                    } catch (InterruptedException itrpe) {
+                        System.out.println("context.write 异常,InterruptedException");
+                        itrpe.printStackTrace();
+                    }
+
 
                 } catch (NullPointerException e) {
+                    e.printStackTrace();
                     System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("-").join(v2.toStrings()));
                 } catch (NumberFormatException e) {
                     System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("-").join(v2.toStrings()));
