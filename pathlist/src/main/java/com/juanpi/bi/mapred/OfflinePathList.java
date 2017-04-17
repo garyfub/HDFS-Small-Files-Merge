@@ -331,11 +331,11 @@ public class OfflinePathList {
          * 初始化未访问的路径
          * @param fields
          */
-        private void initVisitPath(List<String> fields) {
-            for(String field : fields) {
-                pair.setFieldValue(field, new Text("0"));
-            }
-        }
+//        private void initVisitPath(List<String> fields) {
+//            for(String field : fields) {
+//                pair.setFieldValue(field, new Text("0"));
+//            }
+//        }
 
         /**
          *
@@ -417,6 +417,8 @@ public class OfflinePathList {
                         pair.setFieldValue("last_before_goods_event_value", new Text("0"));
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
+
+                        System.out.println("last_entrance_ug_id=" + pair.getFieldValue("last_entrance_ug_id"));
                     } else if(pageLvlId == 3){
 //                        String[] lvls = pageLvl.split("#");
                         System.out.println("last_guide_page_id=" + pair.getFieldValue("last_guide_page_id"));
@@ -443,6 +445,8 @@ public class OfflinePathList {
                         pair.setFieldValue("last_before_goods_event_value", new Text("0"));
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
+
+                        System.out.println("guide_lvl2_timestamp=" + pair.getFieldValue("guide_lvl2_timestamp"));
                     } else if(pageLvlId == 4){
 //                        String[] lvls = pageLvl.split("#");
                         System.out.println("guide_lvl2_page_id=" + pair.getFieldValue("guide_lvl2_page_id"));
@@ -461,6 +465,8 @@ public class OfflinePathList {
                         pair.setFieldValue("last_before_goods_event_value", new Text("0"));
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
+
+                        System.out.println("last_before_goods_page_id=" + pair.getFieldValue("last_before_goods_page_id"));
                     } else if(pageLvlId == 5){
 //                        String[] lvls = pageLvl.split("#");
                         System.out.println("last_before_goods_page_id=" + pair.getFieldValue("last_before_goods_page_id"));
