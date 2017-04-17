@@ -222,7 +222,7 @@ public class OfflinePathList {
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException, ArrayIndexOutOfBoundsException, NumberFormatException {
 
             String val = value.toString().replace("\\N", "0");
-            final String[] splited = value.toString().split("\001");
+            final String[] splited = val.split("\001");
 
             try {
                 // gu_id 和 starttime_origin 作为联合主键
@@ -298,15 +298,22 @@ public class OfflinePathList {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
+                System.out.println("======>>IOException: " + value.toString());
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            } catch (ArrayIndexOutOfBoundsException | NumberFormatException | StringIndexOutOfBoundsException e) {
-                e.printStackTrace();
-                System.out.println("======>>ArrayIndexOutOfBoundsException: " + Joiner.on("#").join(value.toString().split("\001")));
-            } catch (Exception e) {
+                System.out.println("======>>InterruptedException: " + value.toString());
+            } catch (ArrayIndexOutOfBoundsException e) {
                 e.printStackTrace();
                 System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
+            } catch (StringIndexOutOfBoundsException e) {
+                e.printStackTrace();
+                System.out.println("======>>StringIndexOutOfBoundsException: " + value.toString());
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                System.out.println("======>>NumberFormatException: " + value.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("======>>Exception: " + value.toString());
             }
         }
     }
