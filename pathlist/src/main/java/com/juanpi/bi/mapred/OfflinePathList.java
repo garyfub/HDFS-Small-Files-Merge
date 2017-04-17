@@ -347,7 +347,8 @@ public class OfflinePathList {
          */
         protected void reduce(NewK2 k2,
                               Iterable<TextArrayWritable> v2s,
-                              Context context) throws IOException, InterruptedException
+                              Context context)
+                //throws IOException, InterruptedException
         {
 
             pair.setFieldValue("gu_id", new Text(k2.first));
