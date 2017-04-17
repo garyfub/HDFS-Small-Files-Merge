@@ -366,8 +366,17 @@ public class OfflinePathList {
                     pair.setFieldValue("guide_lvl2_is_del", new IntWritable(0));
                     pair.setFieldValue("before_goods_is_del", new IntWritable(0));
 
+                    System.out.println("pageLvlIdStr=" + pageLvlIdStr);
+
+                    String[] lvls = pageLvl.split("#");
+
+                    System.out.println("lvls0=" + lvls[0]);
+
+                    System.out.println("lvls0=" + lvls[6]);
+
                     if(pageLvlId == 1 || pageLvlId == 2){
-                        String[] lvls = pageLvl.split("#");
+
+
                         pair.setFieldValue("last_entrance_page_id",     new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("last_entrance_page_value",  new Text(lvls[1]));
                         pair.setFieldValue("entrance_page_lvl2_value",  new Text(lvls[2]));
@@ -408,7 +417,7 @@ public class OfflinePathList {
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
                     } else if(pageLvlId == 3){
-                        String[] lvls = pageLvl.split("#");
+//                        String[] lvls = pageLvl.split("#");
                         pair.setFieldValue("last_guide_page_id", new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("last_guide_page_value", new Text(lvls[1]));
                         pair.setFieldValue("guide_page_lvl2_value", new Text(lvls[2]));
@@ -433,7 +442,7 @@ public class OfflinePathList {
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
                     } else if(pageLvlId == 4){
-                        String[] lvls = pageLvl.split("#");
+//                        String[] lvls = pageLvl.split("#");
                         pair.setFieldValue("guide_lvl2_page_id", new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("guide_lvl2_page_value", new Text(lvls[1]));
                         pair.setFieldValue("guide_lvl2_page_lvl2_value", new Text(lvls[2]));
@@ -450,7 +459,7 @@ public class OfflinePathList {
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
                     } else if(pageLvlId == 5){
-                        String[] lvls = pageLvl.split("#");
+//                        String[] lvls = pageLvl.split("#");
                         pair.setFieldValue("last_before_goods_page_id", new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("last_before_goods_page_value", new Text(lvls[1]));
                         pair.setFieldValue("before_goods_page_lvl2_value", new Text(lvls[2]));
@@ -464,11 +473,11 @@ public class OfflinePathList {
                     context.write(nw, pair);
 
                 } catch (NullPointerException e) {
-                    System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("#").join(v2.toStrings()));
+                    System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("-").join(v2.toStrings()));
                 } catch (NumberFormatException e) {
-                    System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("#").join(v2.toStrings()));
+                    System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("-").join(v2.toStrings()));
                 } catch (Exception e) {
-                    System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("#").join(v2.toStrings()));
+                    System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("-").join(v2.toStrings()));
                 }
             }
         }
