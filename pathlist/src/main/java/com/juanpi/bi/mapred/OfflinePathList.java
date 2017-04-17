@@ -190,7 +190,7 @@ public class OfflinePathList {
         // 指定分区类
         job.setPartitionerClass(HashPartitioner.class);
 
-        job.setNumReduceTasks(1);
+        job.setNumReduceTasks(16);
 
         // TODO 排序、分区
         job.setGroupingComparatorClass(MyGroupingComparator.class);
@@ -221,6 +221,7 @@ public class OfflinePathList {
 
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException, ArrayIndexOutOfBoundsException, NumberFormatException {
 
+            String val = value.toString().replace("\\N", "0");
             final String[] splited = value.toString().split("\001");
 
             try {
