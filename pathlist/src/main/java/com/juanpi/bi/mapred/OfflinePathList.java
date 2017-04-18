@@ -55,7 +55,7 @@ public class OfflinePathList {
         try {
             fs = FileSystem.get(new Path(basePath).toUri(), conf);
             // 清理待存放数据的目录
-            if(fs.exists(new Path(outPath))){
+            if (fs.exists(new Path(outPath))) {
                 fs.delete(new Path(outPath), true);
             }
         } catch (IOException e) {
@@ -66,11 +66,11 @@ public class OfflinePathList {
 
     /**
      * eg. hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr/gu_hash=a/
+     *
      * @param guStr
      * @return
      */
-    private static String getInputPath(String guStr)
-    {
+    private static String getInputPath(String guStr) {
         // warehouse/dw.db/fct_path_list_mapr
         String patternStr = "{0}/warehouse/{1}/{2}/gu_hash={3}/";
         String inputPath = MessageFormat.format(patternStr, base, "dw.db", SOURCE_DIR, guStr);
@@ -79,24 +79,23 @@ public class OfflinePathList {
 
     /**
      * eg. hdfs://nameservice1/user/hadoop/dw_realtime/fct_for_path_list_offline/gu_hash=a/
+     *
      * @param dateStr
      * @return
      */
-    private static String getOutputPath(String dateStr)
-    {
+    private static String getOutputPath(String dateStr) {
         String patternStr = "{0}/{1}/date={2}/";
         String outPutPath = MessageFormat.format(patternStr, "hdfs://nameservice1/user/hadoop/dw_realtime", TARGET_DIR, dateStr);
         return outPutPath;
     }
 
     /**
-     *
      * @param dateStr
      * @param start
      * @param end
      * @param jobControlName
      */
-    public static void JobsControl(String dateStr, int start, int end, String jobControlName){
+    public static void JobsControl(String dateStr, int start, int end, String jobControlName) {
 
 
         Configuration conf = new Configuration();
@@ -105,7 +104,7 @@ public class OfflinePathList {
         JobControl jc = new JobControl(jobControlName);
 
         // 遍历16个分区
-        for(int i=start; i<=end; i++) {
+        for (int i = start; i <= end; i++) {
             String guStr = String.format("%x", i);
 
             // 文件输入路径
@@ -132,8 +131,8 @@ public class OfflinePathList {
         Thread jcThread = new Thread(jc);
         jcThread.start();
 
-        while(true){
-            if(jc.allFinished()){
+        while (true) {
+            if (jc.allFinished()) {
                 System.out.println("8个目录的数据处理完毕！");
                 System.out.println(jc.getSuccessfulJobList());
                 jc.stop();
@@ -142,11 +141,10 @@ public class OfflinePathList {
                 break;
             }
 
-            if(jc.getFailedJobList().size() > 0){
+            if (jc.getFailedJobList().size() > 0) {
                 List<ControlledJob> failedJobList = jc.getFailedJobList();
 
-                for(ControlledJob fJob : failedJobList)
-                {
+                for (ControlledJob fJob : failedJobList) {
                     System.out.println("失败的job：" + fJob.getJobName());
                     System.out.println("失败信息：" + fJob.getMessage());
                 }
@@ -159,7 +157,6 @@ public class OfflinePathList {
     }
 
     /**
-     *
      * @param inputPath
      * @param outputPath
      * @throws Exception
@@ -227,45 +224,44 @@ public class OfflinePathList {
             try {
                 // gu_id 和 starttime_origin 作为联合主键
                 String gu_id = splited[1];
-                if(!gu_id.isEmpty() && !gu_id.equals("0"))
-                {
+                if (!gu_id.isEmpty() && !gu_id.equals("0")) {
                     final NewK2 k2 = new NewK2(splited[1], Long.parseLong(splited[11]));
 
-                    String pageLevelId = (splited[0] == null) ? "0":splited[0];
-                    String pageId = (splited[2] == null) ? "0":splited[2];
-                    String page_value = (splited[3] == null) ? "0":splited[3];
-                    String page_lvl2_value = (splited[4] == null) ? "0":splited[4];
-                    String eventId = (splited[5] == null) ? "0":splited[5];
-                    String event_value = (splited[6] == null) ? "0":splited[6];
-                    String event_lvl2_value = (splited[7] == null) ? "0":splited[7];
-                    String test_id = (splited[9] == null) ? "0":splited[9];
-                    String select_id = (splited[10] == null) ? "0":splited[10];
-                    String starttime = (splited[11] == null) ? "0":splited[11];
-                    String pit_type = (splited[12] == null) ? "0":splited[12];
-                    String sortdate = (splited[13] == null) ? "0":splited[13];
-                    String sorthour = (splited[14] == null) ? "0":splited[14];
-                    String lplid = (splited[15] == null) ? "0":splited[15];
-                    String ptplid = (splited[16] == null) ? "0":splited[16];
-                    String ug_id  = (splited[17] == null) ? "0":splited[17];
+                    String pageLevelId = (splited[0] == null) ? "0" : splited[0];
+                    String pageId = (splited[2] == null) ? "0" : splited[2];
+                    String page_value = (splited[3] == null) ? "0" : splited[3];
+                    String page_lvl2_value = (splited[4] == null) ? "0" : splited[4];
+                    String eventId = (splited[5] == null) ? "0" : splited[5];
+                    String event_value = (splited[6] == null) ? "0" : splited[6];
+                    String event_lvl2_value = (splited[7] == null) ? "0" : splited[7];
+                    String test_id = (splited[9] == null) ? "0" : splited[9];
+                    String select_id = (splited[10] == null) ? "0" : splited[10];
+                    String starttime = (splited[11] == null) ? "0" : splited[11];
+                    String pit_type = (splited[12] == null) ? "0" : splited[12];
+                    String sortdate = (splited[13] == null) ? "0" : splited[13];
+                    String sorthour = (splited[14] == null) ? "0" : splited[14];
+                    String lplid = (splited[15] == null) ? "0" : splited[15];
+                    String ptplid = (splited[16] == null) ? "0" : splited[16];
+                    String ug_id = (splited[17] == null) ? "0" : splited[17];
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
                     String pageLvlId = pageLevelId;
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
-                    if("481".equals(eventId) || "10041".equals(eventId)){
-                        if("158".equals(pageId) || "167".equals(pageId) || "250".equals(pageId) || "26".equals(pageId)) {
+                    if ("481".equals(eventId) || "10041".equals(eventId)) {
+                        if ("158".equals(pageId) || "167".equals(pageId) || "250".equals(pageId) || "26".equals(pageId)) {
                             pageLvlId = "1";
                         }
-                    } else if("10043".equals(eventId)){
-                        if("10084".equals(pageId) || "10085".equals(pageId)){
+                    } else if ("10043".equals(eventId)) {
+                        if ("10084".equals(pageId) || "10085".equals(pageId)) {
                             pageLvlId = "5";
                         }
-                    } else if("10050".equals(eventId)){
-                        if("10085".equals(pageId) || "10107".equals(pageId)){
+                    } else if ("10050".equals(eventId)) {
+                        if ("10085".equals(pageId) || "10107".equals(pageId)) {
                             pageLvlId = "5";
                         }
-                    } else if("448".equals(eventId)){
-                        if("158".equals(pageId)){
+                    } else if ("448".equals(eventId)) {
+                        if ("158".equals(pageId)) {
                             pageLvlId = "5";
                         }
                     }
@@ -273,21 +269,21 @@ public class OfflinePathList {
                     String str[] = {
                             pageLvlId,
                             pageId
-                                    + "\t" + page_value
-                                    + "\t" + page_lvl2_value
-                                    + "\t" + eventId
-                                    + "\t" + event_value
-                                    + "\t" + event_lvl2_value
-                                    + "\t" + starttime
-                                    + "\t" + pit_type
-                                    + "\t" + sortdate
-                                    + "\t" + sorthour
-                                    + "\t" + lplid
-                                    + "\t" + ptplid
-                                    + "\t" + select_id
-                                    + "\t" + test_id
-                                    + "\t" + ug_id,
-                            value.toString().replace("\001", "\t")
+                                    + "#" + page_value
+                                    + "#" + page_lvl2_value
+                                    + "#" + eventId
+                                    + "#" + event_value
+                                    + "#" + event_lvl2_value
+                                    + "#" + starttime
+                                    + "#" + pit_type
+                                    + "#" + sortdate
+                                    + "#" + sorthour
+                                    + "#" + lplid
+                                    + "#" + ptplid
+                                    + "#" + select_id
+                                    + "#" + test_id
+                                    + "#" + ug_id,
+                            value.toString().replace("\001", "#")
                     };
 
                     final TextArrayWritable v2 = new TextArrayWritable(str);
@@ -297,31 +293,24 @@ public class OfflinePathList {
                     context.write(k2, v2);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("======>>IOException: " + value.toString());
+                System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + value.toString());
             } catch (InterruptedException e) {
-                e.printStackTrace();
-                System.out.println("======>>InterruptedException: " + value.toString());
+                System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + value.toString());
             } catch (ArrayIndexOutOfBoundsException e) {
-                e.printStackTrace();
-                System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
+                System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + value.toString());
             } catch (StringIndexOutOfBoundsException e) {
-                e.printStackTrace();
-                System.out.println("======>>StringIndexOutOfBoundsException: " + value.toString());
+                System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + value.toString());
             } catch (NumberFormatException e) {
-                e.printStackTrace();
-                System.out.println("======>>NumberFormatException: " + value.toString());
+                System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + value.toString());
             } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("======>>Exception: " + value.toString());
+                System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + value.toString());
             }
         }
     }
 
 
     // static class NewValue
-    static class MyReducer extends Reducer<NewK2, TextArrayWritable, NullWritable, OrcStruct>
-    {
+    static class MyReducer extends Reducer<NewK2, TextArrayWritable, NullWritable, OrcStruct> {
 
 
         // 定义
@@ -337,14 +326,13 @@ public class OfflinePathList {
          * 初始化未访问的路径
          * @param fields
          */
-        private void initVisitPath(List<String> fields) {
-            for(String field : fields) {
-                pair.setFieldValue(field, new Text("0"));
-            }
-        }
+//        private void initVisitPath(List<String> fields) {
+//            for(String field : fields) {
+//                pair.setFieldValue(field, new Text("0"));
+//            }
+//        }
 
         /**
-         *
          * @param k2
          * @param v2s
          * @param context
@@ -353,9 +341,9 @@ public class OfflinePathList {
          */
         protected void reduce(NewK2 k2,
                               Iterable<TextArrayWritable> v2s,
-                              Context context) throws IOException, InterruptedException
+                              Context context)
+        //throws IOException, InterruptedException
         {
-            System.out.println("====================================");
 
             pair.setFieldValue("gu_id", new Text(k2.first));
             // 实际字段来源为starttime，只后来创建对应表时，字段名字写成了endtime
@@ -363,32 +351,45 @@ public class OfflinePathList {
 
             for (TextArrayWritable v2 : v2s) {
 
+                System.out.println("====================================");
+
+
+                String pageLvlIdStr = v2.toStrings()[0];
+                String pageLvl = v2.toStrings()[1];
+                int pageLvlId = Integer.parseInt(pageLvlIdStr);
+
+                pair.setFieldValue("guide_is_del", new IntWritable(0));
+                pair.setFieldValue("guide_lvl2_is_del", new IntWritable(0));
+                pair.setFieldValue("before_goods_is_del", new IntWritable(0));
+
+                System.out.println("pageLvlIdStr=" + pageLvlIdStr);
+
+                String[] lvls = pageLvl.split("#");
+
+                System.out.println("lvls0=" + lvls[0]);
+
+                System.out.println("lvls0=" + lvls[6]);
+
                 try {
-                    String pageLvlIdStr = v2.toStrings()[0];
-                    String pageLvl = v2.toStrings()[1];
-                    int pageLvlId = Integer.parseInt(pageLvlIdStr);
+                    if (pageLvlId == 1 || pageLvlId == 2) {
 
-                    pair.setFieldValue("guide_is_del", new IntWritable(0));
-                    pair.setFieldValue("guide_lvl2_is_del", new IntWritable(0));
-                    pair.setFieldValue("before_goods_is_del", new IntWritable(0));
+                        pair.setFieldValue("last_entrance_page_id", new IntWritable(Integer.valueOf(lvls[0])));
+                        System.out.println("last_entrance_page_id=" + pair.getFieldValue("last_entrance_page_id"));
 
-                    if(pageLvlId == 1 || pageLvlId == 2){
-                        String[] lvls = pageLvl.split("\t");
-                        pair.setFieldValue("last_entrance_page_id",     new IntWritable(Integer.valueOf(lvls[0])));
-                        pair.setFieldValue("last_entrance_page_value",  new Text(lvls[1]));
-                        pair.setFieldValue("entrance_page_lvl2_value",  new Text(lvls[2]));
-                        pair.setFieldValue("last_entrance_event_id",    new IntWritable(Integer.valueOf(lvls[3])));
+                        pair.setFieldValue("last_entrance_page_value", new Text(lvls[1]));
+                        pair.setFieldValue("entrance_page_lvl2_value", new Text(lvls[2]));
+                        pair.setFieldValue("last_entrance_event_id", new IntWritable(Integer.valueOf(lvls[3])));
                         pair.setFieldValue("last_entrance_event_value", new Text(lvls[4]));
                         pair.setFieldValue("entrance_event_lvl2_value", new Text(lvls[5]));
-                        pair.setFieldValue("last_entrance_timestamp",   new LongWritable(Long.valueOf(lvls[6])));
-                        pair.setFieldValue("last_entrance_pit_type",    new IntWritable(Integer.valueOf(lvls[7])));
-                        pair.setFieldValue("last_entrance_sortdate",    new Text(lvls[8]));
-                        pair.setFieldValue("last_entrance_sorthour",    new IntWritable(Integer.valueOf(lvls[9])));
-                        pair.setFieldValue("last_entrance_lplid",       new IntWritable(Integer.valueOf(lvls[10])));
-                        pair.setFieldValue("last_entrance_ptplid",      new IntWritable(Integer.valueOf(lvls[11])));
-                        pair.setFieldValue("select_id",                 new IntWritable(Integer.valueOf(lvls[12])));
-                        pair.setFieldValue("test_id",                   new IntWritable(Integer.valueOf(lvls[13])));
-                        pair.setFieldValue("last_entrance_ug_id",       new IntWritable(Integer.valueOf(lvls[14])));
+                        pair.setFieldValue("last_entrance_timestamp", new LongWritable(Long.valueOf(lvls[6])));
+                        pair.setFieldValue("last_entrance_pit_type", new IntWritable(Integer.valueOf(lvls[7])));
+                        pair.setFieldValue("last_entrance_sortdate", new Text(lvls[8]));
+                        pair.setFieldValue("last_entrance_sorthour", new IntWritable(Integer.valueOf(lvls[9])));
+                        pair.setFieldValue("last_entrance_lplid", new IntWritable(Integer.valueOf(lvls[10])));
+                        pair.setFieldValue("last_entrance_ptplid", new IntWritable(Integer.valueOf(lvls[11])));
+                        pair.setFieldValue("select_id", new IntWritable(Integer.valueOf(lvls[12])));
+                        pair.setFieldValue("test_id", new IntWritable(Integer.valueOf(lvls[13])));
+                        pair.setFieldValue("last_entrance_ug_id", new IntWritable(Integer.valueOf(lvls[14])));
 
                         pair.setFieldValue("last_guide_page_id", new IntWritable(0));
                         pair.setFieldValue("last_guide_page_value", new Text("0"));
@@ -413,8 +414,11 @@ public class OfflinePathList {
                         pair.setFieldValue("last_before_goods_event_value", new Text("0"));
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
-                    } else if(pageLvlId == 3){
-                        String[] lvls = pageLvl.split("\t");
+
+                        System.out.println("last_entrance_ug_id=" + pair.getFieldValue("last_entrance_ug_id"));
+                    } else if (pageLvlId == 3) {
+//                        String[] lvls = pageLvl.split("#");
+                        System.out.println("last_guide_page_id=" + pair.getFieldValue("last_guide_page_id"));
                         pair.setFieldValue("last_guide_page_id", new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("last_guide_page_value", new Text(lvls[1]));
                         pair.setFieldValue("guide_page_lvl2_value", new Text(lvls[2]));
@@ -438,8 +442,11 @@ public class OfflinePathList {
                         pair.setFieldValue("last_before_goods_event_value", new Text("0"));
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
-                    } else if(pageLvlId == 4){
-                        String[] lvls = pageLvl.split("\t");
+
+                        System.out.println("guide_lvl2_timestamp=" + pair.getFieldValue("guide_lvl2_timestamp"));
+                    } else if (pageLvlId == 4) {
+//                        String[] lvls = pageLvl.split("#");
+                        System.out.println("guide_lvl2_page_id=" + pair.getFieldValue("guide_lvl2_page_id"));
                         pair.setFieldValue("guide_lvl2_page_id", new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("guide_lvl2_page_value", new Text(lvls[1]));
                         pair.setFieldValue("guide_lvl2_page_lvl2_value", new Text(lvls[2]));
@@ -455,8 +462,13 @@ public class OfflinePathList {
                         pair.setFieldValue("last_before_goods_event_value", new Text("0"));
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
-                    } else if(pageLvlId == 5){
-                        String[] lvls = pageLvl.split("\t");
+
+                        System.out.println("last_before_goods_page_id=" + pair.getFieldValue("last_before_goods_page_id"));
+                    } else if (pageLvlId == 5) {
+//                        String[] lvls = pageLvl.split("#");
+
+
+                        System.out.println("last_before_goods_page_id=" + pair.getFieldValue("last_before_goods_page_id"));
                         pair.setFieldValue("last_before_goods_page_id", new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("last_before_goods_page_value", new Text(lvls[1]));
                         pair.setFieldValue("before_goods_page_lvl2_value", new Text(lvls[2]));
@@ -464,21 +476,33 @@ public class OfflinePathList {
                         pair.setFieldValue("last_before_goods_event_value", new Text(lvls[4]));
                         pair.setFieldValue("before_goods_event_lvl2_value", new Text(lvls[5]));
                         pair.setFieldValue("last_before_goods_timestamp", new LongWritable(Long.valueOf(lvls[6])));
-
                     }
-
-                    context.write(nw, pair);
-
                 } catch (NullPointerException e) {
                     e.printStackTrace();
-                    System.out.println("======>>NumberFormatException: " + Joiner.on("#").join(v2.toStrings()));
+                    System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("-").join(v2.toStrings()));
                 } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                    System.out.println("======>>ClassCastException: " + Joiner.on("#").join(v2.toStrings()));
+                    System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("-").join(v2.toStrings()));
+                } catch (ClassCastException e) {
+                    System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("-").join(v2.toStrings()));
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println("======>>Exception: " +  Joiner.on("#").join(v2.toStrings()));
+                    System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("-").join(v2.toStrings()));
                 }
+
+                if (pair == null) {
+                    System.out.println("=====>> pair is null!");
+                }
+
+                try {
+                    context.write(nw, pair);
+                } catch (IOException ioe) {
+                    System.out.println("context.write 异常,IOException");
+                    ioe.printStackTrace();
+                } catch (InterruptedException itrpe) {
+                    System.out.println("context.write 异常,InterruptedException");
+                    itrpe.printStackTrace();
+                }
+
+
             }
         }
     }
@@ -487,14 +511,16 @@ public class OfflinePathList {
         String key;
         String value;
 
-        Row(String[] val){
+        Row(String[] val) {
             this.key = val[0];
             this.value = val[1];
         }
+
         @Override
         public void readFields(DataInput arg0) throws IOException {
             throw new UnsupportedOperationException("no write");
         }
+
         @Override
         public void write(DataOutput arg0) throws IOException {
             throw new UnsupportedOperationException("no read");
@@ -503,15 +529,15 @@ public class OfflinePathList {
 
     /**
      * 原来的v2不能参与排序，把原来的k2和v2封装到一个类中，作为新的k2
-     *
      */
-    static class  NewK2 implements WritableComparable<NewK2> {
+    static class NewK2 implements WritableComparable<NewK2> {
         String first;
         Long second;
 
-        public NewK2(){}
+        public NewK2() {
+        }
 
-        public NewK2(String first, long second){
+        public NewK2(String first, long second) {
             this.first = first;
             this.second = second;
         }
@@ -535,23 +561,23 @@ public class OfflinePathList {
         @Override
         public int compareTo(NewK2 o) {
             final long minus = this.first.compareTo(o.first);
-            if(minus !=0){
-                return (int)minus;
+            if (minus != 0) {
+                return (int) minus;
             }
-            return (int)(this.second - o.second);
+            return (int) (this.second - o.second);
         }
 
         @Override
         public int hashCode() {
-            return this.first.hashCode()+this.second.hashCode();
+            return this.first.hashCode() + this.second.hashCode();
         }
 
         @Override
         public boolean equals(Object obj) {
-            if(!(obj instanceof NewK2)){
+            if (!(obj instanceof NewK2)) {
                 return false;
             }
-            NewK2 oK2 = (NewK2)obj;
+            NewK2 oK2 = (NewK2) obj;
             return (this.first.equals(oK2.first)) && (this.second == oK2.second);
         }
     }
@@ -561,7 +587,7 @@ public class OfflinePathList {
         @Override
         public int compare(NewK2 o1, NewK2 o2) {
             // lexicographically 即按照字典序排序
-            return (int)(o1.first.compareTo(o2.first));
+            return (int) (o1.first.compareTo(o2.first));
         }
 
         /*
@@ -618,18 +644,19 @@ public class OfflinePathList {
      * run this
      */
     private static void run(String dateStr) {
-        JobsControl(dateStr,0x0, 0x0, "OfflinePathList08");
+        JobsControl(dateStr, 0x0, 0x0, "OfflinePathList08");
 //        JobsControl(0x9, 0xf, "OfflinePathList0f");
     }
 
     /**
      * 分两组并行计算
+     *
      * @param args
      */
-    public static void main(String[] args){
+    public static void main(String[] args) {
         String dateStr = args[0];
 
-        if(dateStr.length() < 10) {
+        if (dateStr.length() < 10) {
             System.out.println("我们约定时间参数的格式为：yyyy-mm-dd.例如：2017-04-01");
         }
 
