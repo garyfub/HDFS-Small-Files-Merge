@@ -466,6 +466,8 @@ public class OfflinePathList {
                         System.out.println("last_before_goods_page_id=" + pair.getFieldValue("last_before_goods_page_id"));
                     } else if (pageLvlId == 5) {
 //                        String[] lvls = pageLvl.split("#");
+
+
                         System.out.println("last_before_goods_page_id=" + pair.getFieldValue("last_before_goods_page_id"));
                         pair.setFieldValue("last_before_goods_page_id", new IntWritable(Integer.valueOf(lvls[0])));
                         pair.setFieldValue("last_before_goods_page_value", new Text(lvls[1]));
@@ -481,6 +483,8 @@ public class OfflinePathList {
                 } catch (NumberFormatException e) {
                     System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("-").join(v2.toStrings()));
                 } catch (ClassCastException e) {
+                    System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("-").join(v2.toStrings()));
+                } catch (Exception e) {
                     System.out.println("======>>Exception: " + e.getClass() + "\n==>" + e.getMessage() + "\n==>data=" + Joiner.on("-").join(v2.toStrings()));
                 }
 
