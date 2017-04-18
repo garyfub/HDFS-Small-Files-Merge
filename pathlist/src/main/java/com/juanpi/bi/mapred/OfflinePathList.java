@@ -4,23 +4,28 @@ import com.google.common.base.Joiner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.*;
+
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.orc.TypeDescription;
+import org.apache.orc.mapred.OrcStruct;
+import org.apache.orc.mapreduce.OrcOutputFormat;
+import org.apache.hadoop.io.*;
+
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.hadoop.io.WritableComparator.readVLong;
@@ -37,7 +42,8 @@ public class OfflinePathList {
     // hdfs://nameservice1/user/hive/warehouse/dw.db/fct_path_list_mapr
     static String base = "hdfs://nameservice1/user/hive";
     static final String SOURCE_DIR = "fct_path_list_mapr";
-    static final String TARGET_DIR = "fct_for_path_list_offline";
+    //    static final String TARGET_DIR = "fct_for_path_list_offline";
+    static final String TARGET_DIR = "test/path_list_offline";
     static Configuration conf = new Configuration();
 
     static FileSystem fs;
@@ -73,17 +79,25 @@ public class OfflinePathList {
 
     /**
      * eg. hdfs://nameservice1/user/hadoop/dw_realtime/fct_for_path_list_offline/gu_hash=a/
-     * @param guStr
+     * @param dateStr
      * @return
      */
-    private static String getOutputPath(String guStr)
+    private static String getOutputPath(String dateStr)
     {
-        String patternStr = "{0}/{1}/gu_hash={2}/";
-        String outPutPath = MessageFormat.format(patternStr, "hdfs://nameservice1/user/hadoop/dw_realtime", TARGET_DIR, guStr);
+        String patternStr = "{0}/{1}/date={2}/";
+        String outPutPath = MessageFormat.format(patternStr, "hdfs://nameservice1/user/hadoop/dw_realtime", TARGET_DIR, dateStr);
         return outPutPath;
     }
 
-    public static void JobsControl(int start, int end, String jobControlName){
+    /**
+     *
+     * @param dateStr
+     * @param start
+     * @param end
+     * @param jobControlName
+     */
+    public static void JobsControl(String dateStr, int start, int end, String jobControlName){
+
 
         Configuration conf = new Configuration();
 
@@ -98,7 +112,7 @@ public class OfflinePathList {
             String inputPath = getInputPath(guStr);
 
             // PathList文件落地路径
-            String outputPath = getOutputPath(guStr);
+            String outputPath = getOutputPath(dateStr);
 
             getFileSystem(base, outputPath);
 
@@ -152,6 +166,10 @@ public class OfflinePathList {
      */
     public static Job jobConstructor(String inputPath, String outputPath, String guStr) throws Exception {
 
+        System.out.println("job start...");
+
+        conf.set("orc.mapred.output.schema", "struct<gu_id:string,endtime:bigint,last_entrance_page_id:int,last_guide_page_id:int,last_before_goods_page_id:int,last_entrance_page_value:string,last_guide_page_value:string,last_before_goods_page_value:string,last_entrance_event_id:int,last_guide_event_id:int,last_before_goods_event_id:int,last_entrance_event_value:string,last_guide_event_value:string,last_before_goods_event_value:string,last_entrance_timestamp:bigint,last_guide_timestamp:bigint,last_before_goods_timestamp:bigint,guide_lvl2_page_id:int,guide_lvl2_page_value:string,guide_lvl2_event_id:int,guide_lvl2_event_value:string,guide_lvl2_timestamp:bigint,guide_is_del:int,guide_lvl2_is_del:int,before_goods_is_del:int,entrance_page_lvl2_value:string,guide_page_lvl2_value:string,guide_lvl2_page_lvl2_value:string,before_goods_page_lvl2_value:string,entrance_event_lvl2_value:string,guide_event_lvl2_value:string,guide_lvl2_event_lvl2_value:string,before_goods_event_lvl2_value:string,rule_id:string,test_id:string,select_id:string,last_entrance_pit_type:int,last_entrance_sortdate:string,last_entrance_sorthour:int,last_entrance_lplid:int,last_entrance_ptplid:int,last_entrance_ug_id:int>");
+
         Job job = Job.getInstance(conf, "OfflinePathList_Partition_" + guStr);
 
         // !! http://stackoverflow.com/questions/21373550/class-not-found-exception-in-mapreduce-wordcount-job
@@ -162,33 +180,35 @@ public class OfflinePathList {
         job.setInputFormatClass(TextInputFormat.class);//指定哪个类用来格式化输入文件
 
         // 指定自定义的Mapper类
-        job.setMapperClass(OfflinePathList.MyMapper.class);
+        job.setMapperClass(MyMapper.class);
 
         // 指定输出<k2,v2>的类型
-        job.setMapOutputKeyClass(OfflinePathList.NewK2.class);
+        job.setMapOutputKeyClass(NewK2.class);
 
-        job.setMapOutputValueClass(OfflinePathList.TextArrayWritable.class);
+        job.setMapOutputValueClass(TextArrayWritable.class);
 
         // 指定分区类
         job.setPartitionerClass(HashPartitioner.class);
 
-        job.setNumReduceTasks(1);
+        job.setNumReduceTasks(16);
 
         // TODO 排序、分区
-        job.setGroupingComparatorClass(OfflinePathList.MyGroupingComparator.class);
+        job.setGroupingComparatorClass(MyGroupingComparator.class);
 
         //2.2 指定自定义的reduce类
-        job.setReducerClass(OfflinePathList.MyReducer.class);
+        job.setReducerClass(MyReducer.class);
 
-        //指定输出<k3,v3>的类型
-        job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(Text.class);
+        //设置最终输出结果<key,value>类型；
+        job.setOutputKeyClass(NullWritable.class);
+        job.setOutputValueClass(OrcStruct.class);
 
         //2.3 指定输出到哪里
         FileOutputFormat.setOutputPath(job, new Path(outputPath));
 
         //设定输出文件的格式化类
-        job.setOutputFormatClass(TextOutputFormat.class);
+        // job.setOutputFormatClass(TextOutputFormat.class);
+        job.setOutputFormatClass(OrcOutputFormat.class);
+
 
         return job;
     }
@@ -196,36 +216,37 @@ public class OfflinePathList {
     /**
      * 计算层级
      */
-    static class MyMapper extends Mapper<LongWritable, Text, OfflinePathList.NewK2, OfflinePathList.TextArrayWritable> {
+    static class MyMapper extends Mapper<LongWritable, Text, NewK2, TextArrayWritable> {
         int xx = 0;
 
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException, ArrayIndexOutOfBoundsException, NumberFormatException {
 
-            final String[] splited = value.toString().split("\001");
+            String val = value.toString().replace("\\N", "0");
+            final String[] splited = val.split("\001");
 
             try {
                 // gu_id 和 starttime_origin 作为联合主键
                 String gu_id = splited[1];
                 if(!gu_id.isEmpty() && !gu_id.equals("0"))
                 {
-                    final OfflinePathList.NewK2 k2 = new OfflinePathList.NewK2(splited[1], Long.parseLong(splited[11]));
+                    final NewK2 k2 = new NewK2(splited[1], Long.parseLong(splited[11]));
 
-                    String pageLevelId = (splited[0] == null) ? "\\N":splited[0];
-                    String pageId = (splited[2] == null) ? "\\N":splited[2];
-                    String page_value = (splited[3] == null) ? "\\N":splited[3];
-                    String page_lvl2_value = (splited[4] == null) ? "\\N":splited[4];
-                    String eventId = (splited[5] == null) ? "\\N":splited[5];
-                    String event_value = (splited[6] == null) ? "\\N":splited[6];
-                    String event_lvl2_value = (splited[7] == null) ? "\\N":splited[7];
-                    String test_id = (splited[9] == null) ? "\\N":splited[9];
-                    String select_id = (splited[10] == null) ? "\\N":splited[10];
-                    String starttime = (splited[11] == null) ? "\\N":splited[11];
-                    String pit_type = (splited[12] == null) ? "\\N":splited[12];
-                    String sortdate = (splited[13] == null) ? "\\N":splited[13];
-                    String sorthour = (splited[14] == null) ? "\\N":splited[14];
-                    String lplid = (splited[15] == null) ? "\\N":splited[15];
-                    String ptplid = (splited[16] == null) ? "\\N":splited[16];
-                    String ug_id  = (splited[17] == null) ? "\\N":splited[17];
+                    String pageLevelId = (splited[0] == null) ? "0":splited[0];
+                    String pageId = (splited[2] == null) ? "0":splited[2];
+                    String page_value = (splited[3] == null) ? "0":splited[3];
+                    String page_lvl2_value = (splited[4] == null) ? "0":splited[4];
+                    String eventId = (splited[5] == null) ? "0":splited[5];
+                    String event_value = (splited[6] == null) ? "0":splited[6];
+                    String event_lvl2_value = (splited[7] == null) ? "0":splited[7];
+                    String test_id = (splited[9] == null) ? "0":splited[9];
+                    String select_id = (splited[10] == null) ? "0":splited[10];
+                    String starttime = (splited[11] == null) ? "0":splited[11];
+                    String pit_type = (splited[12] == null) ? "0":splited[12];
+                    String sortdate = (splited[13] == null) ? "0":splited[13];
+                    String sorthour = (splited[14] == null) ? "0":splited[14];
+                    String lplid = (splited[15] == null) ? "0":splited[15];
+                    String ptplid = (splited[16] == null) ? "0":splited[16];
+                    String ug_id  = (splited[17] == null) ? "0":splited[17];
 
                     // 推荐点击为入口页(购物袋页、品牌页、商祥页底部)
                     String pageLvlId = pageLevelId;
@@ -269,7 +290,7 @@ public class OfflinePathList {
                             value.toString().replace("\001", "\t")
                     };
 
-                    final OfflinePathList.TextArrayWritable v2 = new OfflinePathList.TextArrayWritable(str);
+                    final TextArrayWritable v2 = new TextArrayWritable(str);
 
                     xx++;
 
@@ -277,71 +298,183 @@ public class OfflinePathList {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
+                System.out.println("======>>IOException: " + value.toString());
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            } catch (ArrayIndexOutOfBoundsException | NumberFormatException | StringIndexOutOfBoundsException e) {
-                e.printStackTrace();
-                System.out.println("======>>ArrayIndexOutOfBoundsException: " + Joiner.on("#").join(value.toString().split("\001")));
-            } catch (Exception e) {
+                System.out.println("======>>InterruptedException: " + value.toString());
+            } catch (ArrayIndexOutOfBoundsException e) {
                 e.printStackTrace();
                 System.out.println("======>>ArrayIndexOutOfBoundsException: " + value.toString());
+            } catch (StringIndexOutOfBoundsException e) {
+                e.printStackTrace();
+                System.out.println("======>>StringIndexOutOfBoundsException: " + value.toString());
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                System.out.println("======>>NumberFormatException: " + value.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("======>>Exception: " + value.toString());
             }
         }
     }
 
+
     // static class NewValue
-    static class MyReducer extends Reducer<OfflinePathList.NewK2, OfflinePathList.TextArrayWritable, Text, Text> {
+    static class MyReducer extends Reducer<NewK2, TextArrayWritable, NullWritable, OrcStruct>
+    {
 
-        protected void reduce(OfflinePathList.NewK2 k2,
-                              Iterable<OfflinePathList.TextArrayWritable> v2s,
-                              Context context) throws IOException,
-                InterruptedException
+
+        // 定义
+        private TypeDescription schema = TypeDescription.fromString("struct<gu_id:string,endtime:bigint,last_entrance_page_id:int,last_guide_page_id:int,last_before_goods_page_id:int,last_entrance_page_value:string,last_guide_page_value:string,last_before_goods_page_value:string,last_entrance_event_id:int,last_guide_event_id:int,last_before_goods_event_id:int,last_entrance_event_value:string,last_guide_event_value:string,last_before_goods_event_value:string,last_entrance_timestamp:bigint,last_guide_timestamp:bigint,last_before_goods_timestamp:bigint,guide_lvl2_page_id:int,guide_lvl2_page_value:string,guide_lvl2_event_id:int,guide_lvl2_event_value:string,guide_lvl2_timestamp:bigint,guide_is_del:int,guide_lvl2_is_del:int,before_goods_is_del:int,entrance_page_lvl2_value:string,guide_page_lvl2_value:string,guide_lvl2_page_lvl2_value:string,before_goods_page_lvl2_value:string,entrance_event_lvl2_value:string,guide_event_lvl2_value:string,guide_lvl2_event_lvl2_value:string,before_goods_event_lvl2_value:string,rule_id:string,test_id:string,select_id:string,last_entrance_pit_type:int,last_entrance_sortdate:string,last_entrance_sorthour:int,last_entrance_lplid:int,last_entrance_ptplid:int,last_entrance_ug_id:int>");
+
+
+        // createValue creates the correct value type for the schema
+        private OrcStruct pair = (OrcStruct) OrcStruct.createValue(schema);
+
+        private final NullWritable nw = NullWritable.get();
+
+        /**
+         * 初始化未访问的路径
+         * @param fields
+         */
+        private void initVisitPath(List<String> fields) {
+            for(String field : fields) {
+                pair.setFieldValue(field, new Text("0"));
+            }
+        }
+
+        /**
+         *
+         * @param k2
+         * @param v2s
+         * @param context
+         * @throws IOException
+         * @throws InterruptedException
+         */
+        protected void reduce(NewK2 k2,
+                              Iterable<TextArrayWritable> v2s,
+                              Context context) throws IOException, InterruptedException
         {
-            String[] initStrArray = {"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N","\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N" ,"\\N"};
-            String initStr = Joiner.on("\t").join(initStrArray);
+            System.out.println("====================================");
 
-            String level1 = initStr;
-            String level2 = initStr;
-            String level3 = initStr;
-            String level4 = initStr;
-            String level5 = initStr;
+            pair.setFieldValue("gu_id", new Text(k2.first));
+            // 实际字段来源为starttime，只后来创建对应表时，字段名字写成了endtime
+            pair.setFieldValue("endtime", new LongWritable(k2.second));
 
-            for (OfflinePathList.TextArrayWritable v2 : v2s) {
+            for (TextArrayWritable v2 : v2s) {
 
                 try {
                     String pageLvlIdStr = v2.toStrings()[0];
                     String pageLvl = v2.toStrings()[1];
                     int pageLvlId = Integer.parseInt(pageLvlIdStr);
 
-                    if(pageLvlId == 1){
-                        level1= pageLvl;
-                        level2 = initStr;
-                        level3 = initStr;
-                        level4 = initStr;
-                        level5 = initStr;
-                    } else if(pageLvlId == 2){
-                        level2= pageLvl;
-                        level3 = initStr;
-                        level4 = initStr;
-                        level5 = initStr;
+                    pair.setFieldValue("guide_is_del", new IntWritable(0));
+                    pair.setFieldValue("guide_lvl2_is_del", new IntWritable(0));
+                    pair.setFieldValue("before_goods_is_del", new IntWritable(0));
+
+                    if(pageLvlId == 1 || pageLvlId == 2){
+                        String[] lvls = pageLvl.split("\t");
+                        pair.setFieldValue("last_entrance_page_id",     new IntWritable(Integer.valueOf(lvls[0])));
+                        pair.setFieldValue("last_entrance_page_value",  new Text(lvls[1]));
+                        pair.setFieldValue("entrance_page_lvl2_value",  new Text(lvls[2]));
+                        pair.setFieldValue("last_entrance_event_id",    new IntWritable(Integer.valueOf(lvls[3])));
+                        pair.setFieldValue("last_entrance_event_value", new Text(lvls[4]));
+                        pair.setFieldValue("entrance_event_lvl2_value", new Text(lvls[5]));
+                        pair.setFieldValue("last_entrance_timestamp",   new LongWritable(Long.valueOf(lvls[6])));
+                        pair.setFieldValue("last_entrance_pit_type",    new IntWritable(Integer.valueOf(lvls[7])));
+                        pair.setFieldValue("last_entrance_sortdate",    new Text(lvls[8]));
+                        pair.setFieldValue("last_entrance_sorthour",    new IntWritable(Integer.valueOf(lvls[9])));
+                        pair.setFieldValue("last_entrance_lplid",       new IntWritable(Integer.valueOf(lvls[10])));
+                        pair.setFieldValue("last_entrance_ptplid",      new IntWritable(Integer.valueOf(lvls[11])));
+                        pair.setFieldValue("select_id",                 new IntWritable(Integer.valueOf(lvls[12])));
+                        pair.setFieldValue("test_id",                   new IntWritable(Integer.valueOf(lvls[13])));
+                        pair.setFieldValue("last_entrance_ug_id",       new IntWritable(Integer.valueOf(lvls[14])));
+
+                        pair.setFieldValue("last_guide_page_id", new IntWritable(0));
+                        pair.setFieldValue("last_guide_page_value", new Text("0"));
+                        pair.setFieldValue("guide_page_lvl2_value", new Text("0"));
+                        pair.setFieldValue("last_guide_event_id", new IntWritable(0));
+                        pair.setFieldValue("last_guide_event_value", new Text("0"));
+                        pair.setFieldValue("guide_event_lvl2_value", new Text("0"));
+                        pair.setFieldValue("last_guide_timestamp", new LongWritable(0));
+
+                        pair.setFieldValue("guide_lvl2_page_id", new IntWritable(0));
+                        pair.setFieldValue("guide_lvl2_page_value", new Text("0"));
+                        pair.setFieldValue("guide_lvl2_page_lvl2_value", new Text("0"));
+                        pair.setFieldValue("guide_lvl2_event_id", new IntWritable(0));
+                        pair.setFieldValue("guide_lvl2_event_value", new Text("0"));
+                        pair.setFieldValue("guide_lvl2_event_lvl2_value", new Text("0"));
+                        pair.setFieldValue("guide_lvl2_timestamp", new LongWritable(0));
+
+                        pair.setFieldValue("last_before_goods_page_id", new IntWritable(0));
+                        pair.setFieldValue("last_before_goods_page_value", new Text("0"));
+                        pair.setFieldValue("before_goods_page_lvl2_value", new Text("0"));
+                        pair.setFieldValue("last_before_goods_event_id", new IntWritable(0));
+                        pair.setFieldValue("last_before_goods_event_value", new Text("0"));
+                        pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
+                        pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
                     } else if(pageLvlId == 3){
-                        level3 = pageLvl;
-                        level4 = initStr;
-                        level5 = initStr;
+                        String[] lvls = pageLvl.split("\t");
+                        pair.setFieldValue("last_guide_page_id", new IntWritable(Integer.valueOf(lvls[0])));
+                        pair.setFieldValue("last_guide_page_value", new Text(lvls[1]));
+                        pair.setFieldValue("guide_page_lvl2_value", new Text(lvls[2]));
+                        pair.setFieldValue("last_guide_event_id", new IntWritable(Integer.valueOf(lvls[3])));
+                        pair.setFieldValue("last_guide_event_value", new Text(lvls[4]));
+                        pair.setFieldValue("guide_event_lvl2_value", new Text(lvls[5]));
+                        pair.setFieldValue("last_guide_timestamp", new LongWritable(Long.valueOf(lvls[6])));
+
+                        pair.setFieldValue("guide_lvl2_page_id", new IntWritable(0));
+                        pair.setFieldValue("guide_lvl2_page_value", new Text("0"));
+                        pair.setFieldValue("guide_lvl2_page_lvl2_value", new Text("0"));
+                        pair.setFieldValue("guide_lvl2_event_id", new IntWritable(0));
+                        pair.setFieldValue("guide_lvl2_event_value", new Text("0"));
+                        pair.setFieldValue("guide_lvl2_event_lvl2_value", new Text("0"));
+                        pair.setFieldValue("guide_lvl2_timestamp", new LongWritable(0));
+
+                        pair.setFieldValue("last_before_goods_page_id", new IntWritable(0));
+                        pair.setFieldValue("last_before_goods_page_value", new Text("0"));
+                        pair.setFieldValue("before_goods_page_lvl2_value", new Text("0"));
+                        pair.setFieldValue("last_before_goods_event_id", new IntWritable(0));
+                        pair.setFieldValue("last_before_goods_event_value", new Text("0"));
+                        pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
+                        pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
                     } else if(pageLvlId == 4){
-                        level4 = pageLvl;
-                        level5 = initStr;
+                        String[] lvls = pageLvl.split("\t");
+                        pair.setFieldValue("guide_lvl2_page_id", new IntWritable(Integer.valueOf(lvls[0])));
+                        pair.setFieldValue("guide_lvl2_page_value", new Text(lvls[1]));
+                        pair.setFieldValue("guide_lvl2_page_lvl2_value", new Text(lvls[2]));
+                        pair.setFieldValue("guide_lvl2_event_id", new IntWritable(Integer.valueOf(lvls[3])));
+                        pair.setFieldValue("guide_lvl2_event_value", new Text(lvls[4]));
+                        pair.setFieldValue("guide_lvl2_event_lvl2_value", new Text(lvls[5]));
+                        pair.setFieldValue("guide_lvl2_timestamp", new LongWritable(Long.valueOf(lvls[6])));
+
+                        pair.setFieldValue("last_before_goods_page_id", new IntWritable(0));
+                        pair.setFieldValue("last_before_goods_page_value", new Text("0"));
+                        pair.setFieldValue("before_goods_page_lvl2_value", new Text("0"));
+                        pair.setFieldValue("last_before_goods_event_id", new IntWritable(0));
+                        pair.setFieldValue("last_before_goods_event_value", new Text("0"));
+                        pair.setFieldValue("before_goods_event_lvl2_value", new Text("0"));
+                        pair.setFieldValue("last_before_goods_timestamp", new LongWritable(0));
                     } else if(pageLvlId == 5){
-                        level5 = pageLvl;
+                        String[] lvls = pageLvl.split("\t");
+                        pair.setFieldValue("last_before_goods_page_id", new IntWritable(Integer.valueOf(lvls[0])));
+                        pair.setFieldValue("last_before_goods_page_value", new Text(lvls[1]));
+                        pair.setFieldValue("before_goods_page_lvl2_value", new Text(lvls[2]));
+                        pair.setFieldValue("last_before_goods_event_id", new IntWritable(Integer.valueOf(lvls[3])));
+                        pair.setFieldValue("last_before_goods_event_value", new Text(lvls[4]));
+                        pair.setFieldValue("before_goods_event_lvl2_value", new Text(lvls[5]));
+                        pair.setFieldValue("last_before_goods_timestamp", new LongWritable(Long.valueOf(lvls[6])));
+
                     }
 
-                    String keyStr = level1 + "\t" + level2 + "\t" + level3+ "\t" + level4 + "\t" + level5;
+                    context.write(nw, pair);
 
-                    // 5 个级别
-                    Text key2 = new Text(keyStr);
-                    Text value2 = new Text(v2.toStrings()[2]);
-                    context.write(key2, value2);
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    System.out.println("======>>NumberFormatException: " + Joiner.on("#").join(v2.toStrings()));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                    System.out.println("======>>ClassCastException: " + Joiner.on("#").join(v2.toStrings()));
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.out.println("======>>Exception: " +  Joiner.on("#").join(v2.toStrings()));
@@ -350,11 +483,29 @@ public class OfflinePathList {
         }
     }
 
+    static class Row implements Writable {
+        String key;
+        String value;
+
+        Row(String[] val){
+            this.key = val[0];
+            this.value = val[1];
+        }
+        @Override
+        public void readFields(DataInput arg0) throws IOException {
+            throw new UnsupportedOperationException("no write");
+        }
+        @Override
+        public void write(DataOutput arg0) throws IOException {
+            throw new UnsupportedOperationException("no read");
+        }
+    }
+
     /**
-     原来的v2不能参与排序，把原来的k2和v2封装到一个类中，作为新的k2
+     * 原来的v2不能参与排序，把原来的k2和v2封装到一个类中，作为新的k2
      *
      */
-    static class  NewK2 implements WritableComparable<OfflinePathList.NewK2> {
+    static class  NewK2 implements WritableComparable<NewK2> {
         String first;
         Long second;
 
@@ -382,7 +533,7 @@ public class OfflinePathList {
          * 当第一列不同时，升序；当第一列相同时，第二列升序
          */
         @Override
-        public int compareTo(OfflinePathList.NewK2 o) {
+        public int compareTo(NewK2 o) {
             final long minus = this.first.compareTo(o.first);
             if(minus !=0){
                 return (int)minus;
@@ -397,18 +548,18 @@ public class OfflinePathList {
 
         @Override
         public boolean equals(Object obj) {
-            if(!(obj instanceof OfflinePathList.NewK2)){
+            if(!(obj instanceof NewK2)){
                 return false;
             }
-            OfflinePathList.NewK2 oK2 = (OfflinePathList.NewK2)obj;
+            NewK2 oK2 = (NewK2)obj;
             return (this.first.equals(oK2.first)) && (this.second == oK2.second);
         }
     }
 
-    static class MyGroupingComparator implements RawComparator<OfflinePathList.NewK2> {
+    static class MyGroupingComparator implements RawComparator<NewK2> {
 
         @Override
-        public int compare(OfflinePathList.NewK2 o1, OfflinePathList.NewK2 o2) {
+        public int compare(NewK2 o1, NewK2 o2) {
             // lexicographically 即按照字典序排序
             return (int)(o1.first.compareTo(o2.first));
         }
@@ -426,7 +577,6 @@ public class OfflinePathList {
             int n2 = WritableUtils.decodeVIntSize(b2[s2]);
 
             try {
-                //read value from VLongWritable byte array
                 long l11 = readVLong(b1, s1);
                 long l21 = readVLong(b2, s2);
 
@@ -463,12 +613,13 @@ public class OfflinePathList {
         }
     }
 
+
     /**
      * run this
      */
     private static void run(String dateStr) {
-        JobsControl(0x0, 0x8, "OfflinePathList08");
-        JobsControl(0x9, 0xf, "OfflinePathList0f");
+        JobsControl(dateStr,0x0, 0x0, "OfflinePathList08");
+//        JobsControl(0x9, 0xf, "OfflinePathList0f");
     }
 
     /**
@@ -476,11 +627,12 @@ public class OfflinePathList {
      * @param args
      */
     public static void main(String[] args){
-        run("");
+        String dateStr = args[0];
 
-//        {
-//            System.out.println(getInputPath("a"));
-//            System.out.println(getOutputPath("a"));
-//        }
+        if(dateStr.length() < 10) {
+            System.out.println("我们约定时间参数的格式为：yyyy-mm-dd.例如：2017-04-01");
+        }
+
+        run(dateStr);
     }
 }

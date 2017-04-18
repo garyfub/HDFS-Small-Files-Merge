@@ -67,7 +67,6 @@ public class PathListControledJobs {
 
     public static String getDateTimeStr(long millSeconds, String dateFormat) {
         DateTime dt = new DateTime(millSeconds);
-//        System.out.println(dt.toString("yyyy-MM-dd HH:mm:ss"));
         return dt.toString(dateFormat);
     }
 
@@ -182,7 +181,7 @@ public class PathListControledJobs {
 
             final String[] splited = value.toString().split("\001");
 
-            List<String> urls = Arrays.asList("349","350","351","352","433","479","480","481","482");
+            List<String> ids = Arrays.asList("349","350","351","352","433","479","480","481","482");
 
             try {
                 // gu_id 和starttime 作为联合主键
@@ -217,7 +216,6 @@ public class PathListControledJobs {
 
                     String testId = (splited[44] == null) ? "\\N" : splited[44];
                     String selectId = (splited[45] == null) ? "\\N" : splited[45];
-//                    String pitType = (splited[27] == null) ? "\\N" : splited[27];
                     String sortDate = (splited[28] == null) ? "\\N" : splited[28];
                     String sortHour = (splited[29] == null) ? "\\N" : splited[29];
                     String lplid = (splited[30] == null) ? "\\N" : splited[30];
@@ -235,14 +233,15 @@ public class PathListControledJobs {
                     String pit_value = "\\N";
                     String pit_no = "\\N";
 
-                    if(urls.contains(event_id)) {
+                    if(ids.contains(event_id)) {
                         if(event_value.contains("::")){
                             pit_type = event_value.split("::")[0];
                             if("goods".equals(pit_type)|| "brand".equals(pit_type)){
                                 pit_value = event_value.split("::")[1];
                             }
 
-                            String pitInfo = event_value.split("::")[2];
+                            int len = event_value.split("::").length;
+                            String pitInfo = event_value.split("::")[len-1];
 
                             if(pitInfo.contains("_")){
                                 int i = Integer.parseInt(pitInfo.split("_")[1]);
@@ -553,7 +552,7 @@ public class PathListControledJobs {
         PathListControledJobs pathJobs = new PathListControledJobs();
         pathJobs.OUTPUT_DIR = outPutPath;
 
-        System.out.println("===========>> PathListControledJobs start 2017-03-20 !<<===========");
+        System.out.println("===========>> PathListControledJobs start 2017-04-01 !<<===========");
         if (dateStr == null || dateStr.isEmpty()) {
             JobsControl("", 0x0, 0x3, "PathListControledJobs01");
             JobsControl("", 0x4, 0x7, "PathListControledJobs04");
