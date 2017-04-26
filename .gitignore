@@ -6,6 +6,7 @@ pathlist/target/
 pathlist.iml
 /hdfs-files-merge/target
 .idea
+hdfs-small-files-merge.iml
 /dw-realtime.iml
 /hdfs-files-merge/hdfs-files-merge.iml
 /dataRecovery/dataRecovery.iml

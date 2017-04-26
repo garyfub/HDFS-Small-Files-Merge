@@ -5,13 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.juanpi.bi</groupId>
-    <artifactId>dw-realtime</artifactId>
+    <artifactId>hdfs-small-files-merge</artifactId>
     <packaging>pom</packaging>
     <version>1.0</version>
 
     <modules>
-        <module>realtime-sourcedata</module>
-        <module>pathlist</module>
         <module>hdfs-files-merge</module>
     </modules>
 
