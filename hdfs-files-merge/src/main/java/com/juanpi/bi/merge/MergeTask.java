@@ -114,7 +114,7 @@ public class MergeTask {
             }
         }
 
-        // 判断是否合并文件
+        // 判断是否合并文件,如果源数据目录与目标目录相同，就是合并重新消费的文件
         boolean dirFlag = false;
         if(this.sourceDir.equals(this.targetDir)) {
             dirFlag = true;
